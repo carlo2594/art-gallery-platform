@@ -1,17 +1,36 @@
 {
   "name": "galeria-del-ox-node",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend for Galería del Ox using Express, Mongoose, and Pug.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node --watch server.js",
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "galeria",
+    "arte",
+    "express",
+    "mongoose",
+    "pug"
+  ],
+  "author": "Carlo Jimenez",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.0",
-    "express": "^5.1.0",
-    "pug": "^3.0.3"
+    "express": "^4.21.2",
+    "helmet": "^8.1.0",
+    "module-alias": "^2.2.3",
+    "mongodb": "^6.17.0",
+    "mongoose": "^8.16.3",
+    "pug": "^3.0.3",
+    "xss-clean": "^0.1.4"
+  },
+  "_moduleAliases": {
+    "@models": "models",
+    "@controllers": "controllers",
+    "@routes": "routes",
+    "@utils": "utils"
   }
 }
