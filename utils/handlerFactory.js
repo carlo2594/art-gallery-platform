@@ -1,6 +1,6 @@
-// utils/handlerFactory.js
 const catchAsync = require('./catchAsync');
 const AppError = require('./appError');
+const sendResponse = require('./sendResponse');
 
 exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
@@ -10,10 +10,7 @@ exports.deleteOne = Model =>
       return next(new AppError('No document found with that ID', 404));
     }
 
-    res.status(204).json({
-      status: 'success',
-      data: null
-    });
+    sendResponse(res, null, 'Deleted successfully', 204);
   });
 
 exports.updateOne = Model =>
@@ -27,24 +24,14 @@ exports.updateOne = Model =>
       return next(new AppError('No document found with that ID', 404));
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        data: doc
-      }
-    });
+    sendResponse(res, doc, 'Updated successfully');
   });
 
 exports.createOne = Model =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
 
-    res.status(201).json({
-      status: 'success',
-      data: {
-        data: doc
-      }
-    });
+    sendResponse(res, doc, 'Created successfully', 201);
   });
 
 exports.getOne = (Model, popOptions) =>
@@ -57,23 +44,12 @@ exports.getOne = (Model, popOptions) =>
       return next(new AppError('No document found with that ID', 404));
     }
 
-    res.status(200).json({
-      status: 'success',
-      data: {
-        data: doc
-      }
-    });
+    sendResponse(res, doc, 'Document found');
   });
 
 exports.getAll = Model =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.find();
 
-    res.status(200).json({
-      status: 'success',
-      results: doc.length,
-      data: {
-        data: doc
-      }
-    });
+    sendResponse(res, doc, 'Documents retrieved', 200, { results: doc.length });
   });

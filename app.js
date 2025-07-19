@@ -5,16 +5,22 @@ const path = require('path');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const xss = require('xss-clean');
-const sanitize = require('./middlewares/sanitize');
-
-
-
+const morgan = require('morgan');
 
 require('dotenv').config();
-
 const app = express();
 
-// Seguridad básica
+// Middlewares personalizados
+const sanitize = require('@middlewares/security/sanitize');
+const globalErrorHandler = require('@middlewares/errors/errorController');
+const notFound = require('@middlewares/errors/notFound');
+
+// Logger en desarrollo
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
+
+// Seguridad HTTP
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -22,9 +28,7 @@ app.use(
   })
 );
 app.use(cookieParser());
-
 app.use(xss());
-
 app.use(sanitize);
 
 // Vistas
@@ -36,7 +40,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Parsers
 app.use(express.json({ limit: '10kb' }));
-//app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+// app.use(express.urlencoded({ extended: true, limit: '10kb' })); // si necesitás formularios
 
 // Ruta principal
 app.get('/', (req, res) => {
@@ -45,7 +49,13 @@ app.get('/', (req, res) => {
   });
 });
 
-// Error 404
+// 📌 Montar rutas API desde routes/index.js
+require('./routes')(app);
+
+// Middleware 404 para API
+app.use('/api', notFound);
+
+// Middleware 404 para vistas
 app.use((req, res, next) => {
   res.status(404).render('error', {
     title: 'Página no encontrada',
@@ -53,13 +63,7 @@ app.use((req, res, next) => {
   });
 });
 
-// Manejo global de errores (si querés uno propio)
-app.use((err, req, res, next) => {
-  console.error('❌ Error no manejado:', err);
-  res.status(500).render('error', {
-    title: 'Error interno',
-    msg: 'Ocurrió un problema inesperado.',
-  });
-});
+// Manejo global de errores
+app.use(globalErrorHandler);
 
 module.exports = app;

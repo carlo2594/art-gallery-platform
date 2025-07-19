@@ -1,7 +1,8 @@
-const User = require('../models/userModel');
-const catchAsync = require('../utils/catchAsync');
-const sendResponse = require('../utils/sendResponse');
-const factory = require('../utils/handlerFactory');
+const User = require('@models/userModel');
+const catchAsync = require('@utils/catchAsync');
+const sendResponse = require('@utils/sendResponse');
+const factory = require('@utils/handlerFactory');
+
 
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);

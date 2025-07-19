@@ -1,8 +1,9 @@
-const User = require('../models/userModel');
-const { signToken } = require('../utils/jwt');
-const sendResponse = require('../utils/sendResponse');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
+const User = require('@models/userModel');
+const { signToken } = require('@utils/jwt');
+const sendResponse = require('@utils/sendResponse');
+const catchAsync = require('@utils/catchAsync');
+const AppError = require('@utils/appError');
+
 
 exports.signup = catchAsync(async (req, res, next) => {
   const { name, email, password, role } = req.body;

@@ -1,5 +1,6 @@
-const Collection = require('../models/collectionModel');
-const factory = require('../utils/handlerFactory');
+const Collection = require('@models/collectionModel');
+const factory = require('@utils/handlerFactory');
+
 
 exports.getAllCollections = factory.getAll(Collection);
 exports.getCollection = factory.getOne(Collection, { path: 'artworks createdBy' });

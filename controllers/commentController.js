@@ -1,5 +1,6 @@
-const Comment = require('../models/commentModel');
-const factory = require('../utils/handlerFactory');
+const Comment = require('@models/commentModel');
+const factory = require('@utils/handlerFactory');
+
 
 exports.getAllComments = factory.getAll(Comment);
 exports.getComment = factory.getOne(Comment, { path: 'artwork user' });

@@ -30,9 +30,11 @@
     "xss-clean": "^0.1.4"
   },
   "_moduleAliases": {
-    "@models": "models",
-    "@controllers": "controllers",
-    "@routes": "routes",
-    "@utils": "utils"
-  }
+  "@models": "models",
+  "@controllers": "controllers",
+  "@routes": "routes",
+  "@utils": "utils",
+  "@middlewares": "middlewares"
+}
+
 }
