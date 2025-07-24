@@ -1,5 +1,5 @@
 // routes/index.js
-const express = require('express');
+
 
 const artworkRoutes = require('./artworkRoutes');
 const galleryRoutes = require('./galleryRoutes');
