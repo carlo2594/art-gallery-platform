@@ -4,10 +4,10 @@ const express = require('express');
 const router = express.Router();
 
 // Página de inicio
-router.get('/', (req, res) => {
-  res.render('index', {
-    title: 'Galería del Ox',
-  });
-});
+// routes/views/viewRoutes.js
+
+
+router.get('/', viewsController.getHome);
+
 
 module.exports = router;

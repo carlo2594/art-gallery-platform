@@ -1,18 +1,20 @@
 // controllers/viewsController.js
 
-const Artwork = require('@models/artworkModel');
 const catchAsync = require('@utils/catchAsync');
 
-exports.getHome = (req, res) => {
-  res.render('index', {
-    title: 'Galería del Ox',
-  });
-};
+const statsService = require('@services/statsService');
 
-exports.getGallery = catchAsync(async (req, res) => {
-  const artworks = await Artwork.find().populate('artist');
-  res.render('gallery', {
-    title: 'Galería de Arte',
+exports.getHome = catchAsync(async (req, res) => {
+  const [artworks, artists, galleries] = await Promise.all([
+    statsService.getTopArtworks(),
+    statsService.getTopArtists(),
+    statsService.getTopGalleries()
+  ]);
+
+  res.render('public/home', {
+    title: 'Galería del Ox',
     artworks,
+    artists,
+    galleries
   });
 });
