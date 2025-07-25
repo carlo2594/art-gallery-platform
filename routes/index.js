@@ -1,20 +1,20 @@
 // routes/index.js
 
+const artworkRoutes = require('@routes/api/artworkRoutes');
+const galleryRoutes = require('@routes/api/galleryRoutes');
+const collectionRoutes = require('@routes/api/collectionRoutes');
+const commentRoutes = require('@routes/api/commentRoutes');
+const userRoutes = require('@routes/api/userRoutes');
+const authRoutes = require('@routes/api/authRoutes');
 
-const artworkRoutes = require('./artworkRoutes');
-const galleryRoutes = require('./galleryRoutes');
-const collectionRoutes = require('./collectionRoutes');
-const commentRoutes = require('./commentRoutes');
-const userRoutes = require('./userRoutes');
-const authRoutes = require('./authRoutes');
-const viewRoutes = require('./views/viewRoutes');
-const notFoundRoutes = require('./notFoundRoutes');
+const viewRoutes = require('@routes/views/viewRoutes');
+const notFoundRoutes = require('@routes/notFoundRoutes');
 
 module.exports = app => {
-  // Rutas de vistas
+  // Rutas de vistas (Pug)
   app.use('/', viewRoutes);
 
-  // Rutas de API
+  // Rutas de API REST
   app.use('/api/v1/artworks', artworkRoutes);
   app.use('/api/v1/galleries', galleryRoutes);
   app.use('/api/v1/collections', collectionRoutes);
