@@ -1,6 +1,6 @@
 const express = require('express');
 const artworkController = require('@controllers/artworkController');
-const requireUser = require('@middlewares/auth/requireUser');
+const requireUser = require('@middlewares/requireUser');
 const isOwner = require('@middlewares/isOwner');
 const Artwork = require('@models/artworkModel');
 

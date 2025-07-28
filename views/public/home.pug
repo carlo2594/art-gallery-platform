@@ -1,0 +1,30 @@
+extends ../layouts/layout
+
+block content
+  .container.mt-5
+    h1.text-center GALERÍA DEL OX
+    p.text-center.text-muted Esta es la página de inicio cargada correctamente.
+
+    h2.mt-5.text-primary Obras (test)
+    ul
+      if artworks.length
+        each art in artworks
+          li #{art.title} - #{art.artist.name}
+      else
+        li No hay obras disponibles.
+
+    h2.mt-5.text-primary Artistas (test)
+    ul
+      if artists.length
+        each artist in artists
+          li #{artist.name}
+      else
+        li No hay artistas disponibles.
+
+    h2.mt-5.text-primary Galerías (test)
+    ul
+      if galleries.length
+        each gal in galleries
+          li #{gal.name}
+      else
+        li No hay galerías disponibles.

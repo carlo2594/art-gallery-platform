@@ -1,6 +1,6 @@
 const express = require('express');
 const galleryController = require('@controllers/galleryController');
-const requireUser = require('@middlewares/auth/requireUser');
+const requireUser = require('@middlewares/requireUser');
 const isOwner = require('@middlewares/isOwner');
 const Gallery = require('@models/galleryModel');
 

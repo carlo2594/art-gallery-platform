@@ -1,6 +1,6 @@
 // routes/notFoundRoutes.js
 
-const notFound = require('@middlewares/errors/notFound');
+const notFound = require('@middlewares/notFound');
 
 module.exports = app => {
   // Middleware 404 para API

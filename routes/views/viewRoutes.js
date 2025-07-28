@@ -2,12 +2,9 @@
 
 const express = require('express');
 const router = express.Router();
+const viewsController = require('@controllers/viewsController'); // ✅ import necesario
 
 // Página de inicio
-// routes/views/viewRoutes.js
-
-
 router.get('/', viewsController.getHome);
-
 
 module.exports = router;

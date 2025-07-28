@@ -26,14 +26,16 @@
     "module-alias": "^2.2.3",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.3",
+    "morgan": "^1.10.1",
     "pug": "^3.0.3",
     "xss-clean": "^0.1.4"
   },
   "_moduleAliases": {
-  "@models": "models",
-  "@controllers": "controllers",
-  "@routes": "routes",
-  "@utils": "utils",
-  "@middlewares": "middlewares"
-}
+    "@models": "models",
+    "@controllers": "controllers",
+    "@routes": "routes",
+    "@utils": "utils",
+    "@middlewares": "middlewares",
+     "@services": "services"   
+  }
 }

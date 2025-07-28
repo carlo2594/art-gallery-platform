@@ -1,7 +1,7 @@
 const express = require('express');
 const userController = require('@controllers/userController');
-const requireUser = require('@middlewares/auth/requireUser');
-const restrictTo = require('@middlewares/auth/restrictTo');
+const requireUser = require('@middlewares/requireUser');
+const restrictTo = require('@middlewares/restrictTo');
 
 const router = express.Router();
 

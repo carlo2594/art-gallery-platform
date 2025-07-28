@@ -1,6 +1,6 @@
 const express = require('express');
 const collectionController = require('@controllers/collectionController');
-const requireUser = require('@middlewares/auth/requireUser');
+const requireUser = require('@middlewares/requireUser');
 const isOwner = require('@middlewares/isOwner');
 const Collection = require('@models/collectionModel');
 

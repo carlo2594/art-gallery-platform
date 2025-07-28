@@ -11,8 +11,8 @@ require('dotenv').config();
 const app = express();
 
 // Middlewares personalizados
-const sanitize = require('@middlewares/security/sanitize');
-const globalErrorHandler = require('@middlewares/errors/errorController');
+const sanitize = require('@middlewares/sanitize');
+const globalErrorHandler = require('@controllers/errorController');
 
 // Logger en desarrollo
 if (process.env.NODE_ENV === 'development') {

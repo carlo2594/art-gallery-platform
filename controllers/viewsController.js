@@ -6,9 +6,9 @@ const statsService = require('@services/statsService');
 
 exports.getHome = catchAsync(async (req, res) => {
   const [artworks, artists, galleries] = await Promise.all([
-    statsService.getTopArtworks(),
+    statsService.getRecentArtworks(),
     statsService.getTopArtists(),
-    statsService.getTopGalleries()
+    statsService.getRecentGalleries()
   ]);
 
   res.render('public/home', {

@@ -1,6 +1,6 @@
 const express = require('express');
 const commentController = require('@controllers/commentController');
-const requireUser = require('@middlewares/auth/requireUser');
+const requireUser = require('@middlewares/requireUser');
 const isOwner = require('@middlewares/isOwner');
 const Comment = require('@models/commentModel');
 

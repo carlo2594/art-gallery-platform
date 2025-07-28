@@ -109,4 +109,3 @@ exports.reactivateUser = catchAsync(async (req, res, next) => {
 
   sendResponse(res, user, 'Usuario reactivado');
 });
-w
