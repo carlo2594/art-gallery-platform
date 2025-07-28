@@ -2,6 +2,7 @@ const express = require('express');
 const userController = require('@controllers/userController');
 const requireUser = require('@middlewares/requireUser');
 const restrictTo = require('@middlewares/restrictTo');
+const favoriteController = require('@controllers/favoriteController');
 
 const router = express.Router();
 
@@ -23,4 +24,6 @@ router.patch('/:id/role', requireUser, restrictTo('admin'), userController.chang
 router.patch('/:id/reset-password', requireUser, restrictTo('admin'), userController.resetUserPassword);
 router.patch('/:id/reactivate', requireUser, restrictTo('admin'), userController.reactivateUser);
 
+
+router.get('/:id/favorites', favoriteController.getFavoritesByUser);
 module.exports = router;

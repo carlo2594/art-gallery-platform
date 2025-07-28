@@ -3,28 +3,30 @@ const factory = require('@utils/handlerFactory');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');
-const { updateArtworkCommentsCount } = require('@services/artwork.service');
+const artworkService = require('@services/artwork.service');
 
-// Obtener todos y uno solo
+// Obtener todos los comentarios
 exports.getAllComments = factory.getAll(Comment);
+
+// Obtener un solo comentario (con artwork y user populado)
 exports.getComment = factory.getOne(Comment, { path: 'artwork user' });
 
-// Crear comentario y actualizar contador
+// Crear comentario y aumentar contador
 exports.createComment = catchAsync(async (req, res, next) => {
   const comment = await Comment.create({
     ...req.body,
     user: req.user._id
   });
 
-  await updateArtworkCommentsCount(comment.artwork);
+  await artworkService.incrementCommentCount(comment.artwork);
 
   sendResponse(res, comment, 'Comment created', 201);
 });
 
-// Actualizar comentario (sin afectar contador)
+// Actualizar comentario (no afecta contador)
 exports.updateComment = factory.updateOne(Comment);
 
-// Eliminar comentario y actualizar contador
+// Eliminar comentario y reducir contador
 exports.deleteComment = catchAsync(async (req, res, next) => {
   const comment = await Comment.findById(req.params.id);
 
@@ -36,7 +38,7 @@ exports.deleteComment = catchAsync(async (req, res, next) => {
 
   await comment.deleteOne();
 
-  await updateArtworkCommentsCount(artworkId);
+  await artworkService.decrementCommentCount(artworkId);
 
   sendResponse(res, null, 'Comment deleted', 204);
 });

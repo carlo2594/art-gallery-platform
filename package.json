@@ -36,6 +36,6 @@
     "@routes": "routes",
     "@utils": "utils",
     "@middlewares": "middlewares",
-     "@services": "services"   
+    "@services": "services"   
   }
 }
