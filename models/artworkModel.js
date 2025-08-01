@@ -8,10 +8,10 @@ const artworkSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  galleries: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Gallery'
-  }],
+ exhibitions: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Exhibition'
+    }],
   imageUrl: { type: String, required: true },
   type: { type: String }, // painting, digital, sculpture, etc.
   size: String, // e.g. "100cm x 70cm"

@@ -1,6 +1,6 @@
 const ArtworkView = require('@models/artworkViewModel');
 const Artwork = require('@models/artworkModel');
-const Gallery = require('@models/galleryModel');
+const Exhibition   = require('@models/exhibitionModel');  
 const User = require('@models/userModel');
 
 // 🖼️ Obtener obras más recientes
@@ -46,8 +46,8 @@ exports.getTopArtists = async (limit = 3) => {
 };
 
 // 🖼️ Obtener galerías más recientes
-exports.getRecentGalleries = async (limit = 3) => {
-  return await Gallery.find()
+exports.getRecentExhibitions = async (limit = 3) => {
+  return await Exhibition.find()                        
     .sort({ createdAt: -1 })
     .limit(limit)
     .populate('createdBy');
