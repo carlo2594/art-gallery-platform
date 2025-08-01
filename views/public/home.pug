@@ -1,4 +1,4 @@
-extends ../layouts/layout
+extends ../layouts/public
 
 block content
   .container.mt-5
@@ -7,24 +7,24 @@ block content
 
     h2.mt-5.text-primary Obras (test)
     ul
-      if artworks.length
+      if artworks && artworks.length
         each art in artworks
           li #{art.title} - #{art.artist.name}
       else
-        li No hay obras disponibles.
+        li.text-muted No hay obras disponibles.
 
     h2.mt-5.text-primary Artistas (test)
     ul
-      if artists.length
+      if artists && artists.length
         each artist in artists
           li #{artist.name}
       else
-        li No hay artistas disponibles.
+        li.text-muted No hay artistas disponibles.
 
-    h2.mt-5.text-primary Galerías (test)
+    h2.mt-5.text-primary Exhibiciones (test)
     ul
-      if galleries.length
-        each gal in galleries
-          li #{gal.name}
+      if exhibitions && exhibitions.length
+        each ex in exhibitions
+          li #{ex.name}
       else
-        li No hay galerías disponibles.
+        li.text-muted No hay exhibiciones disponibles.

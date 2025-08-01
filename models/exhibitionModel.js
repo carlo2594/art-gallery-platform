@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
 
-const gallerySchema = new mongoose.Schema({
+const exhibitionSchema = new mongoose.Schema({
   name: { type: String, required: true },
   description: String,
   coverImage: String,
+  // Opcional: fechas de inicio / fin si las necesitas
+  startDate: Date,
+  endDate: Date,
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -16,4 +19,4 @@ const gallerySchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Gallery', gallerySchema);
+module.exports = mongoose.model('Exhibition', exhibitionSchema);

@@ -18,7 +18,7 @@ const artworkSchema = new mongoose.Schema({
   material: String, // e.g. "Acrylic on canvas"
   views: { type: Number, default: 0 },
   ratings: {
-    averlage: { type: Number, default: 0 },
+    average: { type: Number, default: 0 },
     count: { type: Number, default: 0 }
   },
   commentsCount: { type: Number, default: 0 }, 

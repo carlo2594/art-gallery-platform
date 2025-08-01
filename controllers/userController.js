@@ -52,11 +52,13 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   sendResponse(res, null, 'Contraseña actualizada correctamente');
 });
 
+
 // Obtener perfil completo con relaciones
 exports.getMyProfileWithArt = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.user.id).populate('collections artworks galleries');
+  const user = await User.findById(req.user.id).populate('collections artworks exhibitions');
   sendResponse(res, user, 'Perfil completo del usuario');
 });
+
 
 // ADMIN: Cambiar el rol de un usuario
 exports.changeUserRole = catchAsync(async (req, res, next) => {
