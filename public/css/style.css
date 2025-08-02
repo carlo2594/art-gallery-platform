@@ -1,0 +1,89 @@
+:root {
+  --ox-yellow: #F5C45E;
+  --ox-blue:   #102E50;
+  --ox-orange: #E78B48;
+  --ox-red:    #BE3D2A;
+  --ox-beige:  #F7F6EF;
+
+  --font-title:    'Montserrat', sans-serif;
+  --font-subtitle: 'Lora', serif;
+}
+
+/* Base: 1rem = 10px */
+html {
+  font-size: 62.5%;
+}
+
+body {
+  font-family: var(--font-title);
+  background-color: var(--ox-beige);
+  color: #111;
+  font-size: 1.6rem;
+}
+
+.navbar {
+  height: 7.5rem;
+  background-color: var(--ox-blue);
+  overflow: hidden;
+}
+
+.navbar-brand {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+  max-width: 100%;
+}
+
+.logo-navbar {
+  height: auto;
+  max-height: 100%;
+  max-width: 100%;
+  display: block;
+}
+
+/* Links */
+.navbar-nav .nav-link {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  color: white;
+  margin-left: 1rem;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+  font-size: 1.4rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: var(--ox-yellow);
+}
+
+/* Icono login */
+.navbar-nav .fa-user {
+  font-size: 1.6rem;
+  vertical-align: middle;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navbar {
+    height: auto;
+  }
+
+  .navbar-brand {
+    max-width: 60%;
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .logo-navbar {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .navbar-nav .nav-link {
+    margin-left: 0;
+    padding: 0.8rem 1rem;
+  }
+}
