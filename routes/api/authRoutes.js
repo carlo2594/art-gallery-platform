@@ -1,11 +1,13 @@
-const express = require('express');
+const express      = require('express');
 const authController = require('@controllers/authController');
-const requireUser = require('@middlewares/requireUser');
+const requireUser  = require('@middlewares/requireUser');
+const rateLimiter  = require('@middlewares/rateLimiter');   // ⬅️ nuevo (100 req/15 min)
 
 const router = express.Router();
 
-router.post('/signup', authController.signup);
-router.post('/login', authController.login);
-router.post('/logout', requireUser, authController.logout); // opcional proteger
+/* --- Auth --- */
+router.post('/signup', rateLimiter, authController.signup); // también limita flood
+router.post('/login',  rateLimiter, authController.login);
+router.post('/logout', requireUser, authController.logout); // token requerido para borrar cookie
 
 module.exports = router;

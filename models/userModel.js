@@ -1,30 +1,41 @@
+// models/userModel.js
 const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+const bcrypt   = require('bcryptjs');
+const validator = require('validator'); 
 
 const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true, select: false }, // proteger contraseña
+  name:     { type: String, required: true },
+  email: {
+  type: String,
+  required: true,
+  unique: true,
+  lowercase: true,
+  validate: [validator.isEmail, 'Correo inválido']
+},
+
+  password: { type: String, required: true, select: false },   // hash no se envía
   role: {
     type: String,
     enum: ['admin', 'artist'],
     default: 'artist'
   },
   profileImage: String,
-  bio: String,
-  active: { type: Boolean, default: true },
+  bio:          String,
+  active:       { type: Boolean, default: true },
   lastActiveAt: { type: Date },
-  createdAt: { type: Date, default: Date.now }
+  createdAt:    { type: Date, default: Date.now }
 });
 
+/* ---------- Hash de contraseña ---------- */
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 12); // 12 salt rounds
   next();
 });
 
-// Method to check password
+/* ---------- Comparar contraseña ---------- */
 userSchema.methods.correctPassword = function (candidatePassword) {
+  if (!this.password) return false;            // evita bcrypt error si el hash no está presente
   return bcrypt.compare(candidatePassword, this.password);
 };
 
