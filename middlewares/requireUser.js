@@ -3,13 +3,11 @@ const User = require('@models/userModel');
 
 
 const requireUser = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Not authorized, no token' });
+  // Solo acepta JWT desde cookie HttpOnly
+  const token = req.cookies && req.cookies.jwt;
+  if (!token) {
+    return res.status(401).json({ message: 'Not authorized, no token (cookie required)' });
   }
-
-  const token = authHeader.split(' ')[1];
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
