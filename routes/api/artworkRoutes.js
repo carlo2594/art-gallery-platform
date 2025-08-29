@@ -9,9 +9,21 @@ const Artwork           = require('@models/artworkModel');
 const router = express.Router();
 
 /* ------------------------------------------------------------------ */
+/*  Nuevas Rutas                                                      */
+/* ------------------------------------------------------------------ */
+
+// Filtrar artworks por status (solo admin)
+router.get(
+  '/status/:status',
+  requireUser,
+  restrictTo('admin'),
+  artworkController.getArtworksByStatus
+);
+
+/* ------------------------------------------------------------------ */
 /*  Lectura pública                                                    */
 /* ------------------------------------------------------------------ */
-router.get('/',    artworkController.getAllArtworks);
+router.get('/',    artworkController.getAllArtworks); // Modifica el controlador para aceptar req.query.status
 router.get('/:id', artworkController.getArtwork);
 
 /* ------------------------------------------------------------------ */

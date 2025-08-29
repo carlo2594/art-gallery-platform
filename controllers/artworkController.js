@@ -1,58 +1,74 @@
 // controllers/artworkController.js
 const Artwork      = require('@models/artworkModel');
-const factory      = require('@utils/handlerFactory');        // para getOne básico si lo necesitas
 const catchAsync   = require('@utils/catchAsync');
 const AppError     = require('@utils/appError');
-const filterObject = require('@utils/filterObject');          // whitelist helper
+const filterObject = require('@utils/filterObject');
+const sendResponse = require('@utils/sendResponse');
+
+const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
 /* ------------------------------------------------------------------ */
 /*  Lectura                                                           */
 /* ------------------------------------------------------------------ */
 
 exports.getAllArtworks = catchAsync(async (req, res, next) => {
-  const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
-  let filter = { deletedAt: null };                 // <── oculta las obras en papelera
+  let filter = { deletedAt: null };
 
-  /* STATUS */
+  // STATUS
   const statusParam = req.query.status;
   if (statusParam) {
     if (!ALLOWED_STATUS.includes(statusParam))
       return next(new AppError('Invalid status parameter', 400));
 
-    if (statusParam !== 'approved' && req.user?.role !== 'admin')
+    // Si no es admin, solo puede filtrar por 'approved' o por sus propias obras
+    if (
+      statusParam !== 'approved' &&
+      (!req.user || (req.user.role !== 'admin' && req.query.artist !== 'my'))
+    ) {
       return next(new AppError('Not authorized to view this status', 403));
+    }
 
     filter.status = statusParam;
   } else {
+    // Por defecto, solo mostrar aprobadas salvo que sea admin o esté pidiendo sus propias obras
     if (req.query.include !== 'all') filter.status = 'approved';
-    else if (req.user?.role !== 'admin')
+    else if (!req.user || req.user.role !== 'admin')
       return next(new AppError('include=all reserved for admin', 403));
   }
 
-  /* Solo mis obras */
+  // Solo mis obras
   if (req.query.artist === 'my') {
     if (!req.user) return next(new AppError('Must be logged in', 401));
     filter.artist = req.user.id;
+    // Si no se especifica status, mostrar todas las del usuario
+    if (!statusParam) delete filter.status;
   }
 
   const docs = await Artwork.find(filter).populate('artist exhibitions');
-
-  res.status(200).json({
-    status:  'success',
-    results: docs.length,
-    data:    { artworks: docs }
-  });
+  sendResponse(res, docs, 'Obras encontradas');
 });
 
-/** GET /api/v1/artworks/:id  (oculta papelera al público) */
+/** GET /api/v1/artworks/:id  (oculta papelera al público, solo admin o dueño ve no aprobadas) */
 exports.getArtwork = catchAsync(async (req, res, next) => {
   const art = await Artwork.findOne({ _id: req.params.id }).populate('artist exhibitions');
   if (!art) return next(new AppError('Artwork not found', 404));
 
+  // Validar status
+  if (!ALLOWED_STATUS.includes(art.status)) {
+    return next(new AppError('Invalid artwork status', 400));
+  }
+
+  // Si está en papelera, solo admin puede verla
   if (art.deletedAt && req.user?.role !== 'admin')
     return next(new AppError('Artwork is in trash', 404));
 
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  // Permitir solo admin, dueño o público si está aprobada
+  const isOwner = req.user && art.artist.equals(req.user.id);
+  const isAdmin = req.user && req.user.role === 'admin';
+  if (!isAdmin && !isOwner && art.status !== 'approved')
+    return next(new AppError('No autorizado para ver esta obra', 403));
+
+  sendResponse(res, art, 'Detalle de obra');
 });
 
 /* ------------------------------------------------------------------ */
@@ -60,12 +76,12 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 
 exports.createArtwork = catchAsync(async (req, res, next) => {
-  req.body.status = 'draft';                              // fuerza borrador
+  req.body.status = 'draft'; // fuerza borrador
   const allowed = ['title', 'description', 'imageUrl', 'type', 'size', 'material', 'exhibitions', 'status'];
   const data    = filterObject(req.body, ...allowed);
 
   const artwork = await Artwork.create({ ...data, artist: req.user.id });
-  res.status(201).json({ status: 'success', data: { artwork } });
+  sendResponse(res, artwork, 'Obra creada', 201);
 });
 
 /* ------------------------------------------------------------------ */
@@ -88,7 +104,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   Object.assign(art, dataToUpdate);
   await art.save({ validateModifiedOnly: true });
 
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Obra actualizada');
 });
 
 /* ------------------------------------------------------------------ */
@@ -101,7 +117,7 @@ exports.moveToTrash = catchAsync(async (req, res, next) => {
   if (!art) return next(new AppError('Artwork not found or already trashed', 404));
 
   await art.moveToTrash(req.user.id);
-  res.status(204).json({ status: 'success' });
+  sendResponse(res, null, 'Obra movida a papelera', 204);
 });
 
 /** PATCH /:id/restore  → saca de papelera (solo admin) */
@@ -110,7 +126,7 @@ exports.restoreArtwork = catchAsync(async (req, res, next) => {
   if (!art || !art.deletedAt) return next(new AppError('Artwork not in trash', 400));
 
   await art.restore();
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Obra restaurada');
 });
 
 /* ------------------------------------------------------------------ */
@@ -126,7 +142,7 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('Not authorized', 403));
 
   await art.submit();
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Obra enviada a revisión');
 });
 
 /** PATCH /:id/start-review  submitted → under_review (admin) */
@@ -135,7 +151,7 @@ exports.startReview = catchAsync(async (req, res, next) => {
   if (!art) return next(new AppError('Artwork not found', 404));
 
   await art.startReview(req.user.id);
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Revisión iniciada');
 });
 
 /** PATCH /:id/approve  under_review → approved (admin) */
@@ -144,7 +160,7 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
   if (!art) return next(new AppError('Artwork not found', 404));
 
   await art.approve(req.user.id);
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Obra aprobada');
 });
 
 /** PATCH /:id/reject  under_review → rejected (admin) */
@@ -153,5 +169,18 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
   if (!art) return next(new AppError('Artwork not found', 404));
 
   await art.reject(req.user.id, req.body.reason);
-  res.status(200).json({ status: 'success', data: { artwork: art } });
+  sendResponse(res, art, 'Obra rechazada');
+});
+
+/* ------------------------------------------------------------------ */
+/*  Obtener obras por estado                                          */
+/* ------------------------------------------------------------------ */
+
+exports.getArtworksByStatus = catchAsync(async (req, res, next) => {
+  const { status } = req.params;
+  if (!ALLOWED_STATUS.includes(status)) {
+    return next(new AppError('Status inválido', 400));
+  }
+  const artworks = await Artwork.find({ status, deletedAt: null });
+  sendResponse(res, artworks, `Obras con status: ${status}`);
 });
