@@ -1,6 +1,10 @@
 // middlewares/isOwner.js
+const mongoose = require('mongoose');
 module.exports = (Model, ownerField = 'createdBy') => {
   return async (req, res, next) => {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: 'ID inválido' });
+    }
     const doc = await Model.findById(req.params.id);
     if (!doc) {
       return res.status(404).json({ message: 'Recurso no encontrado' });

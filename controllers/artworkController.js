@@ -49,7 +49,12 @@ exports.getAllArtworks = catchAsync(async (req, res, next) => {
 });
 
 /** GET /api/v1/artworks/:id  (oculta papelera al público, solo admin o dueño ve no aprobadas) */
+const mongoose = require('mongoose');
+
 exports.getArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id }).populate('artist exhibitions');
   if (!art) return next(new AppError('Artwork not found', 404));
 
@@ -78,8 +83,25 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 exports.createArtwork = catchAsync(async (req, res, next) => {
   req.body.status = 'draft'; // fuerza borrador
   const allowed = ['title', 'description', 'imageUrl', 'type', 'size', 'material', 'exhibitions', 'status'];
-  const data    = filterObject(req.body, ...allowed);
 
+  // Verifica que el body no esté vacío y detiene la función si es así
+  if (!req.body || Object.keys(req.body).length === 0) {
+    return next(new AppError('El cuerpo de la solicitud no puede estar vacío', 400));
+  }
+
+ 
+  // Verifica que todos los campos sean válidos
+  const invalidFields = Object.keys(req.body).filter(key => !allowed.includes(key));
+  if (invalidFields.length > 0) {
+    return next(new AppError(`Campos no permitidos: ${invalidFields.join(', ')}`, 400));
+  }
+
+  // Verifica que el campo title sea obligatorio
+  if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
+    return next(new AppError('El campo "title" es obligatorio', 400));
+  }
+
+  const data = filterObject(req.body, ...allowed);
   const artwork = await Artwork.create({ ...data, artist: req.user.id });
   sendResponse(res, artwork, 'Obra creada', 201);
 });
@@ -89,6 +111,9 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 
 exports.updateArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const artistAllowed = ['title', 'description', 'imageUrl', 'type', 'size', 'material'];
   const adminAllowed  = [...artistAllowed, 'exhibitions'];
   const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
@@ -113,6 +138,9 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/trash  → mueve a papelera (TTL 30 días) */
 exports.moveToTrash = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Artwork not found or already trashed', 404));
 
@@ -122,6 +150,9 @@ exports.moveToTrash = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/restore  → saca de papelera (solo admin) */
 exports.restoreArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findById(req.params.id);
   if (!art || !art.deletedAt) return next(new AppError('Artwork not in trash', 400));
 
@@ -135,6 +166,9 @@ exports.restoreArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/submit  draft → submitted */
 exports.submitArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Artwork not found', 404));
 
@@ -147,6 +181,9 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/start-review  submitted → under_review (admin) */
 exports.startReview = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Artwork not found', 404));
 
@@ -156,6 +193,9 @@ exports.startReview = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/approve  under_review → approved (admin) */
 exports.approveArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Artwork not found', 404));
 
@@ -165,6 +205,9 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/reject  under_review → rejected (admin) */
 exports.rejectArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido', 400));
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Artwork not found', 404));
 
