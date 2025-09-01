@@ -54,11 +54,11 @@ router.patch(
   artworkController.moveToTrash
 );
 
-// Restaurar desde la papelera (PATCH /artworks/:id/restore) – solo admin
+// Cambiar a estado draft (PATCH /artworks/:id/draft)
 router.patch(
-  '/:id/restore',
+  '/:id/draft',
   requireUser,
-  restrictTo('admin'),
+  isOwner(Artwork, 'artist'),
   artworkController.restoreArtwork
 );
 

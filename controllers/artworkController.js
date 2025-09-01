@@ -138,14 +138,10 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/trash  → mueve a papelera (TTL 30 días) */
 exports.moveToTrash = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return next(new AppError('ID de obra inválido', 400));
-  }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
-  if (!art) return next(new AppError('Artwork not found or already trashed', 404));
-
-  await art.moveToTrash(req.user.id);
-  sendResponse(res, null, 'Obra movida a papelera', 204);
+  const art = await Artwork.findById(req.params.id);
+  if (!art) return next(new AppError('Obra no encontrada', 404));
+  await art.moveToTrash(req.user._id);
+  sendResponse(res, art, 'Obra enviada a la papelera');
 });
 
 /** PATCH /:id/restore  → saca de papelera (solo admin) */
@@ -154,9 +150,14 @@ exports.restoreArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido', 400));
   }
   const art = await Artwork.findById(req.params.id);
-  if (!art || !art.deletedAt) return next(new AppError('Artwork not in trash', 400));
+  if (!art || (!art.deletedAt && art.status === 'draft')) {
+    return next(new AppError('Artwork already in draft', 400));
+  }
 
+  // Si tu método restore no actualiza el status, hazlo aquí:
   await art.restore();
+  sendResponse(res, art, 'Obra restaurada');
+
   sendResponse(res, art, 'Obra restaurada');
 });
 

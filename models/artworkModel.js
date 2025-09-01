@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 /* ---------- Allowed states ---------- */
-const STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
+const STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
 const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 
 const artworkSchema = new mongoose.Schema(
@@ -37,7 +37,7 @@ const artworkSchema = new mongoose.Schema(
     commentsCount: { type: Number, default: 0, immutable: true },
 
     /* ------ Workflow ------ */
-    status: { type: String, enum: STATUS, default: 'draft', index: true, immutable: true },
+    status: { type: String, enum: STATUS, default: 'draft', index: true },
     review: {
       reviewedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', immutable: true },
       reviewedAt:   { type: Date, immutable: true },
@@ -94,6 +94,7 @@ artworkSchema.methods.moveToTrash = function (userId) {
   if (this.deletedAt) return this;
   this.deletedAt = new Date();
   this.deletedBy = userId;
+  this.status = 'trashed'; 
   return this.save();
 };
 
@@ -102,6 +103,7 @@ artworkSchema.methods.restore = function () {
   if (!this.deletedAt) return this;
   this.deletedAt = null;
   this.deletedBy = undefined;
+  this.status = 'draft'; // Or restore to previous status if you store it
   return this.save();
 };
 
