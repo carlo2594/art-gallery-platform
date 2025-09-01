@@ -39,9 +39,13 @@ const artworkSchema = new mongoose.Schema(
     /* ------ Workflow ------ */
     status: { type: String, enum: STATUS, default: 'draft', index: true },
     review: {
-      reviewedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', immutable: true },
-      reviewedAt:   { type: Date, immutable: true },
-      rejectReason: { type: String, immutable: true }
+      reviewedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      reviewedAt:   { type: Date },
+      rejectReason: { type: String },
+      comment:      {
+        type: String,
+        trim: true
+      }
     },
 
     /* ------ Soft-delete (papelera) ------ */
@@ -91,7 +95,7 @@ artworkSchema.methods.reject = function (adminId, reason = '') {
 
 // move to trash (soft delete)
 artworkSchema.methods.moveToTrash = function (userId) {
-  if (this.deletedAt) return this;
+  if (this.status === 'trashed') return this; // No hacer nada si ya está en trash
   this.deletedAt = new Date();
   this.deletedBy = userId;
   this.status = 'trashed'; 
@@ -101,9 +105,16 @@ artworkSchema.methods.moveToTrash = function (userId) {
 // restore from trash
 artworkSchema.methods.restore = function () {
   if (!this.deletedAt) return this;
-  this.deletedAt = null;
+  this.deletedAt = undefined;
   this.deletedBy = undefined;
   this.status = 'draft'; // Or restore to previous status if you store it
+  return this.save();
+};
+
+// Permitir volver a draft desde cualquier estado excepto 'trashed'
+artworkSchema.methods.setDraft = function () {
+  if (this.status === 'trashed') return this;
+  this.status = 'draft';
   return this.save();
 };
 

@@ -70,6 +70,7 @@ router.patch(
 router.patch(
   '/:id/submit',
   requireUser,
+  isOwner(Artwork, 'artist'), // <-- aquí validas que sea dueño o admin
   artworkController.submitArtwork
 );
 
