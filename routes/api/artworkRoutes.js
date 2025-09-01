@@ -24,7 +24,7 @@ router.get(
 /*  Lectura pública                                                    */
 /* ------------------------------------------------------------------ */
 router.get('/',    artworkController.getAllArtworks); // Modifica el controlador para aceptar req.query.status
-router.get('/:id', artworkController.getArtwork);
+router.get('/:id', artworkController.getApprovedArtwork);
 
 /* ------------------------------------------------------------------ */
 /*  CRUD básico (usuario logueado)                                     */
@@ -96,6 +96,14 @@ router.patch(
   requireUser,
   restrictTo('admin'),
   artworkController.rejectArtwork
+);
+
+// Lectura privada: ver cualquier obra si eres dueño o admin
+router.get(
+  '/private/:id',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkController.getArtwork
 );
 
 module.exports = router;

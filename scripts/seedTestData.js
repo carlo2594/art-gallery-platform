@@ -38,6 +38,9 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Agrega el arreglo de statuses permitidos
+const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+
 /**
  * Función principal que conecta a la base de datos, limpia las colecciones y agrega datos de prueba variados.
  */
@@ -74,7 +77,7 @@ async function seed() {
   }
   const users = await User.insertMany(userData);
 
-  // Crea obras de arte de prueba con distintos tipos y materiales
+  // Crea obras de arte de prueba con distintos tipos, materiales y status aleatorio
   const artworkData = [];
   for (let i = 1; i <= 20; i++) {
     const user = randomFromArray(users);
@@ -86,7 +89,8 @@ async function seed() {
       size: `${randomInt(20, 120)}x${randomInt(20, 120)} cm`,
       material: ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5],
       createdBy: user._id,
-      artist: user._id // <-- ObjectId requerido
+      artist: user._id,
+      status: randomFromArray(ARTWORK_STATUSES) // <-- status aleatorio
     });
   }
   const artworks = await Artwork.insertMany(artworkData);

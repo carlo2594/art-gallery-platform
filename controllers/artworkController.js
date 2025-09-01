@@ -78,16 +78,6 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('Estado de la obra inválido.', 400));
   }
 
-  // Si está en papelera, solo admin puede verla
-  if (art.deletedAt && req.user?.role !== 'admin')
-    return next(new AppError('La obra está en la papelera.', 404));
-
-  // Permitir solo admin, dueño o público si está aprobada
-  const isOwner = req.user && art.artist.equals(req.user.id);
-  const isAdmin = req.user && req.user.role === 'admin';
-  if (!isAdmin && !isOwner && art.status !== 'approved')
-    return next(new AppError('No tienes autorización para ver esta obra.', 403));
-
   sendResponse(res, art, 'Detalle de la obra.');
 });
 
@@ -246,4 +236,18 @@ exports.getArtworksByStatus = catchAsync(async (req, res, next) => {
   }
   const artworks = await Artwork.find({ status, deletedAt: null });
   sendResponse(res, artworks, `Obras con estado: ${status}.`);
+});
+
+exports.getApprovedArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido.', 400));
+  }
+  const art = await Artwork.findOne({
+    _id: req.params.id,
+    status: 'approved',
+    deletedAt: null
+  }).populate('artist exhibitions');
+  if (!art) return next(new AppError('Obra no encontrada o no aprobada.', 404));
+
+  sendResponse(res, art, 'Detalle de la obra aprobada.');
 });
