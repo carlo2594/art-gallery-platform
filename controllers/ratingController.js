@@ -4,11 +4,13 @@ const Artwork     = require('@models/artworkModel');
 const catchAsync  = require('@utils/catchAsync');
 const AppError    = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');
+const mongoose = require('mongoose'); // Agrega esto arriba
 
 /* Helper para promedio y conteo */
 const recalcArtworkRating = async artworkId => {
+  const objectId = typeof artworkId === 'string' ? new mongoose.Types.ObjectId(artworkId) : artworkId;
   const stats = await Rating.aggregate([
-    { $match: { artwork: artworkId } },
+    { $match: { artwork: objectId } },
     {
       $group: {
         _id: '$artwork',
@@ -31,16 +33,28 @@ const recalcArtworkRating = async artworkId => {
 
 /* Crear o actualizar rating (1 × user × artwork) */
 exports.upsertRating = catchAsync(async (req, res, next) => {
-  const { artworkId, rating } = req.body;
+  // Permite artworkId o artwork
+  const artworkId = req.body.artworkId || req.body.artwork;
+  const { rating } = req.body;
   const userId = req.user._id;
 
-  if (!rating || rating < 1 || rating > 5) {
-    return next(new AppError('Rating debe estar entre 1 y 5', 400));
+  if (typeof artworkId === 'undefined' || typeof rating === 'undefined') {
+    return next(new AppError('El body debe incluir los campos artworkId (o artwork) y rating', 400));
+  }
+
+  const parsedRating = Number(rating);
+
+  if (
+    !Number.isInteger(parsedRating) ||
+    parsedRating < 1 ||
+    parsedRating > 5
+  ) {
+    return next(new AppError('Rating debe ser un número entero entre 1 y 5', 400));
   }
 
   const ratingDoc = await Rating.findOneAndUpdate(
     { artwork: artworkId, user: userId },
-    { rating },
+    { rating: parsedRating },
     { new: true, upsert: true, runValidators: true }
   );
 

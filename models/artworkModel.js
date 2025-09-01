@@ -29,12 +29,12 @@ const artworkSchema = new mongoose.Schema(
     material: { type: String },
 
     /* ------ Metrics (inmutables) ------ */
-    views: { type: Number, default: 0, immutable: true },
+    views: { type: Number, default: 0 },
     ratings: {
-      average: { type: Number, default: 0, immutable: true },
-      count:   { type: Number, default: 0, immutable: true }
+      average: { type: Number, default: 0},
+      count:   { type: Number, default: 0}
     },
-    commentsCount: { type: Number, default: 0, immutable: true },
+    commentsCount: { type: Number, default: 0},
 
     /* ------ Workflow ------ */
     status: { type: String, enum: STATUS, default: 'draft', index: true },

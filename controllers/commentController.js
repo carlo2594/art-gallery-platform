@@ -9,7 +9,23 @@ const artworkService = require('@services/artwork.service');
 exports.getAllComments = factory.getAll(Comment);
 
 // Obtener un solo comentario (con artwork y user populado)
-exports.getComment = factory.getOne(Comment, { path: 'artwork user' });
+exports.getComment = catchAsync(async (req, res, next) => {
+  const comment = await Comment.findById(req.params.id)
+    .populate({
+      path: 'artwork',
+      select: 'title imageUrl _id' // Solo los campos necesarios de artwork
+    })
+    .populate({
+      path: 'user',
+      select: 'name profileImage _id' // Solo los campos necesarios de user
+    });
+
+  if (!comment) {
+    return next(new AppError('Comentario no encontrado', 404));
+  }
+
+  sendResponse(res, comment, 'Comentario encontrado');
+});
 
 // Crear comentario y aumentar contador
 exports.createComment = catchAsync(async (req, res, next) => {

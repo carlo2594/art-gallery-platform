@@ -135,4 +135,5 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Ignore scripts folder
+# Ignore only the seedTestData.js script, but keep other scripts
+scripts/seedTestData.js

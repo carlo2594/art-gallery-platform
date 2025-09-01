@@ -5,6 +5,7 @@ const userRoutes        = require('@routes/api/userRoutes');
 const authRoutes        = require('@routes/api/authRoutes');
 const favoriteRoutes    = require('@routes/api/favoriteRoutes');
 const ratingRoutes      = require('@routes/api/ratingRoutes');
+const artworkViewRoutes = require('@routes/api/artworkViewRoutes'); // <-- Agrega esta línea
 
 const viewRoutes   = require('@routes/views/viewRoutes');
 const adminRoutes  = require('@routes/views/adminRoutes');
@@ -23,6 +24,7 @@ module.exports = app => {
   app.use('/api/v1/artworks',    artworkRoutes);
   app.use('/api/v1/exhibitions', exhibitionRoutes);
   app.use('/api/v1/comments',    commentRoutes);
+  app.use('/api/v1/artwork-views', artworkViewRoutes); // <-- Y esta línea
 
   /* ---------- 404 ---------- */
   notFoundRoutes(app);

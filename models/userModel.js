@@ -10,19 +10,21 @@ const userSchema = new mongoose.Schema({
   required: true,
   unique: true,
   lowercase: true,
-  validate: [validator.isEmail, 'Correo inválido']
+  validate: [validator.isEmail, 'Correo inválido'],
+  select: false // <-- proteger email
 },
 
   password: { type: String, required: true, select: false },   // hash no se envía
   role: {
     type: String,
-    enum: ['admin', 'artist'],
-    default: 'artist'
+    enum: ['artist', 'admin'],
+    default: 'artist',
+    select: false
   },
   profileImage: String,
   bio:          String,
-  active:       { type: Boolean, default: true },
-  lastActiveAt: { type: Date },
+  active: { type: Boolean, default: true, select: false },
+  lastActiveAt: { type: Date, select: false },
   createdAt:    { type: Date, default: Date.now }
 });
 

@@ -234,7 +234,15 @@ exports.getArtworksByStatus = catchAsync(async (req, res, next) => {
   if (!ALLOWED_STATUS.includes(status)) {
     return next(new AppError('El estado solicitado es inválido.', 400));
   }
-  const artworks = await Artwork.find({ status, deletedAt: null });
+
+  let filter = { status, deletedAt: null };
+
+  // Si no es admin, solo puede ver sus propias obras
+  if (req.user.role !== 'admin') {
+    filter.artist = req.user.id;
+  }
+
+  const artworks = await Artwork.find(filter).populate('artist exhibitions');
   sendResponse(res, artworks, `Obras con estado: ${status}.`);
 });
 

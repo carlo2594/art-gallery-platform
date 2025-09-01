@@ -1,4 +1,4 @@
-// Script para poblar la base de datos con muchos datos de prueba variados
+// Script para poblar la base de datos: elimina toda la base y crea datos de prueba variados
 require('dotenv').config();
 const mongoose = require('mongoose');
 
@@ -7,7 +7,8 @@ const User = require('../models/userModel');
 const Exhibition = require('../models/exhibitionModel');
 const Comment = require('../models/commentModel');
 const Favorite = require('../models/favoriteModel');
-const Rating = require('../models/ratingViewModel'); // Usa el modelo correcto
+const Rating = require('../models/ratingViewModel');
+const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
@@ -42,30 +43,30 @@ function randomInt(min, max) {
 const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
 
 /**
- * Función principal que conecta a la base de datos, limpia las colecciones y agrega datos de prueba variados.
+ * Función principal que conecta a la base de datos, elimina toda la base y agrega datos de prueba variados.
  */
 async function seed() {
   await mongoose.connect(DB);
 
-  // Limpia todas las colecciones antes de insertar datos nuevos
+  // Elimina todos los documentos de cada colección (incluyendo artwork views)
   await Promise.all([
     User.deleteMany({}),
     Artwork.deleteMany({}),
     Exhibition.deleteMany({}),
     Comment.deleteMany({}),
     Favorite.deleteMany({}),
-    Rating.deleteMany({})
+    Rating.deleteMany({}),
+    ArtworkView.deleteMany({}) // <-- AGREGA ESTA LÍNEA
   ]);
 
-  // Crea usuarios de prueba (admin, artistas y usuarios normales)
+  // Crea usuarios de prueba (máximo 10)
   const userData = [
     { name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin' },
     { name: 'Artista Uno', email: 'artista1@test.com', password: '123456', role: 'artist' },
     { name: 'Artista Dos', email: 'artista2@test.com', password: '123456', role: 'artist' },
     { name: 'Visitante', email: 'visitante@test.com', password: '123456', role: 'artist' }
   ];
-  // Agrega más usuarios con datos variados
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 6; i++) { // 4 + 6 = 10
     userData.push({
       name: `Usuario${i}`,
       email: `usuario${i}@test.com`,
@@ -75,11 +76,11 @@ async function seed() {
       profileImage: randomFromArray(randomImages)
     });
   }
-  const users = await User.insertMany(userData);
+  const users = await User.insertMany(userData.slice(0, 10));
 
-  // Crea obras de arte de prueba con distintos tipos, materiales y status aleatorio
+  // Crea obras de arte de prueba (máximo 10)
   const artworkData = [];
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 10; i++) {
     const user = randomFromArray(users);
     artworkData.push({
       title: `Obra ${i}`,
@@ -90,55 +91,76 @@ async function seed() {
       material: ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5],
       createdBy: user._id,
       artist: user._id,
-      status: randomFromArray(ARTWORK_STATUSES) // <-- status aleatorio
+      status: randomFromArray(ARTWORK_STATUSES),
+      ratings: { count: 0, average: 0 },
+      commentsCount: 0
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Crea exposiciones de prueba con obras aleatorias
+  // Crea exposiciones de prueba (máximo 10)
   const exhibitionData = [];
-  for (let i = 1; i <= 5; i++) {
+  for (let i = 1; i <= 10; i++) {
+    // Máximo 10 artworks y 10 participantes por exposición
+    const artworksSet = new Set();
+    while (artworksSet.size < 10) {
+      artworksSet.add(artworks[randomInt(0, artworks.length - 1)]._id);
+      if (artworksSet.size === artworks.length) break;
+    }
+    const artworksArray = Array.from(artworksSet);
+
+    const participantsSet = new Set();
+    while (participantsSet.size < 10) {
+      participantsSet.add(randomFromArray(users)._id);
+      if (participantsSet.size === users.length) break;
+    }
+    const participantsArray = Array.from(participantsSet);
+
     exhibitionData.push({
-      name: `Exposición ${i}`, // <-- Campo requerido por tu modelo
+      title: `Exposición ${i}`,
       description: `Descripción de la exposición ${i}`,
       startDate: new Date(2025, i, 1),
       endDate: new Date(2025, i, 15),
-      artworks: [
-        artworks[randomInt(0, artworks.length - 1)]._id,
-        artworks[randomInt(0, artworks.length - 1)]._id
-      ],
-      createdBy: randomFromArray(users)._id
+      artworks: artworksArray,
+      createdBy: randomFromArray(users)._id,
+      participants: participantsArray
     });
   }
   const exhibitions = await Exhibition.insertMany(exhibitionData);
 
-  // Crea comentarios de prueba en distintas obras y por distintos usuarios
+  // Crea comentarios de prueba (máximo 10)
   const commentData = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 10; i++) {
     const user = randomFromArray(users);
+    const artwork = randomFromArray(artworks);
     commentData.push({
-      artwork: randomFromArray(artworks)._id,
+      artwork: artwork._id,
       text: `Comentario ${i} sobre la obra.`,
-      user: user._id // <-- Campo requerido por tu modelo
+      user: user._id
     });
+    artwork.commentsCount = (artwork.commentsCount || 0) + 1;
   }
   await Comment.insertMany(commentData);
+  for (const artwork of artworks) {
+    await artwork.save();
+  }
 
-  // Crea ratings de prueba para distintas obras y usuarios
+  // Crea ratings de prueba (máximo 10)
   const ratingData = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 10; i++) {
     const user = randomFromArray(users);
+    const artwork = randomFromArray(artworks);
     ratingData.push({
-      artwork: randomFromArray(artworks)._id,
-      rating: randomInt(1, 5), // <-- Campo requerido por tu modelo
-      user: user._id           // <-- Campo requerido por tu modelo
+      artwork: artwork._id,
+      rating: randomInt(1, 5),
+      user: user._id
     });
   }
   await Rating.insertMany(ratingData);
 
-  // Crea favoritos de prueba para distintos usuarios y obras
+  // Crea favoritos de prueba (máximo 10)
   const favoriteData = [];
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 10; i++) {
     favoriteData.push({
       artwork: randomFromArray(artworks)._id,
       user: randomFromArray(users)._id
@@ -146,7 +168,7 @@ async function seed() {
   }
   await Favorite.insertMany(favoriteData);
 
-  console.log('Muchos datos de prueba insertados correctamente.');
+  console.log('Base de datos eliminada y datos de prueba insertados correctamente.');
   await mongoose.disconnect();
 }
 

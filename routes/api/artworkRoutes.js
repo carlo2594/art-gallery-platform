@@ -12,11 +12,10 @@ const router = express.Router();
 /*  Nuevas Rutas                                                      */
 /* ------------------------------------------------------------------ */
 
-// Filtrar artworks por status (solo admin)
+// Filtrar artworks por status 
 router.get(
   '/status/:status',
   requireUser,
-  restrictTo('admin'),
   artworkController.getArtworksByStatus
 );
 
