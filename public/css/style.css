@@ -28,24 +28,20 @@ body {
 }
 
 .navbar-brand {
-  height: 100%;
+  height: 8rem;
   display: flex;
   align-items: center;
-  padding-top: 0.8rem;
-  padding-bottom: 0.8rem;
   max-width: 100%;
 }
 
 .logo-navbar {
-  height: auto;
-  max-height: 100%;
+  height: 8rem;
   max-width: 100%;
   display: block;
 }
 
 /* Links */
 .navbar-nav .nav-link {
-  height: 100%;
   display: flex;
   align-items: center;
   color: white;
@@ -55,7 +51,7 @@ body {
   font-size: 1.4rem;
 }
 
-.navbar-nav .nav-link:hover {
+.navbar .navbar-nav .nav-link:hover {
   color: var(--ox-yellow);
 }
 
@@ -65,25 +61,72 @@ body {
   vertical-align: middle;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .navbar {
-    height: auto;
-  }
-
-  .navbar-brand {
-    max-width: 60%;
-    padding-top: 0.6rem;
-    padding-bottom: 0.6rem;
-  }
-
-  .logo-navbar {
-    max-width: 100%;
-    height: auto;
-  }
-
-  .navbar-nav .nav-link {
-    margin-left: 0;
-    padding: 0.8rem 1rem;
-  }
+/* HERO H1 Montserrat Bold */
+.hero h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: bold;
 }
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4rem;
+  padding: 5rem 2rem;
+}
+
+.hero-content {
+  flex: 1;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-content p.lead {
+  display: inline-block;
+  position: relative;
+  font-size: 1.6rem;
+}
+
+.hero-content p.lead::after {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 4px;
+  background: var(--ox-orange);
+  border-radius: 2px;
+  margin: 0.7rem 0 0 0;
+}
+
+.hero-content p.mb-4 {
+  font-size: 1.2rem;
+  margin-bottom: 4rem;
+}
+
+.hero-image {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1rem;
+}
+
+.btn-primary {
+  background-color: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+  color: #102E50;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #e6b24e;
+  border-color: #e6b24e;
+  color: #102E50;
+}
+

@@ -17,14 +17,14 @@ module.exports = app => {
   app.use('/admin', adminRoutes);
 
   /* ---------- API REST ---------- */
-  app.use('/api/v1/auth',        authRoutes);        // ① primero, por claridad
+  app.use('/api/v1/auth',        authRoutes);        
   app.use('/api/v1/users',       userRoutes);
   app.use('/api/v1/favorites',   favoriteRoutes);
   app.use('/api/v1/ratings',     ratingRoutes);
   app.use('/api/v1/artworks',    artworkRoutes);
   app.use('/api/v1/exhibitions', exhibitionRoutes);
   app.use('/api/v1/comments',    commentRoutes);
-  app.use('/api/v1/artwork-views', artworkViewRoutes); // <-- Y esta línea
+  app.use('/api/v1/artwork-views', artworkViewRoutes); 
 
   /* ---------- 404 ---------- */
   notFoundRoutes(app);

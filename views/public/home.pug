@@ -1,10 +1,22 @@
 extends ../layouts/public
 
 block content
-  .container.mt-5
-    h1.text-center GALERÍA DEL OX
-    p.text-center.text-muted Esta es la página de inicio cargada correctamente.
+  // HERO SECTION
+  .container.mt-1
+    .hero
+      .hero-content
+        h1.mb-3 GALERÍA DEL OX
+        p.lead.mb-4 Un refugio artístico donde cada pincelada cuenta una historia.
+        p.mb-4
+          | Galería del Ox nace de un proyecto familiar y se convierte en un espacio vivo de inspiración, expresión y conexión. Aquí el arte no solo se observa, se siente, se comparte y se descubre.
+          br
+          br
+          | Desde obras originales hasta experiencias sensoriales, cada rincón de la galería está pensado para celebrar la diversidad creativa y hacer del arte un lenguaje común.
+        a.btn.btn-primary.btn-lg(href="/obras") Ver el arte
+      .hero-image
+        img(src="/img/hero.jpg" alt="Galería del Ox")
 
+  .container.mt-5
     h2.mt-5.text-primary Obras (test)
     ul
       if artworks && artworks.length

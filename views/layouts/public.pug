@@ -9,7 +9,7 @@ html(lang='es')
     link(rel='stylesheet' href='/css/style.css')
   body(data-bs-theme='dark')
     nav.navbar.navbar-expand-lg
-      .container
+      .container.align-items-center
         a.navbar-brand(href='/')
           img.logo-navbar(src='/Logos/GOX_LOGO_05.png' alt='Galería del Ox')
         button.navbar-toggler(type='button' data-bs-toggle='collapse' data-bs-target='#mainNavbar')
@@ -35,3 +35,8 @@ html(lang='es')
     block content
 
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js')
+    style.
+      .navbar-toggler {
+        margin-top: auto;
+        margin-bottom: auto;
+      }

@@ -34,15 +34,11 @@ async function updateArtworkViews() {
 
   // Actualiza el campo views de cada artwork
   for (const view of uniqueViews) {
-    await Artwork.findByIdAndUpdate(view._id, { views: view.views });
+    await Artwork.findByIdAndUpdate(
+      view._id,
+      { $inc: { views: view.views } }
+    );
   }
-
-  // Opcional: si quieres poner en 0 los artworks sin vistas en las últimas 24h
-  const artworksWithViews = uniqueViews.map(v => v._id.toString());
-  await Artwork.updateMany(
-    { _id: { $nin: artworksWithViews } },
-    { views: 0 }
-  );
 
   console.log('Campo "views" actualizado correctamente.');
   await mongoose.disconnect();
