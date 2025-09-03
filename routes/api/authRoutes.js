@@ -9,5 +9,7 @@ const router = express.Router();
 router.post('/signup', rateLimiter, authController.signup); // también limita flood
 router.post('/login',  rateLimiter, authController.login);
 router.post('/logout', requireUser, authController.logout); // token requerido para borrar cookie
+router.post('/password/forgot', authController.forgotPassword);
+router.post('/password/reset', authController.resetPassword);
 
 module.exports = router;

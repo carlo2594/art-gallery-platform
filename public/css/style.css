@@ -51,8 +51,8 @@ html, body {
 }
 .logo-navbar {
   max-height: 5rem;
-  margin-left: 2rem;
-  margin-right: 1rem;
+  margin-left: 6rem;   /* aumentado */
+  margin-right: 2rem;  /* aumentado */
 }
 .navbar-title {
   color: var(--ox-blue);
@@ -105,8 +105,8 @@ html, body {
   position: relative;
   max-width: 50rem;
   width: 100%;
-  margin: auto;
-  margin-left: 1rem;
+  margin: 0 2rem;      /* margen horizontal agregado */
+  margin-left:4rem;   /* puedes ajustar según lo necesites */
 }
 .searchbar-input {
   height: 4.2rem;
@@ -175,6 +175,29 @@ section.hero .hero-description {
   color: var(--ox-blue) !important;
 }
 
+/* HERO ROW FLEX */
+.hero-row {
+  display: flex;
+  flex-direction: column;
+}
+.hero-image-container {
+  order: 1;
+}
+.hero-text {
+  order: 2;
+}
+@media (min-width: 992px) {
+  .hero-row {
+    flex-direction: row;
+    align-items: center;
+  }
+  .hero-text {
+    order: 1;
+  }
+  .hero-image-container {
+    order: 2;
+  }
+}
 
 /* =========================
    BOTÓN CTA

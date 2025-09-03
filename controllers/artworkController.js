@@ -5,6 +5,7 @@ const catchAsync   = require('@utils/catchAsync');
 const AppError     = require('@utils/appError');
 const filterObject = require('@utils/filterObject');
 const sendResponse = require('@utils/sendResponse');
+const emailSender  = require('@utils/emailSender'); // <-- Agregado
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
@@ -188,12 +189,22 @@ exports.startReview = catchAsync(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'under_review', 'La obra ya está en revisión.')) return;
 
   await art.startReview(req.user.id);
+
+  // Notificar al artista que su obra está en revisión
+  if (art.artist && art.artist.email) {
+    await emailSender({
+      to: art.artist.email,
+      subject: 'Tu obra está en revisión',
+      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.`
+    });
+  }
+
   sendResponse(res, art, 'La revisión de la obra ha iniciado.');
 });
 
@@ -202,12 +213,22 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'approved', 'La obra ya está aprobada.')) return;
 
   await art.approve(req.user.id);
+
+  // Notificar al artista que su obra fue aprobada
+  if (art.artist && art.artist.email) {
+    await emailSender({
+      to: art.artist.email,
+      subject: '¡Tu obra fue aprobada!',
+      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.`
+    });
+  }
+
   sendResponse(res, art, 'La obra fue aprobada.');
 });
 
@@ -216,12 +237,22 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'rejected', 'La obra ya está rechazada.')) return;
 
   await art.reject(req.user.id, req.body.reason);
+
+  // Notificar al artista que su obra fue rechazada
+  if (art.artist && art.artist.email) {
+    await emailSender({
+      to: art.artist.email,
+      subject: 'Tu obra fue rechazada',
+      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.${req.body.reason ? '\nMotivo: ' + req.body.reason : ''}`
+    });
+  }
+
   sendResponse(res, art, 'La obra fue rechazada.');
 });
 
