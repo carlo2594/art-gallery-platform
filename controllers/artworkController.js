@@ -5,7 +5,7 @@ const catchAsync   = require('@utils/catchAsync');
 const AppError     = require('@utils/appError');
 const filterObject = require('@utils/filterObject');
 const sendResponse = require('@utils/sendResponse');
-const emailSender  = require('@utils/emailSender'); // <-- Agregado
+const { sendMail } = require('@services/mailer');
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
@@ -175,12 +175,42 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  // Busca la obra y el artista
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'submitted', 'La obra ya fue enviada a revisión.')) return;
 
   await art.submit();
+
+  // Notifica a todos los administradores
+  const User = require('@models/userModel');
+  const admins = await User.find({ role: 'admin', active: true });
+
+  const artworkInfo = `
+Título: ${art.title}
+Descripción: ${art.description || '(sin descripción)'}
+Artista: ${art.artist.name} (${art.artist.email})
+ID de obra: ${art._id}
+`;
+
+  let extraInfo = '';
+  if (admins.length > 1) {
+    extraInfo = `
+
+Este correo ha sido enviado a otros administradores. 
+Si no ves la obra en el queue de aprobación, es posible que ya fue aprobada o rechazada por otro administrador.
+Puedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
+  }
+
+  for (const admin of admins) {
+    await sendMail({
+      to: admin.email,
+      subject: 'Nueva obra enviada para revisión',
+      text: `Se ha enviado una nueva obra para revisión:\n\n${artworkInfo}\n${extraInfo}`
+    });
+  }
+
   sendResponse(res, art, 'La obra fue enviada a revisión.');
 });
 
@@ -198,10 +228,12 @@ exports.startReview = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra está en revisión
   if (art.artist && art.artist.email) {
-    await emailSender({
+    await sendMail({
       to: art.artist.email,
       subject: 'Tu obra está en revisión',
-      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.`
+      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.
+
+Tan pronto sea aprobada o rechazada, te notificaremos`
     });
   }
 
@@ -222,10 +254,12 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra fue aprobada
   if (art.artist && art.artist.email) {
-    await emailSender({
+    await sendMail({
       to: art.artist.email,
       subject: '¡Tu obra fue aprobada!',
-      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.`
+      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.
+
+Ya es visible para el público que visita la página de`
     });
   }
 
@@ -242,14 +276,20 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
 
   if (checkAlreadyInStatus(res, art, 'rejected', 'La obra ya está rechazada.')) return;
 
+  // Validar que venga motivo de rechazo
+  if (!req.body.reason || typeof req.body.reason !== 'string' || req.body.reason.trim() === '') {
+    return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+  }
+
   await art.reject(req.user.id, req.body.reason);
 
   // Notificar al artista que su obra fue rechazada
   if (art.artist && art.artist.email) {
-    await emailSender({
+    await sendMail({
       to: art.artist.email,
       subject: 'Tu obra fue rechazada',
-      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.${req.body.reason ? '\nMotivo: ' + req.body.reason : ''}`
+      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.
+Motivo: ${req.body.reason}`
     });
   }
 

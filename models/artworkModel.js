@@ -23,7 +23,9 @@ const artworkSchema = new mongoose.Schema(
     }],
 
     /* ------ Media & meta ------ */
-    imageUrl: { type: String, required: true },
+  /* Campos para imagen en Cloudinary */
+  imageUrl: { type: String, required: true },      // URL pública de la imagen
+  imagePublicId: { type: String, required: true }, // ID único de Cloudinary
     type:     { type: String },
     size:     { type: String },
     material: { type: String },

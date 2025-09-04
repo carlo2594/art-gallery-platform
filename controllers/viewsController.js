@@ -22,6 +22,10 @@ exports.getHome = catchAsync(async (req, res) => {
 // Vista para reset password
 exports.getResetPassword = (req, res) => {
   const { uid, token } = req.query;
-  res.render('public/resetPassword', { uid, token, hideNavbar: true });
+  res.render('public/resetPassword', {
+    uid,
+    token,
+    isNewPassword: true // o false según el caso
+  });
 };
 

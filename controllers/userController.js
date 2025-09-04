@@ -20,18 +20,34 @@ exports.getMe = catchAsync(async (req, res, next) => {
 
 // Actualizar perfil (limitado)
 exports.updateMe = catchAsync(async (req, res, next) => {
-  if (req.body.password) {
+  if (req.body.password || req.body.newPassword) {
     return next(new AppError('Esta ruta no es para actualizar la contraseña.', 400));
   }
 
-  const filteredBody = filterObject(req.body, 'name', 'email');
+  // Solo permite actualizar estos campos
+  const filteredBody = filterObject(req.body, 'name', 'email', 'profileImage', 'bio');
 
-  const updatedUser = await User.findByIdAndUpdate(req.user.id, filteredBody, {
-    new: true,
-    runValidators: true
-  });
+  // Busca el usuario actual
+  const user = await User.findById(req.user.id);
+  if (!user) return next(new AppError('Usuario no encontrado.', 404));
 
-  sendResponse(res, updatedUser, 'Perfil actualizado');
+  const oldEmail = user.email;
+
+  // Actualiza los campos permitidos
+  Object.assign(user, filteredBody);
+  await user.save();
+
+  // Si el email cambió, notifica al nuevo email
+  if (filteredBody.email && filteredBody.email !== oldEmail) {
+    await sendMail({
+      to: filteredBody.email,
+      subject: 'Confirmación de cambio de correo',
+      text: `Hola ${user.name}, tu correo ha sido actualizado exitosamente en Galería del Ox. 
+Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+    });
+  }
+
+  sendResponse(res, user, 'Perfil actualizado');
 });
 
 // Desactivar cuenta (soft delete)

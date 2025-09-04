@@ -18,18 +18,43 @@ async function sendEmail({ to, subject, text, html }) {
 /*  Signup                                                            */
 /* ------------------------------------------------------------------ */
 exports.signup = catchAsync(async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email } = req.body;
 
-  const newUser = await User.create({ name, email, password, role });
-  const token   = signToken(newUser._id);
+  // Verifica si el usuario ya existe
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return sendResponse(res, null, 'El correo ya está registrado.', 400);
+  }
 
-  // Jwt en cookie HttpOnly + JSON opcional
-  sendTokenCookie(res, token);
+  // Crea el usuario con password temporal y estado pendiente
+  const tempPassword = crypto.randomBytes(16).toString('hex');
+  const newUser = await User.create({ name, email, password: tempPassword, active: false });
+
+  // Genera token para crear contraseña
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
+
+  await PasswordResetToken.create({
+    userId: newUser._id,
+    tokenHash,
+    expiresAt,
+    used: false
+  });
+
+  // Enviar email con link para crear contraseña (type=new)
+  const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
+
+  await sendEmail({
+    to: newUser.email,
+    subject: 'Crea tu contraseña',
+    text: `Bienvenido, ${name}! Haz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+  });
 
   sendResponse(
     res,
-    { token, user: { id: newUser._id, name, email, role } },
-    'User registered',
+    null,
+    'Registro iniciado. Revisa tu correo para crear la contraseña.',
     201
   );
 });
@@ -142,9 +167,16 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     return sendResponse(res, null, 'Usuario no encontrado.', 404);
   }
 
-  user.password = newPassword;
+  user.password = req.body.newPassword;
   await user.save();
-  console.log('[resetPassword] Contraseña actualizada');
+
+  // Notifica al usuario
+  await sendMail({
+    to: user.email,
+    subject: 'Tu contraseña ha sido cambiada',
+    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente. 
+Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+  });
 
   resetToken.used = true;
   await resetToken.save();
