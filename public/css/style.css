@@ -51,8 +51,8 @@ html, body {
 }
 .logo-navbar {
   max-height: 5rem;
-  margin-left: 6rem;   /* aumentado */
-  margin-right: 2rem;  /* aumentado */
+  margin-left: 6rem;
+  margin-right: 2rem;
 }
 .navbar-title {
   color: var(--ox-blue);
@@ -105,8 +105,8 @@ html, body {
   position: relative;
   max-width: 50rem;
   width: 100%;
-  margin: 0 2rem;      /* margen horizontal agregado */
-  margin-left:4rem;   /* puedes ajustar según lo necesites */
+  margin: 0 2rem;
+  margin-left:4rem;
 }
 .searchbar-input {
   height: 4.2rem;
@@ -144,8 +144,7 @@ html, body {
 section.hero {
   background: none;
   position: relative;
-  min-height: calc(100vh - 6rem); 
-
+  min-height: calc(100vh - 6rem);
   display: flex;
   align-items: center;
   margin-top: 0;
@@ -158,7 +157,6 @@ section.hero {
   position: relative;
   z-index: 2;
 }
-
 .hero-content > * {
   margin-bottom: 2rem;
   max-width: 48rem;
@@ -166,7 +164,6 @@ section.hero {
 .hero-content > *:last-child {
   margin-bottom: 0;
 }
-
 section.hero .hero-description {
   font-family: 'Lora', serif !important;
   font-style: italic !important;
@@ -174,8 +171,6 @@ section.hero .hero-description {
   font-size: 2rem !important;
   color: var(--ox-blue) !important;
 }
-
-/* HERO ROW FLEX */
 .hero-row {
   display: flex;
   flex-direction: column;
@@ -214,6 +209,53 @@ section.hero .hero-description {
   border-color: var(--ox-orange) !important;
   color: var(--ox-beige) !important;
   box-shadow: 0 4px 16px -2px rgba(16, 46, 80, 0.18);
+}
+
+/* =========================
+   RESET PASSWORD PAGE BG
+   ========================= */
+body.reset-password-bg,
+.reset-password-bg {
+  background-color: var(--ox-beige) !important;
+}
+
+.logo-reset {
+  max-height: 10rem;
+  width: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.font-title {
+  font-family: var(--font-title), sans-serif !important;
+}
+.text-ox-blue {
+  color: var(--ox-blue) !important;
+}
+a.transition {
+  transition: background 0.2s, color 0.2s;
+}
+a.text-ox-blue:hover {
+  background: var(--ox-yellow);
+  color: var(--ox-blue);
+  text-decoration: none;
+}
+
+/* =========================
+   RESET PASSWORD FORM
+   ========================= */
+.reset-password-input {
+  font-size: 1.7rem;
+
+}
+.reset-password-btn {
+  
+  font-size: 1.7rem !important;
+  
+}
+.reset-password-field label {
+  font-size: 1.4rem;
 }
 
 

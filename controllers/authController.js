@@ -8,7 +8,11 @@ const sendResponse    = require('@utils/sendResponse');
 const sendTokenCookie = require('@utils/sendTokenCookie');   
 const catchAsync      = require('@utils/catchAsync');
 const AppError        = require('@utils/appError');
-const { sendEmail }   = require('@utils/email');
+const { sendMail }    = require('@services/mailer');
+
+async function sendEmail({ to, subject, text, html }) {
+  return sendMail({ to, subject, text, html });
+}
 
 /* ------------------------------------------------------------------ */
 /*  Signup                                                            */
@@ -67,9 +71,13 @@ exports.logout = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
+
+  const user = await User.findOne({ email }).select('+email');
+
   // Siempre responde igual para no revelar si el email existe
-  if (!user) return sendResponse(res, null, 'Si el email existe, se enviará un enlace.');
+  if (!user || !user.email || user.email.trim() === '') {
+    return sendResponse(res, null, 'Si el email existe, se enviará un enlace.');
+  }
 
   // Generar token y hash
   const token = crypto.randomBytes(32).toString('hex');
@@ -86,6 +94,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   // Enviar email
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${user._id}&token=${token}`;
+
   await sendEmail({
     to: user.email,
     subject: 'Restablece tu contraseña',
@@ -100,10 +109,16 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const { uid, token, newPassword } = req.body;
-  if (!uid || !token || !newPassword)
+  console.log('[resetPassword] Datos recibidos:', { uid, token, newPassword: !!newPassword });
+
+  if (!uid || !token || !newPassword) {
+    console.log('[resetPassword] Datos incompletos');
     return sendResponse(res, null, 'Datos incompletos.', 400);
+  }
 
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  console.log('[resetPassword] tokenHash:', tokenHash);
+
   const resetToken = await PasswordResetToken.findOne({
     userId: uid,
     tokenHash,
@@ -111,19 +126,29 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     used: false
   });
 
-  if (!resetToken)
+  console.log('[resetPassword] resetToken encontrado:', !!resetToken);
+
+  if (!resetToken) {
+    console.log('[resetPassword] Token inválido o expirado');
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
+  }
 
   // Actualizar contraseña
   const user = await User.findById(uid);
-  if (!user)
-    return sendResponse(res, null, 'Usuario no encontrado.', 404);
+  console.log('[resetPassword] Usuario encontrado:', !!user);
 
-  user.password = await bcrypt.hash(newPassword, 12);
+  if (!user) {
+    console.log('[resetPassword] Usuario no encontrado');
+    return sendResponse(res, null, 'Usuario no encontrado.', 404);
+  }
+
+  user.password = newPassword;
   await user.save();
+  console.log('[resetPassword] Contraseña actualizada');
 
   resetToken.used = true;
   await resetToken.save();
+  console.log('[resetPassword] Token marcado como usado');
 
   sendResponse(res, null, 'Contraseña restablecida correctamente.');
 });
