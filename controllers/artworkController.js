@@ -6,6 +6,7 @@ const AppError     = require('@utils/appError');
 const filterObject = require('@utils/filterObject');
 const sendResponse = require('@utils/sendResponse');
 const { sendMail } = require('@services/mailer');
+const { upload, deleteImage, updateImage } = require('@middlewares/cloudinaryImage');
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
@@ -88,7 +89,7 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 
 exports.createArtwork = catchAsync(async (req, res, next) => {
   req.body.status = 'draft'; // fuerza borrador
-  const allowed = ['title', 'description', 'imageUrl', 'type', 'size', 'material', 'exhibitions', 'status'];
+  const allowed = ['title', 'description', 'type', 'size', 'material', 'exhibitions', 'status'];
 
   // Verifica que el body no esté vacío y detiene la función si es así
   if (!req.body || Object.keys(req.body).length === 0) {
@@ -106,8 +107,20 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('El campo "title" es obligatorio.', 400));
   }
 
+  // Verifica que venga una imagen
+  if (!req.file) {
+    return next(new AppError('Debes subir una imagen.', 400));
+  }
+
+  // Sube la imagen a Cloudinary
+  const imageResult = await upload(req.file.path);
+
   const data = filterObject(req.body, ...allowed);
-  const artwork = await Artwork.create({ ...data, artist: req.user.id });
+  data.artist = req.user.id;
+  data.imageUrl = imageResult.secure_url;
+  data.imagePublicId = imageResult.public_id;
+
+  const artwork = await Artwork.create(data);
   sendResponse(res, artwork, 'Obra creada correctamente.', 201);
 });
 
@@ -130,6 +143,17 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Obra no encontrada o está en la papelera.', 404));
+
+  // Si viene una nueva imagen, elimina la anterior y sube la nueva
+  if (req.file) {
+    // Elimina la imagen anterior de Cloudinary
+    await deleteImage(art.imagePublicId);
+
+    // Sube la nueva imagen
+    const imageResult = await upload(req.file.path);
+    art.imageUrl = imageResult.secure_url;
+    art.imagePublicId = imageResult.public_id;
+  }
 
   Object.assign(art, dataToUpdate);
   await art.save({ validateModifiedOnly: true });
