@@ -5,7 +5,9 @@ const router = express.Router();
 const viewsController = require('@controllers/viewsController'); 
 
 
+
 // Página de inicio de sesión
+router.get('/login', viewsController.getLogin);
 router.get('/signin', viewsController.getSignIn);
 
 // Vista para reset password (antes de otras rutas)

@@ -360,3 +360,8 @@ section.gallery-wall { margin: 5rem 0; }
   color: var(--ox-beige) !important;
   font-family: 'Montserrat', var(--font-title), sans-serif !important;
 }
+
+.login-signin-img-col {
+  text-align: right;
+}
+
