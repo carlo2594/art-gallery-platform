@@ -15,6 +15,7 @@ exports.getHome = catchAsync(async (req, res) => {
     });
 });
 
+
 // Vista para reset password
 exports.getResetPassword = (req, res) => {
   const { uid, token } = req.query;
@@ -22,6 +23,15 @@ exports.getResetPassword = (req, res) => {
     uid,
     token,
     isNewPassword: true // o false según el caso
+  });
+};
+
+// Vista para sign in
+exports.getSignIn = (req, res) => {
+  res.render('public/signin', {
+    title: 'Iniciar sesión · Galería del Ox',
+    hideNavbar: true,
+    hideFooter: true
   });
 };
 

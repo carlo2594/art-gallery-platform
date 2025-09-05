@@ -340,3 +340,23 @@ section.gallery-wall { margin: 5rem 0; }
     aspect-ratio: var(--ratio);       /* --ratio = width_cm / height_cm */
   }
 }
+
+/* =========================
+   FOOTER
+   ========================= */
+.footer {
+  background-color: var(--ox-blue) !important;
+  color: var(--ox-beige) !important;
+  font-family: 'Montserrat', var(--font-title), sans-serif !important;
+}
+.footer > .container > footer > * {
+  margin-top: 0.5rem;
+}
+  
+.footer .text-body-secondary,
+.footer .nav-link,
+.footer p,
+.footer a {
+  color: var(--ox-beige) !important;
+  font-family: 'Montserrat', var(--font-title), sans-serif !important;
+}

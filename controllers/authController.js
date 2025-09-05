@@ -63,7 +63,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 /*  Login                                                             */
 /* ------------------------------------------------------------------ */
 exports.login = catchAsync(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, remember } = req.body;
 
   // trae hash y verifica que la cuenta esté activa
   const user = await User.findOne({ email, active: true }).select('+password');
@@ -72,7 +72,15 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   const token = signToken(user._id);
-  sendTokenCookie(res, token);
+
+  // Si el usuario marcó "Recuérdame", la cookie dura 30 días; si no, 7 días
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000 // 30 días o 7 días
+  };
+  res.cookie('jwt', token, cookieOptions);
 
   sendResponse(res, { token }, 'User logged in');
 });
