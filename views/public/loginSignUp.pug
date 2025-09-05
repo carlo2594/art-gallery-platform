@@ -6,9 +6,9 @@ block content
       .col-md-4.col-lg-4
         .d-flex.align-items-center.py-4.login-signin-bg(style="min-height:100vh;")
           main.form-signin.w-100.m-auto.font-title.login-signin-main
-            form.login-signin-form(method="POST", action="/login")
+            form.login-signin-form(method="POST", data-mode=mode)
               img.mb-4.logo-reset.mb-3.login-signin-logo(src="/Logos/GOX_LOGO_08.png", alt="Galería del Ox", width="72", height="57")
-              if mode === 'signin'
+              if mode === 'signUp'
                 h1.h3.mb-3.fw-normal.mb-3.login-signin-title Registrarse
               else
                 h1.h3.mb-3.fw-normal.mb-3.login-signin-title Inicia sesión
@@ -23,7 +23,7 @@ block content
                 input.form-control.login-signin-input(type="email", id="floatingInput", name="email", placeholder="name@example.com", required)
                 label.login-signin-label(for="floatingInput") Correo electrónico
 
-              if mode !== 'signin'
+              if mode !== 'signUp'
                 .form-floating.mb-3.login-signin-field
                   input.form-control.login-signin-input(type="password", id="floatingPassword", name="password", placeholder="Contraseña", required)
                   label.login-signin-label(for="floatingPassword") Contraseña
@@ -32,7 +32,7 @@ block content
                   input.form-check-input.login-signin-checkbox(type="checkbox", value="remember-me", id="checkDefault", name="remember")
                   label.form-check-label.login-signin-checkbox-label(for="checkDefault") Recuérdame
 
-              if mode === 'signin'
+              if mode === 'signUp'
                 button.btn.btn-primary.w-100.py-2.mt-3.mb-3.login-signin-btn(type="submit") Registrarse
               else
                 button.btn.btn-primary.w-100.py-2.mt-3.mb-3.login-signin-btn(type="submit") Iniciar sesión
@@ -44,4 +44,5 @@ block content
 
               p.mt-5.mb-3.text-body-secondary.text-center.login-signin-copyright © 2025 Galería del Ox
       .col-md-4.col-lg-4.d-none.d-lg-block.login-signin-img-col
-        img.login-signin-side-img.login-signin-artwork(src="/img/sabiduria-nocturna-login.jpg" alt="Sabiduría Nocturna" style="height:90vh")
+        img.login-signin-side-img.login-signin-artwork(src="/img/sabiduria-nocturna-login.jpg" alt="Sabiduría Nocturna" style="height:60vh")
+

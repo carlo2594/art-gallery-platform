@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 12); // 12 salt rounds
+  // Si no hay name, lo iguala al email
+  if (!this.name && this.email) {
+    this.name = this.email;
+  }
   next();
 });
 

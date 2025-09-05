@@ -18,7 +18,14 @@ async function sendEmail({ to, subject, text, html }) {
 /*  Signup                                                            */
 /* ------------------------------------------------------------------ */
 exports.signup = catchAsync(async (req, res, next) => {
-  const { name, email } = req.body;
+  const { email } = req.body;
+
+  let name;
+  if (req.body.name) {
+    name = req.body.name;
+  } else if (email) {
+    name = email.split('@')[0];
+  }
 
   // Verifica si el usuario ya existe
   const existingUser = await User.findOne({ email });

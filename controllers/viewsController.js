@@ -27,19 +27,19 @@ exports.getResetPassword = (req, res) => {
 };
 
 // Vista para sign in
-exports.getSignIn = (req, res) => {
-  res.render('public/loginSignIn', {
+exports.getSignUp = (req, res) => {
+  res.render('public/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
-    mode: 'signin'
+    mode: 'signUp'
   });
 };
 
 
 // Vista para login
 exports.getLogin = (req, res) => {
-  res.render('public/loginSignIn', {
+  res.render('public/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
