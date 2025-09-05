@@ -134,15 +134,12 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const { uid, token, newPassword } = req.body;
-  console.log('[resetPassword] Datos recibidos:', { uid, token, newPassword: !!newPassword });
 
   if (!uid || !token || !newPassword) {
-    console.log('[resetPassword] Datos incompletos');
     return sendResponse(res, null, 'Datos incompletos.', 400);
   }
 
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  console.log('[resetPassword] tokenHash:', tokenHash);
 
   const resetToken = await PasswordResetToken.findOne({
     userId: uid,
@@ -151,19 +148,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     used: false
   });
 
-  console.log('[resetPassword] resetToken encontrado:', !!resetToken);
 
   if (!resetToken) {
-    console.log('[resetPassword] Token inválido o expirado');
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
   }
 
   // Actualizar contraseña
   const user = await User.findById(uid);
-  console.log('[resetPassword] Usuario encontrado:', !!user);
 
   if (!user) {
-    console.log('[resetPassword] Usuario no encontrado');
     return sendResponse(res, null, 'Usuario no encontrado.', 404);
   }
 
@@ -180,7 +173,6 @@ Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@gal
 
   resetToken.used = true;
   await resetToken.save();
-  console.log('[resetPassword] Token marcado como usado');
 
   sendResponse(res, null, 'Contraseña restablecida correctamente.');
 });

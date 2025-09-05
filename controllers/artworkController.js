@@ -6,7 +6,7 @@ const AppError     = require('@utils/appError');
 const filterObject = require('@utils/filterObject');
 const sendResponse = require('@utils/sendResponse');
 const { sendMail } = require('@services/mailer');
-const { upload, deleteImage, updateImage } = require('@middlewares/cloudinaryImage');
+const { upload, deleteImage } = require('@utils/cloudinaryImage');
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 

@@ -6,6 +6,8 @@ const filterObject = require('@utils/filterObject');
 const AppError = require('@utils/appError');
 const Artwork = require('@models/artworkModel');
 const Exhibition = require('@models/exhibitionModel');
+const { upload, deleteImage } = require('@utils/cloudinaryImage');
+const handleProfileImage = require('@utils/handleProfileImage');
 
 // CRUD estándar
 exports.getAllUsers = factory.getAll(User);
@@ -32,6 +34,33 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (!user) return next(new AppError('Usuario no encontrado.', 404));
 
   const oldEmail = user.email;
+
+  // Si viene una nueva imagen, elimina la anterior y sube la nueva
+  if (req.file) {
+    if (user.profileImagePublicId) {
+      await deleteImage(user.profileImagePublicId);
+    }
+    const imageResult = await upload(req.file.path);
+    filteredBody.profileImage = imageResult.secure_url;
+    filteredBody.profileImagePublicId = imageResult.public_id;
+  }
+
+  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
+  if (
+    ('profileImage' in filteredBody) &&
+    (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
+  ) {
+    if (user.profileImagePublicId) {
+      await deleteImage(user.profileImagePublicId);
+    }
+    user.profileImage = undefined;
+    user.profileImagePublicId = undefined;
+    // Elimina el campo para que no quede la referencia
+    delete filteredBody.profileImage;
+    delete filteredBody.profileImagePublicId;
+  }
+
+  await handleProfileImage(user, req, filteredBody);
 
   // Actualiza los campos permitidos
   Object.assign(user, filteredBody);
@@ -155,16 +184,42 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   // Solo permite actualizar estos campos
   const filteredBody = filterObject(req.body, 'name', 'email', 'profileImage', 'bio', 'active');
 
-  const updatedUser = await User.findByIdAndUpdate(req.params.id, filteredBody, {
-    new: true,
-    runValidators: true
-  });
-
-  if (!updatedUser) {
+  const user = await User.findById(req.params.id);
+  if (!user) {
     return next(new AppError('Usuario no encontrado', 404));
   }
 
-  sendResponse(res, updatedUser, 'Usuario actualizado');
+  // Si viene una nueva imagen, elimina la anterior y sube la nueva
+  if (req.file) {
+    if (user.profileImagePublicId) {
+      await deleteImage(user.profileImagePublicId);
+    }
+    const imageResult = await upload(req.file.path);
+    filteredBody.profileImage = imageResult.secure_url;
+    filteredBody.profileImagePublicId = imageResult.public_id;
+  }
+
+  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
+  if (
+    ('profileImage' in filteredBody) &&
+    (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
+  ) {
+    if (user.profileImagePublicId) {
+      await deleteImage(user.profileImagePublicId);
+    }
+    user.profileImage = undefined;
+    user.profileImagePublicId = undefined;
+    // Elimina el campo para que no quede la referencia
+    delete filteredBody.profileImage;
+    delete filteredBody.profileImagePublicId;
+  }
+
+  await handleProfileImage(user, req, filteredBody);
+
+  Object.assign(user, filteredBody);
+  await user.save();
+
+  sendResponse(res, user, 'Usuario actualizado');
 });
 
 // ADMIN: Desactivar un usuario (soft delete)

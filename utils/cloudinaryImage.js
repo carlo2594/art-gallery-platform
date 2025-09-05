@@ -1,40 +1,27 @@
-// utils/cloudinaryImage.js
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
 const cloudinary = require('@services/cloudinary');
+const fs = require('fs');
 
-// Multer storage para subir imágenes a Cloudinary
-defaultFolder = 'galeria-del-ox';
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: defaultFolder,
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1200, crop: 'limit' }]
-  }
-});
+// Sube una imagen a Cloudinary
+async function upload(filePath, folder = 'galeria-del-ox') {
+  const result = await cloudinary.uploader.upload(filePath, { folder });
+  // Borra el archivo temporal si existe
+  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  return result;
+}
 
-const upload = multer({ storage });
-
-// Función para eliminar una imagen de Cloudinary
+// Elimina una imagen de Cloudinary por public_id
 async function deleteImage(publicId) {
-  if (!publicId) return;
   return cloudinary.uploader.destroy(publicId);
 }
 
-// Función para actualizar una imagen (borra la anterior y sube la nueva)
-// Debe usarse junto con el middleware upload.single('image')
-async function updateImage(oldPublicId, file) {
-  if (oldPublicId) await deleteImage(oldPublicId);
-  // file debe ser req.file después de pasar por upload.single('image')
-  return {
-    imageUrl: file.path,
-    imagePublicId: file.filename
-  };
+// Actualiza una imagen: elimina la anterior y sube la nueva
+async function updateImage(oldPublicId, newFilePath, folder = 'galeria-del-ox') {
+  await deleteImage(oldPublicId);
+  return upload(newFilePath, folder);
 }
 
 module.exports = {
-  upload,         // Middleware para subir imágenes
-  deleteImage,    // Eliminar imagen de Cloudinary
-  updateImage     // Actualizar imagen (borra la anterior y retorna info de la nueva)
+  upload,
+  deleteImage,
+  updateImage
 };
