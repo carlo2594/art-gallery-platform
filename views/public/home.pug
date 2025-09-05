@@ -19,3 +19,16 @@ block content
             alt="Galería del Ox",
             style="max-width:100%;height:auto;border-radius:1.5rem;"
           )
+
+  // Muro de galería (efecto Pinterest con tamaño relativo a cm)
+  section.gallery-wall.my-5
+    .container
+      h2.h4.mb-4.text-center.gallery-wall-title Muro de Galería
+      .gallery-wall-grid
+        each a in artworks
+          figure.gallery-wall-item(
+            style=`--wcm:${a.width_cm}; --hcm:${a.height_cm}; --ratio:${a.width_cm} / ${a.height_cm};`
+          )
+            img.gallery-wall-img(src=a.imageUrl, alt=a.title, loading="lazy")
+            if a.title
+              figcaption.gallery-wall-caption= a.title

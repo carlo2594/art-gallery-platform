@@ -1,21 +1,17 @@
 const catchAsync = require('@utils/catchAsync');
+const Artwork = require('@models/artworkModel');
 const statsService = require('@services/statsService');
+
 
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  const [artworks, artists, exhibitions] = await Promise.all([
-    statsService.getRecentArtworks(),
-    statsService.getTopArtists(),
-    statsService.getRecentExhibitions()
-  ]);
+  const artworks = await Artwork.find({ deletedAt: null });
 
   res
     .status(200)
     .render('public/home', {
       title: 'Inicio · Galería del Ox',
-      artworks,
-      artists,
-      exhibitions
+      artworks
     });
 });
 

@@ -26,9 +26,13 @@ const artworkSchema = new mongoose.Schema(
   /* Campos para imagen en Cloudinary */
   imageUrl: { type: String, required: true },      // URL pública de la imagen
   imagePublicId: { type: String, required: true }, // ID único de Cloudinary
-    type:     { type: String },
-    size:     { type: String },
-    material: { type: String },
+  imageWidth_px: { type: Number }, // Ancho real de la imagen en px (opcional)
+  imageHeight_px: { type: Number }, // Alto real de la imagen en px (opcional)
+  type:     { type: String },
+  size:     { type: String },
+  material: { type: String },
+  width_cm:  { type: Number, required: true },     // Ancho en centímetros
+  height_cm: { type: Number, required: true },     // Alto en centímetros
 
     /* ------ Metrics (inmutables) ------ */
     views: { type: Number, default: 0 },
@@ -36,9 +40,10 @@ const artworkSchema = new mongoose.Schema(
       average: { type: Number, default: 0},
       count:   { type: Number, default: 0}
     },
+
     commentsCount: { type: Number, default: 0},
 
-    /* ------ Workflow ------ */
+    /* ------ Workflow ----- */
     status: { type: String, enum: STATUS, default: 'draft', index: true },
     review: {
       reviewedBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -124,5 +129,12 @@ artworkSchema.methods.setDraft = function () {
 artworkSchema.statics.findApproved = function (filter = {}) {
   return this.find({ status: 'approved', deletedAt: null, ...filter });
 };
+
+artworkSchema.pre('save', function(next) {
+  if (typeof this.width_cm === 'number' && typeof this.height_cm === 'number') {
+    this.size = `${this.width_cm} x ${this.height_cm} cm`;
+  }
+  next();
+});
 
 module.exports = mongoose.model('Artwork', artworkSchema);

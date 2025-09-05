@@ -13,16 +13,22 @@ const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA L�
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
 const randomImages = [
-  'https://images.unsplash.com/photo-1506744038136-46273834b3fb',
-  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e',
-  'https://images.unsplash.com/photo-1519985176271-adb1088fa94c',
-  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99',
-  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429',
-  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e'
+  'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
+  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80'
 ];
 
 /**
@@ -78,22 +84,39 @@ async function seed() {
   }
   const users = await User.insertMany(userData.slice(0, 10));
 
+  // Tamaños reales de canvas (en cm)
+  const canvasSizes = [
+    { width: 20, height: 30 },
+    { width: 30, height: 40 },
+    { width: 40, height: 50 },
+    { width: 50, height: 70 },
+    { width: 60, height: 80 },
+    { width: 70, height: 100 },
+    { width: 80, height: 120 }
+  ];
+
   // Crea obras de arte de prueba (máximo 10)
   const artworkData = [];
   for (let i = 1; i <= 10; i++) {
     const user = randomFromArray(users);
+    const canvas = randomFromArray(canvasSizes);
+    // Asigna una escala aleatoria para variedad visual (0.5x, 1x, 1.5x)
+    const scaleOptions = [0.5, 1, 1.5];
+    const scale = randomFromArray(scaleOptions);
     artworkData.push({
       title: `Obra ${i}`,
       description: `Descripción de la obra ${i}`,
       imageUrl: randomFromArray(randomImages),
+      imagePublicId: `seeded-image-${i}`,
       type: ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4],
-      size: `${randomInt(20, 120)}x${randomInt(20, 120)} cm`,
       material: ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5],
       createdBy: user._id,
       artist: user._id,
       status: randomFromArray(ARTWORK_STATUSES),
       ratings: { count: 0, average: 0 },
-      commentsCount: 0
+      commentsCount: 0,
+      width_cm: Math.round(canvas.width * scale),
+      height_cm: Math.round(canvas.height * scale)
     });
   }
   const artworks = await Artwork.insertMany(artworkData);

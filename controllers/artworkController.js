@@ -1,4 +1,10 @@
 // controllers/artworkController.js
+const {
+  verifyAspect,
+  buildTransformedUrl,
+  getAspectPolicy,
+  buildAspectErrorPayload
+} = require('@utils/aspectUtils');
 const mongoose = require('mongoose');
 const Artwork      = require('@models/artworkModel');
 const catchAsync   = require('@utils/catchAsync');
@@ -89,37 +95,48 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 
 exports.createArtwork = catchAsync(async (req, res, next) => {
   req.body.status = 'draft'; // fuerza borrador
-  const allowed = ['title', 'description', 'type', 'size', 'material', 'exhibitions', 'status'];
-
-  // Verifica que el body no esté vacío y detiene la función si es así
+  const allowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'material', 'exhibitions', 'status'];
   if (!req.body || Object.keys(req.body).length === 0) {
-    return next(new AppError('El cuerpo de la solicitud no puede estar vacío.', 400));
+    return res.status(400).json({ status: 'fail', error: { code: 'INVALID_BODY', message: 'El cuerpo de la solicitud no puede estar vacío.' }});
   }
-
-  // Verifica que todos los campos sean válidos
   const invalidFields = Object.keys(req.body).filter(key => !allowed.includes(key));
   if (invalidFields.length > 0) {
-    return next(new AppError(`Campos no permitidos: ${invalidFields.join(', ')}`, 400));
+    return res.status(400).json({ status: 'fail', error: { code: 'INVALID_FIELDS', message: `Campos no permitidos: ${invalidFields.join(', ')}` }});
   }
-
-  // Verifica que el campo title sea obligatorio
   if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
-    return next(new AppError('El campo "title" es obligatorio.', 400));
+    return res.status(400).json({ status: 'fail', error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio.' }});
   }
-
-  // Verifica que venga una imagen
   if (!req.file) {
-    return next(new AppError('Debes subir una imagen.', 400));
+    return res.status(400).json({ status: 'fail', error: { code: 'NO_IMAGE', message: 'Debes subir una imagen.' }});
   }
-
   // Sube la imagen a Cloudinary
   const imageResult = await upload(req.file.path);
-
+  const widthCm = Number(req.body.width_cm);
+  const heightCm = Number(req.body.height_cm);
+  const imgW = imageResult.width;
+  const imgH = imageResult.height;
+  // Validar dimensiones
+  if (!isFinite(widthCm) || !isFinite(heightCm) || widthCm <= 0 || heightCm <= 0) {
+    return res.status(400).json({ status: 'fail', error: { code: 'INVALID_DIMENSIONS', message: 'Las dimensiones declaradas deben ser mayores a cero y finitas.' }});
+  }
+  const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+  const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
+  const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+  const aspectPolicy = getAspectPolicy();
+  let imageUrlToSave = imageResult.secure_url;
+  if (!aspect.ok) {
+    const payload = buildAspectErrorPayload({ widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg });
+    if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
+      return res.status(400).json({ status: 'fail', error: payload });
+    }
+    imageUrlToSave = buildTransformedUrl(imageResult.secure_url, { policy: aspectPolicy, widthCm, heightCm, bg: padBg });
+  }
   const data = filterObject(req.body, ...allowed);
   data.artist = req.user.id;
-  data.imageUrl = imageResult.secure_url;
+  data.imageUrl = imageUrlToSave;
   data.imagePublicId = imageResult.public_id;
-
+  data.imageWidth_px = imgW;
+  data.imageHeight_px = imgH;
   const artwork = await Artwork.create(data);
   sendResponse(res, artwork, 'Obra creada correctamente.', 201);
 });
@@ -132,32 +149,61 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const artistAllowed = ['title', 'description', 'imageUrl', 'type', 'size', 'material'];
+  const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'material'];
   const adminAllowed  = [...artistAllowed, 'exhibitions'];
   const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
-
   const dataToUpdate = filterObject(req.body, ...allowedFields);
-
   if (Object.keys(req.body).some(key => !allowedFields.includes(key)))
-    return next(new AppError('La solicitud contiene campos no permitidos.', 400));
-
+    return res.status(400).json({ status: 'fail', error: { code: 'INVALID_FIELDS', message: 'La solicitud contiene campos no permitidos.' }});
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Obra no encontrada o está en la papelera.', 404));
-
-  // Si viene una nueva imagen, elimina la anterior y sube la nueva
+  const aspectPolicy = getAspectPolicy();
+  // Si viene una nueva imagen, sube primero y valida aspecto
   if (req.file) {
-    // Elimina la imagen anterior de Cloudinary
-    await deleteImage(art.imagePublicId);
-
-    // Sube la nueva imagen
     const imageResult = await upload(req.file.path);
-    art.imageUrl = imageResult.secure_url;
+    const widthCm = Number(dataToUpdate.width_cm ?? art.width_cm);
+    const heightCm = Number(dataToUpdate.height_cm ?? art.height_cm);
+    const imgW = imageResult.width;
+    const imgH = imageResult.height;
+    const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+    const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
+    const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+    if (!aspect.ok) {
+      const payload = buildAspectErrorPayload({ widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg });
+      if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
+        return res.status(400).json({ status: 'fail', error: payload });
+      }
+      // Si pad/fill, usar URL transformada y continuar
+      art.imageUrl = buildTransformedUrl(imageResult.secure_url, { policy: aspectPolicy, widthCm, heightCm, bg: padBg });
+    } else {
+      // Si calza, borra la anterior y actualiza
+      await deleteImage(art.imagePublicId);
+      art.imageUrl = imageResult.secure_url;
+    }
     art.imagePublicId = imageResult.public_id;
+    art.imageWidth_px = imgW;
+    art.imageHeight_px = imgH;
   }
-
+  // Si NO suben imagen nueva pero cambian width_cm/height_cm y tenemos px guardados
+  else if ((dataToUpdate.width_cm || dataToUpdate.height_cm) && art.imageWidth_px && art.imageHeight_px) {
+    const widthCm = Number(dataToUpdate.width_cm ?? art.width_cm);
+    const heightCm = Number(dataToUpdate.height_cm ?? art.height_cm);
+    const imgW = art.imageWidth_px;
+    const imgH = art.imageHeight_px;
+    const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+    const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
+    const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+    if (!aspect.ok && (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy))) {
+      const payload = buildAspectErrorPayload({ widthCm, heightCm, imgW, imgH, secureUrl: art.imageUrl, tolerance, padBg });
+      return res.status(400).json({ status: 'fail', error: payload });
+    }
+    // Si es pad/fill, podrías actualizar la URL, pero solo si lo deseas
+  }
   Object.assign(art, dataToUpdate);
   await art.save({ validateModifiedOnly: true });
-
+  // Ejemplo de test (comentado):
+  // const test = verifyAspect({ widthCm: 100, heightCm: 50, imgW: 2000, imgH: 1000 });
+  // console.log(test);
   sendResponse(res, art, 'Obra actualizada correctamente.');
 });
 
