@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   profileImage: String,
   bio:          String,
-  active: { type: Boolean, default: true, select: false },
+  active: { type: Boolean, default: true },
   lastActiveAt: { type: Date, select: false },
   createdAt:    { type: Date, default: Date.now }
 });

@@ -6,7 +6,7 @@ const rateLimiter  = require('@middlewares/rateLimiter');   // ⬅️ nuevo (100
 const router = express.Router();
 
 /* --- Auth --- */
-router.post('/signup', rateLimiter, authController.signup); // también limita flood
+router.post('/signup', rateLimiter, authController.signup); 
 router.post('/login',  rateLimiter, authController.login);
 router.post('/logout', requireUser, authController.logout); // token requerido para borrar cookie
 router.post('/password/forgot', authController.forgotPassword);

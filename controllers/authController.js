@@ -35,11 +35,12 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   // Crea el usuario con password temporal y estado pendiente
   const tempPassword = crypto.randomBytes(16).toString('hex');
-  const newUser = await User.create({ name, email, password: tempPassword, active: false });
+  const newUser = await User.create({ name, email, password: tempPassword});
 
   // Genera token para crear contraseña
   const token = crypto.randomBytes(32).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  console.log('newUser creado:', newUser);
   const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
 
   await PasswordResetToken.create({
@@ -55,7 +56,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   await sendEmail({
     to: newUser.email,
     subject: 'Crea tu contraseña',
-    text: `Bienvenido, ${name}! Haz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+  text: `Bienvenido, ${name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
   });
 
   sendResponse(
@@ -71,10 +72,13 @@ exports.signup = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password, remember } = req.body;
-
+  const normalizedEmail = email.trim().toLowerCase();
+  console.log('Login intento:', { email: normalizedEmail, password });
   // trae hash y verifica que la cuenta esté activa
-  const user = await User.findOne({ email, active: true }).select('+password');
+  const user = await User.findOne({ email: normalizedEmail, active: true }).select('+password');
+  console.log('Usuario encontrado en login:', user);
   if (!user || !(await user.correctPassword(password))) {
+    console.log('Login fallido: credenciales incorrectas');
     return next(new AppError('Correo o contraseña incorrectos', 401));
   }
 
@@ -149,12 +153,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const { uid, token, newPassword } = req.body;
+  console.log('resetPassword POST:', { uid, token, newPassword });
 
   if (!uid || !token || !newPassword) {
+    console.log('Datos incompletos:', { uid, token, newPassword });
     return sendResponse(res, null, 'Datos incompletos.', 400);
   }
 
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  console.log('tokenHash:', tokenHash);
 
   const resetToken = await PasswordResetToken.findOne({
     userId: uid,
@@ -162,32 +169,71 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     expiresAt: { $gt: Date.now() },
     used: false
   });
+  console.log('resetToken encontrado:', resetToken);
 
 
   if (!resetToken) {
+    console.log('Token inválido o expirado:', { uid, token, tokenHash });
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
   }
 
   // Actualizar contraseña
-  const user = await User.findById(uid);
+  const user = await User.findById(uid).select('+email');
+  console.log('user encontrado:', user);
 
   if (!user) {
+    console.log('Usuario no encontrado:', uid);
     return sendResponse(res, null, 'Usuario no encontrado.', 404);
   }
 
   user.password = req.body.newPassword;
   await user.save();
 
+  // Activar si era alta nueva
+  if (user.active === false) {
+    await User.findByIdAndUpdate(uid, { active: true }, { new: true, strict: false });
+    console.log('Usuario activado y guardado con findByIdAndUpdate:', uid);
+  }
+
+  // Iniciar sesión automática
+  const jwtToken = signToken(user._id);
+  res.cookie('jwt', jwtToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+  });
+
+  // Marcar token como usado
+  resetToken.used = true;
+  await resetToken.save({ validateBeforeSave: false });
+
   // Notifica al usuario
+  console.log('Enviando email:', {
+    to: user.email,
+    subject: 'Tu contraseña ha sido cambiada',
+    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+  });
   await sendMail({
     to: user.email,
     subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente. 
-Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+  });
+  // Notifica al usuario
+  console.log('Enviando email:', {
+    to: user.email,
+    subject: 'Tu contraseña ha sido cambiada',
+    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+  });
+  await sendMail({
+    to: user.email,
+    subject: 'Tu contraseña ha sido cambiada',
+    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
   });
 
-  resetToken.used = true;
-  await resetToken.save();
-
-  sendResponse(res, null, 'Contraseña restablecida correctamente.');
+  return res.status(200).json({
+    success: true,
+    message: '¡Listo! Tu cuenta está activa y tu sesión se inició.',
+    token: jwtToken
+  });
 });
