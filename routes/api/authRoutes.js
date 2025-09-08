@@ -8,7 +8,7 @@ const router = express.Router();
 /* --- Auth --- */
 router.post('/signup', rateLimiter, authController.signup); 
 router.post('/login',  rateLimiter, authController.login);
-router.post('/logout', requireUser, authController.logout); // token requerido para borrar cookie
+router.post('/logout', authController.logout);
 router.post('/password/forgot', authController.forgotPassword);
 router.post('/password/reset', authController.resetPassword);
 
