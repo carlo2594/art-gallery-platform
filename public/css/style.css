@@ -257,16 +257,14 @@ a.text-ox-blue:hover {
    ========================= */
 .reset-password-input {
   font-size: 1.7rem;
-
 }
 .reset-password-btn {
-  
   font-size: 1.7rem !important;
-  
 }
 .reset-password-field label {
   font-size: 1.4rem;
 }
+
 /* =========================
    GALLERY WALL (Pinterest)
    ========================= */
@@ -371,7 +369,31 @@ section.gallery-wall { margin: 5rem 0; }
   font-family: 'Montserrat', var(--font-title), sans-serif !important;
 }
 
+/* =========================
+   LOGIN / SIGN-IN LAYOUT
+   ========================= */
+
+
+
+/* Contenedor más estrecho SOLO para el form */
+.login-form-narrow {
+  max-width: 520px; /* ajusta a tu gusto: 420–560px suelen ir bien */
+}
+
+/* Columna imagen (ya usado antes) */
 .login-signin-img-col {
+  height: 100vh;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
   text-align: right;
+}
+
+/* Imagen sin zoom ni recorte */
+.login-signin-side-img {
+  display: block;
+  height: auto;
+  max-height: 100vh;
+  width: auto;
 }
 
