@@ -1,122 +1,5 @@
-/* ===== Opción A: colapsar desde XL (≥1200px) ===== */
-
-/* Desktop XL en adelante: centrado y ancho del buscador */
-@media (min-width: 1200px) {
-  .navbar-container { display: flex; align-items: center; gap: 1rem; }
-  .navbar-center { flex: 1 1 0; display: flex; justify-content: center; min-width: 0; }
-  .navbar-collapse-custom { margin-left: auto; }
-
-  /* SOLO ancho del buscador en desktop (ajusta a gusto) */
-  .navbar-search-center {
-    width: clamp(360px, 32vw, 520px);
-    max-width: 100%;
-    margin: 0 !important;
-    position: relative;
-  }
-
-  /* Márgenes prudentes para no empujar el layout */
-  .logo-navbar { margin-left: 1rem; margin-right: 1rem; }
-  .navbar-links .nav-link { margin-left: 1rem; }
-  .navbar-links .nav-link:last-child { margin-right: 0; }
-}
-
-/* Móvil/Tablet y pantallas <1200px: que todo quepa sin scroll horizontal */
-@media (max-width: 1199.98px) {
-  .searchbar-navbar {
-    margin: 12px 0 0 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-  #navbarsExample09 { padding-left: 1rem; padding-right: 1rem; }
-  .logo-navbar { margin-left: 0 !important; margin-right: 1rem !important; }
-  .navbar-links .nav-link:last-child { margin-right: 0 !important; }
-}
-
-/* Evitar cualquier desborde horizontal del nav por subpíxeles */
-.main-navbar, .navbar-container { overflow-x: clip; }
-/* === Desktop: evitar overflow y “tirón” a la izquierda === */
-@media (min-width: 992px) {
-  /* Deja que la columna central pueda encogerse sin forzar overflow */
-  .navbar-center { flex: 1 1 0; min-width: 0; }
-
-  /* Márgenes más prudentes para que todo quepa entre 992–1200px */
-  .logo-navbar { margin-left: 1rem; margin-right: 1rem; }
-  .navbar-links .nav-link { margin-left: 1rem; }
-  .navbar-links .nav-link:last-child { margin-right: 0; }
-
-  /* El buscador dentro del navbar no debe añadir margen lateral extra */
-  .searchbar-navbar { margin-left: 0 !important; margin-right: 0 !important; }
-
-  /* Si usas la variante centrada (.navbar-search-center), controla su ancho */
-  .navbar-search-center { width: clamp(280px, 32vw, 440px); max-width: 100%; }
-}
-
-/* === Móvil/Tablet: que no genere scroll lateral en el collapse === */
-@media (max-width: 991.98px) {
-  .searchbar-navbar { margin: 12px 0 0 0 !important; width: 100% !important; max-width: 100% !important; }
-  #navbarsExample09 { padding-left: 1rem; padding-right: 1rem; }
-}
-
-/* Por si acaso, recorta desbordes subpíxel del navbar */
-.main-navbar, .navbar-container { overflow-x: clip; }
-/* === FIX NAV HAMBURGUESA: que todo quepa y no haga scroll lateral === */
-@media (max-width: 991.98px) {
-  /* El search del collapse NO debe tener margen que lo desplace */
-  .searchbar-navbar {
-    margin: 12px 0 0 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  /* Evita que el logo/márgenes fijos empujen el layout */
-  .logo-navbar { 
-    margin-left: 0 !important;
-    margin-right: 1rem !important;
-  }
-
-  /* Dentro del collapse, evita sumar margen extra que pueda causar overflow */
-  .navbar-links .nav-link:last-child { 
-    margin-right: 0 !important;
-  }
-
-  /* Un poco de respiro dentro del collapse */
-  #navbarsExample09 {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-/* === SOLO ANCHO EN DESKTOP (centrado ya lo tienes con .navbar-center) === */
-/* Cambia 380px por el valor exacto que quieras */
-@media (min-width: 992px) {
-  .navbar-search-center { 
-    width: 60rem !important;  /* ← SOLO ancho */
-    max-width: 100%;
-  }
-}
 /* =========================
-   SEARCHBAR RESPONSIVE SUGERIDO
-   ========================= */
-@media (min-width: 992px) {
-  .searchbar-navbar, .navbar-search-center {
-    width: clamp(320px, 38vw, 540px);
-    max-width: 540px;
-  }
-}
-@media (min-width: 768px) and (max-width: 991.98px) {
-  .searchbar-navbar, .navbar-search-center {
-    width: clamp(220px, 60vw, 420px);
-    max-width: 420px;
-  }
-}
-@media (max-width: 767.98px) {
-  .searchbar-navbar, .navbar-search-center {
-    width: 100%;
-    max-width: 320px;
-  }
-}
-/* =========================
-   VARIABLES
+   VARIABLES Y BASE
    ========================= */
 :root {
   --ox-yellow: #F5C45E;
@@ -124,42 +7,37 @@
   --ox-orange: #E78B48;
   --ox-red:    #BE3D2A;
   --ox-beige:  #F7F6EF;
+
   --font-title:    'Montserrat', sans-serif;
   --font-subtitle: 'Lora', serif;
 }
-
-/* =========================
-   BASE
-   ========================= */
-html {
-  font-size: 62.5%;
-}
+html { font-size: 62.5%; }
 body {
   font-family: var(--font-title);
   background-color: var(--ox-beige);
   color: #111;
   font-size: 1.2rem;
-}
-html, body {
   margin: 0;
   padding: 0;
 }
 
 /* =========================
-   NAVBAR
+   NAVBAR GENERAL
    ========================= */
 .main-navbar {
   background-color: var(--ox-beige) !important;
-  border-bottom: none;
   box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10);
   padding-left: 0 !important;
   padding-right: 0 !important;
+  border-bottom: none;
+  overflow-x: clip;
 }
 .navbar-container {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 1rem;
+  overflow-x: clip;
 }
 .navbar-logo-link {
   display: flex;
@@ -167,19 +45,23 @@ html, body {
 }
 .logo-navbar {
   max-height: 5rem;
-  margin-left: 6rem;
-  margin-right: 2rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
 }
 .navbar-title {
   color: var(--ox-blue);
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-title);
   font-weight: 700;
   letter-spacing: 0.1em;
   font-size: 1.6rem;
   text-transform: uppercase;
 }
+
+/* =========================
+   NAVBAR LINKS
+   ========================= */
 .navbar-collapse-custom {
-  flex-grow: 1;
+  margin-left: auto;
 }
 .navbar-links {
   display: flex;
@@ -190,97 +72,34 @@ html, body {
   padding: 0;
 }
 .navbar-links .nav-link {
-  margin-left: 2rem;
   color: var(--ox-blue);
   text-decoration: none;
   font-size: 1.4rem;
   text-transform: uppercase;
   padding: 0.5rem 1rem;
   border-radius: 2rem;
-  transition: background 0.2s, color 0.2s;
   font-weight: 500;
-}
-.navbar-links .nav-link:last-child {
-  margin-right: 2rem;
-}
-.nav-link-login i {
-  font-size: 2rem;
-  vertical-align: middle;
+  transition: background 0.2s, color 0.2s;
 }
 .navbar-links .nav-link:hover,
 .navbar-links .nav-link:focus {
   background-color: var(--ox-yellow);
   color: var(--ox-blue);
-  transition: background 0.2s, color 0.2s;
-}
-.navbar-links .nav-link.nav-link-registrarse,
-.navbar .nav-link.nav-link-registrarse {
-  background-color: var(--ox-blue);
-  color: var(--ox-beige);
-  border: 1px solid var(--ox-blue);
-  border-radius: .5rem;
-  padding: .35rem .9rem;
-  line-height: 1.2;
-  display: inline-block;
-}
-.navbar-links .nav-link.nav-link-registrarse:hover,
-.navbar-links .nav-link.nav-link-registrarse:focus,
-.navbar .nav-link.nav-link-registrarse:hover,
-.navbar .nav-link.nav-link-registrarse:focus {
-  background-color: var(--ox-blue);
-  color: var(--ox-beige);
-  filter: brightness(0.93);
-  text-decoration: none;
-}
-.navbar-links .nav-username,
-.navbar .nav-username {
-  max-width: 18ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* =========================
-   NAVBAR: 3 columnas y búsqueda centrada en desktop
-   ========================= */
-@media (min-width: 992px) {
-  .navbar-grid {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 1rem;
-  }
-  .navbar-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
-  .navbar-center {
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center;
-  }
-  .navbar-collapse-custom {
-    margin-left: auto;
-  }
-  .navbar-search-center {
-    justify-self: center;
-    width: clamp(320px, 38vw, 480px);
-    max-width: 100%;
-    margin: 0 !important;
-    position: relative;
-  }
 }
 
 /* =========================
    SEARCHBAR
    ========================= */
+.navbar-search-fixed {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 .searchbar-navbar {
   position: relative;
-  max-width: 60rem;
   width: 100%;
-  margin: 0 2rem;
-  margin-left: 4rem;
+  max-width: 540px;
+  margin: 0;
 }
 .searchbar-input {
   height: 4.2rem;
@@ -288,6 +107,7 @@ html, body {
   padding-right: 3rem;
   border-radius: 2rem;
   border: 2px solid var(--ox-yellow);
+  width: 100%;
 }
 .searchbar-input:focus {
   border-color: var(--ox-orange);
@@ -295,7 +115,7 @@ html, body {
   box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15);
 }
 .searchbar-input::placeholder {
-  font-family: 'Montserrat', sans-serif;
+  font-family: var(--font-title);
   font-style: italic;
   color: #bbb;
   padding-left: 1rem;
@@ -311,23 +131,30 @@ html, body {
   align-items: center;
   font-size: 1.7rem;
 }
-@media (min-width: 992px) {
-  .navbar-search-center .searchbar-input {
-    height: 3.4rem;
-    font-size: 1.4rem;
-    padding-right: 2.6rem;
-    border-radius: 1.6rem;
-    border-width: 1.5px;
+
+/* =========================
+   RESPONSIVE NAVBAR & SEARCHBAR
+   ========================= */
+@media (max-width: 1199.98px) {
+  .navbar-container {
+    flex-wrap: wrap;
   }
-  .navbar-search-center .search-icon svg {
-    width: 18px;
-    height: 18px;
-  }
+  .logo-navbar { margin-left: 0 !important; margin-right: 1rem !important; }
+  #navbarsExample09 { padding-left: 1rem; padding-right: 1rem; }
+  .searchbar-navbar { margin: 12px 0 0 0 !important; }
 }
-@media (max-width: 991.98px) {
-  .searchbar-input {
-    height: 3.4rem;
-    font-size: 1.45rem;
+@media (min-width: 1200px) {
+  .navbar-search-fixed {
+    order: 2;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .navbar-collapse-custom {
+    order: 3;
+  }
+  .logo-navbar { margin-left: 1rem; margin-right: 1rem; }
+  .navbar-search-fixed .searchbar-navbar {
+    max-width: clamp(320px, 34vw, 520px);
   }
 }
 
@@ -335,60 +162,44 @@ html, body {
    HERO SECTION
    ========================= */
 section.hero {
-  background: none;
-  position: relative;
   min-height: calc(100vh - 6rem);
   display: flex;
   align-items: center;
-  margin-top: 0;
-  padding-top: 0;
   overflow: hidden;
 }
-.hero-container,
-.hero-row,
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-.hero-content > * {
-  margin-bottom: 2rem;
-  max-width: 48rem;
-}
-.hero-content > *:last-child {
-  margin-bottom: 0;
-}
+.hero-content > * { margin-bottom: 2rem; max-width: 48rem; }
+.hero-content > *:last-child { margin-bottom: 0; }
 section.hero .hero-description {
-  font-family: 'Lora', serif !important;
+  font-family: var(--font-subtitle) !important;
   font-style: italic !important;
   font-weight: 400 !important;
   font-size: 2rem !important;
   color: var(--ox-blue) !important;
 }
-.hero-row {
-  display: flex;
-  flex-direction: column;
-}
-.hero-image-container {
-  order: 1;
-}
-.hero-text {
-  order: 2;
-}
+.hero-row { display: flex; flex-direction: column; }
+.hero-image-container { order: 1; }
+.hero-text { order: 2; }
 @media (min-width: 992px) {
-  .hero-row {
-    flex-direction: row;
-    align-items: center;
-  }
-  .hero-text {
-    order: 1;
-  }
-  .hero-image-container {
-    order: 2;
-  }
+  .hero-row { flex-direction: row; align-items: center; }
+  .hero-text { order: 1; }
+  .hero-image-container { order: 2; }
 }
 
 /* =========================
-   BOTÓN CTA
+   FOOTER
+   ========================= */
+.footer {
+  background-color: var(--ox-blue) !important;
+  color: var(--ox-beige) !important;
+  font-family: var(--font-title), sans-serif !important;
+}
+.footer > .container > footer > * { margin-top: 0.5rem; }
+.footer .nav-link,
+.footer p,
+.footer a { color: var(--ox-beige) !important; }
+
+/* =========================
+   OTROS COMPONENTES
    ========================= */
 .btn-primary {
   background-color: var(--ox-yellow) !important;
@@ -403,13 +214,7 @@ section.hero .hero-description {
   color: var(--ox-beige) !important;
   box-shadow: 0 4px 16px -2px rgba(16, 46, 80, 0.18);
 }
-
-/* =========================
-   LOGIN / SIGN-IN LAYOUT
-   ========================= */
-.login-form-narrow {
-  max-width: 520px;
-}
+.login-form-narrow { max-width: 520px; }
 .login-signin-img-col {
   height: 100vh;
   display: flex;
@@ -428,11 +233,7 @@ section.hero .hero-description {
    GALLERY WALL (Pinterest)
    ========================= */
 section.gallery-wall { margin: 5rem 0; }
-.gallery-wall-title {
-  font-size: 2.4rem;
-  margin-bottom: 4rem;
-  text-align: center;
-}
+.gallery-wall-title { font-size: 2.4rem; margin-bottom: 4rem; text-align: center; }
 .gallery-wall-grid {
   column-width: 22rem;
   column-gap: 1.6rem;
@@ -444,9 +245,6 @@ section.gallery-wall { margin: 5rem 0; }
 @media (max-width: 576px)  { .gallery-wall-grid { column-width: 14rem; column-gap: 1rem; } }
 .gallery-wall-item {
   break-inside: avoid;
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-  margin: 0 0 1.6rem;
   background: #fff;
   border-radius: 1rem;
   overflow: hidden;
@@ -485,621 +283,5 @@ section.gallery-wall { margin: 5rem 0; }
     break-inside: auto;
     grid-column: span var(--wspan, 1);
     aspect-ratio: var(--ratio);
-  }
-}
-
-/* =========================
-   FOOTER
-   ========================= */
-.footer {
-  background-color: var(--ox-blue) !important;
-  color: var(--ox-beige) !important;
-  font-family: 'Montserrat', var(--font-title), sans-serif !important;
-}
-.footer > .container > footer > * {
-  margin-top: 0.5rem;
-}
-.footer .text-body-secondary,
-.footer .nav-link,
-.footer p,
-.footer a {
-  color: var(--ox-beige) !important;
-  font-family: 'Montserrat', var(--font-title), sans-serif !important;
-}
-
-/* =========================
-   OTROS COMPONENTES Y ESTADOS
-   ========================= */
-.check-email-state {
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 24px;
-  margin-top: 16px;
-}
-.check-email-state .stack > * + * {
-  margin-top: 8px;
-}
-.reset-password-bg,
-body.reset-password-bg {
-  background-color: var(--ox-beige) !important;
-}
-.logo-reset {
-  max-height: 10rem;
-  width: auto;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-.font-title {
-  font-family: var(--font-title), sans-serif !important;
-}
-.text-ox-blue {
-  color: var(--ox-blue) !important;
-}
-a.transition {
-  transition: background 0.2s, color 0.2s;
-}
-a.text-ox-blue:hover {
-  background: var(--ox-yellow);
-  color: var(--ox-blue);
-  text-decoration: none;
-}
-.reset-password-input {
-  font-size: 1.7rem;
-}
-.reset-password-btn {
-  font-size: 1.7rem !important;
-}
-.reset-password-field label {
-  font-size: 1.4rem;
-}
-/* =========================
-   BUSCADOR — tamaño más compacto y limpio
-   ========================= */
-
-/* Desktop: ancho controlado y altura más baja */
-@media (min-width: 992px) {
-  /* Mantiene el centrado por flex; solo ajusta tamaño */
-  .navbar-search-center {
-    width: clamp(320px, 38vw, 480px); /* <= ajusta el rango si deseas */
-    max-width: 60rem;
-  }
-  .navbar-search-center .searchbar-input {
-    height: 3.4rem;       /* antes ~4.2rem */
-    font-size: 1.4rem;    /* un poco más discreto */
-    padding-right: 2.6rem;
-    border-radius: 1.6rem; /* menos “pill” */
-    border-width: 1.5px;  /* línea más fina */
-  }
-  .navbar-search-center .search-icon svg {
-    width: 18px;
-    height: 18px;
-  }
-}
-
-/* Tablet y móvil: también un poco más compacto */
-@media (max-width: 991.98px) {
-  .searchbar-input {
-    height: 3.4rem;
-    font-size: 1.45rem;
-  }
-}
-/* ====== (tus estilos existentes permanecen igual) ====== */
-
-/* =========================
-   NAVBAR: centrar búsqueda con FLEX en desktop
-   ========================= */
-@media (min-width: 992px) {
-  /* La fila de la navbar es flex; el centro ocupa el espacio medio */
-  .navbar-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem; /* más compacto que 2rem si lo prefieres */
-  }
-
-  /* Ocupa el espacio entre brand y links, y centra su contenido */
-  .navbar-center {
-    flex: 1 1 auto;
-    display: flex;
-    justify-content: center; /* <<< aquí la magia */
-  }
-
-  /* El bloque de links se mantiene pegado a la derecha */
-  .navbar-collapse-custom {
-    margin-left: auto;
-  }
-
-  /* El form de escritorio: ancho controlado y SIN márgenes que lo empujen */
-  .navbar-search-center {
-    width: min(640px, 60vw);
-    max-width: 60rem;
-    margin: 0 !important;   /* anula el margin-left de .searchbar-navbar */
-    position: relative;
-  }
-}
-
-/* Ajuste general para el form (sigue aplicando en móvil) */
-.searchbar-navbar {
-  position: relative;
-  max-width: 50rem;
-  width: 100%;
-  margin: 0 2rem;
-  margin-left: 4rem; /* <- este es el que descentraba; arriba lo anulamos para desktop */
-}
-.searchbar-input {
-  height: 4.2rem;
-  font-size: 1.6rem;
-  padding-right: 3rem;
-  border-radius: 2rem;
-  border: 2px solid var(--ox-yellow);
-}
-.searchbar-input:focus {
-  border-color: var(--ox-orange);
-  outline: none;
-  box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15);
-}
-.searchbar-input::placeholder {
-  font-family: 'Montserrat', sans-serif;
-  font-style: italic;
-  color: #bbb;
-  padding-left: 1rem;
-}
-.search-icon {
-  position: absolute;
-  right: 1.2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ox-yellow);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  font-size: 1.7rem;
-}
-/* Estado de verificación de correo para registro por magic link */
-.check-email-state {
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 24px;
-  margin-top: 16px;
-}
-.check-email-state .stack > * + * {
-  margin-top: 8px;
-}
-/* =========================
-   VARIABLES
-   ========================= */
-:root {
-  --ox-yellow: #F5C45E;
-  --ox-blue:   #102E50;
-  --ox-orange: #E78B48;
-  --ox-red:    #BE3D2A;
-  --ox-beige:  #F7F6EF;
-
-  --font-title:    'Montserrat', sans-serif;
-  --font-subtitle: 'Lora', serif;
-}
-
-/* =========================
-   BASE
-   ========================= */
-html {
-  font-size: 62.5%;
-}
-body {
-  font-family: var(--font-title);
-  background-color: var(--ox-beige);
-  color: #111;
-  font-size: 1.2rem;
-}
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
-/* =========================
-   NAVBAR
-   ========================= */
-.main-navbar {
-  background-color: var(--ox-beige) !important;
-  border-bottom: none;
-  box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10);
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-}
-.navbar-container {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-.navbar-logo-link {
-  display: flex;
-  align-items: center;
-}
-.logo-navbar {
-  max-height: 5rem;
-  margin-left: 6rem;
-  margin-right: 2rem;
-}
-.navbar-title {
-  color: var(--ox-blue);
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  font-size: 1.6rem;
-  text-transform: uppercase;
-}
-.navbar-collapse-custom {
-  flex-grow: 1;
-}
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.navbar-links .nav-link {
-  margin-left: 2rem;
-  color: var(--ox-blue);
-  text-decoration: none;
-  font-size: 1.4rem;
-  text-transform: uppercase;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  transition: background 0.2s, color 0.2s;
-  font-weight: 500;
-}
-.navbar-links .nav-link:last-child {
-  margin-right: 2rem;
-}
-.nav-link-login i {
-  font-size: 2rem;
-  vertical-align: middle;
-}
-.navbar-links .nav-link:hover,
-.navbar-links .nav-link:focus {
-  background-color: var(--ox-yellow);
-  color: var(--ox-blue);
-  transition: background 0.2s, color 0.2s;
-}
-
-/* =========================
-   SEARCHBAR
-   ========================= */
-.searchbar-navbar {
-  position: relative;
-  max-width: 50rem;
-  width: 100%;
-  margin: 0 2rem;
-  margin-left:4rem;
-}
-.searchbar-input {
-  height: 4.2rem;
-  font-size: 1.6rem;
-  padding-right: 3rem;
-  border-radius: 2rem;
-  border: 2px solid var(--ox-yellow);
-}
-.searchbar-input:focus {
-  border-color: var(--ox-orange);
-  outline: none;
-  box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15);
-}
-.searchbar-input::placeholder {
-  font-family: 'Montserrat', sans-serif;
-  font-style: italic;
-  color: #bbb;
-  padding-left: 1rem;
-}
-.search-icon {
-  position: absolute;
-  right: 1.2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ox-yellow);
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  font-size: 1.7rem;
-}
-
-/* NAVBAR — CTA Registrarse y username */
-.navbar-links .nav-link.nav-link-registrarse,
-.navbar .nav-link.nav-link-registrarse {
-  background-color: var(--ox-blue);
-  color: var(--ox-beige);
-  border: 1px solid var(--ox-blue);
-  border-radius: .5rem;
-  padding: .35rem .9rem;
-  line-height: 1.2;
-  display: inline-block;
-}
-.navbar-links .nav-link.nav-link-registrarse:hover,
-.navbar-links .nav-link.nav-link-registrarse:focus,
-.navbar .nav-link.nav-link-registrarse:hover,
-.navbar .nav-link.nav-link-registrarse:focus {
-  background-color: var(--ox-blue);
-  color: var(--ox-beige);
-  filter: brightness(0.93);
-  text-decoration: none;
-}
-
-/* Truncar nombres muy largos */
-.navbar-links .nav-username,
-.navbar .nav-username {
-  max-width: 18ch;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* =========================
-   HERO SECTION
-   ========================= */
-section.hero {
-  background: none;
-  position: relative;
-  min-height: calc(100vh - 6rem);
-  display: flex;
-  align-items: center;
-  margin-top: 0;
-  padding-top: 0;
-  overflow: hidden;
-}
-.hero-container,
-.hero-row,
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-.hero-content > * {
-  margin-bottom: 2rem;
-  max-width: 48rem;
-}
-.hero-content > *:last-child {
-  margin-bottom: 0;
-}
-section.hero .hero-description {
-  font-family: 'Lora', serif !important;
-  font-style: italic !important;
-  font-weight: 400 !important;
-  font-size: 2rem !important;
-  color: var(--ox-blue) !important;
-}
-.hero-row {
-  display: flex;
-  flex-direction: column;
-}
-.hero-image-container {
-  order: 1;
-}
-.hero-text {
-  order: 2;
-}
-@media (min-width: 992px) {
-  .hero-row {
-    flex-direction: row;
-    align-items: center;
-  }
-  .hero-text {
-    order: 1;
-  }
-  .hero-image-container {
-    order: 2;
-  }
-}
-
-/* =========================
-   BOTÓN CTA
-   ========================= */
-.btn-primary {
-  background-color: var(--ox-yellow) !important;
-  border-color: var(--ox-yellow) !important;
-  color: var(--ox-blue) !important;
-  box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15);
-}
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: var(--ox-orange) !important;
-  border-color: var(--ox-orange) !important;
-  color: var(--ox-beige) !important;
-  box-shadow: 0 4px 16px -2px rgba(16, 46, 80, 0.18);
-}
-
-/* =========================
-   RESET PASSWORD PAGE BG
-   ========================= */
-body.reset-password-bg,
-.reset-password-bg {
-  background-color: var(--ox-beige) !important;
-}
-
-.logo-reset {
-  max-height: 10rem;
-  width: auto;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.font-title {
-  font-family: var(--font-title), sans-serif !important;
-}
-.text-ox-blue {
-  color: var(--ox-blue) !important;
-}
-a.transition {
-  transition: background 0.2s, color 0.2s;
-}
-a.text-ox-blue:hover {
-  background: var(--ox-yellow);
-  color: var(--ox-blue);
-  text-decoration: none;
-}
-
-/* =========================
-   RESET PASSWORD FORM
-   ========================= */
-.reset-password-input {
-  font-size: 1.7rem;
-}
-.reset-password-btn {
-  font-size: 1.7rem !important;
-}
-.reset-password-field label {
-  font-size: 1.4rem;
-}
-
-/* =========================
-   GALLERY WALL (Pinterest)
-   ========================= */
-section.gallery-wall { margin: 5rem 0; }
-
-.gallery-wall-title {
-  font-size: 2.4rem;
-  margin-bottom: 4rem;
-  text-align: center;
-}
-
-/* Fallback: Masonry por columnas (todas las tarjetas mismo ancho) */
-.gallery-wall-grid {
-  column-width: 22rem;      /* ajusta 22–26rem para verlas más grandes/pequeñas */
-  column-gap: 1.6rem;
-  max-width: 120rem;
-  margin: 0 auto;
-  padding: 0 .5rem;
-}
-@media (max-width: 992px)  { .gallery-wall-grid { column-width: 18rem; column-gap: 1.2rem; } }
-@media (max-width: 576px)  { .gallery-wall-grid { column-width: 14rem; column-gap: 1rem; } }
-
-/* Tarjeta base (vale para ambos modos) */
-.gallery-wall-item {
-  break-inside: avoid;                /* clave en multicolumn */
-  -webkit-column-break-inside: avoid;
-  page-break-inside: avoid;
-
-  margin: 0 0 1.6rem;                 /* espacio vertical (solo multicolumn) */
-  background: #fff;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
-
-  /* Proporción basada en cm (también ayuda en fallback) */
-  aspect-ratio: var(--ratio);
-}
-.gallery-wall-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  background: #fff;
-}
-.gallery-wall-caption {
-  position: relative;
-  margin: .6rem .8rem .8rem;
-  padding: .6rem .8rem;
-  font-size: 1.2rem;
-  text-align: center;
-  color: #fff;
-  background: rgba(0,0,0,.7);
-  border-radius: .5rem;
-}
-
-/* =========================
-   Mejora progresiva: CSS Grid + masonry
-   (ancho y alto relativos a cm)
-   ========================= */
-@supports (grid-template-rows: masonry) {
-  .gallery-wall-grid{
-    /* anula multicolumn */
-    column-width: auto; column-gap: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-    grid-template-rows: masonry;      /* masonry vertical real */
-    grid-auto-flow: row dense;
-    gap: 1.6rem;
-    max-width: 120rem;
-  }
-
-  .gallery-wall-item{
-    /* en grid ya no usamos margin-bot; el gap lo maneja la grilla */
-    margin: 0;
-    break-inside: auto;
-
-    /* Cada obra ocupa tantas columnas como toque por su ancho en cm */
-    grid-column: span var(--wspan, 1);
-
-    /* La altura sale de la proporción real (cm) y el ancho efectivo */
-    aspect-ratio: var(--ratio);       /* --ratio = width_cm / height_cm */
-  }
-}
-
-/* =========================
-   FOOTER
-   ========================= */
-.footer {
-  background-color: var(--ox-blue) !important;
-  color: var(--ox-beige) !important;
-  font-family: 'Montserrat', var(--font-title), sans-serif !important;
-}
-.footer > .container > footer > * {
-  margin-top: 0.5rem;
-}
-  
-.footer .text-body-secondary,
-.footer .nav-link,
-.footer p,
-.footer a {
-  color: var(--ox-beige) !important;
-  font-family: 'Montserrat', var(--font-title), sans-serif !important;
-}
-
-/* =========================
-   LOGIN / SIGN-IN LAYOUT
-   ========================= */
-
-/* Contenedor más estrecho SOLO para el form */
-.login-form-narrow {
-  max-width: 520px; /* ajusta a tu gusto: 420–560px suelen ir bien */
-}
-
-/* Columna imagen (ya usado antes) */
-.login-signin-img-col {
-  height: 100vh;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  text-align: right;
-}
-
-/* Imagen sin zoom ni recorte */
-.login-signin-side-img {
-  display: block;
-  height: auto;
-  max-height: 100vh;
-  width: auto;
-}
-
-/* =========================
-   NAVBAR: 3 columnas y búsqueda centrada en desktop
-   ========================= */
-@media (min-width: 992px) {
-  /* 3 columnas: [logo] [search centrado] [links] */
-  .navbar-grid {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 1rem;
-  }
-
-  /* El form de búsqueda centrado (fuera del collapse) */
-  .navbar-search-center {
-    justify-self: center;
-    width: min(640px, 60vw);
-    max-width: 100%;
-    margin: 0;
-    position: relative; /* para el icono */
   }
 }

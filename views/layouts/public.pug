@@ -9,42 +9,34 @@ html(lang='es')
     link(rel='stylesheet' href='/css/style.css')
   body
     if !hideNavbar
-      // cambiamos expand a XL
-      nav.navbar.navbar-expand-xl.main-navbar(aria-label='Eleventh navbar example')
+      // Mantén expand-xl si quieres colapsar links a partir de 1200px
+      nav.navbar.navbar-expand-xl.main-navbar(aria-label='Navbar principal')
         .container-fluid.navbar-container
           a.navbar-brand.d-flex.align-items-center.navbar-logo-link(href='/')
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-2.text-uppercase.fw-bold.navbar-title Galería del Ox
 
-          button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarsExample09', aria-controls='navbarsExample09', aria-expanded='false', aria-label='Toggle navigation')
+          button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarsExample09', aria-controls='navbarsExample09', aria-expanded='false', aria-label='Abrir menú')
             span.navbar-toggler-icon
 
-          // --- SEARCH CENTRADA EN DESKTOP (fuera del collapse) SOLO ≥1200px
-          .navbar-center.d-none.d-xl-flex
-            form.searchbar-navbar.navbar-search-center(role='search')
+          // === BUSCADOR SIEMPRE VISIBLE (fuera del collapse)
+          .navbar-search-fixed
+            form.searchbar-navbar(role='search' aria-label='Buscar')
               input.form-control.pr-5.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar', style='padding-right:2.5rem;')
               span.search-icon
                 svg(xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16")
                   path(d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0")
 
-          .collapse.navbar-collapse#navbarsExample09.navbar-collapse-custom
-            // --- SEARCH EN MÓVIL/TABLET (dentro del collapse) <1200px
-            form.searchbar-navbar.d-xl-none(role='search')
-              input.form-control.pr-5.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar', style='padding-right:2.5rem;')
-              span.search-icon
-                svg(xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16")
-                  path(d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0")
+          // === SOLO links dentro del collapse
+          .collapse.navbar-collapse#navbarsExample09.navbar-collapse-custom.w-auto
+            ul.navbar-nav.ms-auto.mb-2.mb-lg-0.fs-2
+              li.nav-item
+                a.nav-link.me-3(href='/obras') Obras
+              li.nav-item
+                a.nav-link.me-3(href='/artistas') Artistas
+              li.nav-item
+                a.nav-link.me-3(href='/exposiciones') Exposiciones
 
-            // Links a la derecha
-            ul.navbar-nav.ms-auto.mb-2.mb-lg-0.fs-2.navbar-links
-              li.nav-item
-                a.nav-link.nav-link-obras(href='/obras') Obras
-              li.nav-item
-                a.nav-link.nav-link-artistas(href='/artistas') Artistas
-              li.nav-item
-                a.nav-link.nav-link-exposiciones(href='/exposiciones') Exposiciones
-
-              // Auth: sin sesión => enlaces; con sesión => username + menú
               if !currentUser
                 li.nav-item
                   a.nav-link(href='/login' aria-label='Iniciar sesión') Iniciar sesión

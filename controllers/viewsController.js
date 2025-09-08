@@ -27,9 +27,10 @@ exports.getResetPassword = (req, res) => {
 };
 
 // Vista para sign in
+
 exports.getSignUp = (req, res) => {
   res.render('public/loginSignUp', {
-    title: 'Iniciar sesión · Galería del Ox',
+    title: 'Registrarse · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     mode: 'signUp'
@@ -44,5 +45,13 @@ exports.getLogin = (req, res) => {
     hideNavbar: true,
     hideFooter: true,
     mode: 'login'
+  });
+};
+
+
+// Vista de bienvenida (primera vez)
+exports.getWelcome = (req, res) => {
+  res.status(200).render('public/welcome', {
+    title: 'Bienvenido · Galería del Ox',
   });
 };

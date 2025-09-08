@@ -10,7 +10,7 @@ block content
           .container-sm.login-form-narrow.px-3
             main.form-signin.w-100.m-auto.font-title.login-signin-main
               .login-signup-form-wrapper
-                form.login-signin-form(method="POST", action="#", data-mode=mode)
+                form.login-signin-form(method="POST", action= mode === 'signUp' ? "/auth/signup" : "/auth/login", data-mode=mode)
                   img.mb-4.logo-reset.mb-3.login-signin-logo(src="/Logos/GOX_LOGO_08.png", alt="Galería del Ox", width="72", height="57")
                   if mode === 'signUp'
                     h1.h3.mb-3.fw-normal.mb-3.login-signin-title Registrarse
