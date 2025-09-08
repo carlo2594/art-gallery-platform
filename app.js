@@ -3,6 +3,7 @@ const express       = require('express');
 const path          = require('path');
 const helmet        = require('helmet');
 const cookieParser  = require('cookie-parser');
+const attachUserToViews = require('./middlewares/attachUserToViews');
 const xss           = require('xss-clean');
 const morgan        = require('morgan');
 
@@ -29,6 +30,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.use(attachUserToViews);
 app.use(xss());
 app.use(sanitize);
 

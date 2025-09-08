@@ -9,22 +9,33 @@ html(lang='es')
     link(rel='stylesheet' href='/css/style.css')
   body
     if !hideNavbar
-      nav.navbar.navbar-expand-lg.main-navbar(aria-label='Eleventh navbar example')
+      // cambiamos expand a XL
+      nav.navbar.navbar-expand-xl.main-navbar(aria-label='Eleventh navbar example')
         .container-fluid.navbar-container
           a.navbar-brand.d-flex.align-items-center.navbar-logo-link(href='/')
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-2.text-uppercase.fw-bold.navbar-title Galería del Ox
+
           button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarsExample09', aria-controls='navbarsExample09', aria-expanded='false', aria-label='Toggle navigation')
             span.navbar-toggler-icon
-          .collapse.navbar-collapse#navbarsExample09.navbar-collapse-custom
-            // Searchbar centrado
-            form.searchbar-navbar(role='search')
+
+          // --- SEARCH CENTRADA EN DESKTOP (fuera del collapse) SOLO ≥1200px
+          .navbar-center.d-none.d-xl-flex
+            form.searchbar-navbar.navbar-search-center(role='search')
               input.form-control.pr-5.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar', style='padding-right:2.5rem;')
-              //- Ícono de buscar SVG posicionado absolutamente
               span.search-icon
                 svg(xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16")
                   path(d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0")
-            // Links alineados a la derecha
+
+          .collapse.navbar-collapse#navbarsExample09.navbar-collapse-custom
+            // --- SEARCH EN MÓVIL/TABLET (dentro del collapse) <1200px
+            form.searchbar-navbar.d-xl-none(role='search')
+              input.form-control.pr-5.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar', style='padding-right:2.5rem;')
+              span.search-icon
+                svg(xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16")
+                  path(d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0")
+
+            // Links a la derecha
             ul.navbar-nav.ms-auto.mb-2.mb-lg-0.fs-2.navbar-links
               li.nav-item
                 a.nav-link.nav-link-obras(href='/obras') Obras
@@ -32,10 +43,32 @@ html(lang='es')
                 a.nav-link.nav-link-artistas(href='/artistas') Artistas
               li.nav-item
                 a.nav-link.nav-link-exposiciones(href='/exposiciones') Exposiciones
-              li.nav-item
-                a.nav-link.nav-link-login(href='/login')
-                  i.fas.fa-user
 
+              // Auth: sin sesión => enlaces; con sesión => username + menú
+              if !currentUser
+                li.nav-item
+                  a.nav-link(href='/login' aria-label='Iniciar sesión') Iniciar sesión
+                li.nav-item
+                  a.nav-link.nav-link-registrarse(href='/signup' aria-label='Registrarse') Registrarse
+              else
+                li.nav-item.dropdown
+                  a.nav-link.dropdown-toggle.nav-username#userMenu(
+                    href='#'
+                    role='button'
+                    data-bs-toggle='dropdown'
+                    aria-expanded='false'
+                    aria-label='Menú de usuario'
+                  )= currentUser.name
+                  ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenu')
+                    li
+                      a.dropdown-item(href='/mi-cuenta' aria-label='Ir a mi cuenta') Mi cuenta
+                    li
+                      hr.dropdown-divider
+                    li
+                      form(action='/logout' method='POST')
+                        button.dropdown-item(type='submit' aria-label='Cerrar sesión') Cerrar sesión
+
+    // Contenido de cada página
     block content
 
     if !hideFooter
