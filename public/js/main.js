@@ -1,10 +1,10 @@
 // Login/SignUp form handler
   const loginSignUpForm = document.querySelector('.login-signin-form');
   if (loginSignUpForm) {
-    console.log('Handler de submit adjuntado para login/signUp');
+  // ...existing code...
     loginSignUpForm.addEventListener('submit', async function (e) {
-      console.log('Evento submit disparado en login/signUp');
-      console.log('Evento submit disparado');
+  // ...existing code...
+  // ...existing code...
       e.preventDefault();
       const submitBtn = loginSignUpForm.querySelector('button[type="submit"]');
       if (submitBtn) {
@@ -13,7 +13,7 @@
       }
       // Get mode from data attribute or hidden input if needed
       const mode = window.loginSignUpMode || loginSignUpForm.getAttribute('data-mode');
-      console.log('Modo actual del formulario:', mode);
+  // ...existing code...
       const url = mode === 'signUp' ? '/api/v1/auth/signup' : '/api/v1/auth/login';
       const emailInput = loginSignUpForm.querySelector('input[name="email"]');
       if (!emailInput) {
@@ -78,9 +78,9 @@
 document.addEventListener('DOMContentLoaded', function () {
   const resetForm = document.querySelector('.reset-password-form');
   if (resetForm) {
-    console.log('Handler de submit adjuntado para reset password');
+  // ...existing code...
     resetForm.addEventListener('submit', async function (e) {
-      console.log('Evento submit disparado en reset password');
+  // ...existing code...
       e.preventDefault();
       const uid = document.querySelector('input[name="uid"]').value;
       const token = document.querySelector('input[name="token"]').value;

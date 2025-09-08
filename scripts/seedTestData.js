@@ -191,7 +191,7 @@ async function seed() {
   }
   await Favorite.insertMany(favoriteData);
 
-  console.log('Base de datos eliminada y datos de prueba insertados correctamente.');
+  // ...existing code...
   await mongoose.disconnect();
 }
 

@@ -19,18 +19,18 @@ const connectWithRetry = () => {
   mongoose
     .connect(DB, mongooseOpts)
     .then(() => {
-      console.log('✅ MongoDB conectada');
+  // ...existing code...
       /* Arrancamos Express solo una vez */
       if (!app.listening) {
         app.listen(PORT, () => {
           app.listening = true; // marca para no iniciar dos veces
-          console.log(`🚀 Servidor en http://localhost:${PORT}`);
+          // ...existing code...
         });
       }
     })
     .catch(err => {
       console.error('⚠️  No se pudo conectar a MongoDB:', err.message);
-      console.log('🕒 Reintento en 5 s…');
+  // ...existing code...
       setTimeout(connectWithRetry, 5000);
     });
 };

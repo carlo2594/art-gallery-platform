@@ -40,7 +40,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   // Genera token para crear contraseña
   const token = crypto.randomBytes(32).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  console.log('newUser creado:', newUser);
+  // ...existing code...
   const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 horas
 
   await PasswordResetToken.create({
@@ -73,12 +73,12 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password, remember } = req.body;
   const normalizedEmail = email.trim().toLowerCase();
-  console.log('Login intento:', { email: normalizedEmail, password });
+  // ...existing code...
   // trae hash y verifica que la cuenta esté activa
   const user = await User.findOne({ email: normalizedEmail, active: true }).select('+password');
-  console.log('Usuario encontrado en login:', user);
+  // ...existing code...
   if (!user || !(await user.correctPassword(password))) {
-    console.log('Login fallido: credenciales incorrectas');
+  // ...existing code...
     return next(new AppError('Correo o contraseña incorrectos', 401));
   }
 
@@ -153,15 +153,15 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const { uid, token, newPassword } = req.body;
-  console.log('resetPassword POST:', { uid, token, newPassword });
+  // ...existing code...
 
   if (!uid || !token || !newPassword) {
-    console.log('Datos incompletos:', { uid, token, newPassword });
+  // ...existing code...
     return sendResponse(res, null, 'Datos incompletos.', 400);
   }
 
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
-  console.log('tokenHash:', tokenHash);
+  // ...existing code...
 
   const resetToken = await PasswordResetToken.findOne({
     userId: uid,
@@ -169,20 +169,20 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     expiresAt: { $gt: Date.now() },
     used: false
   });
-  console.log('resetToken encontrado:', resetToken);
+  // ...existing code...
 
 
   if (!resetToken) {
-    console.log('Token inválido o expirado:', { uid, token, tokenHash });
+  // ...existing code...
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
   }
 
   // Actualizar contraseña
   const user = await User.findById(uid).select('+email');
-  console.log('user encontrado:', user);
+  // ...existing code...
 
   if (!user) {
-    console.log('Usuario no encontrado:', uid);
+  // ...existing code...
     return sendResponse(res, null, 'Usuario no encontrado.', 404);
   }
 
@@ -192,7 +192,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // Activar si era alta nueva
   if (user.active === false) {
     await User.findByIdAndUpdate(uid, { active: true }, { new: true, strict: false });
-    console.log('Usuario activado y guardado con findByIdAndUpdate:', uid);
+  // ...existing code...
   }
 
   // Iniciar sesión automática
@@ -209,23 +209,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   await resetToken.save({ validateBeforeSave: false });
 
   // Notifica al usuario
-  console.log('Enviando email:', {
-    to: user.email,
-    subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
-  });
-  await sendMail({
-    to: user.email,
-    subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
-  });
-  // Notifica al usuario
-  console.log('Enviando email:', {
-    to: user.email,
-    subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
-  });
-  await sendMail({
+  await sendEmail({
     to: user.email,
     subject: 'Tu contraseña ha sido cambiada',
     text: `Hola ${user.name}, tu contraseña en Galería del Ox ha sido cambiada exitosamente.\nSi no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`

@@ -40,7 +40,7 @@ async function updateArtworkViews() {
     );
   }
 
-  console.log('Campo "views" actualizado correctamente.');
+  // ...existing code...
   await mongoose.disconnect();
 }
 

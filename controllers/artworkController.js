@@ -203,7 +203,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   await art.save({ validateModifiedOnly: true });
   // Ejemplo de test (comentado):
   // const test = verifyAspect({ widthCm: 100, heightCm: 50, imgW: 2000, imgH: 1000 });
-  // console.log(test);
+  // ...existing code...
   sendResponse(res, art, 'Obra actualizada correctamente.');
 });
 
