@@ -4,38 +4,56 @@ html(lang='es')
     title #{title || 'Galería del Ox'}
     meta(charset='utf-8')
     meta(name='viewport' content='width=device-width, initial-scale=1')
+
+    // CSS de Bootstrap y tus estilos
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')
     link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet' href='/css/style.css')
+
+    // Estilos opcionales (mover a /css/style.css si quieres)
+    style.
+      /* Centrado del contenido dentro del collapse en mobile */
+      @media (max-width: 991.98px) {
+        #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
+        #navbarsExample05 .navbar-nav { align-items: center; } /* centra items del ul */
+        #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
+        #navbarsExample05 .searchbar-input { width: 100%; }
+      }
+      /* Tamaño del buscador en desktop */
+      @media (min-width: 992px) {
+        #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
+      }
+
   body
     if !hideNavbar
-      // Mantén expand-xl si quieres colapsar links a partir de 1200px
-      nav.navbar.navbar-expand-xl.main-navbar(aria-label='Navbar principal')
+      // Navbar: Expande a partir de lg (colapsa < 992px)
+      nav.navbar.navbar-expand-lg.main-navbar(aria-label='Navbar principal')
         .container-fluid.navbar-container
+          // Brand (logo + título) — queda a la izquierda
           a.navbar-brand.d-flex.align-items-center.navbar-logo-link(href='/')
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-2.text-uppercase.fw-bold.navbar-title Galería del Ox
 
-          button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarsExample09', aria-controls='navbarsExample09', aria-expanded='false', aria-label='Abrir menú')
+          // Botón hamburguesa
+          button.navbar-toggler(type='button', data-bs-toggle='collapse', data-bs-target='#navbarsExample05', aria-controls='navbarsExample05', aria-expanded='false', aria-label='Abrir menú')
             span.navbar-toggler-icon
 
-          // === BUSCADOR SIEMPRE VISIBLE (fuera del collapse)
-          .navbar-search-fixed
-            form.searchbar-navbar(role='search' aria-label='Buscar')
-              input.form-control.pr-5.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar', style='padding-right:2.5rem;')
-              span.search-icon
-                svg(xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16")
-                  path(d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0")
+          // Contenido colapsable
+          // Nota: en mobile el contenido se centra; en lg+ el ul usa ms-lg-auto para irse a la derecha
+          .collapse.navbar-collapse#navbarsExample05.text-center
 
-          // === SOLO links dentro del collapse
-          .collapse.navbar-collapse#navbarsExample09.navbar-collapse-custom.w-auto
-            ul.navbar-nav.ms-auto.mb-2.mb-lg-0.fs-2
+            // Buscador — centrado en mobile, centrado entre brand y links en desktop
+            form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(role='search' aria-label='Buscar')
+              input.form-control.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar')
+
+            // Links principales — al extremo derecho en lg+ con ms-lg-auto; centrados en mobile
+            ul.navbar-nav.navbar-links.ms-lg-auto.mx-auto.mb-2.mb-lg-0.fs-5
               li.nav-item
-                a.nav-link.me-3(href='/obras') Obras
+                a.nav-link.me-lg-3(href='/obras') Obras
               li.nav-item
-                a.nav-link.me-3(href='/artistas') Artistas
+                a.nav-link.me-lg-3(href='/artistas') Artistas
               li.nav-item
-                a.nav-link.me-3(href='/exposiciones') Exposiciones
+                a.nav-link.me-lg-3(href='/exposiciones') Exposiciones
 
               if !currentUser
                 li.nav-item
@@ -66,6 +84,7 @@ html(lang='es')
     if !hideFooter
       include ./footer.pug
 
+    // JS de Bootstrap y otros
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js')
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/main.js')

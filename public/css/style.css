@@ -1,3 +1,4 @@
+/* /css/style.css (actualizado a navbar "Never expand") */
 /* =========================
    VARIABLES Y BASE
    ========================= */
@@ -22,30 +23,17 @@ body {
 }
 
 /* =========================
-   NAVBAR GENERAL
+   NAVBAR
    ========================= */
 .main-navbar {
   background-color: var(--ox-beige) !important;
   box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10);
-  padding-left: 0 !important;
-  padding-right: 0 !important;
   border-bottom: none;
-  overflow-x: clip;
 }
-.navbar-container {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  overflow-x: clip;
-}
-.navbar-logo-link {
-  display: flex;
-  align-items: center;
-}
+.navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
+.navbar-light .navbar-toggler { border: none; }
 .logo-navbar {
   max-height: 5rem;
-  margin-left: 1rem;
   margin-right: 1rem;
 }
 .navbar-title {
@@ -57,49 +45,32 @@ body {
   text-transform: uppercase;
 }
 
-/* =========================
-   NAVBAR LINKS
-   ========================= */
-.navbar-collapse-custom {
-  margin-left: auto;
-}
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.navbar-links .nav-link {
+/* Links */
+.navbar .nav-link {
   color: var(--ox-blue);
-  text-decoration: none;
-  font-size: 1.4rem;
   text-transform: uppercase;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
+  font-size: 1.4rem;
   font-weight: 500;
-  transition: background 0.2s, color 0.2s;
 }
-.navbar-links .nav-link:hover,
-.navbar-links .nav-link:focus {
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
   background-color: var(--ox-yellow);
   color: var(--ox-blue);
+  border-radius: 2rem;
+}
+
+/* Collapse spacing (siempre vertical porque nunca expande) */
+.main-navbar .navbar-collapse {
+  width: 100%;
+  padding: .5rem 0;
 }
 
 /* =========================
    SEARCHBAR
    ========================= */
-.navbar-search-fixed {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-}
 .searchbar-navbar {
   position: relative;
   width: 100%;
-  max-width: 540px;
-  margin: 0;
 }
 .searchbar-input {
   height: 4.2rem;
@@ -132,30 +103,9 @@ body {
   font-size: 1.7rem;
 }
 
-/* =========================
-   RESPONSIVE NAVBAR & SEARCHBAR
-   ========================= */
-@media (max-width: 1199.98px) {
-  .navbar-container {
-    flex-wrap: wrap;
-  }
-  .logo-navbar { margin-left: 0 !important; margin-right: 1rem !important; }
-  #navbarsExample09 { padding-left: 1rem; padding-right: 1rem; }
-  .searchbar-navbar { margin: 12px 0 0 0 !important; }
-}
-@media (min-width: 1200px) {
-  .navbar-search-fixed {
-    order: 2;
-    flex: 1 1 0;
-    min-width: 0;
-  }
-  .navbar-collapse-custom {
-    order: 3;
-  }
-  .logo-navbar { margin-left: 1rem; margin-right: 1rem; }
-  .navbar-search-fixed .searchbar-navbar {
-    max-width: clamp(320px, 34vw, 520px);
-  }
+/* Ajustes menores por tamaño */
+@media (min-width: 992px) {
+  .logo-navbar { margin-right: 1rem; }
 }
 
 /* =========================
