@@ -159,49 +159,73 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ------------------------------- */
-/* Gallery Wall: reveal on scroll  */
-/* ------------------------------- */
-const wallItems = document.querySelectorAll('.gallery-wall-item');
-if (wallItems.length) {
-  // Marca inicial para que se oculten hasta revelarse
-  wallItems.forEach(el => el.classList.add('reveal-on-scroll'));
+  /* Gallery Wall: reveal on scroll  */
+  /* ------------------------------- */
+  const wallItems = document.querySelectorAll('.gallery-wall-item');
+  if (wallItems.length) {
+    // Marca inicial para que se oculten hasta revelarse
+    wallItems.forEach(el => el.classList.add('reveal-on-scroll'));
 
-  // Mostrarlas una por una (stagger)
-  const STAGGER_MS = 320;   // separa cada ítem 0.12s
-  const queue = [];
-  let flushing = false;
+    // Mostrarlas una por una (stagger)
+    const STAGGER_MS = 320;   // separa cada ítem 0.12s
+    const queue = [];
+    let flushing = false;
 
-  const flushQueue = () => {
-    if (!queue.length) { flushing = false; return; }
-    const el = queue.shift();
-    // Marca visible (dispara la transición CSS)
-    el.classList.add('is-visible');
-    // Revela la siguiente tras un pequeño delay
-    setTimeout(flushQueue, STAGGER_MS);
-  };
+    const flushQueue = () => {
+      if (!queue.length) { flushing = false; return; }
+      const el = queue.shift();
+      // Marca visible (dispara la transición CSS)
+      el.classList.add('is-visible');
+      // Revela la siguiente tras un pequeño delay
+      setTimeout(flushQueue, STAGGER_MS);
+    };
 
-  const io = new IntersectionObserver((entries, obs) => {
-    // Toma los que entran al viewport y ordénalos por posición vertical
-    const toShow = entries
-      .filter(e => e.isIntersecting && !e.target.dataset.revealed)
-      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+    const io = new IntersectionObserver((entries, obs) => {
+      // Toma los que entran al viewport y ordénalos por posición vertical
+      const toShow = entries
+        .filter(e => e.isIntersecting && !e.target.dataset.revealed)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
 
-    toShow.forEach(e => {
-      e.target.dataset.revealed = '1'; // evita repetir
-      queue.push(e.target);
-      obs.unobserve(e.target);         // solo una vez
+      toShow.forEach(e => {
+        e.target.dataset.revealed = '1'; // evita repetir
+        queue.push(e.target);
+        obs.unobserve(e.target);         // solo una vez
+      });
+
+      if (!flushing && queue.length) {
+        flushing = true;
+        flushQueue();
+      }
+    }, {
+      rootMargin: '0px 0px -10% 0px',  // empieza un pelín antes del bottom
+      threshold: 0.2                   // cuando ~20% del ítem es visible
     });
 
-    if (!flushing && queue.length) {
-      flushing = true;
-      flushQueue();
-    }
-  }, {
-    rootMargin: '0px 0px -10% 0px',  // empieza un pelín antes del bottom
-    threshold: 0.2                   // cuando ~20% del ítem es visible
-  });
+    wallItems.forEach(el => io.observe(el));
 
-  wallItems.forEach(el => io.observe(el));
-}
+    // Oculta la última fila si está incompleta (responsive)
+    setTimeout(() => {
+      // Agrupa por offsetTop
+      const rows = {};
+      wallItems.forEach(el => {
+        const top = el.offsetTop;
+        if (!rows[top]) rows[top] = [];
+        rows[top].push(el);
+      });
+      const rowTops = Object.keys(rows).map(Number).sort((a, b) => a - b);
+      if (rowTops.length) {
+        const lastRow = rows[rowTops[rowTops.length - 1]];
+        // Busca el tamaño de las filas completas
+        let fullRowSize = 0;
+        for (let i = 0; i < rowTops.length - 1; i++) {
+          fullRowSize = Math.max(fullRowSize, rows[rowTops[i]].length);
+        }
+        // Si la última fila está incompleta, ocúltala
+        if (lastRow.length < fullRowSize) {
+          lastRow.forEach(el => el.style.display = 'none');
+        }
+      }
+    }, 500); // Espera a que el layout esté listo
+  }
 
 });

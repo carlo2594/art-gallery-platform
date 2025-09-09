@@ -65,24 +65,16 @@ async function seed() {
     ArtworkView.deleteMany({}) // <-- AGREGA ESTA LÍNEA
   ]);
 
-  // Crea usuarios de prueba (máximo 10)
+
+  // Crea usuarios de prueba (solo 5)
   const userData = [
     { name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin' },
     { name: 'Artista Uno', email: 'artista1@test.com', password: '123456', role: 'artist' },
     { name: 'Artista Dos', email: 'artista2@test.com', password: '123456', role: 'artist' },
-    { name: 'Visitante', email: 'visitante@test.com', password: '123456', role: 'artist' }
+    { name: 'Visitante', email: 'visitante@test.com', password: '123456', role: 'artist' },
+    { name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) }
   ];
-  for (let i = 1; i <= 6; i++) { // 4 + 6 = 10
-    userData.push({
-      name: `Usuario${i}`,
-      email: `usuario${i}@test.com`,
-      password: '123456',
-      role: i % 2 === 0 ? 'artist' : 'admin',
-      bio: `Bio de usuario ${i}`,
-      profileImage: randomFromArray(randomImages)
-    });
-  }
-  const users = await User.insertMany(userData.slice(0, 10));
+  const users = await User.insertMany(userData);
 
   // Tamaños reales de canvas (en cm)
   const canvasSizes = [
@@ -95,9 +87,10 @@ async function seed() {
     { width: 80, height: 120 }
   ];
 
-  // Crea obras de arte de prueba (máximo 10)
+
+  // Crea obras de arte de prueba (total 30)
   const artworkData = [];
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 30; i++) {
     const user = randomFromArray(users);
     const canvas = randomFromArray(canvasSizes);
     // Asigna una escala aleatoria para variedad visual (0.5x, 1x, 1.5x)
@@ -113,8 +106,9 @@ async function seed() {
       createdBy: user._id,
       artist: user._id,
       status: randomFromArray(ARTWORK_STATUSES),
-      ratings: { count: 0, average: 0 },
-      commentsCount: 0,
+      views: randomInt(0, 500),
+      ratings: { count: randomInt(0, 20), average: randomInt(1, 5) },
+      commentsCount: randomInt(0, 10),
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale)
     });

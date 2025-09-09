@@ -7,7 +7,9 @@ const Artwork = require('@models/artworkModel');
 exports.getHome = catchAsync(async (req, res) => {
   const artworks = await Artwork
     .find({ deletedAt: null })
-    .populate({ path: 'artist', select: 'name' }); // ⟵ añade esto
+    .sort({ views: -1 })
+    .limit(10)
+    .populate({ path: 'artist', select: 'name' });
 
   res.status(200).render('public/home', {
     title: 'Inicio · Galería del Ox',
