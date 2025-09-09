@@ -128,15 +128,25 @@ document.addEventListener('DOMContentLoaded', function () {
       const newPassword = document.querySelector('input[name="newPassword"]').value;
       const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
 
+        // Leer el valor del checkbox "Recuérdame"
+        const rememberInput = resetForm.querySelector('input[name="remember"]');
+        const remember = rememberInput && rememberInput.checked ? rememberInput.value : undefined;
+
       if (newPassword !== confirmPassword) {
         alert('Las contraseñas no coinciden');
         if (btn) { btn.disabled = false; btn.textContent = 'Cambiar contraseña'; }
         return;
       }
 
-      try {
-        const res = await axios.post('/api/v1/auth/password/reset', { uid, token, newPassword });
+        try {
+          const data = { uid, token, newPassword };
+          if (remember) data.remember = remember;
+          const res = await axios.post('/api/v1/auth/password/reset', data);
         alert(res.data?.message || 'Contraseña actualizada.');
+        if (res.data?.data?.next) {
+          window.location = res.data.data.next;
+          return;
+        }
         if ((res.data?.message || '').toLowerCase().includes('correctamente')) {
           window.location = '/';
         }

@@ -168,7 +168,7 @@ exports.forgotPassword = catchAsync(async (req, res) => {
 /*  Reset Password                                                    */
 /* ------------------------------------------------------------------ */
 exports.resetPassword = catchAsync(async (req, res) => {
-  const { uid, token, newPassword } = req.body;
+  const { uid, token, newPassword, remember } = req.body;
   if (!uid || !token || !newPassword) {
     return sendResponse(res, null, 'Datos incompletos.', 400);
   }
@@ -186,13 +186,20 @@ exports.resetPassword = catchAsync(async (req, res) => {
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
   }
 
-  const user = await User.findById(uid).select('+email');
+  const user = await User.findById(uid).select('+email +lastLoginAt');
   if (!user) {
     return sendResponse(res, null, 'Usuario no encontrado.', 404);
   }
 
+
+  const isFirstLogin = !user.lastLoginAt;
   user.password = newPassword; // el hook del modelo lo hashea
   await user.save();
+  // Actualiza el lastLoginAt si es el primer login
+  if (isFirstLogin) {
+    user.lastLoginAt = new Date();
+    await user.save();
+  }
 
   // Por si el alta venía inactiva, lo activamos sin romper schema
   if (user.active === false) {
@@ -201,12 +208,24 @@ exports.resetPassword = catchAsync(async (req, res) => {
 
   // Autologin post-reset
   const jwtToken = signToken(user._id);
-  res.cookie('jwt', jwtToken, {
+
+  // "remember" puede venir como on/true/1/etc.
+  const rememberMe =
+    remember === true ||
+    remember === 'true' ||
+    remember === 'on' ||
+    remember === 1 ||
+    remember === '1' ||
+    remember === 'remember-me';
+
+  // cookie 30d si remember, si no 7d
+  const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-  });
+    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000
+  };
+  res.cookie('jwt', jwtToken, cookieOptions);
 
   resetToken.used = true;
   await resetToken.save({ validateBeforeSave: false });
@@ -217,6 +236,14 @@ exports.resetPassword = catchAsync(async (req, res) => {
     text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`
   });
 
+  // Redirige si es HTML y es el primer login
+  const wantsHTML = req.accepts(['html', 'json']) === 'html';
+  if (wantsHTML && isFirstLogin) {
+    return res.redirect(303, '/welcome');
+  }
+  if (isFirstLogin) {
+    return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
+  }
   return sendResponse(res, null, 'Contraseña actualizada correctamente.');
 });
 
@@ -232,13 +259,21 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     return sendResponse(res, null, 'Debes enviar la contraseña actual y la nueva.', 400);
   }
 
-  const user = await User.findById(userId).select('+password +email');
+  const user = await User.findById(userId).select('+password +email +lastLoginAt');
   if (!user || !(await user.correctPassword(currentPassword))) {
     return sendResponse(res, null, 'Tu contraseña actual no es correcta.', 400);
   }
 
+  const isFirstLogin = !user.lastLoginAt;
+
   user.password = newPassword;
   await user.save();
+
+  // Actualiza el lastLoginAt si es el primer login
+  if (isFirstLogin) {
+    user.lastLoginAt = new Date();
+    await user.save();
+  }
 
   const jwtToken = signToken(user._id);
   res.cookie('jwt', jwtToken, {
@@ -254,5 +289,13 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`
   });
 
-  return sendResponse(res, null, 'Contraseña actualizada.');
+  // Redirige si es HTML y es el primer login
+  const wantsHTML = req.accepts(['html', 'json']) === 'html';
+  if (wantsHTML && isFirstLogin) {
+    return res.redirect(303, '/welcome');
+  }
+  if (isFirstLogin) {
+    return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
+  }
+  return sendResponse(res, null, 'Contraseña actualizada correctamente.');
 });
