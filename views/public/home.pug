@@ -30,5 +30,9 @@ block content
             style=`--wcm:${a.width_cm}; --hcm:${a.height_cm}; --ratio:${a.width_cm} / ${a.height_cm};`
           )
             img.gallery-wall-img(src=a.imageUrl, alt=a.title, loading="lazy")
-            if a.title
-              figcaption.gallery-wall-caption= a.title
+            if a.title || (a.artist && a.artist.name)
+              figcaption.gallery-wall-caption
+                if a.title
+                  div.caption-title= a.title
+                if a.artist && a.artist.name
+                  div.caption-artist por #{a.artist.name}

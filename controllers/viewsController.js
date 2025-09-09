@@ -5,15 +5,16 @@ const Artwork = require('@models/artworkModel');
 
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  const artworks = await Artwork.find({ deletedAt: null });
-  
-  res
-  .status(200)
-  .render('public/home', {
+  const artworks = await Artwork
+    .find({ deletedAt: null })
+    .populate({ path: 'artist', select: 'name' }); // ⟵ añade esto
+
+  res.status(200).render('public/home', {
     title: 'Inicio · Galería del Ox',
     artworks
   });
 });
+
 
 
 // Vista para reset password

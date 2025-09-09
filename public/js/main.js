@@ -157,4 +157,51 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+
+  /* ------------------------------- */
+/* Gallery Wall: reveal on scroll  */
+/* ------------------------------- */
+const wallItems = document.querySelectorAll('.gallery-wall-item');
+if (wallItems.length) {
+  // Marca inicial para que se oculten hasta revelarse
+  wallItems.forEach(el => el.classList.add('reveal-on-scroll'));
+
+  // Mostrarlas una por una (stagger)
+  const STAGGER_MS = 320;   // separa cada ítem 0.12s
+  const queue = [];
+  let flushing = false;
+
+  const flushQueue = () => {
+    if (!queue.length) { flushing = false; return; }
+    const el = queue.shift();
+    // Marca visible (dispara la transición CSS)
+    el.classList.add('is-visible');
+    // Revela la siguiente tras un pequeño delay
+    setTimeout(flushQueue, STAGGER_MS);
+  };
+
+  const io = new IntersectionObserver((entries, obs) => {
+    // Toma los que entran al viewport y ordénalos por posición vertical
+    const toShow = entries
+      .filter(e => e.isIntersecting && !e.target.dataset.revealed)
+      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+    toShow.forEach(e => {
+      e.target.dataset.revealed = '1'; // evita repetir
+      queue.push(e.target);
+      obs.unobserve(e.target);         // solo una vez
+    });
+
+    if (!flushing && queue.length) {
+      flushing = true;
+      flushQueue();
+    }
+  }, {
+    rootMargin: '0px 0px -10% 0px',  // empieza un pelín antes del bottom
+    threshold: 0.2                   // cuando ~20% del ítem es visible
+  });
+
+  wallItems.forEach(el => io.observe(el));
+}
+
 });
