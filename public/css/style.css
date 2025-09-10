@@ -400,3 +400,16 @@ section.join-artists {
 
 /* Un poco más de espacio bajo la frase (por si .mb-0 recorta el p de abajo) */
 .footer-quote { margin-bottom: 1rem; }
+
+/* Centrado del contenido dentro del collapse en mobile */
+@media (max-width: 991.98px) {
+  #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
+  #navbarsExample05 .navbar-nav { align-items: center; } /* centra items del ul */
+  #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
+  #navbarsExample05 .searchbar-input { width: 100%; }
+}
+
+/* Tamaño del buscador en desktop */
+@media (min-width: 992px) {
+  #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
+}
