@@ -136,18 +136,18 @@ section.hero .hero-description {
    ========================= */
 section.gallery-wall { margin: 5rem 0; }
 .gallery-wall-title { font-size: 2.4rem; margin-bottom: 4rem; text-align: center; }
-
+/* --- Columnas y layout --- */
 .gallery-wall-grid {
-  column-width: 29rem;
+  column-width: 24rem;
+  max-width: 140rem;
   column-gap: 1.6rem;
-  max-width: 120rem;
   margin: 0 auto;
   padding: 0 .5rem;
+  column-count: 3 !important; /* nunca más de 3 columnas */
 }
-@media (max-width: 992px)  { .gallery-wall-grid { column-width: 18rem; column-gap: 1.2rem; } }
-@media (max-width: 576px)  { .gallery-wall-grid { column-width: 14rem; column-gap: 1rem; } }
-
-/* Ítem de obra con overlay */
+@media (max-width: 992px){ .gallery-wall-grid{ column-width: 16rem; column-count: 2 !important; } }
+@media (max-width: 576px)  { .gallery-wall-grid { column-width: 12rem; column-gap: 1rem; column-count: 2 !important; } }
+/* --- Ítem de obra --- */
 .gallery-wall-item {
   position: relative;            /* necesario para el overlay */
   break-inside: avoid;
@@ -166,8 +166,7 @@ section.gallery-wall { margin: 5rem 0; }
   object-fit: contain;            /* inofensivo con height:auto, por claridad */
   background: #fff;               /* mantiene fondo blanco alrededor si sobra */
 }
-
-/* === Overlay del pie sobre la imagen === */
+/* --- Overlay del pie sobre la imagen --- */
 .gallery-wall-caption {
   position: absolute;
   left: 0; right: 0; bottom: 0;
@@ -193,8 +192,7 @@ section.gallery-wall { margin: 5rem 0; }
   font-size: clamp(1.1rem, .95vw, 1.4rem);
   color: rgba(255,255,255,.85);
 }
-
-/* Masonry con Grid si está disponible */
+/* --- Masonry con Grid si está disponible --- */
 @supports (grid-template-rows: masonry) {
   .gallery-wall-grid{
     column-width: auto; column-gap: 0;
@@ -212,8 +210,7 @@ section.gallery-wall { margin: 5rem 0; }
     aspect-ratio: var(--ratio);
   }
 }
-
-/* === Reveal on scroll para el muro (lento y delicado) === */
+/* --- Reveal on scroll para el muro --- */
 .reveal-on-scroll {
   opacity: 0;
   transform: translateY(24px);
@@ -224,8 +221,6 @@ section.gallery-wall { margin: 5rem 0; }
   opacity: 1;
   transform: translateY(0); /* ← visible sin desplazamiento */
 }
-
-/* Accesibilidad: menos movimiento si el usuario lo prefiere */
 @media (prefers-reduced-motion: reduce) {
   .reveal-on-scroll {
     opacity: 1 !important;
@@ -288,8 +283,6 @@ section.join-artists {
   color: var(--ox-beige) !important;
   font-family: var(--font-title), sans-serif !important;
 }
-
-/* Frase dentro de la columna central */
 .footer-quote {
   font-family: var(--font-subtitle), serif;
   font-weight: 400;
@@ -301,26 +294,19 @@ section.join-artists {
   color: var(--ox-beige);
   margin: 0 0 .6rem;  /* pequeño espacio sobre el copyright */
 }
-
-/* Tamaño de la fila principal a 1.6rem */
 .footer .row.d-flex.align-items-center {
   font-size: 1.6rem;
   line-height: 1.35;
 }
-
-/* Enlaces del footer */
 .footer .nav-link,
 .footer p,
 .footer a { color: var(--ox-beige) !important; }
-
 .footer a {
   color: var(--ox-beige) !important;
   font-size: 1.6rem !important;
   line-height: 1.35;
   text-decoration: none;
 }
-
-/* Comportamiento por defecto (pantallas grandes): una sola línea con scroll si no cabe */
 .footer .nav {
   display: flex;
   flex-wrap: nowrap;          /* no permitir varias filas */
@@ -338,19 +324,13 @@ section.join-artists {
   min-width: max-content;     /* evita “aplastamiento” en flex */
 }
 .footer .nav::-webkit-scrollbar { height: 6px; }
-
-/* (Opcional) Ensanchar el contenedor del footer */
 .footer .container-xxl,
 .footer .container {
   max-width: 1440px;
   padding-left: 2rem;
   padding-right: 2rem;
 }
-
-
-
-/* ===== Footer: cambio de comportamiento a <=1455px ===== */
-@media (max-width: 1455px) {
+@media (max-width: 1500px) {
   .footer .nav {
     flex-wrap: wrap !important;          /* ahora sí puede saltar a varias filas */
     overflow-x: visible !important;      /* sin scroll horizontal */
@@ -358,12 +338,10 @@ section.join-artists {
     justify-content: center !important;  /* centrar filas */
     gap: .5rem 1rem;
   }
-
   .footer .nav li {
     flex: 0 0 auto;
     margin-bottom: .6rem;                /* margen inferior bajo cada ítem */
   }
-
   .footer .nav-link {
     display: inline-block;
     white-space: nowrap;                 /* el texto de cada link no se parte */
@@ -373,25 +351,16 @@ section.join-artists {
     min-width: max-content;
   }
 }
-
-/* Opcional: ensancha más en pantallas muy grandes */
 @media (min-width: 1456px) {
   .footer .container-xxl,
   .footer .container {
     max-width: 1600px;
   }
 }
-
-
-/* Separación entre hijos directos del container del footer (extra aire) */
 .footer .container-xxl > * + * { margin-top: 1.2rem; }
-
-/* Si por algo no aplica gy-3, forza gutter vertical en móvil */
 @media (max-width: 991.98px) {
   .footer .row { --bs-gutter-y: 1rem; } /* ~16px entre columnas apiladas */
 }
-
-/* Menú: cuando envuelve (<=1455px), separa renglones y columnas */
 @media (max-width: 1455px) {
   .footer .nav {
     flex-wrap: wrap !important;
@@ -399,22 +368,19 @@ section.join-artists {
     justify-content: center !important;
     gap: .8rem 1.2rem !important; /* fila/columna */
   }
-  /* No uses margin-bottom en el <a> (inline); deja que el gap haga el trabajo */
   .footer .nav li { margin: 0; } /* el gap ya mete espacio */
 }
-
-/* Un poco más de espacio bajo la frase (por si .mb-0 recorta el p de abajo) */
 .footer-quote { margin-bottom: 1rem; }
 
-/* Centrado del contenido dentro del collapse en mobile */
+/* =========================
+   NAVBAR: Responsive ajustes
+   ========================= */
 @media (max-width: 991.98px) {
   #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
   #navbarsExample05 .navbar-nav { align-items: center; } /* centra items del ul */
   #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
   #navbarsExample05 .searchbar-input { width: 100%; }
 }
-
-/* Tamaño del buscador en desktop */
 @media (min-width: 992px) {
   #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
 }

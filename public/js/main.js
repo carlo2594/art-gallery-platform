@@ -15,28 +15,23 @@ document.addEventListener('DOMContentLoaded', function () {
         submitBtn.textContent = 'Enviando...';
       }
 
-      const mode = window.loginSignUpMode || loginSignUpForm.getAttribute('data-mode');
-      const url = mode === 'signUp' ? '/api/v1/auth/signup' : '/api/v1/auth/login';
-
       const emailInput = loginSignUpForm.querySelector('input[name="email"]');
-      if (!emailInput) {
-        alert('No se encontró el campo de correo electrónico.');
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.textContent = mode === 'signUp' ? 'Registrarse' : 'Iniciar sesión';
-        }
+      const passwordInput = loginSignUpForm.querySelector('input[name="password"]');
+      const modeInput = loginSignUpForm.querySelector('input[name="mode"]');
+
+      const email = emailInput?.value || '';
+      const password = passwordInput?.value || '';
+      const mode = modeInput?.value || 'login';
+
+      // simple validación
+      if (!email || !password) {
+        alert('Por favor, completa email y contraseña.');
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar'; }
         return;
       }
 
-      const email = emailInput.value;
-      let password = '';
-      if (mode !== 'signUp') {
-        const passwordInput = loginSignUpForm.querySelector('input[name="password"]');
-        if (passwordInput) password = passwordInput.value;
-      }
-
-      const data = { email };
-      if (password) data.password = password;
+      const url = mode === 'signUp' ? '/api/v1/users/signup' : '/api/v1/users/login';
+      const data = { email, password };
 
       if (mode === 'signUp') {
         const nameInput = loginSignUpForm.querySelector('input[name="name"]');
@@ -53,31 +48,18 @@ document.addEventListener('DOMContentLoaded', function () {
           window.location = next || '/';
           return;
         } else if (res.status === 201 || (res.data && res.data.success)) {
-          // Estado "revisa tu correo" para sign up con magic link de password
-          const form = loginSignUpForm;
-          const wrapper = form.parentElement;
-          form.style.display = 'none';
-          const panel = document.createElement('div');
-          panel.className = 'check-email-state';
-          panel.innerHTML = `
-            <h1 class="h3 mb-2">Revisa tu correo</h1>
-            <p>Te enviamos un enlace para crear tu contraseña en <strong>${email}</strong>. El enlace expira en 24 horas.</p>
-            <p class="mb-3">Si no lo ves, revisa spam o espera unos segundos.</p>
-            <div class="stack">
-              <a class="btn btn-primary w-100" href="/">Volver al inicio</a>
-            </div>
-          `;
-          wrapper.appendChild(panel);
+          window.location = next || '/';
           return;
         } else {
-          alert(res.data.message || 'Acción completada');
+          alert(res.data?.message || 'Operación completada');
         }
       } catch (err) {
-        alert(err.response?.data?.message || 'Error al enviar el formulario');
+        console.error(err);
+        alert(err.response?.data?.message || 'Ocurrió un error');
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = mode === 'signUp' ? 'Registrarse' : 'Iniciar sesión';
+          submitBtn.textContent = 'Enviar';
         }
       }
     });
@@ -88,26 +70,22 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ------------------------------- */
   const forgotForm = document.querySelector('.forgot-password-form');
   if (forgotForm) {
-    forgotForm.addEventListener('submit', async function (e) {
+    forgotForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = forgotForm.querySelector('button[type="submit"]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
-
       const email = forgotForm.querySelector('input[name="email"]')?.value || '';
       if (!email) {
-        alert('Ingresa tu correo.');
-        if (btn) { btn.disabled = false; btn.textContent = 'Enviar enlace'; }
+        alert('Ingresa tu email');
         return;
       }
-
       try {
-        const res = await axios.post('/api/v1/auth/password/forgot', { email });
-        alert(res.data?.message || 'Si el email existe, se enviará un enlace.');
+        if (btn) { btn.disabled = true; btn.textContent = 'Enviando...'; }
+        const res = await axios.post('/api/v1/users/forgotPassword', { email });
+        alert(res.data?.message || 'Te enviamos un email si la cuenta existe.');
       } catch (err) {
-        // Respuesta deliberadamente ambigua por seguridad
-        alert(err.response?.data?.message || 'Si el email existe, se enviará un enlace.');
+        alert(err.response?.data?.message || 'Error al solicitar recuperación');
       } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Enviar enlace'; }
+        if (btn) { btn.disabled = false; btn.textContent = 'Enviar'; }
       }
     });
   }
@@ -115,117 +93,4 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ------------------------------- */
   /* Reset Password                  */
   /* ------------------------------- */
-  const resetForm = document.querySelector('.reset-password-form');
-  if (resetForm) {
-    resetForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const btn = resetForm.querySelector('button[type="submit"]');
-      if (btn) { btn.disabled = true; btn.textContent = 'Actualizando...'; }
-
-      const uid = document.querySelector('input[name="uid"]').value;
-      const token = document.querySelector('input[name="token"]').value;
-      const newPassword = document.querySelector('input[name="newPassword"]').value;
-      const confirmPassword = document.querySelector('input[name="confirmPassword"]').value;
-
-        // Leer el valor del checkbox "Recuérdame"
-        const rememberInput = resetForm.querySelector('input[name="remember"]');
-        const remember = rememberInput && rememberInput.checked ? rememberInput.value : undefined;
-
-      if (newPassword !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
-        if (btn) { btn.disabled = false; btn.textContent = 'Cambiar contraseña'; }
-        return;
-      }
-
-        try {
-          const data = { uid, token, newPassword };
-          if (remember) data.remember = remember;
-          const res = await axios.post('/api/v1/auth/password/reset', data);
-        alert(res.data?.message || 'Contraseña actualizada.');
-        if (res.data?.data?.next) {
-          window.location = res.data.data.next;
-          return;
-        }
-        if ((res.data?.message || '').toLowerCase().includes('correctamente')) {
-          window.location = '/';
-        }
-      } catch (err) {
-        alert(err.response?.data?.message || 'Error al restablecer contraseña');
-      } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Cambiar contraseña'; }
-      }
-    });
-  }
-
-  /* ------------------------------- */
-  /* Gallery Wall: reveal on scroll  */
-  /* ------------------------------- */
-  const wallItems = document.querySelectorAll('.gallery-wall-item');
-  if (wallItems.length) {
-    // Marca inicial para que se oculten hasta revelarse
-    wallItems.forEach(el => el.classList.add('reveal-on-scroll'));
-
-    // Mostrarlas una por una (stagger)
-    const STAGGER_MS = 320;   // separa cada ítem 0.12s
-    const queue = [];
-    let flushing = false;
-
-    const flushQueue = () => {
-      if (!queue.length) { flushing = false; return; }
-      const el = queue.shift();
-      // Marca visible (dispara la transición CSS)
-      el.classList.add('is-visible');
-      // Revela la siguiente tras un pequeño delay
-      setTimeout(flushQueue, STAGGER_MS);
-    };
-
-    const io = new IntersectionObserver((entries, obs) => {
-      // Toma los que entran al viewport y ordénalos por posición vertical
-      const toShow = entries
-        .filter(e => e.isIntersecting && !e.target.dataset.revealed)
-        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-      toShow.forEach(e => {
-        e.target.dataset.revealed = '1'; // evita repetir
-        queue.push(e.target);
-        obs.unobserve(e.target);         // solo una vez
-      });
-
-      if (!flushing && queue.length) {
-        flushing = true;
-        flushQueue();
-      }
-    }, {
-      rootMargin: '0px 0px -10% 0px',  // empieza un pelín antes del bottom
-      threshold: 0.2                   // cuando ~20% del ítem es visible
-    });
-
-    wallItems.forEach(el => io.observe(el));
-
-    // Oculta la última fila si está incompleta (responsive)
-    setTimeout(() => {
-      // Agrupa por offsetTop
-      const rows = {};
-      wallItems.forEach(el => {
-        const top = el.offsetTop;
-        if (!rows[top]) rows[top] = [];
-        rows[top].push(el);
-      });
-      const rowTops = Object.keys(rows).map(Number).sort((a, b) => a - b);
-      if (rowTops.length) {
-        const lastRow = rows[rowTops[rowTops.length - 1]];
-        // Busca el tamaño de las filas completas
-        let fullRowSize = 0;
-        for (let i = 0; i < rowTops.length - 1; i++) {
-          fullRowSize = Math.max(fullRowSize, rows[rowTops[i]].length);
-        }
-        // Si la última fila está incompleta, ocúltala
-        if (lastRow.length < fullRowSize) {
-          lastRow.forEach(el => el.style.display = 'none');
-        }
-      }
-    }, 500); // Espera a que el layout esté listo
-  }
-
-});
+  const resetForm = document.que

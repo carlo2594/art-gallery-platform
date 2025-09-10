@@ -13,23 +13,24 @@ const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA L�
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
 const randomImages = [
-  'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=600&q=80',
-  'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=600&q=80'
+  'https://picsum.photos/seed/gdo-1/1200/800',
+  'https://picsum.photos/seed/gdo-2/1024/683',
+  'https://picsum.photos/seed/gdo-3/900/1200',
+  'https://picsum.photos/seed/gdo-4/800/800',
+  'https://picsum.photos/seed/gdo-5/1400/700',
+  'https://picsum.photos/seed/gdo-6/700/1400',
+  'https://picsum.photos/seed/gdo-7/1280/720',
+  'https://picsum.photos/seed/gdo-8/720/1280',
+  'https://picsum.photos/seed/gdo-9/1000/1000',
+  'https://picsum.photos/seed/gdo-10/2048/1365',
+  'https://picsum.photos/seed/gdo-11/1365/2048',
+  'https://picsum.photos/seed/gdo-12/1920/1080',
+  'https://picsum.photos/seed/gdo-13/1080/1920',
+  'https://picsum.photos/seed/gdo-14/1600/900',
+  'https://picsum.photos/seed/gdo-15/900/1600',
+  'https://picsum.photos/seed/gdo-16/1200/1200'
 ];
+
 
 /**
  * Devuelve un elemento aleatorio de un arreglo.
@@ -105,7 +106,7 @@ async function seed() {
       material: ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5],
       createdBy: user._id,
       artist: user._id,
-      status: randomFromArray(ARTWORK_STATUSES),
+      status: "approved",
       views: randomInt(0, 500),
       ratings: { count: randomInt(0, 20), average: randomInt(1, 5) },
       commentsCount: randomInt(0, 10),
