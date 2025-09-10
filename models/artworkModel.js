@@ -137,4 +137,9 @@ artworkSchema.pre('save', function(next) {
   next();
 });
 
+artworkSchema.statics.findApproved = function (filter = {}) {
+  return this.find({ status: 'approved', deletedAt: null, ...filter });
+};
+
+
 module.exports = mongoose.model('Artwork', artworkSchema);

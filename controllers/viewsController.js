@@ -58,3 +58,17 @@ exports.getWelcome = (req, res) => {
     title: 'Bienvenido · Galería del Ox',
   });
 };
+
+
+// Asegúrate de que la ruta al modelo sea correcta:
+
+exports.getArtworks = catchAsync(async (req, res) => {
+  const artworks = await Artwork
+    .findApproved()                       // approved + no deletedAt
+    .populate({ path: 'artist', select: 'name' });
+
+  res.status(200).render('public/artworks', {
+    title: 'Obras',
+    artworks,
+  });
+});

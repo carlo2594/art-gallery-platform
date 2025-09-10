@@ -18,6 +18,8 @@ router.get('/reset-password', viewsController.getResetPassword);
 
 router.get('/welcome', viewsController.getWelcome);
 
+router.get('/artworks', viewsController.getArtworks);
+
 
 // Página de inicio
 router.get('/', viewsController.getHome);

@@ -12,7 +12,7 @@ block content
             br
             | Desde obras originales hasta experiencias sensoriales, cada rincón de la galería está pensado para celebrar la diversidad creativa y hacer del arte un lenguaje común.
           .d-grid.gap-2.d-md-flex.justify-content-md-start.mb-4.mb-lg-3.hero-cta
-            a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase(href="/obras") Ver el arte
+            a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase(href="/artworks") Ver el arte
         .col-lg-5.d-flex.justify-content-end.align-items-center.hero-image-container
           img.hero-image(
             src="/img/Ox-hero-image-landing.jpg",
@@ -27,10 +27,8 @@ block content
       h2.h4.mb-4.text-center.gallery-wall-title Muro de Galería
       .gallery-wall-grid
         each a in artworks
-          figure.gallery-wall-item(
-            style=`--wcm:${a.width_cm}; --hcm:${a.height_cm}; --ratio:${a.width_cm} / ${a.height_cm};`
-          )
-            img.gallery-wall-img(src=a.imageUrl, alt=a.title, loading="lazy")
+          figure.gallery-wall-item
+            img.gallery-wall-img(src=a.imageUrl, alt=a.title, loading='lazy', decoding='async')
             if a.title || (a.artist && a.artist.name)
               figcaption.gallery-wall-caption
                 if a.title

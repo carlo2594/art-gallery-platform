@@ -10,6 +10,9 @@
 
   --font-title:    'Montserrat', sans-serif;
   --font-subtitle: 'Lora', serif; /* Lora para frases y subtítulos */
+
+  /* ===== Ajuste: que el item mida lo que la imagen, con altura máxima ===== */
+  --art-max-h: 68rem; /* ~680px en desktop */
 }
 
 html { font-size: 62.5%; } /* 1rem = 10px aprox */
@@ -152,14 +155,16 @@ section.gallery-wall { margin: 5rem 0; }
   border-radius: 1rem;
   overflow: hidden;
   box-shadow: 0 6px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
-  aspect-ratio: var(--ratio);
+  aspect-ratio: auto !important;  /* sobreescribe el var(--ratio) anterior */
+  overflow: hidden;               /* por si el caption u otros elementos exceden */
 }
 .gallery-wall-img {
-  display: block;
   width: 100%;
-  height: 100%;
-  object-fit: contain;           /* respeta proporción original */
-  background: #fff;
+  height: auto;                   /* respeta proporción natural */
+  max-height: var(--art-max-h);  /* evita imágenes descomunales */
+  display: block;
+  object-fit: contain;            /* inofensivo con height:auto, por claridad */
+  background: #fff;               /* mantiene fondo blanco alrededor si sobra */
 }
 
 /* === Overlay del pie sobre la imagen === */

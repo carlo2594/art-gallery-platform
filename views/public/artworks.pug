@@ -1,0 +1,32 @@
+extends ../layouts/public
+
+block content
+  // Encabezado de página
+  section.page-header.py-4
+    .container
+      h2.h3.mb-1 Obras
+      p.text-muted Explora las piezas disponibles en la galería.
+
+  // Muro de obras (aprovecha los estilos existentes en style.css)
+  section.gallery-wall.my-5
+    .container
+      if artworks && artworks.length
+        .gallery-wall-grid
+          each a in artworks
+            figure.gallery-wall-item
+              img.gallery-wall-img(
+                src=a.imageUrl,
+                alt=a.title || 'Obra',
+                loading='lazy',
+                decoding='async'
+              )
+              if a.title || (a.artist && a.artist.name)
+                figcaption.gallery-wall-caption
+                  if a.title
+                    div.caption-title= a.title
+                  if a.artist && a.artist.name
+                    div.caption-artist por #{a.artist.name}
+      else
+        .text-center.py-5
+          p.mb-2 No hay obras publicadas todavía.
+          a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
