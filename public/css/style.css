@@ -1,4 +1,3 @@
-/* /css/style.css (actualizado a navbar "Never expand") */
 /* =========================
    VARIABLES Y BASE
    ========================= */
@@ -10,9 +9,10 @@
   --ox-beige:  #F7F6EF;
 
   --font-title:    'Montserrat', sans-serif;
-  --font-subtitle: 'Lora', serif;
+  --font-subtitle: 'Lora', serif; /* Lora para frases y subtítulos */
 }
-html { font-size: 62.5%; }
+
+html { font-size: 62.5%; } /* 1rem = 10px aprox */
 body {
   font-family: var(--font-title);
   background-color: var(--ox-beige);
@@ -32,7 +32,7 @@ body {
 }
 .navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
 .navbar-light .navbar-toggler { border: none; }
-.logo-navbar { max-height: 5rem; margin-right: 1rem; }
+.logo-navbar { max-height: 5rem }
 .navbar-title {
   color: var(--ox-blue);
   font-family: var(--font-title);
@@ -60,6 +60,10 @@ body {
 .main-navbar .navbar-collapse {
   width: 100%;
   padding: .5rem 0;
+}
+
+@media (min-width: 992px) {
+  .logo-navbar { margin-right: 1rem; }
 }
 
 /* =========================
@@ -97,11 +101,6 @@ body {
   font-size: 1.7rem;
 }
 
-/* Ajustes menores por tamaño */
-@media (min-width: 992px) {
-  .logo-navbar { margin-right: 1rem; }
-}
-
 /* =========================
    HERO SECTION
    ========================= */
@@ -130,50 +129,6 @@ section.hero .hero-description {
 }
 
 /* =========================
-   FOOTER
-   ========================= */
-.footer {
-  background-color: var(--ox-blue) !important;
-  color: var(--ox-beige) !important;
-  font-family: var(--font-title), sans-serif !important;
-}
-.footer > .container > footer > * { margin-top: 0.5rem; }
-.footer .nav-link,
-.footer p,
-.footer a { color: var(--ox-beige) !important; }
-
-/* =========================
-   OTROS COMPONENTES
-   ========================= */
-.btn-primary {
-  background-color: var(--ox-yellow) !important;
-  border-color: var(--ox-yellow) !important;
-  color: var(--ox-blue) !important;
-  box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15);
-}
-.btn-primary:hover,
-.btn-primary:focus {
-  background-color: var(--ox-orange) !important;
-  border-color: var(--ox-orange) !important;
-  color: var(--ox-beige) !important;
-  box-shadow: 0 4px 16px -2px rgba(16, 46, 80, 0.18);
-}
-.login-form-narrow { max-width: 520px; }
-.login-signin-img-col {
-  height: 100vh;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-start;
-  text-align: right;
-}
-.login-signin-side-img {
-  display: block;
-  height: auto;
-  max-height: 100vh;
-  width: auto;
-}
-
-/* =========================
    GALLERY WALL (Pinterest)
    ========================= */
 section.gallery-wall { margin: 5rem 0; }
@@ -187,7 +142,6 @@ section.gallery-wall { margin: 5rem 0; }
   padding: 0 .5rem;
 }
 @media (max-width: 992px)  { .gallery-wall-grid { column-width: 18rem; column-gap: 1.2rem; } }
-@media (max-width: 576px)  { .gallery-wall-grid { column-width: 18rem; column-gap: 1rem; } }
 @media (max-width: 576px)  { .gallery-wall-grid { column-width: 14rem; column-gap: 1rem; } }
 
 /* Ítem de obra con overlay */
@@ -280,7 +234,7 @@ section.gallery-wall { margin: 5rem 0; }
    ========================= */
 section.join-artists {
   position: relative;
-  margin: 5rem 0;
+  margin-top: 5rem;
 }
 .join-artists-bg {
   width: 100%;
@@ -292,7 +246,7 @@ section.join-artists {
 .join-artists-card {
   width: 80%;
   max-width: 120rem;
-  height: 80%;  
+  height: 80%;
   max-height: 80rem;
   min-height: 16rem;
   padding-left: 1.5rem;
@@ -305,9 +259,7 @@ section.join-artists {
   flex-direction: column;
   justify-content: center;
 }
-.join-artists-card .card-body {
-  padding: 2rem;
-}
+.join-artists-card .card-body { padding: 2rem; }
 .join-artists-btn {
   background: var(--ox-yellow) !important;
   color: var(--ox-blue) !important;
@@ -322,3 +274,129 @@ section.join-artists {
   background: var(--ox-orange) !important;
   color: var(--ox-beige) !important;
 }
+
+/* =========================
+   FOOTER
+   ========================= */
+.footer {
+  background-color: var(--ox-blue) !important;
+  color: var(--ox-beige) !important;
+  font-family: var(--font-title), sans-serif !important;
+}
+
+/* Frase dentro de la columna central */
+.footer-quote {
+  font-family: var(--font-subtitle), serif;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 2.4rem;  /* 24px con 1rem≈10px */
+  line-height: 1;     /* 100% */
+  letter-spacing: 0;
+  text-align: center;
+  color: var(--ox-beige);
+  margin: 0 0 .6rem;  /* pequeño espacio sobre el copyright */
+}
+
+/* Tamaño de la fila principal a 1.6rem */
+.footer .row.d-flex.align-items-center {
+  font-size: 1.6rem;
+  line-height: 1.35;
+}
+
+/* Enlaces del footer */
+.footer .nav-link,
+.footer p,
+.footer a { color: var(--ox-beige) !important; }
+
+.footer a {
+  color: var(--ox-beige) !important;
+  font-size: 1.6rem !important;
+  line-height: 1.35;
+  text-decoration: none;
+}
+
+/* Comportamiento por defecto (pantallas grandes): una sola línea con scroll si no cabe */
+.footer .nav {
+  display: flex;
+  flex-wrap: nowrap;          /* no permitir varias filas */
+  white-space: nowrap;        /* no cortar texto */
+  overflow-x: auto;           /* scroll horizontal si no cabe */
+  -webkit-overflow-scrolling: touch;
+  gap: .25rem;
+}
+.footer .nav li { flex: 0 0 auto; }
+.footer .nav-link {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  min-width: max-content;     /* evita “aplastamiento” en flex */
+}
+.footer .nav::-webkit-scrollbar { height: 6px; }
+
+/* (Opcional) Ensanchar el contenedor del footer */
+.footer .container-xxl,
+.footer .container {
+  max-width: 1440px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+
+
+/* ===== Footer: cambio de comportamiento a <=1455px ===== */
+@media (max-width: 1455px) {
+  .footer .nav {
+    flex-wrap: wrap !important;          /* ahora sí puede saltar a varias filas */
+    overflow-x: visible !important;      /* sin scroll horizontal */
+    white-space: normal !important;      /* permitir salto entre items */
+    justify-content: center !important;  /* centrar filas */
+    gap: .5rem 1rem;
+  }
+
+  .footer .nav li {
+    flex: 0 0 auto;
+    margin-bottom: .6rem;                /* margen inferior bajo cada ítem */
+  }
+
+  .footer .nav-link {
+    display: inline-block;
+    white-space: nowrap;                 /* el texto de cada link no se parte */
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+    min-width: max-content;
+  }
+}
+
+/* Opcional: ensancha más en pantallas muy grandes */
+@media (min-width: 1456px) {
+  .footer .container-xxl,
+  .footer .container {
+    max-width: 1600px;
+  }
+}
+
+
+/* Separación entre hijos directos del container del footer (extra aire) */
+.footer .container-xxl > * + * { margin-top: 1.2rem; }
+
+/* Si por algo no aplica gy-3, forza gutter vertical en móvil */
+@media (max-width: 991.98px) {
+  .footer .row { --bs-gutter-y: 1rem; } /* ~16px entre columnas apiladas */
+}
+
+/* Menú: cuando envuelve (<=1455px), separa renglones y columnas */
+@media (max-width: 1455px) {
+  .footer .nav {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    justify-content: center !important;
+    gap: .8rem 1.2rem !important; /* fila/columna */
+  }
+  /* No uses margin-bottom en el <a> (inline); deja que el gap haga el trabajo */
+  .footer .nav li { margin: 0; } /* el gap ya mete espacio */
+}
+
+/* Un poco más de espacio bajo la frase (por si .mb-0 recorta el p de abajo) */
+.footer-quote { margin-bottom: 1rem; }

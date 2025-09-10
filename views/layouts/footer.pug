@@ -1,23 +1,27 @@
 footer.footer
-  .container
-    // Footer reutilizable para Galería del Ox
-    .row.d-flex.align-items-center.py-3.my-4.border-top
-      .col-4.d-flex.justify-content-center
+  .container-xxl 
+    // 👇 agrega gy-3 (gutter vertical) a la fila
+    .row.d-flex.align-items-center.py-5.mt-0.mb-0.gy-3
+      .col-12.col-lg-4.d-flex.justify-content-center
         a(href='/')
           img.logo-navbar(src='/Logos/GOX_LOGO_08.png' alt='Galería del Ox')
-      .col-4.d-flex.justify-content-center.align-items-center
-        p.mb-0.text-center © 2025 Galería del Ox. Todos los derechos reservados.
-      .col-4.d-flex.justify-content-center
+
+      // 👇 agrega gap-2 para separar la frase del copyright
+      .col-12.col-lg-4.d-flex.justify-content-center.align-items-center.flex-column.text-center.gap-2
+        p.footer-quote “Cada obra, una historia que te elige”
+        p.mb-0 © 2025 Galería del Ox. Todos los derechos reservados.
+
+      .col-12.col-lg-4.d-flex.justify-content-center
         ul.nav.justify-content-center
           li.nav-item
-            a.nav-link.px-2.text-body-secondary(href='#') Inicio
+            a.nav-link.px-2.text-body-secondary(href='/') Inicio
           li.nav-item
             a.nav-link.px-2.text-body-secondary(href='#') ¿Quiénes somos?
           li.nav-item
-            a.nav-link.px-2.text-body-secondary(href='#') Obras
+            a.nav-link.px-2.text-body-secondary(href='/obras') Obras
           li.nav-item
-            a.nav-link.px-2.text-body-secondary(href='#') Artistas
+            a.nav-link.px-2.text-body-secondary(href='/artistas') Artistas
           li.nav-item
-            a.nav-link.px-2.text-body-secondary(href='#') Exposiciones
+            a.nav-link.px-2.text-body-secondary(href='/exposiciones') Exposiciones
           li.nav-item
-            a.nav-link.px-2.text-body-secondary(href='#') Contacto
+            a.nav-link.px-2.text-body-secondary(href='/contacto') Contacto
