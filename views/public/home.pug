@@ -20,6 +20,7 @@ block content
             style="max-width:100%;height:auto;border-radius:1.5rem;"
           )
 
+
   // Muro de galería (efecto Pinterest con tamaño relativo a cm)
   section.gallery-wall.my-5
     .container
@@ -36,3 +37,14 @@ block content
                   div.caption-title= a.title
                 if a.artist && a.artist.name
                   div.caption-artist por #{a.artist.name}
+
+  // Sección para invitar artistas
+  section.join-artists.my-5.position-relative
+    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Join Artists Background")
+    .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg
+      // Imagen superior opcional (puedes quitar si no quieres)
+      // img.card-img-top(src="/img/join-artists-bg.jpg", alt="Card image", class="rounded-top-4")
+      .card-body.text-center.p-4
+        h5.card-title.fw-bold.mb-3 Discover Art That Speaks to You
+        p.card-text.fs-5.mb-4 Explore a curated collection of contemporary artworks from emerging and established artists worldwide.
+        a.join-artists-btn.btn.btn-primary.rounded-pill.fw-bold(href="/obras") Explore Gallery

@@ -274,3 +274,51 @@ section.gallery-wall { margin: 5rem 0; }
     transition: none !important;
   }
 }
+
+/* =========================
+   JOIN ARTISTS SECTION
+   ========================= */
+section.join-artists {
+  position: relative;
+  margin: 5rem 0;
+}
+.join-artists-bg {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2rem;
+  object-fit: cover;
+}
+.join-artists-card {
+  width: 80%;
+  max-width: 120rem;
+  height: 80%;  
+  max-height: 80rem;
+  min-height: 25.8rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  background: rgba(255,255,255,0.32);
+  backdrop-filter: blur(16px);
+  border-radius: 2rem;
+  box-shadow: 0 8px 32px rgba(16,46,80,0.18), 0 2px 8px rgba(16,46,80,0.10);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.join-artists-card .card-body {
+  padding: 2rem;
+}
+.join-artists-btn {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border: none !important;
+  padding: .75rem 2.5rem !important;
+  font-size: 1.15rem !important;
+  border-radius: 2rem !important;
+  box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15);
+}
+.join-artists-btn:hover,
+.join-artists-btn:focus {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+}
