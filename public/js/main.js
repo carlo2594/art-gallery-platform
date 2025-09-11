@@ -301,9 +301,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Inicialización de la galería
   whenImagesSettled(wallRoot).then(() => {
-    observeRevealItems();
     markFirstRow();
     applyInitialRevealState();
+    observeRevealItems();
     updateIncompleteLastRow();
   }).catch(() => {
     // Si algo falla, al menos intenta proceder

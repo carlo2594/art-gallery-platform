@@ -13,7 +13,7 @@ block content
       if artworks && artworks.length
         .gallery-wall-grid
           each a in artworks
-            figure.gallery-wall-item
+            figure.gallery-wall-item.reveal-on-scroll
               img.gallery-wall-img(
                 src=a.imageUrl,
                 alt=a.title || 'Obra',
