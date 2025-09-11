@@ -7,6 +7,78 @@ block content
       h2.h3.mb-1 Obras
       p.text-muted Explora las piezas disponibles en la galería.
 
+  // Barra de chips + botón filtros
+  section.filters-toolbar.py-2
+    .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+      // Chips rápidas (submit por GET a /artworks)
+      form#quickChips(method='GET' action='/artworks' class='d-flex flex-wrap gap-2')
+        // Tipo
+        input(type='hidden' name='sort' value=(q && q.sort ? q.sort : ''))
+        each t in ['Pintura','Fotografía','Escultura','Ilustración']
+          label.chip
+            input(type='checkbox' name='type' value=t checked=(Array.isArray(q && q.type) ? q.type.includes(t) : (q && q.type) === t))
+            span= t
+        // Orientación
+        each o in [{v:'vertical',l:'Vertical'},{v:'horizontal',l:'Horizontal'},{v:'cuadrado',l:'Cuadrado'}]
+          label.chip
+            input(type='checkbox' name='orientation' value=o.v checked=(Array.isArray(q && q.orientation) ? q.orientation.includes(o.v) : (q && q.orientation) === o.v))
+            span= o.l
+        button.btn.btn-apply.ms-1(type='submit') Aplicar
+
+      // Botón abrir filtros avanzados (mobile/desktop)
+      button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
+        i.fa-solid.fa-filter.me-1
+        | Filtros
+
+  // Offcanvas con filtros avanzados
+  div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
+    .offcanvas-header
+      h5#filtersTitle Filtros
+      button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
+    form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action='/artworks')
+      // Mantén chips marcadas al aplicar desde aquí también
+      if q && q.type
+        each t in (Array.isArray(q.type)? q.type : [q.type]) 
+          input(type='hidden' name='type' value=t)
+      if q && q.orientation
+        each o in (Array.isArray(q.orientation)? q.orientation : [q.orientation]) 
+          input(type='hidden' name='orientation' value=o)
+
+      // Material (multi)
+      .filter-block
+        label.form-label.mb-2 Material
+        .d-flex.flex-wrap.gap-2
+          each m in ['Óleo','Acrílico','Mixta','Fotografía','Digital','Tinta','Acuarela']
+            label.chip
+              input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
+              span= m
+
+      // Tamaño en cm (rango)
+      .filter-block
+        label.form-label.mb-2 Tamaño (ancho x alto)
+        .row.g-2
+          .col-6
+            input.form-control(type='number' name='minw' placeholder='Ancho mín.' value=(q && q.minw ? q.minw : ''))
+          .col-6
+            input.form-control(type='number' name='maxw' placeholder='Ancho máx.' value=(q && q.maxw ? q.maxw : ''))
+          .col-6
+            input.form-control(type='number' name='minh' placeholder='Alto mín.' value=(q && q.minh ? q.minh : ''))
+          .col-6
+            input.form-control(type='number' name='maxh' placeholder='Alto máx.' value=(q && q.maxh ? q.maxh : ''))
+
+      // Orden
+      .filter-block
+        label.form-label.mb-2 Ordenar por
+        select.form-select(name='sort')
+          option(value='') Relevancia
+          option(value='populares' selected=(q && q.sort==='populares')) Populares
+          option(value='recientes' selected=(q && q.sort==='recientes')) Recientes
+
+      // Acciones
+      .mt-auto.d-flex.gap-2.sticky-apply
+        a.btn.btn-light.flex-fill(href='/artworks') Limpiar
+        button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+
   // Muro de obras (aprovecha los estilos existentes en style.css)
   section.gallery-wall.my-5
     .container-xxl

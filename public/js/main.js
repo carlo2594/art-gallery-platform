@@ -322,4 +322,9 @@ document.addEventListener('DOMContentLoaded', function () {
     allItems.forEach(el => { if (el.offsetTop < minTop) minTop = el.offsetTop; });
     return item.offsetTop === minTop;
   }
+
+  // Enviar chips al cambiar (opcional: auto-submit)
+  document.getElementById('quickChips')?.addEventListener('change', e => {
+    if(e.target.matches('input[type="checkbox"]')) e.currentTarget.submit();
+  });
 });

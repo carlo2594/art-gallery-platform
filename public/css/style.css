@@ -387,3 +387,19 @@ section.join-artists {
 @media (min-width: 992px) {
   #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
 }
+
+/* Chips bonitas usando tu paleta */
+.chip { 
+  display:inline-flex; align-items:center; gap:.5rem; 
+  padding:.35rem .9rem; border:2px solid var(--ox-yellow); border-radius: 2rem;
+  cursor:pointer; user-select:none; font-size:1.3rem; color:var(--ox-blue); background:#fff;
+}
+.chip input { display:none; }
+.chip input:checked + span { font-weight:700; }
+.chip:has(input:checked) { background: var(--ox-yellow); }
+
+.btn-apply{ background:var(--ox-yellow); color:var(--ox-blue); border:none; border-radius:2rem; }
+.btn-apply:hover{ background:var(--ox-orange); color:var(--ox-beige); }
+
+.offcanvas .filter-block{ border-top:1px solid #eee; padding-top:1rem; }
+.sticky-apply{ position: sticky; bottom: 0; background: #fff; padding-top: .75rem; }
