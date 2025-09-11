@@ -315,4 +315,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Recalcular solo la "última fila incompleta" en resize (no tocamos animaciones ya lanzadas)
   window.addEventListener('resize', debounce(updateIncompleteLastRow, 150));
+
+  function isFirstRowItem(item, allItems) {
+    if (!item || !allItems?.length) return false;
+    let minTop = Infinity;
+    allItems.forEach(el => { if (el.offsetTop < minTop) minTop = el.offsetTop; });
+    return item.offsetTop === minTop;
+  }
 });
