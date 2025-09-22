@@ -15,7 +15,11 @@
   --art-max-h: 68rem; /* ~680px en desktop */
 }
 
-html { font-size: 62.5%; } /* 1rem = 10px aprox */
+html {
+  font-size: 62.5%; /* 1rem = 10px aprox */
+  height: 100%;
+  min-height: 100%;
+}
 body {
   font-family: var(--font-title);
   background-color: var(--ox-beige);
@@ -23,6 +27,15 @@ body {
   font-size: 1.2rem;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content {
+  flex: 1 0 auto;
+}
+footer, .footer {
+  flex-shrink: 0;
 }
 
 /* =========================
@@ -131,104 +144,231 @@ section.hero .hero-description {
   .hero-image-container { order: 2; }
 }
 
+
 /* =========================
-   GALLERY WALL (Pinterest)
+   GALLERY GRID & EFFECTS
    ========================= */
-section.gallery-wall {
-  margin: 5rem 0;
-  min-height: 100vh;
+.grid {
+  max-width: 69em;
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
 }
-.gallery-wall-title { font-size: 2.4rem; margin-bottom: 4rem; text-align: center; }
-/* --- Columnas y layout --- */
-.gallery-wall-grid {
-  column-width: 24rem;
-  max-width: 140rem;
-  column-gap: 1.6rem;
-  margin: 0 auto;
-  padding: 0 .5rem;
-  column-count: 3 !important; /* nunca más de 3 columnas */
-}
-@media (max-width: 992px){ .gallery-wall-grid{ column-width: 16rem; column-count: 2 !important; } }
-@media (max-width: 576px)  { .gallery-wall-grid { column-width: 12rem; column-gap: 1rem; column-count: 2 !important; } }
-/* --- Ítem de obra --- */
-.gallery-wall-item {
-  position: relative;            /* necesario para el overlay */
-  break-inside: avoid;
-  background: #fff;
-  border-radius: 1rem;
-  overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0,0,0,.08), 0 2px 8px rgba(0,0,0,.06);
-  aspect-ratio: auto !important;  /* sobreescribe el var(--ratio) anterior */
-  overflow: hidden;               /* por si el caption u otros elementos exceden */
-}
-.gallery-wall-img {
-  width: 100%;
-  height: auto;                   /* respeta proporción natural */
-  max-height: var(--art-max-h);  /* evita imágenes descomunales */
+
+.grid li {
   display: block;
-  object-fit: contain;            /* inofensivo con height:auto, por claridad */
-  background: #fff;               /* mantiene fondo blanco alrededor si sobra */
-}
-/* --- Overlay del pie sobre la imagen --- */
-.gallery-wall-caption {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  margin: 0;
-  padding: .8rem 1rem .95rem;
-  color: #fff;
-  background: linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,0));
-  border-top: none;
-  border-radius: 0;
-  text-align: left;
-}
-.caption-title {
-  font-weight: 700;
-  line-height: 1.25;
-  font-size: clamp(1.3rem, 1.2vw, 1.6rem);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;        /* máximo 2 líneas */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.caption-artist {
-  margin-top: .15rem;
-  font-size: clamp(1.1rem, .95vw, 1.4rem);
-  color: rgba(255,255,255,.85);
-}
-/* --- Masonry con Grid si está disponible --- */
-@supports (grid-template-rows: masonry) {
-  .gallery-wall-grid{
-    column-width: auto; column-gap: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-    grid-template-rows: masonry;
-    grid-auto-flow: row dense;
-    gap: 1.6rem;
-    max-width: 120rem;
-  }
-  .gallery-wall-item{
-    margin: 0;
-    break-inside: auto;
-    grid-column: span var(--wspan, 1);
-    aspect-ratio: var(--ratio);
-  }
-}
-/* --- Reveal on scroll para el muro --- */
-.reveal-on-scroll {
+  float: left;
+  padding: 7px;
+  width: 33%;
   opacity: 0;
-  transform: translateY(24px);
-  transition: transform 0.95s cubic-bezier(.22,1,.36,1), opacity 0.95s ease-out;
-  will-change: transform, opacity;
 }
-.reveal-on-scroll.is-visible {
+
+.grid li.shown,
+.no-js .grid li,
+.no-cssanimations .grid li {
   opacity: 1;
-  transform: translateY(0); /* ← visible sin desplazamiento */
 }
-@media (prefers-reduced-motion: reduce) {
-  .reveal-on-scroll {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
+
+.grid li a,
+.grid li img {
+  outline: none;
+  border: none;
+  display: block;
+  max-width: 100%;
+}
+
+/* Effect 1: opacity */
+.grid.effect-1 li.animate {
+  -webkit-animation: fadeIn 0.65s ease forwards;
+  animation: fadeIn 0.65s ease forwards;
+}
+
+@-webkit-keyframes fadeIn {
+  0% { }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { }
+  100% { opacity: 1; }
+}
+
+/* Effect 2: Move Up */
+.grid.effect-2 li.animate {
+  -webkit-transform: translateY(200px);
+  transform: translateY(200px);
+  -webkit-animation: moveUp 0.65s ease forwards;
+  animation: moveUp 0.65s ease forwards;
+}
+
+@-webkit-keyframes moveUp {
+  0% { }
+  100% { -webkit-transform: translateY(0); opacity: 1; }
+}
+
+@keyframes moveUp {
+  0% { }
+  100% { -webkit-transform: translateY(0); transform: translateY(0); opacity: 1; }
+}
+
+/* Effect 3: Scale up */
+.grid.effect-3 li.animate {
+  -webkit-transform: scale(0.6);
+  transform: scale(0.6);
+  -webkit-animation: scaleUp 0.65s ease-in-out forwards;
+  animation: scaleUp 0.65s ease-in-out forwards;
+}
+
+@-webkit-keyframes scaleUp {
+  0% { }
+  100% { -webkit-transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleUp {
+  0% { }
+  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+}
+
+/* Effect 4: fall perspective */
+.grid.effect-4 {
+  -webkit-perspective: 1300px;
+  perspective: 1300px;
+}
+
+.grid.effect-4 li.animate {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transform: translateZ(400px) translateY(300px) rotateX(-90deg);
+  transform: translateZ(400px) translateY(300px) rotateX(-90deg);
+  -webkit-animation: fallPerspective .8s ease-in-out forwards;
+  animation: fallPerspective .8s ease-in-out forwards;
+}
+
+@-webkit-keyframes fallPerspective {
+  0% { }
+  100% { -webkit-transform: translateZ(0px) translateY(0px) rotateX(0deg); opacity: 1; }
+}
+
+@keyframes fallPerspective {
+  0% { }
+  100% { -webkit-transform: translateZ(0px) translateY(0px) rotateX(0deg); transform: translateZ(0px) translateY(0px) rotateX(0deg); opacity: 1; }
+}
+
+/* Effect 5: fly (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
+.grid.effect-5 {
+  -webkit-perspective: 1300px;
+  perspective: 1300px;
+}
+
+.grid.effect-5 li.animate {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transform-origin: 50% 50% -300px;
+  transform-origin: 50% 50% -300px;
+  -webkit-transform: rotateX(-180deg);
+  transform: rotateX(-180deg);
+  -webkit-animation: fly .8s ease-in-out forwards;
+  animation: fly .8s ease-in-out forwards;
+}
+
+@-webkit-keyframes fly {
+  0% { }
+  100% { -webkit-transform: rotateX(0deg); opacity: 1; }
+}
+
+@keyframes fly {
+  0% { }
+  100% { -webkit-transform: rotateX(0deg); transform: rotateX(0deg); opacity: 1; }
+}
+
+/* Effect 6: flip (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
+.grid.effect-6 {
+  -webkit-perspective: 1300px;
+  perspective: 1300px;
+}
+
+.grid.effect-6 li.animate {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transform-origin: 0% 0%;
+  transform-origin: 0% 0%;
+  -webkit-transform: rotateX(-80deg);
+  transform: rotateX(-80deg);
+  -webkit-animation: flip .8s ease-in-out forwards;
+  animation: flip .8s ease-in-out forwards;
+}
+
+@-webkit-keyframes flip {
+  0% { }
+  100% { -webkit-transform: rotateX(0deg); opacity: 1; }
+}
+
+@keyframes flip {
+  0% { }
+  100% { -webkit-transform: rotateX(0deg); transform: rotateX(0deg); opacity: 1; }
+}
+
+/* Effect 7: helix (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
+.grid.effect-7 {
+  -webkit-perspective: 1300px;
+  perspective: 1300px;
+}
+
+.grid.effect-7 li.animate {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transform: rotateY(-180deg);
+  transform: rotateY(-180deg);
+  -webkit-animation: helix .8s ease-in-out forwards;
+  animation: helix .8s ease-in-out forwards;
+}
+
+@-webkit-keyframes helix {
+  0% { }
+  100% { -webkit-transform: rotateY(0deg); opacity: 1; }
+}
+
+@keyframes helix {
+  0% { }
+  100% { -webkit-transform: rotateY(0deg); transform: rotateY(0deg); opacity: 1; }
+}
+
+/* Effect 8:  */
+.grid.effect-8 {
+  -webkit-perspective: 1300px;
+  perspective: 1300px;
+}
+
+.grid.effect-8 li.animate {
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  -webkit-transform: scale(0.4);
+  transform: scale(0.4);
+  -webkit-animation: popUp .8s ease-in forwards;
+  animation: popUp .8s ease-in forwards;
+}
+
+@-webkit-keyframes popUp {
+  0% { }
+  70% { -webkit-transform: scale(1.1); opacity: .8; -webkit-animation-timing-function: ease-out; }
+  100% { -webkit-transform: scale(1); opacity: 1; }
+}
+
+@keyframes popUp {
+  0% { }
+  70% { -webkit-transform: scale(1.1); transform: scale(1.1); opacity: .8; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; }
+  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
+}
+
+@media screen and (max-width: 900px) {
+  .grid li {
+    width: 50%;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .grid li {
+    width: 100%;
   }
 }
 
