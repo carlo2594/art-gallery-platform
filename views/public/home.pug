@@ -20,21 +20,20 @@ block content
             style="max-width:100%;height:auto;border-radius:1.5rem;"
           )
 
-
-  // Muro de galería (efecto Pinterest con tamaño relativo a cm)
-  section.gallery-wall.my-5
-    .container
-      h2.h4.mb-4.text-center.gallery-wall-title Muro de Galería
-      .gallery-wall-grid
-        each a in artworks
-          figure.gallery-wall-item.reveal-on-scroll
-            img.gallery-wall-img(src=a.imageUrl, alt=a.title, loading='lazy', decoding='async')
-            if a.title || (a.artist && a.artist.name)
-              figcaption.gallery-wall-caption
-                if a.title
-                  div.caption-title= a.title
-                if a.artist && a.artist.name
-                  div.caption-artist por #{a.artist.name}
+  // Galería (Masonry estilo Codrops, igual que artworks.pug)
+  section.my-5
+    .container-xxl
+      h2.h4.mb-4.text-center Muro de Galería
+      if artworks && artworks.length
+        ul.grid.effect-2#grid
+          each a in artworks
+            li
+              a(href=`/artworks/${a.slug || a._id}`)
+                img(src=a.imageUrl, alt=a.title, loading='lazy', decoding='async')
+      else
+        .text-center.py-5
+          p.mb-2 No hay obras publicadas todavía.
+          a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
 
   // Sección para invitar artistas
   section.join-artists.position-relative
@@ -45,4 +44,4 @@ block content
       .card-body.text-center.p-4
         h5.card-title.fw-bold.mb-3 Discover Art That Speaks to You
         p.card-text.fs-5.mb-4 Explore a curated collection of contemporary artworks from emerging and established artists worldwide.
-        a.join-artists-btn.btn.btn-primary.rounded-pill.fw-bold(href="/obras") Explore Gallery
+        a.join-artists-btn.btn.btn-primary.rounded-pill.fw-bold(href="/obras")
