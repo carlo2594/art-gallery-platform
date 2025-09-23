@@ -1,3 +1,7 @@
+/**
+ * Utilidades para gestionar imágenes en Cloudinary.
+ * Permite subir, eliminar y actualizar imágenes en la nube, manejando archivos temporales locales.
+ */
 const cloudinary = require('@services/cloudinary');
 const fs = require('fs');
 

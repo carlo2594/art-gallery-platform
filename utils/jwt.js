@@ -1,3 +1,7 @@
+/**
+ * Utilidades para la gestión de JSON Web Tokens (JWT).
+ * Permite firmar y verificar tokens para autenticación y autorización.
+ */
 const jwt = require('jsonwebtoken');
 
 exports.signToken = userId => {

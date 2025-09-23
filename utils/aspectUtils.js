@@ -1,3 +1,7 @@
+/**
+ * Utilidades para trabajar con proporciones y aspectos de imágenes o elementos.
+ * Incluye funciones para simplificar proporciones y calcular el máximo común divisor.
+ */
 // utils/aspectUtils.js
 
 /**

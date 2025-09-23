@@ -1,3 +1,7 @@
+/**
+ * Utilidad para estandarizar y limpiar queries de búsqueda.
+ * Genera una versión canónica de los parámetros de consulta para evitar duplicados y mejorar la navegación.
+ */
 // utils/queryCanonicalizer.js
 function canonicalizeQuery(req, appliedPrice, priceBounds) {
   const original = new URLSearchParams(req.query);

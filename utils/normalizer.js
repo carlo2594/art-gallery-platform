@@ -1,3 +1,7 @@
+/**
+ * Utilidades para normalizar cadenas y arreglos de texto.
+ * Elimina acentos, convierte a minúsculas y limpia espacios para facilitar búsquedas y comparaciones.
+ */
 // utils/normalizer.js
 function norm(s) {
   return (s || '')

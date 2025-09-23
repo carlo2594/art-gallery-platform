@@ -1,3 +1,8 @@
+/**
+ * Clase personalizada para manejar errores de aplicación.
+ * Permite distinguir entre errores operacionales y errores de programación,
+ * y facilita el manejo centralizado de errores en la API.
+ */
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);

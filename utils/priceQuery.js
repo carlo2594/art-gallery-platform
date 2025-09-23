@@ -1,3 +1,7 @@
+/**
+ * Utilidades para procesar y limpiar valores de precio en queries.
+ * Permite convertir precios a centavos y limpiar formatos monetarios para búsquedas y filtros.
+ */
 // utils/priceQuery.js
 function cleanMoney(v) {
   return String(v).replace(/[$,\s]/g, '');

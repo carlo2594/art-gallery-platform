@@ -1,3 +1,7 @@
+/**
+ * Utilidad para enviar correos electrónicos de manera sencilla.
+ * Facilita el envío de emails usando un servicio de mailer configurado en la aplicación.
+ */
 const { sendMail } = require('@services/mailer');
 
 /**

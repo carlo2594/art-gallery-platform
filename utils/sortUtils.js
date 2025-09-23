@@ -1,3 +1,7 @@
+/**
+ * Utilidad para construir criterios de ordenamiento para queries.
+ * Permite mapear parámetros de orden a objetos de sort para consultas en la base de datos.
+ */
 // utils/sortUtils.js
 function getSort(sortParam) {
   return sortParam === 'populares'  ? { views: -1 }

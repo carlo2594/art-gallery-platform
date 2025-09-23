@@ -1,3 +1,7 @@
+/**
+ * Fábrica de controladores genéricos para modelos de Mongoose.
+ * Proporciona funciones CRUD reutilizables para evitar duplicación de código en los controladores.
+ */
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');

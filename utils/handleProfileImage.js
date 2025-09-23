@@ -1,3 +1,7 @@
+/**
+ * Utilidad para gestionar la imagen de perfil de un usuario.
+ * Permite subir, actualizar o eliminar la imagen de perfil en Cloudinary y sincronizar los datos del usuario.
+ */
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 
 async function handleProfileImage(user, req, filteredBody) {
