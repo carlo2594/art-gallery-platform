@@ -1,3 +1,19 @@
+  // Ocultar imagen login-signin-side-img si supera el 50vw (display: none)
+  const loginSideImg = document.querySelector('.login-signin-side-img');
+  function checkLoginSideImgWidth() {
+    if (!loginSideImg) return;
+    const vw = window.innerWidth;
+    if (loginSideImg.offsetWidth > vw * 0.5) {
+      loginSideImg.style.display = 'none';
+    } else {
+      loginSideImg.style.display = '';
+    }
+  }
+  if (loginSideImg) {
+    window.addEventListener('resize', checkLoginSideImgWidth);
+    window.addEventListener('DOMContentLoaded', checkLoginSideImgWidth);
+    checkLoginSideImgWidth();
+  }
 // public/js/main.js
 'use strict';
 

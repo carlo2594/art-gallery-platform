@@ -1,4 +1,33 @@
 /* =========================
+   IMAGEN LOGIN SIGNIN SIDE
+   ========================= */
+.login-signin-side-img {
+  max-height: 100vh;
+  width: auto;
+  height: 100vh;
+  display: block;
+  object-fit: cover;
+}
+/* =========================
+   BOTÓN LOGIN/SIGNIN
+   ========================= */
+.login-signin-btn {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border: none !important;
+  border-radius: 2rem !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10);
+  transition: background 0.2s, color 0.2s;
+}
+.login-signin-btn:hover,
+.login-signin-btn:focus {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+}
+
+/* =========================
    VARIABLES Y BASE
    ========================= */
 :root {
@@ -7,16 +36,12 @@
   --ox-orange: #E78B48;
   --ox-red:    #BE3D2A;
   --ox-beige:  #F7F6EF;
-
   --font-title:    'Montserrat', sans-serif;
-  --font-subtitle: 'Lora', serif; /* Lora para frases y subtítulos */
-
-  /* ===== Ajuste: que el item mida lo que la imagen, con altura máxima ===== */
-  --art-max-h: 68rem; /* ~680px en desktop */
+  --font-subtitle: 'Lora', serif;
+  --art-max-h: 68rem;
 }
-
 html {
-  font-size: 62.5%; /* 1rem = 10px aprox */
+  font-size: 62.5%;
   height: 100%;
   min-height: 100%;
 }
@@ -31,12 +56,8 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
-.main-content {
-  flex: 1 0 auto;
-}
-footer, .footer {
-  flex-shrink: 0;
-}
+.main-content { flex: 1 0 auto; }
+footer, .footer { flex-shrink: 0; }
 
 /* =========================
    NAVBAR
@@ -57,8 +78,6 @@ footer, .footer {
   font-size: 1.6rem;
   text-transform: uppercase;
 }
-
-/* Links */
 .navbar .nav-link {
   color: var(--ox-blue);
   text-transform: uppercase;
@@ -71,15 +90,25 @@ footer, .footer {
   color: var(--ox-blue);
   border-radius: 2rem;
 }
-
-/* Collapse spacing (siempre vertical porque nunca expande) */
 .main-navbar .navbar-collapse {
   width: 100%;
   padding: .5rem 0;
 }
-
 @media (min-width: 992px) {
   .logo-navbar { margin-right: 1rem; }
+}
+
+/* =========================
+   NAVBAR: Responsive ajustes
+   ========================= */
+@media (max-width: 991.98px) {
+  #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
+  #navbarsExample05 .navbar-nav { align-items: center; }
+  #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
+  #navbarsExample05 .searchbar-input { width: 100%; }
+}
+@media (min-width: 992px) {
+  #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
 }
 
 /* =========================
@@ -144,234 +173,6 @@ section.hero .hero-description {
   .hero-image-container { order: 2; }
 }
 
-
-/* =========================
-   GALLERY GRID & EFFECTS
-   ========================= */
-.grid {
-  max-width: 69em;
-  list-style: none;
-  margin: 30px auto;
-  padding: 0;
-}
-
-.grid li {
-  display: block;
-  float: left;
-  padding: 7px;
-  width: 33%;
-  opacity: 0;
-}
-
-.grid li.shown,
-.no-js .grid li,
-.no-cssanimations .grid li {
-  opacity: 1;
-}
-
-.grid li a,
-.grid li img {
-  outline: none;
-  border: none;
-  display: block;
-  max-width: 100%;
-}
-
-/* Effect 1: opacity */
-.grid.effect-1 li.animate {
-  -webkit-animation: fadeIn 0.65s ease forwards;
-  animation: fadeIn 0.65s ease forwards;
-}
-
-@-webkit-keyframes fadeIn {
-  0% { }
-  100% { opacity: 1; }
-}
-
-@keyframes fadeIn {
-  0% { }
-  100% { opacity: 1; }
-}
-
-/* Effect 2: Move Up */
-.grid.effect-2 li.animate {
-  -webkit-transform: translateY(200px);
-  transform: translateY(200px);
-  -webkit-animation: moveUp 0.65s ease forwards;
-  animation: moveUp 0.65s ease forwards;
-}
-
-@-webkit-keyframes moveUp {
-  0% { }
-  100% { -webkit-transform: translateY(0); opacity: 1; }
-}
-
-@keyframes moveUp {
-  0% { }
-  100% { -webkit-transform: translateY(0); transform: translateY(0); opacity: 1; }
-}
-
-/* Effect 3: Scale up */
-.grid.effect-3 li.animate {
-  -webkit-transform: scale(0.6);
-  transform: scale(0.6);
-  -webkit-animation: scaleUp 0.65s ease-in-out forwards;
-  animation: scaleUp 0.65s ease-in-out forwards;
-}
-
-@-webkit-keyframes scaleUp {
-  0% { }
-  100% { -webkit-transform: scale(1); opacity: 1; }
-}
-
-@keyframes scaleUp {
-  0% { }
-  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
-}
-
-/* Effect 4: fall perspective */
-.grid.effect-4 {
-  -webkit-perspective: 1300px;
-  perspective: 1300px;
-}
-
-.grid.effect-4 li.animate {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  -webkit-transform: translateZ(400px) translateY(300px) rotateX(-90deg);
-  transform: translateZ(400px) translateY(300px) rotateX(-90deg);
-  -webkit-animation: fallPerspective .8s ease-in-out forwards;
-  animation: fallPerspective .8s ease-in-out forwards;
-}
-
-@-webkit-keyframes fallPerspective {
-  0% { }
-  100% { -webkit-transform: translateZ(0px) translateY(0px) rotateX(0deg); opacity: 1; }
-}
-
-@keyframes fallPerspective {
-  0% { }
-  100% { -webkit-transform: translateZ(0px) translateY(0px) rotateX(0deg); transform: translateZ(0px) translateY(0px) rotateX(0deg); opacity: 1; }
-}
-
-/* Effect 5: fly (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
-.grid.effect-5 {
-  -webkit-perspective: 1300px;
-  perspective: 1300px;
-}
-
-.grid.effect-5 li.animate {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  -webkit-transform-origin: 50% 50% -300px;
-  transform-origin: 50% 50% -300px;
-  -webkit-transform: rotateX(-180deg);
-  transform: rotateX(-180deg);
-  -webkit-animation: fly .8s ease-in-out forwards;
-  animation: fly .8s ease-in-out forwards;
-}
-
-@-webkit-keyframes fly {
-  0% { }
-  100% { -webkit-transform: rotateX(0deg); opacity: 1; }
-}
-
-@keyframes fly {
-  0% { }
-  100% { -webkit-transform: rotateX(0deg); transform: rotateX(0deg); opacity: 1; }
-}
-
-/* Effect 6: flip (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
-.grid.effect-6 {
-  -webkit-perspective: 1300px;
-  perspective: 1300px;
-}
-
-.grid.effect-6 li.animate {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  -webkit-transform-origin: 0% 0%;
-  transform-origin: 0% 0%;
-  -webkit-transform: rotateX(-80deg);
-  transform: rotateX(-80deg);
-  -webkit-animation: flip .8s ease-in-out forwards;
-  animation: flip .8s ease-in-out forwards;
-}
-
-@-webkit-keyframes flip {
-  0% { }
-  100% { -webkit-transform: rotateX(0deg); opacity: 1; }
-}
-
-@keyframes flip {
-  0% { }
-  100% { -webkit-transform: rotateX(0deg); transform: rotateX(0deg); opacity: 1; }
-}
-
-/* Effect 7: helix (based on http://lab.hakim.se/scroll-effects/ by @hakimel) */
-.grid.effect-7 {
-  -webkit-perspective: 1300px;
-  perspective: 1300px;
-}
-
-.grid.effect-7 li.animate {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  -webkit-transform: rotateY(-180deg);
-  transform: rotateY(-180deg);
-  -webkit-animation: helix .8s ease-in-out forwards;
-  animation: helix .8s ease-in-out forwards;
-}
-
-@-webkit-keyframes helix {
-  0% { }
-  100% { -webkit-transform: rotateY(0deg); opacity: 1; }
-}
-
-@keyframes helix {
-  0% { }
-  100% { -webkit-transform: rotateY(0deg); transform: rotateY(0deg); opacity: 1; }
-}
-
-/* Effect 8:  */
-.grid.effect-8 {
-  -webkit-perspective: 1300px;
-  perspective: 1300px;
-}
-
-.grid.effect-8 li.animate {
-  -webkit-transform-style: preserve-3d;
-  transform-style: preserve-3d;
-  -webkit-transform: scale(0.4);
-  transform: scale(0.4);
-  -webkit-animation: popUp .8s ease-in forwards;
-  animation: popUp .8s ease-in forwards;
-}
-
-@-webkit-keyframes popUp {
-  0% { }
-  70% { -webkit-transform: scale(1.1); opacity: .8; -webkit-animation-timing-function: ease-out; }
-  100% { -webkit-transform: scale(1); opacity: 1; }
-}
-
-@keyframes popUp {
-  0% { }
-  70% { -webkit-transform: scale(1.1); transform: scale(1.1); opacity: .8; -webkit-animation-timing-function: ease-out; animation-timing-function: ease-out; }
-  100% { -webkit-transform: scale(1); transform: scale(1); opacity: 1; }
-}
-
-@media screen and (max-width: 900px) {
-  .grid li {
-    width: 50%;
-  }
-}
-
-@media screen and (max-width: 400px) {
-  .grid li {
-    width: 100%;
-  }
-}
-
 /* =========================
    JOIN ARTISTS SECTION
    ========================= */
@@ -419,6 +220,70 @@ section.join-artists {
 }
 
 /* =========================
+   CHIPS Y BOTONES
+   ========================= */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .35rem .9rem;
+  border: 2px solid var(--ox-yellow);
+  border-radius: 2rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.3rem;
+  color: var(--ox-blue);
+  background: #fff;
+}
+.chip input { display: none; }
+.chip input:checked + span { font-weight: 700; }
+.chip:has(input:checked) { background: var(--ox-yellow); }
+
+.btn-apply {
+  background: var(--ox-yellow);
+  color: var(--ox-blue);
+  border: none;
+  border-radius: 2rem;
+}
+.btn-apply:hover {
+  background: var(--ox-orange);
+  color: var(--ox-beige);
+}
+
+/* =========================
+   BOTÓN LOGIN/SIGNIN
+   ========================= */
+.login-signin-btn {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border: none !important;
+  border-radius: 2rem !important;
+  font-weight: 700;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10);
+  transition: background 0.2s, color 0.2s;
+}
+.login-signin-btn:hover,
+.login-signin-btn:focus {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+}
+
+/* =========================
+   OFFCANVAS Y FILTROS
+   ========================= */
+.offcanvas .filter-block {
+  border-top: 1px solid #eee;
+  padding-top: 1rem;
+}
+.sticky-apply {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: .75rem;
+}
+
+/* =========================
    FOOTER
    ========================= */
 .footer {
@@ -430,12 +295,12 @@ section.join-artists {
   font-family: var(--font-subtitle), serif;
   font-weight: 400;
   font-style: italic;
-  font-size: 2.4rem;  /* 24px con 1rem≈10px */
-  line-height: 1;     /* 100% */
+  font-size: 2.4rem;
+  line-height: 1;
   letter-spacing: 0;
   text-align: center;
   color: var(--ox-beige);
-  margin: 0 0 .6rem;  /* pequeño espacio sobre el copyright */
+  margin: 0 0 .6rem;
 }
 .footer .row.d-flex.align-items-center {
   font-size: 1.6rem;
@@ -452,9 +317,9 @@ section.join-artists {
 }
 .footer .nav {
   display: flex;
-  flex-wrap: nowrap;          /* no permitir varias filas */
-  white-space: nowrap;        /* no cortar texto */
-  overflow-x: auto;           /* scroll horizontal si no cabe */
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   gap: .25rem;
 }
@@ -464,7 +329,7 @@ section.join-artists {
   word-break: normal;
   overflow-wrap: normal;
   hyphens: none;
-  min-width: max-content;     /* evita “aplastamiento” en flex */
+  min-width: max-content;
 }
 .footer .nav::-webkit-scrollbar { height: 6px; }
 .footer .container-xxl,
@@ -475,19 +340,19 @@ section.join-artists {
 }
 @media (max-width: 1500px) {
   .footer .nav {
-    flex-wrap: wrap !important;          /* ahora sí puede saltar a varias filas */
-    overflow-x: visible !important;      /* sin scroll horizontal */
-    white-space: normal !important;      /* permitir salto entre items */
-    justify-content: center !important;  /* centrar filas */
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+    white-space: normal !important;
+    justify-content: center !important;
     gap: .5rem 1rem;
   }
   .footer .nav li {
     flex: 0 0 auto;
-    margin-bottom: .6rem;                /* margen inferior bajo cada ítem */
+    margin-bottom: .6rem;
   }
   .footer .nav-link {
     display: inline-block;
-    white-space: nowrap;                 /* el texto de cada link no se parte */
+    white-space: nowrap;
     word-break: normal;
     overflow-wrap: normal;
     hyphens: none;
@@ -502,44 +367,15 @@ section.join-artists {
 }
 .footer .container-xxl > * + * { margin-top: 1.2rem; }
 @media (max-width: 991.98px) {
-  .footer .row { --bs-gutter-y: 1rem; } /* ~16px entre columnas apiladas */
+  .footer .row { --bs-gutter-y: 1rem; }
 }
 @media (max-width: 1455px) {
   .footer .nav {
     flex-wrap: wrap !important;
     overflow-x: visible !important;
     justify-content: center !important;
-    gap: .8rem 1.2rem !important; /* fila/columna */
+    gap: .8rem 1.2rem !important;
   }
-  .footer .nav li { margin: 0; } /* el gap ya mete espacio */
+  .footer .nav li { margin: 0; }
 }
 .footer-quote { margin-bottom: 1rem; }
-
-/* =========================
-   NAVBAR: Responsive ajustes
-   ========================= */
-@media (max-width: 991.98px) {
-  #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
-  #navbarsExample05 .navbar-nav { align-items: center; } /* centra items del ul */
-  #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
-  #navbarsExample05 .searchbar-input { width: 100%; }
-}
-@media (min-width: 992px) {
-  #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
-}
-
-/* Chips bonitas usando tu paleta */
-.chip { 
-  display:inline-flex; align-items:center; gap:.5rem; 
-  padding:.35rem .9rem; border:2px solid var(--ox-yellow); border-radius: 2rem;
-  cursor:pointer; user-select:none; font-size:1.3rem; color:var(--ox-blue); background:#fff;
-}
-.chip input { display:none; }
-.chip input:checked + span { font-weight:700; }
-.chip:has(input:checked) { background: var(--ox-yellow); }
-
-.btn-apply{ background:var(--ox-yellow); color:var(--ox-blue); border:none; border-radius:2rem; }
-.btn-apply:hover{ background:var(--ox-orange); color:var(--ox-beige); }
-
-.offcanvas .filter-block{ border-top:1px solid #eee; padding-top:1rem; }
-.sticky-apply{ position: sticky; bottom: 0; background: #fff; padding-top: .75rem; }
