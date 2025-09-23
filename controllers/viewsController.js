@@ -65,13 +65,13 @@ exports.getWelcome = (req, res) => {
 // controllers/viewsController.js
 exports.getArtworks = catchAsync(async (req, res) => {
 
-  const { norm, normArr } = require('../utils/normalizer');
-  const { cleanMoney, readMinCentsFromQuery, readMaxCentsFromQuery } = require('../utils/priceQuery');
-  const { canonicalizeQuery } = require('../utils/queryCanonicalizer');
-  const { inArr } = require('../utils/arrayUtils');
-  const { toNumber } = require('../utils/numberUtils');
-  const { getSort } = require('../utils/sortUtils');
-  const { swapIfGreater } = require('../utils/boundsUtils');
+  const { normArr } = require('@utils/normalizer');
+  const { readMinCentsFromQuery, readMaxCentsFromQuery } = require('@utils/priceQuery');
+  const { canonicalizeQuery } = require('@utils/queryCanonicalizer');
+  const { inArr } = require('@utils/arrayUtils');
+  const { toNumber } = require('@utils/numberUtils');
+  const { getSort } = require('@utils/sortUtils');
+  const { swapIfGreater } = require('@utils/boundsUtils');
 
   const q = req.query;
   const filter = {};
