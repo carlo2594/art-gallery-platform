@@ -408,4 +408,11 @@ section.join-artists {
   .footer .nav li { margin: 0; }
 }
 .footer-quote { margin-bottom: 1rem; }
+/* Logo específico del footer */
+.logo-footer {
+  max-height: 8rem;
+  width: auto;
+  display: block;
+  /* Otros estilos específicos para el logo del footer */
+}
 
