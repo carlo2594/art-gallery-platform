@@ -101,14 +101,43 @@ footer, .footer { flex-shrink: 0; }
 /* =========================
    NAVBAR: Responsive ajustes
    ========================= */
+
+/* Mobile y tablets: navbar colapsado */
+@media (max-width: 1399.98px) {
+  #navbarsExample05 form[role="search"] {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 60rem; /* Ajusta según tu diseño */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+
+/* Pantallas medianas: searchbar ocupa todo el ancho */
 @media (max-width: 991.98px) {
   #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
   #navbarsExample05 .navbar-nav { align-items: center; }
-  #navbarsExample05 form[role="search"] { width: 100%; max-width: 600px; }
+  #navbarsExample05 form[role="search"] { width: 100%; }
   #navbarsExample05 .searchbar-input { width: 100%; }
 }
+
+/* Pantallas grandes: searchbar más pequeño y alineado */
 @media (min-width: 992px) {
-  #navbarsExample05 form[role="search"] .searchbar-input { width: 320px; }
+  #navbarsExample05 form[role="search"] .searchbar-input { width: 32rem; }
+}
+
+/* Margen inferior para los ítems del navbar en modo hamburguesa */
+@media (max-width: 1399.98px) {
+  #navbarsExample05 .navbar-nav .nav-item:first-child {
+    margin-top: 1.2rem;
+  }
+  #navbarsExample05 .navbar-nav .nav-item {
+    margin-bottom: 1.2rem;
+  }
+  #navbarsExample05 form[role="search"] {
+    margin-bottom: 1.2rem;
+  }
 }
 
 /* =========================
@@ -379,3 +408,4 @@ section.join-artists {
   .footer .nav li { margin: 0; }
 }
 .footer-quote { margin-bottom: 1rem; }
+
