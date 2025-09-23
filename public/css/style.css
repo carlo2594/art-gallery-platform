@@ -416,3 +416,15 @@ section.join-artists {
   /* Otros estilos específicos para el logo del footer */
 }
 
+/* Título del footer */
+.footer-title {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: 1.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ox-beige) !important;
+  margin-left: -2rem;
+  display: inline-block;
+}
+
