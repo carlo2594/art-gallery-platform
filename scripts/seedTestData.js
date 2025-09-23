@@ -111,7 +111,8 @@ async function seed() {
       ratings: { count: randomInt(0, 20), average: randomInt(1, 5) },
       commentsCount: randomInt(0, 10),
       width_cm: Math.round(canvas.width * scale),
-      height_cm: Math.round(canvas.height * scale)
+      height_cm: Math.round(canvas.height * scale),
+      price_cents: randomInt(500, 5000) * 100 // <-- agrega el precio en centavos
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
@@ -120,6 +121,7 @@ async function seed() {
   const exhibitionData = [];
   for (let i = 1; i <= 10; i++) {
     // Máximo 10 artworks y 10 participantes por exposición
+          price_cents: randomInt(500, 5000) * 100 // <-- agrega el precio en centavos
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
       artworksSet.add(artworks[randomInt(0, artworks.length - 1)]._id);

@@ -12,17 +12,32 @@ block content
     .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
       // Chips rápidas (submit por GET a /artworks)
       form#quickChips(method='GET' action='/artworks' class='d-flex flex-wrap gap-2')
-        // Tipo
+        // Mantener orden actual
         input(type='hidden' name='sort' value=(q && q.sort ? q.sort : ''))
+
+        // Mantener rango de precio si el usuario ya filtró
+        if q && (q.minPrice || q.maxPrice || q.minPriceCents || q.maxPriceCents)
+          if q.minPrice
+            input(type='hidden' name='minPrice' value=q.minPrice)
+          if q.maxPrice
+            input(type='hidden' name='maxPrice' value=q.maxPrice)
+          if q.minPriceCents
+            input(type='hidden' name='minPriceCents' value=q.minPriceCents)
+          if q.maxPriceCents
+            input(type='hidden' name='maxPriceCents' value=q.maxPriceCents)
+
+        // Tipo
         each t in ['Pintura','Fotografía','Escultura','Ilustración']
           label.chip
             input(type='checkbox' name='type' value=t checked=(Array.isArray(q && q.type) ? q.type.includes(t) : (q && q.type) === t))
             span= t
+
         // Orientación
         each o in [{v:'vertical',l:'Vertical'},{v:'horizontal',l:'Horizontal'},{v:'cuadrado',l:'Cuadrado'}]
           label.chip
             input(type='checkbox' name='orientation' value=o.v checked=(Array.isArray(q && q.orientation) ? q.orientation.includes(o.v) : (q && q.orientation) === o.v))
             span= o.l
+
         button.btn.btn-apply.ms-1(type='submit') Aplicar
 
       // Botón abrir filtros avanzados (mobile/desktop)
@@ -66,6 +81,42 @@ block content
           .col-6
             input.form-control(type='number' name='maxh' placeholder='Alto máx.' value=(q && q.maxh ? q.maxh : ''))
 
+      // === NUEVO: Precio en USD ===
+      .filter-block
+        label.form-label.mb-2 Precio (USD)
+        if typeof priceBounds !== 'undefined' && priceBounds && priceBounds.minUSD != null && priceBounds.maxUSD != null
+          .small.text-muted.mb-2
+            | Rango disponible: $
+            = priceBounds.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+            |  – $
+            = priceBounds.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        .row.g-2
+          .col-6
+            input.form-control(
+              type='number'
+              step='0.01'
+              min='0'
+              name='minPrice'
+              placeholder=(priceBounds && priceBounds.minUSD != null ? priceBounds.minUSD.toFixed(2) : 'Mín.')
+              value=(appliedPrice && appliedPrice.minUSD != null ? appliedPrice.minUSD.toFixed(2) : (q && q.minPrice ? q.minPrice : ''))
+            )
+          .col-6
+            input.form-control(
+              type='number'
+              step='0.01'
+              min='0'
+              name='maxPrice'
+              placeholder=(priceBounds && priceBounds.maxUSD != null ? priceBounds.maxUSD.toFixed(2) : 'Máx.')
+              value=(appliedPrice && appliedPrice.maxUSD != null ? appliedPrice.maxUSD.toFixed(2) : (q && q.maxPrice ? q.maxPrice : ''))
+            )
+        // Opcional: campos en centavos (avanzado)
+        // .collapse#centsAdvanced
+        //   .row.g-2.mt-2
+        //     .col-6
+        //       input.form-control(type='number' min='0' name='minPriceCents' placeholder='Mín. (centavos)' value=(q && q.minPriceCents ? q.minPriceCents : ''))
+        //     .col-6
+        //       input.form-control(type='number' min='0' name='maxPriceCents' placeholder='Máx. (centavos)' value=(q && q.maxPriceCents ? q.maxPriceCents : ''))
+
       // Orden
       .filter-block
         label.form-label.mb-2 Ordenar por
@@ -73,11 +124,22 @@ block content
           option(value='') Relevancia
           option(value='populares' selected=(q && q.sort==='populares')) Populares
           option(value='recientes' selected=(q && q.sort==='recientes')) Recientes
+          option(value='precio_asc' selected=(q && q.sort==='precio_asc')) Precio: menor a mayor
+          option(value='precio_desc' selected=(q && q.sort==='precio_desc')) Precio: mayor a menor
 
       // Acciones
       .mt-auto.d-flex.gap-2.sticky-apply
         a.btn.btn-light.flex-fill(href='/artworks') Limpiar
         button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+
+  // Rango aplicado (visible)
+  if appliedPrice && appliedPrice.minUSD != null && appliedPrice.maxUSD != null
+    .container-xxl.mb-2
+      .small.text-muted
+        | Mostrando: $
+        = appliedPrice.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        |  – $
+        = appliedPrice.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   // === Masonry Grid estilo Codrops ===
   section.my-5
@@ -88,6 +150,11 @@ block content
             li
               a(href=`/artworks/${a.slug || a._id}`)
                 img(src=a.imageUrl)
+              // Mostrar precio
+              .mt-2.text-muted
+                if typeof a.price === 'number'
+                  span
+                    = a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
       else
         .text-center.py-5
           p.mb-2 No hay obras publicadas todavía.
