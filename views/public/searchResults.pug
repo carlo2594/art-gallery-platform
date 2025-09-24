@@ -9,46 +9,49 @@ block content
       else
         p.text-muted.mb-0 Ingresa un término para buscar obras, artistas o exposiciones.
 
+
   .container-xxl.my-4
     // Tabs
-    - const artworksCount = artworks ? artworks.length : 0;
+    - const artworksCount = typeof totalArtworks !== 'undefined' ? totalArtworks : (artworks ? artworks.length : 0);
     - const artistsCount = artists ? artists.length : 0;
     - const exhibitionsCount = exhibitions ? exhibitions.length : 0;
     - const totalCount = artworksCount + artistsCount + exhibitionsCount;
     ul.nav.nav-tabs.mb-4#searchTabs(role="tablist")
-      li.nav-item
-        a.nav-link.active(href="#tab-obras", data-tab="obras", role="tab") Obras (#{artworksCount})
-      li.nav-item
-        a.nav-link(href="#tab-artistas", data-tab="artistas", role="tab") Artistas (#{artistsCount})
-      li.nav-item
-        a.nav-link(href="#tab-exposiciones", data-tab="exposiciones", role="tab") Exposiciones (#{exhibitionsCount})
+      li.nav-item.flex-fill.text-center
+        a.nav-link.active.w-100(href="#tab-obras", data-bs-toggle="tab", data-tab="obras", role="tab") Obras (#{artworksCount})
+      li.nav-item.flex-fill.text-center
+        a.nav-link.w-100(href="#tab-artistas", data-bs-toggle="tab", data-tab="artistas", role="tab") Artistas (#{artistsCount})
+      li.nav-item.flex-fill.text-center
+        a.nav-link.w-100(href="#tab-exposiciones", data-bs-toggle="tab", data-tab="exposiciones", role="tab") Exposiciones (#{exhibitionsCount})
 
     // Tab Contents
-
     .tab-content
 
       // OBRAS TAB
       .tab-pane.active#tab-obras
-        if artworksCount
-          h3.h5.mb-3 Obras encontradas
-          ul.grid.effect-2#grid
-            each a, i in artworks.slice(0,12)
-              li
-                a(href=`/artworks/${a.slug || a._id}`)
-                  img(src=a.imageUrl)
-                .mt-2.text-muted
-                  span= a.title
-                  if a.artist
-                    |  ·
-                    span.text-secondary= a.artist.name
-                  if typeof a.price === 'number'
-                    |  ·
-                    span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-          if artworksCount > 12
-            .d-flex.justify-content-end.mb-3
-              button.btn.btn-outline-primary.btn-sm(data-more="obras") Ver más
-        else
-          h3.h5.mt-4.text-muted No se encontraron obras.
+        .container-xxl
+          if artworks && artworks.length
+            h3.h5.mb-3 Obras encontradas
+            ul.grid.effect-2#grid(data-tab="obras")
+              each a, i in artworks
+                li
+                  a(href=`/artworks/${a.slug || a._id}`)
+                    img(src=a.imageUrl)
+                  .mt-2.text-muted
+                    span= a.title
+                    if a.artist
+                      |  ·
+                      span.text-secondary= a.artist.name
+                    if typeof a.price === 'number'
+                      |  ·
+                      span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+            nav.mt-4.mb-4.d-flex.justify-content-center#pager-obras(aria-label="Paginación obras" data-tab="obras")
+              // El paginador real lo maneja el JS, aquí solo el primer botón
+              ul.pagination-ox.pagination-lg
+                li.page-item.active
+                  a.page-link.tabindex-0(href=`?q=${search}&tab=obras&page=1` data-page="1" aria-current="page") 1
+          else
+            h3.h5.mt-4.text-muted No se encontraron obras.
 
       // ARTISTAS TAB
       .tab-pane#tab-artistas
@@ -79,4 +82,3 @@ block content
               button.btn.btn-outline-primary.btn-sm(data-more="exposiciones") Ver más
         else
           h3.h5.mt-4.text-muted No se encontraron exposiciones.
-

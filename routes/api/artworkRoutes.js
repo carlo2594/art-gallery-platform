@@ -22,9 +22,12 @@ router.get(
 /* ------------------------------------------------------------------ */
 /*  Lectura pública                                                    */
 /* ------------------------------------------------------------------ */
-router.get('/',    artworkController.getAllArtworks); // Modifica el controlador para aceptar req.query.status
-router.get('/:id', artworkController.getApprovedArtwork);
 
+
+// ⬇️ NUEVO: endpoint JSON para búsqueda paginada (para tu UI sin recarga)
+router.get('/search', artworkController.searchArtworksPaged);
+router.get('/',    artworkController.getAllArtworks); // acepta req.query.status/include
+router.get('/:id', artworkController.getApprovedArtwork);
 /* ------------------------------------------------------------------ */
 /*  CRUD básico (usuario logueado)                                     */
 /* ------------------------------------------------------------------ */

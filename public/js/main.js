@@ -1,19 +1,92 @@
-  // Ocultar imagen login-signin-side-img si supera el 50vw (display: none)
-  const loginSideImg = document.querySelector('.login-signin-side-img');
-  function checkLoginSideImgWidth() {
-    if (!loginSideImg) return;
-    const vw = window.innerWidth;
-    if (loginSideImg.offsetWidth > vw * 0.5) {
-      loginSideImg.style.display = 'none';
-    } else {
-      loginSideImg.style.display = '';
+// ⬇️⬇️ NUEVO: paginación simple para searchResults (tab Obras) ⬇️⬇️
+document.addEventListener('DOMContentLoaded', function () {
+  const grid = document.querySelector('#grid');
+  const pagerObras = document.querySelector('#pager-obras');
+  if (!grid || !pagerObras) return; // solo en searchResults (tab Obras)
+
+  const q = new URLSearchParams(location.search).get('q') || '';
+  const perPage = 20;
+
+  const renderObras = (items) => {
+    grid.innerHTML = items.map(a => `
+      <li>
+        <a href="/artworks/${a.slug || a._id}">
+          <img src="${a.imageUrl || ''}" alt="">
+        </a>
+        <div class="mt-2 text-muted">
+          <span>${a.title || ''}</span>
+          ${a.artist ? ` · <span class="text-secondary">${a.artist.name}</span>` : ''}
+        </div>
+      </li>
+    `).join('');
+
+    try {
+      if (window.imagesLoaded && window.Masonry) {
+        window.imagesLoaded(grid, function () {
+          new window.Masonry(grid, {
+            itemSelector: 'li',
+            columnWidth: 'li',
+            percentPosition: true,
+            transitionDuration: '0.2s'
+          });
+        });
+      }
+      if (window.AnimOnScroll) {
+        new window.AnimOnScroll(grid, { minDuration: 0.4, maxDuration: 0.7, viewportFactor: 0.2 });
+      }
+    } catch (e) {}
+  };
+
+  const renderPager = (page, pages) => {
+    const mkHref = (p) => `?q=${encodeURIComponent(q)}&tab=obras&page=${p}`;
+    let html = '';
+    const maxButtons = 7;
+    let start = Math.max(1, page - 3);
+    let end = Math.min(pages, start + maxButtons - 1);
+    if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
+
+    html += `<a class="btn btn-sm btn-outline-secondary me-2 ${page<=1?'disabled':''}" href="${mkHref(page-1)}" data-page="${page-1}">Atrás</a>`;
+    for (let p = start; p <= end; p++) {
+      html += `<a class="btn btn-sm me-2 ${p===page?'btn-primary':'btn-outline-secondary'}" href="${mkHref(p)}" data-page="${p}" ${p===page?'aria-current="page"':''}>${p}</a>`;
+    }
+    html += `<a class="btn btn-sm btn-outline-secondary ${page>=pages?'disabled':''}" href="${mkHref(page+1)}" data-page="${page+1}">Siguiente</a>`;
+    pagerObras.innerHTML = html;
+
+    pagerObras.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', (e) => {
+        const next = parseInt(a.getAttribute('data-page'), 10);
+        if (!isNaN(next) && next >= 1 && next <= pages) {
+          e.preventDefault();
+          loadPage(next, true);
+        }
+      });
+    });
+  };
+
+  async function loadPage(page = 1, push = false) {
+  const res = await axios.get('/api/v1/artworks/search', { params: { q, page, perPage } });
+    const { items, pages } = res.data || { items: [], pages: 0 };
+    renderObras(items);
+    renderPager(page, pages);
+    if (push) {
+      const url = new URL(location.href);
+      url.searchParams.set('q', q);
+      url.searchParams.set('tab', 'obras');
+      url.searchParams.set('page', String(page));
+      history.pushState({ tab: 'obras', page }, '', url.toString());
     }
   }
-  if (loginSideImg) {
-    window.addEventListener('resize', checkLoginSideImgWidth);
-    window.addEventListener('DOMContentLoaded', checkLoginSideImgWidth);
-    checkLoginSideImgWidth();
-  }
+
+  // popstate para back/forward del navegador
+  window.addEventListener('popstate', () => {
+    const p = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+    loadPage(p, false);
+  });
+
+  // Carga inicial respetando ?page=
+  const initialPage = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+  loadPage(initialPage, false);
+});
 // public/js/main.js
 'use strict';
 
@@ -359,4 +432,144 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('quickChips')?.addEventListener('change', e => {
     if(e.target.matches('input[type="checkbox"]')) e.currentTarget.submit();
   });
+
+  // --- helpers usados arriba ---
+  function updateIncompleteLastRow() {
+    // función dummy para mantener compatibilidad con el flujo anterior
+  }
 });
+
+// ⬇️⬇️ NUEVO: segundo listener dedicado a la paginación de la página de búsqueda (no interfiere con la galería) ⬇️⬇️
+document.addEventListener('DOMContentLoaded', function () {
+  const grid = document.querySelector('#grid');
+  const pagerObras = document.querySelector('#pager-obras');
+  if (!grid || !pagerObras) return; // solo corre en searchResults.pug (tab Obras)
+
+  const qs = (s, r = document) => r.querySelector(s);
+  const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  const urlParams = new URLSearchParams(location.search);
+  const q = urlParams.get('q') || '';
+  const perPage = 20;
+
+  const renderObras = (items) => {
+    grid.innerHTML = items.map(a => `
+      <li>
+        <a href="/artworks/${a.slug || a._id}">
+          <img src="${a.imageUrl || ''}" alt="">
+        </a>
+        <div class="mt-2 text-muted">
+          <span>${a.title || ''}</span>
+          ${a.artist ? ` · <span class="text-secondary">${a.artist.name}</span>` : ''}
+          ${Number.isFinite(a.price_cents) ? ` · <span>$${(a.price_cents/100).toLocaleString('en-US')}</span>` : (typeof a.price === 'number' ? ` · <span>${(a.price).toLocaleString('en-US',{style:'currency',currency:'USD'})}</span>` : '')}
+        </div>
+      </li>
+    `).join('');
+
+    // Re-inicializa Masonry/ImagesLoaded/AnimOnScroll si están disponibles globalmente
+    try {
+      if (window.imagesLoaded && window.Masonry) {
+        window.imagesLoaded(grid, function () {
+          new window.Masonry(grid, {
+            itemSelector: 'li',
+            columnWidth: 'li',
+            percentPosition: true,
+            transitionDuration: '0.2s'
+          });
+        });
+      }
+      if (window.AnimOnScroll) {
+        new window.AnimOnScroll(grid, { minDuration: 0.4, maxDuration: 0.7, viewportFactor: 0.2 });
+      }
+    } catch (e) { /* no-op */ }
+  };
+
+  const renderPager = (nav, page, pages) => {
+  // Maneja navegación con el historial (back/forward)
+  window.addEventListener('popstate', () => {
+    const p = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
+    loadPage(p, /*push=*/false);
+  });
+    const mkHref = (p) => `?q=${encodeURIComponent(q)}&tab=obras&page=${p}`;
+    let html = '';
+    const maxButtons = 7;
+    let start = Math.max(1, page - 3);
+    let end = Math.min(pages, start + maxButtons - 1);
+    if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
+
+    html += `<a class="btn btn-sm btn-outline-secondary me-2 ${page<=1?'disabled':''}" href="${mkHref(page-1)}" data-page="${page-1}">Atrás</a>`;
+    for (let p = start; p <= end; p++) {
+      html += `<a class="btn btn-sm me-2 ${p===page?'btn-primary':'btn-outline-secondary'}" href="${mkHref(p)}" data-page="${p}" ${p===page?'aria-current="page"':''}>${p}</a>`;
+    }
+    html += `<a class="btn btn-sm btn-outline-secondary ${page>=pages?'disabled':''}" href="${mkHref(page+1)}" data-page="${page+1}">Siguiente</a>`;
+
+    nav.innerHTML = html;
+
+    qsa('a', nav).forEach(a => {
+      a.addEventListener('click', (e) => {
+        const next = parseInt(a.getAttribute('data-page'), 10);
+        if (!isNaN(next) && next >= 1 && next <= pages) {
+          e.preventDefault();
+          loadPage(next, true);
+        }
+      });
+    });
+  };
+
+  async function loadPage(page = 1, push = false) {
+    try {
+      const res = await axios.get('/api/v1/artworks/search', { params: { q, page, perPage } });
+      const { items, pages } = res.data || { items: [], pages: 0 };
+      renderObras(items);
+      renderPager(pagerObras, page, pages);
+
+      // Scroll up al contenedor principal de resultados
+      const section = document.querySelector('.container-xxl.my-4') || document.querySelector('#searchTabs') || document.body;
+      if (section && typeof section.scrollIntoView === 'function') {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      if (push) {
+        const url = new URL(location.href);
+        url.searchParams.set('q', q);
+        url.searchParams.set('tab', 'obras');
+        url.searchParams.set('page', String(page));
+        history.pushState({ tab: 'obras', page }, '', url.toString());
+      }
+    } catch (err) {
+      // Si falla, deja el SSR como fallback
+      console.error('Error cargando página de obras:', err);
+    }
+  }
+
+  // Intercepta cambio de tab hacia "Obras" para cargar página 1 sin recarga
+  qsa('a[data-bs-toggle="tab"]').forEach(el => {
+    el.addEventListener('shown.bs.tab', (e) => {
+      const tab = e.target.getAttribute('data-tab');
+      if (tab === 'obras') loadPage(1, true);
+    });
+  });
+
+  // Carga inicial respetando ?page=
+  const initialPage = parseInt(urlParams.get('page') || '1', 10);
+  loadPage(initialPage, false);
+});
+
+// Ocultar imagen login-signin-side-img si supera el 50vw (display: none)
+const loginSideImg = document.querySelector('.login-signin-side-img');
+function checkLoginSideImgWidth() {
+  if (!loginSideImg) return;
+  const vw = window.innerWidth;
+  if (loginSideImg.offsetWidth > vw * 0.5) {
+    loginSideImg.style.display = 'none';
+  } else {
+    loginSideImg.style.display = '';
+  }
+}
+if (loginSideImg) {
+  window.addEventListener('resize', checkLoginSideImgWidth);
+  window.addEventListener('DOMContentLoaded', checkLoginSideImgWidth);
+  checkLoginSideImgWidth();
+}

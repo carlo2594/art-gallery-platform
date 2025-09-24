@@ -1,4 +1,9 @@
+
 // controllers/artworkController.js
+
+// =======================
+// IMPORTS
+// =======================
 const {
   verifyAspect,
   buildTransformedUrl,
@@ -14,13 +19,14 @@ const sendResponse = require('@utils/sendResponse');
 const { sendMail } = require('@services/mailer');
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 
-
+// =======================
+// CONSTANTES
+// =======================
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                           */
-/* ------------------------------------------------------------------ */
-
+// =======================
+// HELPERS
+// =======================
 /** Si la obra ya está en el status solicitado, responde y corta. */
 function checkAlreadyInStatus(res, art, status, mensaje) {
   if (art.status === status) {
@@ -52,6 +58,42 @@ function toCentsOrThrow(value, fieldName = 'amount') {
   if (cents < 0) throw new AppError(`"${fieldName}" no puede ser negativo.`, 400);
   return cents;
 }
+
+// =======================
+// --- NUEVO: búsqueda paginada pública de obras ---
+exports.searchArtworksPaged = catchAsync(async (req, res) => {
+  const qRaw    = (req.query.q || '').trim();
+  const page    = Math.max(1, parseInt(req.query.page || '1', 10));
+  const perPage = Math.max(1, Math.min(100, parseInt(req.query.perPage || '20', 10)));
+  const skip    = (page - 1) * perPage;
+
+  const filter = { deletedAt: null, status: 'approved' };
+  if (qRaw) filter.title = { $regex: qRaw, $options: 'i' };
+
+  const sort = { createdAt: -1 };
+
+  const [total, items] = await Promise.all([
+    Artwork.countDocuments(filter),
+    Artwork.find(filter)
+      .populate({ path: 'artist', select: 'name' })
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage)
+  ]);
+
+  res.json({
+    tab: 'obras',
+    items,
+    total,
+    page,
+    perPage,
+    pages: Math.ceil(total / perPage)
+  });
+});
+
+// =======================
+// LECTURA
+// =======================
 
 /* ------------------------------------------------------------------ */
 /*  Lectura                                                           */

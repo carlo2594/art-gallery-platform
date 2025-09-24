@@ -1,4 +1,64 @@
 /* =========================
+   PAGINATION OX CUSTOM
+   ========================= */
+.pagination-ox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.pagination-ox .page-item {
+  display: inline-block;
+}
+.pagination-ox .page-link {
+  font-size: 2.1rem;
+  font-family: var(--font-title);
+  color: var(--ox-blue);
+  background: #fff;
+  border: 2px solid var(--ox-yellow);
+  border-radius: 1.5rem;
+  padding: 0.7rem 1.6rem;
+  margin: 0 0.1rem;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  outline: none;
+  cursor: pointer;
+}
+.pagination-ox .page-link:focus,
+.pagination-ox .page-link:active {
+  background: var(--ox-yellow);
+  color: var(--ox-blue);
+  border-color: var(--ox-orange);
+  outline: 2px solid var(--ox-orange);
+}
+.pagination-ox .page-item.active .page-link,
+.pagination-ox .page-link[aria-current="page"] {
+  background: var(--ox-yellow);
+  color: var(--ox-blue);
+  border-color: var(--ox-orange);
+  font-weight: 700;
+  outline: 2px solid var(--ox-orange);
+}
+.pagination-ox .page-link:hover {
+  background: var(--ox-orange);
+  color: var(--ox-beige);
+  border-color: var(--ox-orange);
+}
+.pagination-ox .page-link[disabled],
+.pagination-ox .page-item.disabled .page-link {
+  color: #bbb;
+  background: #f7f6ef;
+  border-color: #eee;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.pagination-ox .page-link:focus-visible {
+  outline: 2px solid var(--ox-orange);
+}
+/* =========================
    VARIABLES Y BASE
    ========================= */
 :root {

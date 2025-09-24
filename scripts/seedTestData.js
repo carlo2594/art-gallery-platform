@@ -89,17 +89,45 @@ async function seed() {
   ];
 
 
-  // Crea obras de arte de prueba (total 30)
+  // Crea obras de arte de prueba (total 100)
   const artworkData = [];
-  for (let i = 1; i <= 30; i++) {
+  // Nombres únicos para las obras
+  // Descriptores únicos para las obras
+  const artworkDescriptors = [
+    'Aurora', 'Ecos', 'Reflejo', 'Caminos', 'Fragmentos',
+    'Horizonte', 'Raíces', 'Alas', 'Susurros', 'Círculo',
+    'Misterio', 'Ritmo', 'Jardín', 'Sombras', 'Río',
+    'Constelación', 'Laberinto', 'Cumbre', 'Espejismo', 'Travesía',
+    'Niebla', 'Cascada', 'Paz', 'Fuego', 'Oasis',
+    'Cosecha', 'Amanecer', 'Atardecer', 'Noche', 'Mar',
+    'Bosque', 'Danza', 'Caminante', 'Raíz', 'Puente',
+    'Nevada', 'Invierno', 'Verano', 'Otoño', 'Primavera',
+    'Caverna', 'Escondida', 'Lava', 'Montaña', 'Valle',
+    'Isla', 'Desierto', 'Lago', 'Cueva', 'Pradera',
+    'Sendero', 'Mirador', 'Colina', 'Lejana', 'Plata',
+    'Dorada', 'Niebla', 'Cielo', 'Nubes', 'Estrella',
+    'Luna', 'Sol', 'Viento', 'Brisa', 'Azul',
+    'Escondido', 'Sombras', 'Sagrada', 'Luz', 'Rojo',
+    'Esmeralda', 'Sueños', 'Dorada', 'Perdido', 'Alba',
+    'Verde', 'Cristal', 'Dorado', 'Plateada', 'Azul',
+    'Fuego', 'Estrellas', 'Polar', 'Aurora', 'Medianoche',
+    'Sur', 'Otoño', 'Niebla', 'Jade', 'Azul',
+    'Luz', 'Escondida', 'Cristal', 'Dorado', 'Plata',
+    'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
+  ];
+  for (let i = 1; i <= 200; i++) {
     const user = randomFromArray(users);
     const canvas = randomFromArray(canvasSizes);
-    // Asigna una escala aleatoria para variedad visual (0.5x, 1x, 1.5x)
     const scaleOptions = [0.5, 1, 1.5];
     const scale = randomFromArray(scaleOptions);
+    let descriptor = artworkDescriptors[(i - 1) % artworkDescriptors.length];
+    if (i > artworkDescriptors.length) {
+      descriptor = `${descriptor} ${Math.ceil(i / artworkDescriptors.length)}`;
+    }
+    const title = `Obra ${descriptor}`;
     artworkData.push({
-      title: `Obra ${i}`,
-      description: `Descripción de la obra ${i}`,
+      title,
+      description: `Descripción de la obra \"${title}\"`,
       imageUrl: randomFromArray(randomImages),
       imagePublicId: `seeded-image-${i}`,
       type: ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4],
@@ -112,7 +140,7 @@ async function seed() {
       commentsCount: randomInt(0, 10),
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale),
-      price_cents: randomInt(500, 5000) * 100 // <-- agrega el precio en centavos
+      price_cents: randomInt(500, 5000) * 100
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
