@@ -29,6 +29,10 @@ block content
 
       // OBRAS TAB
       .tab-pane.active#tab-obras
+        // Filtros solo visibles en el tab Obras
+        .artwork-filters.mt-3.mb-3(id="artwork-filters")
+          include _artworkFilters.pug
+          // Pasa las variables necesarias: q, materials, priceBounds, appliedPrice, actionUrl='/search'
         .container-xxl
           if artworks && artworks.length
             h3.h5.mb-3 Obras encontradas

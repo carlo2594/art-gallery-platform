@@ -1,130 +1,16 @@
 extends ../layouts/public
 
 block content
-  // Encabezado de página
-  section.page-header.py-4
-    .container
-      h2.h3.mb-1 Obras
-      p.text-muted Explora las piezas disponibles en la galería.
-
-  // Barra de chips + botón filtros
+  // Barra de chips + botón filtros (fragmento reutilizable)
   section.filters-toolbar.py-2
     .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
-      // Chips rápidas (submit por GET a /artworks)
-      form#quickChips(method='GET' action='/artworks' class='d-flex flex-wrap gap-2')
-        // Botones de orden
-        - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}, {label: 'Mejores ratings', value: 'top_rated'}, {label: 'Más comentados', value: 'most_commented'}]
-        each opt in opts
-          button.chip.btn(
-            type='submit'
-            name='sort'
-            value=opt.value
-            class=(
-              (!q || !q.sort) && opt.value === '' ? 'active' :
-              (q && q.sort === opt.value ? 'active' : '')
-            )
-          )= opt.label
-
-        // Mantener rango de precio si el usuario ya filtró
-        if q && (q.minPrice || q.maxPrice || q.minPriceCents || q.maxPriceCents)
-          if q.minPrice
-            input(type='hidden' name='minPrice' value=q.minPrice)
-          if q.maxPrice
-            input(type='hidden' name='maxPrice' value=q.maxPrice)
-          if q.minPriceCents
-            input(type='hidden' name='minPriceCents' value=q.minPriceCents)
-          if q.maxPriceCents
-            input(type='hidden' name='maxPriceCents' value=q.maxPriceCents)
-
-      
-
-      // Botón abrir filtros avanzados (mobile/desktop)
-      button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
-        i.fa-solid.fa-filter.me-1
-        | Filtros
-
-  // Offcanvas con filtros avanzados
-  div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
-    .offcanvas-header
-      h5#filtersTitle Filtros
-      button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
-    form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action='/artworks')
-      // Mantén chips marcadas al aplicar desde aquí también
-      if q && q.type
-        each t in (Array.isArray(q.type)? q.type : [q.type]) 
-          input(type='hidden' name='type' value=t)
-      if q && q.orientation
-        each o in (Array.isArray(q.orientation)? q.orientation : [q.orientation]) 
-          input(type='hidden' name='orientation' value=o)
-
-      // Material (multi)
-      .filter-block
-        label.form-label.mb-2 Material
-        .d-flex.flex-wrap.gap-2
-          each m in materials
-            if m
-              label.chip
-                input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
-                span= m
-
-      // Tamaño en cm (rango)
-      .filter-block
-        label.form-label.mb-2 Tamaño (ancho x alto)
-        .row.g-2
-          .col-6
-            input.form-control(type='number' name='minw' placeholder='Ancho mín.' value=(q && q.minw ? q.minw : ''))
-          .col-6
-            input.form-control(type='number' name='maxw' placeholder='Ancho máx.' value=(q && q.maxw ? q.maxw : ''))
-          .col-6
-            input.form-control(type='number' name='minh' placeholder='Alto mín.' value=(q && q.minh ? q.minh : ''))
-          .col-6
-            input.form-control(type='number' name='maxh' placeholder='Alto máx.' value=(q && q.maxh ? q.maxh : ''))
-
-      // === NUEVO: Precio en USD ===
-      .filter-block
-        label.form-label.mb-2 Precio (USD)
-        if typeof priceBounds !== 'undefined' && priceBounds && priceBounds.minUSD != null && priceBounds.maxUSD != null
-          .small.text-muted.mb-2
-            | Rango disponible: $
-            = priceBounds.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            |  – $
-            = priceBounds.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        .row.g-2
-          .col-6
-            input.form-control(
-              type='number'
-              step='0.01'
-              min='0'
-              name='minPrice'
-              placeholder=(priceBounds && priceBounds.minUSD != null ? priceBounds.minUSD.toFixed(2) : 'Mín.')
-              value=(appliedPrice && appliedPrice.minUSD != null ? appliedPrice.minUSD.toFixed(2) : (q && q.minPrice ? q.minPrice : ''))
-            )
-          .col-6
-            input.form-control(
-              type='number'
-              step='0.01'
-              min='0'
-              name='maxPrice'
-              placeholder=(priceBounds && priceBounds.maxUSD != null ? priceBounds.maxUSD.toFixed(2) : 'Máx.')
-              value=(appliedPrice && appliedPrice.maxUSD != null ? appliedPrice.maxUSD.toFixed(2) : (q && q.maxPrice ? q.maxPrice : ''))
-            )
-
-      // Orden
-      .filter-block
-        label.form-label.mb-2 Ordenar por
-        select.form-select(name='sort')
-          option(value='') Relevancia
-          option(value='popular' selected=(q && q.sort==='popular')) Populares
-          option(value='recent' selected=(q && q.sort==='recent')) Recientes
-          option(value='price_asc' selected=(q && q.sort==='price_asc')) Precio: menor a mayor
+      include _artworkFilters.pug
+      // Pasa las variables necesarias: q, materials, priceBounds, appliedPrice, actionUrl='/artworks'
           option(value='price_desc' selected=(q && q.sort==='price_desc')) Precio: mayor a menor
           option(value='top_rated' selected=(q && q.sort==='top_rated')) Mejores ratings
           option(value='most_commented' selected=(q && q.sort==='most_commented')) Más comentados
 
-      // Acciones
-      .mt-auto.d-flex.gap-2.sticky-apply
-        a.btn.btn-light.flex-fill(href='/artworks') Limpiar
-        button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+      // ...
 
   // Rango aplicado (visible)
   if appliedPrice && appliedPrice.minUSD != null && appliedPrice.maxUSD != null

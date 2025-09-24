@@ -1,11 +1,36 @@
 // ⬇️⬇️ NUEVO: paginación simple para searchResults (tab Obras) ⬇️⬇️
 document.addEventListener('DOMContentLoaded', function () {
+  // Mostrar/ocultar filtros según tab activo
+  function updateArtworkFiltersVisibility() {
+    var tab = new URLSearchParams(location.search).get('tab') || 'obras';
+    var filters = document.getElementById('artwork-filters');
+    if (filters) filters.classList.toggle('d-none', tab !== 'obras');
+  }
+  document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function (el) {
+    el.addEventListener('shown.bs.tab', function (e) {
+      updateArtworkFiltersVisibility();
+    });
+  });
+  updateArtworkFiltersVisibility();
+
   const grid = document.querySelector('#grid');
   const pagerObras = document.querySelector('#pager-obras');
   if (!grid || !pagerObras) return; // solo en searchResults (tab Obras)
 
-  const q = new URLSearchParams(location.search).get('q') || '';
   const perPage = 20;
+
+  // Serializa los filtros del formulario
+  function getFilterParams() {
+    const params = {};
+    const form = document.getElementById('quickChips');
+    if (form) {
+      new FormData(form).forEach((v, k) => { if (v !== '') params[k] = v; });
+    }
+    // También agrega q de la barra de búsqueda si existe
+    const q = new URLSearchParams(location.search).get('q') || '';
+    if (q) params.q = q;
+    return params;
+  }
 
   const renderObras = (items) => {
     grid.innerHTML = items.map(a => `
@@ -38,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   const renderPager = (page, pages) => {
+    const q = new URLSearchParams(location.search).get('q') || '';
     const mkHref = (p) => `?q=${encodeURIComponent(q)}&tab=obras&page=${p}`;
     let html = '';
     const maxButtons = 7;
@@ -64,13 +90,17 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   async function loadPage(page = 1, push = false) {
-  const res = await axios.get('/api/v1/artworks/search', { params: { q, page, perPage } });
+    const params = getFilterParams();
+    params.page = page;
+    params.perPage = perPage;
+    const res = await axios.get('/api/v1/artworks/search', { params });
     const { items, pages } = res.data || { items: [], pages: 0 };
     renderObras(items);
     renderPager(page, pages);
     if (push) {
       const url = new URL(location.href);
-      url.searchParams.set('q', q);
+      // Actualiza los parámetros de la URL
+      Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
       url.searchParams.set('tab', 'obras');
       url.searchParams.set('page', String(page));
       history.pushState({ tab: 'obras', page }, '', url.toString());
@@ -81,6 +111,21 @@ document.addEventListener('DOMContentLoaded', function () {
   window.addEventListener('popstate', () => {
     const p = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
     loadPage(p, false);
+    updateArtworkFiltersVisibility();
+  });
+
+  // Intercepta submit de filtros para recargar vía AJAX
+  document.getElementById('quickChips')?.addEventListener('submit', function(e) {
+    e.preventDefault();
+    loadPage(1, true);
+  });
+
+  // Intercepta cambio de tab hacia "Obras" para cargar página 1 sin recarga
+  document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(el => {
+    el.addEventListener('shown.bs.tab', (e) => {
+      const tab = e.target.getAttribute('data-tab');
+      if (tab === 'obras') loadPage(1, true);
+    });
   });
 
   // Carga inicial respetando ?page=
