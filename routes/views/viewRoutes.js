@@ -1,8 +1,12 @@
+
 // routes/viewRoutes.js
 
 const express = require('express');
 const router = express.Router();
 const viewsController = require('@controllers/viewsController'); 
+
+// Búsqueda global
+router.get('/search', viewsController.getSearchResults);
 
 
 

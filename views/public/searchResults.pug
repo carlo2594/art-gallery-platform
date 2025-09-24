@@ -1,0 +1,49 @@
+extends ../layouts/public
+
+block content
+  section.page-header.py-4
+    .container
+      h2.h3.mb-1 Resultados de búsqueda
+      if search
+        p.text-muted.mb-0 Buscando: "#{search}"
+      else
+        p.text-muted.mb-0 Ingresa un término para buscar obras, artistas o exposiciones.
+
+  .container-xxl.my-4
+    if artworks && artworks.length
+      h3.h5.mb-3 Obras encontradas
+      ul.grid.effect-2#grid
+        each a in artworks
+          li
+            a(href=`/artworks/${a.slug || a._id}`)
+              img(src=a.imageUrl)
+            .mt-2.text-muted
+              span= a.title
+              if a.artist
+                |  ·
+                span.text-secondary= a.artist.name
+              if typeof a.price === 'number'
+                |  ·
+                span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+    else
+      h3.h5.mt-4.text-muted No se encontraron obras.
+
+    if artists && artists.length
+      h3.h5.mt-5.mb-3 Artistas encontrados
+      ul.list-group.mb-4
+        each artist in artists
+          li.list-group-item
+            a(href=`/artistas/${artist._id}`)
+              | #{artist.name}
+    else
+      h3.h5.mt-4.text-muted No se encontraron artistas.
+
+    if exhibitions && exhibitions.length
+      h3.h5.mt-5.mb-3 Exposiciones encontradas
+      ul.list-group
+        each expo in exhibitions
+          li.list-group-item
+            a(href=`/exposiciones/${expo._id}`)
+              | #{expo.title}
+    else
+      h3.h5.mt-4.text-muted No se encontraron exposiciones.

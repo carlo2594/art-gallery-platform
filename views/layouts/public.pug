@@ -41,8 +41,8 @@ html.no-js(lang='es')
           // Nota: en mobile el contenido se centra; en lg+ el ul usa ms-lg-auto para irse a la derecha
           .collapse.navbar-collapse#navbarsExample05.text-center
             // Buscador — centrado en mobile, centrado entre brand y links en desktop
-            form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(role='search' aria-label='Buscar')
-              input.form-control.searchbar-input(type='search', placeholder='Buscar', aria-label='Buscar')
+            form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(action='/search' method='GET' role='search' aria-label='Buscar')
+              input.form-control.searchbar-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
 
             // Links principales — al extremo derecho en lg+ con ms-lg-auto; centrados en mobile
             ul.navbar-nav.navbar-links.ms-lg-auto.mx-auto.mb-2.mb-lg-0.fs-5

@@ -1,8 +1,61 @@
+
 const catchAsync = require('@utils/catchAsync');
 const Artwork = require('@models/artworkModel');
+const User = require('@models/userModel');
+const Exhibition = require('@models/exhibitionModel');
 
+// /search?q=texto
+exports.getSearchResults = catchAsync(async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (!q) {
+    return res.status(200).render('public/searchResults', {
+      title: 'Buscar',
+      artworks: [],
+      artists: [],
+      exhibitions: [],
+      search: q
+    });
+  }
 
+  // Buscar obras por título (y artista/expo por nombre)
+  const artworkFilter = {
+    status: 'approved',
+    deletedAt: null,
+    $or: [
+      { title: { $regex: q, $options: 'i' } },
+    ]
+  };
 
+  // Buscar artistas cuyo nombre coincida
+  const artistFilter = { name: { $regex: q, $options: 'i' } };
+
+  // Buscar exposiciones cuyo título coincida
+  const exhibitionFilter = { title: { $regex: q, $options: 'i' } };
+
+  // Buscar obras y poblar artista
+  let artworks = await Artwork.find(artworkFilter).populate({ path: 'artist', select: 'name' });
+
+  // Si quieres buscar también por nombre de artista:
+  const matchingArtists = await User.find(artistFilter);
+  if (matchingArtists.length) {
+    const artistIds = matchingArtists.map(a => a._id);
+    const byArtist = await Artwork.find({ status: 'approved', deletedAt: null, artist: { $in: artistIds } }).populate({ path: 'artist', select: 'name' });
+    // Unir sin duplicados
+    const ids = new Set(artworks.map(a => a._id.toString()));
+    byArtist.forEach(a => { if (!ids.has(a._id.toString())) artworks.push(a); });
+  }
+
+  // Buscar exposiciones
+  const exhibitions = await Exhibition.find(exhibitionFilter);
+
+  res.status(200).render('public/searchResults', {
+    title: `Buscar: ${q}`,
+    artworks,
+    artists: matchingArtists,
+    exhibitions,
+    search: q
+  });
+});
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
   const artworks = await Artwork
