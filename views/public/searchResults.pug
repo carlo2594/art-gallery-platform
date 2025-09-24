@@ -10,40 +10,73 @@ block content
         p.text-muted.mb-0 Ingresa un término para buscar obras, artistas o exposiciones.
 
   .container-xxl.my-4
-    if artworks && artworks.length
-      h3.h5.mb-3 Obras encontradas
-      ul.grid.effect-2#grid
-        each a in artworks
-          li
-            a(href=`/artworks/${a.slug || a._id}`)
-              img(src=a.imageUrl)
-            .mt-2.text-muted
-              span= a.title
-              if a.artist
-                |  ·
-                span.text-secondary= a.artist.name
-              if typeof a.price === 'number'
-                |  ·
-                span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-    else
-      h3.h5.mt-4.text-muted No se encontraron obras.
+    // Tabs
+    - const artworksCount = artworks ? artworks.length : 0;
+    - const artistsCount = artists ? artists.length : 0;
+    - const exhibitionsCount = exhibitions ? exhibitions.length : 0;
+    - const totalCount = artworksCount + artistsCount + exhibitionsCount;
+    ul.nav.nav-tabs.mb-4#searchTabs(role="tablist")
+      li.nav-item
+        a.nav-link.active(href="#tab-obras", data-tab="obras", role="tab") Obras (#{artworksCount})
+      li.nav-item
+        a.nav-link(href="#tab-artistas", data-tab="artistas", role="tab") Artistas (#{artistsCount})
+      li.nav-item
+        a.nav-link(href="#tab-exposiciones", data-tab="exposiciones", role="tab") Exposiciones (#{exhibitionsCount})
 
-    if artists && artists.length
-      h3.h5.mt-5.mb-3 Artistas encontrados
-      ul.list-group.mb-4
-        each artist in artists
-          li.list-group-item
-            a(href=`/artistas/${artist._id}`)
-              | #{artist.name}
-    else
-      h3.h5.mt-4.text-muted No se encontraron artistas.
+    // Tab Contents
 
-    if exhibitions && exhibitions.length
-      h3.h5.mt-5.mb-3 Exposiciones encontradas
-      ul.list-group
-        each expo in exhibitions
-          li.list-group-item
-            a(href=`/exposiciones/${expo._id}`)
-              | #{expo.title}
-    else
-      h3.h5.mt-4.text-muted No se encontraron exposiciones.
+    .tab-content
+
+      // OBRAS TAB
+      .tab-pane.active#tab-obras
+        if artworksCount
+          h3.h5.mb-3 Obras encontradas
+          ul.grid.effect-2#grid
+            each a, i in artworks.slice(0,12)
+              li
+                a(href=`/artworks/${a.slug || a._id}`)
+                  img(src=a.imageUrl)
+                .mt-2.text-muted
+                  span= a.title
+                  if a.artist
+                    |  ·
+                    span.text-secondary= a.artist.name
+                  if typeof a.price === 'number'
+                    |  ·
+                    span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+          if artworksCount > 12
+            .d-flex.justify-content-end.mb-3
+              button.btn.btn-outline-primary.btn-sm(data-more="obras") Ver más
+        else
+          h3.h5.mt-4.text-muted No se encontraron obras.
+
+      // ARTISTAS TAB
+      .tab-pane#tab-artistas
+        if artistsCount
+          h3.h5.mb-3 Artistas encontrados
+          ul.list-group.mb-4#list-artistas
+            each artist, i in artists.slice(0,12)
+              li.list-group-item
+                a(href=`/artistas/${artist._id}`)
+                  | #{artist.name}
+          if artistsCount > 12
+            .d-flex.justify-content-end.mb-3
+              button.btn.btn-outline-primary.btn-sm(data-more="artistas") Ver más
+        else
+          h3.h5.mt-4.text-muted No se encontraron artistas.
+
+      // EXPOSICIONES TAB
+      .tab-pane#tab-exposiciones
+        if exhibitionsCount
+          h3.h5.mb-3 Exposiciones encontradas
+          ul.list-group#list-exposiciones
+            each expo, i in exhibitions.slice(0,12)
+              li.list-group-item
+                a(href=`/exposiciones/${expo._id}`)
+                  | #{expo.title}
+          if exhibitionsCount > 12
+            .d-flex.justify-content-end.mb-3
+              button.btn.btn-outline-primary.btn-sm(data-more="exposiciones") Ver más
+        else
+          h3.h5.mt-4.text-muted No se encontraron exposiciones.
+
