@@ -64,7 +64,6 @@ exports.getWelcome = (req, res) => {
 
 // controllers/viewsController.js
 exports.getArtworks = catchAsync(async (req, res) => {
-
   const { normArr } = require('@utils/normalizer');
   const { readMinCentsFromQuery, readMaxCentsFromQuery } = require('@utils/priceQuery');
   const { canonicalizeQuery } = require('@utils/queryCanonicalizer');
@@ -108,7 +107,14 @@ exports.getArtworks = catchAsync(async (req, res) => {
   ]);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
 
-
+  // 2) Obtener materiales únicos desde la base de datos (solo aprobados y no borrados)
+  const materialsAgg = await Artwork.aggregate([
+    { $match: { status: 'approved', deletedAt: null } },
+    { $group: { _id: '$material', material: { $first: '$material' } } },
+    { $project: { _id: 0, material: 1 } },
+    { $sort: { material: 1 } }
+  ]);
+  const materials = materialsAgg.map(m => m.material).filter(Boolean);
 
   let minCents = readMinCentsFromQuery(q);
   let maxCents = readMaxCentsFromQuery(q);
@@ -159,7 +165,8 @@ exports.getArtworks = catchAsync(async (req, res) => {
     artworks,
     q,
     priceBounds,   // rango total desde BD
-    appliedPrice   // rango aplicado (query o defaults)
+    appliedPrice,  // rango aplicado (query o defaults)
+    materials      // materiales únicos para filtros
   });
 });
 

@@ -12,8 +12,18 @@ block content
     .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
       // Chips rápidas (submit por GET a /artworks)
       form#quickChips(method='GET' action='/artworks' class='d-flex flex-wrap gap-2')
-        // Mantener orden actual
-        input(type='hidden' name='sort' value=(q && q.sort ? q.sort : ''))
+        // Botones de orden
+        - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}, {label: 'Mejores ratings', value: 'top_rated'}, {label: 'Más comentados', value: 'most_commented'}]
+        each opt in opts
+          button.chip.btn(
+            type='submit'
+            name='sort'
+            value=opt.value
+            class=(
+              (!q || !q.sort) && opt.value === '' ? 'active' :
+              (q && q.sort === opt.value ? 'active' : '')
+            )
+          )= opt.label
 
         // Mantener rango de precio si el usuario ya filtró
         if q && (q.minPrice || q.maxPrice || q.minPriceCents || q.maxPriceCents)
@@ -26,19 +36,7 @@ block content
           if q.maxPriceCents
             input(type='hidden' name='maxPriceCents' value=q.maxPriceCents)
 
-        // Tipo
-        each t in ['Pintura','Fotografía','Escultura','Ilustración']
-          label.chip
-            input(type='checkbox' name='type' value=t checked=(Array.isArray(q && q.type) ? q.type.includes(t) : (q && q.type) === t))
-            span= t
-
-        // Orientación
-        each o in [{v:'vertical',l:'Vertical'},{v:'horizontal',l:'Horizontal'},{v:'cuadrado',l:'Cuadrado'}]
-          label.chip
-            input(type='checkbox' name='orientation' value=o.v checked=(Array.isArray(q && q.orientation) ? q.orientation.includes(o.v) : (q && q.orientation) === o.v))
-            span= o.l
-
-        button.btn.btn-apply.ms-1(type='submit') Aplicar
+      
 
       // Botón abrir filtros avanzados (mobile/desktop)
       button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
@@ -63,10 +61,11 @@ block content
       .filter-block
         label.form-label.mb-2 Material
         .d-flex.flex-wrap.gap-2
-          each m in ['Óleo','Acrílico','Mixta','Fotografía','Digital','Tinta','Acuarela']
-            label.chip
-              input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
-              span= m
+          each m in materials
+            if m
+              label.chip
+                input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
+                span= m
 
       // Tamaño en cm (rango)
       .filter-block
@@ -109,23 +108,18 @@ block content
               placeholder=(priceBounds && priceBounds.maxUSD != null ? priceBounds.maxUSD.toFixed(2) : 'Máx.')
               value=(appliedPrice && appliedPrice.maxUSD != null ? appliedPrice.maxUSD.toFixed(2) : (q && q.maxPrice ? q.maxPrice : ''))
             )
-        // Opcional: campos en centavos (avanzado)
-        // .collapse#centsAdvanced
-        //   .row.g-2.mt-2
-        //     .col-6
-        //       input.form-control(type='number' min='0' name='minPriceCents' placeholder='Mín. (centavos)' value=(q && q.minPriceCents ? q.minPriceCents : ''))
-        //     .col-6
-        //       input.form-control(type='number' min='0' name='maxPriceCents' placeholder='Máx. (centavos)' value=(q && q.maxPriceCents ? q.maxPriceCents : ''))
 
       // Orden
       .filter-block
         label.form-label.mb-2 Ordenar por
         select.form-select(name='sort')
           option(value='') Relevancia
-          option(value='populares' selected=(q && q.sort==='populares')) Populares
-          option(value='recientes' selected=(q && q.sort==='recientes')) Recientes
-          option(value='precio_asc' selected=(q && q.sort==='precio_asc')) Precio: menor a mayor
-          option(value='precio_desc' selected=(q && q.sort==='precio_desc')) Precio: mayor a menor
+          option(value='popular' selected=(q && q.sort==='popular')) Populares
+          option(value='recent' selected=(q && q.sort==='recent')) Recientes
+          option(value='price_asc' selected=(q && q.sort==='price_asc')) Precio: menor a mayor
+          option(value='price_desc' selected=(q && q.sort==='price_desc')) Precio: mayor a menor
+          option(value='top_rated' selected=(q && q.sort==='top_rated')) Mejores ratings
+          option(value='most_commented' selected=(q && q.sort==='most_commented')) Más comentados
 
       // Acciones
       .mt-auto.d-flex.gap-2.sticky-apply

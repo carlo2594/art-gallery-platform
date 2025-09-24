@@ -1,13 +1,15 @@
 /**
- * Utilidad para construir criterios de ordenamiento para queries.
- * Permite mapear parámetros de orden a objetos de sort para consultas en la base de datos.
+ * Utility to build sorting criteria for queries.
+ * Maps sort parameters to sort objects for database queries.
  */
 // utils/sortUtils.js
 function getSort(sortParam) {
-  return sortParam === 'populares'  ? { views: -1 }
-    : sortParam === 'recientes'     ? { createdAt: -1 }
-    : sortParam === 'precio_asc'    ? { price_cents: 1, _id: -1 }
-    : sortParam === 'precio_desc'   ? { price_cents: -1, _id: -1 }
+  return sortParam === 'popular'         ? { views: -1 }
+    : sortParam === 'recent'             ? { createdAt: -1 }
+    : sortParam === 'price_asc'          ? { price_cents: 1, _id: -1 }
+    : sortParam === 'price_desc'         ? { price_cents: -1, _id: -1 }
+    : sortParam === 'top_rated'          ? { 'ratings.average': -1, 'ratings.count': -1, _id: -1 }
+    : sortParam === 'most_commented'     ? { commentsCount: -1, _id: -1 }
     : { _id: -1 };
 }
 module.exports = { getSort };
