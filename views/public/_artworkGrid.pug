@@ -34,5 +34,3 @@ ul.grid.effect-2#grid
               span Fecha: #{new Date(a.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
             if typeof a.commentsCount === 'number'
               span Comentarios: #{a.commentsCount}
-            if a.ratings && typeof a.ratings.average === 'number'
-              span Calificación: #{a.ratings.average.toFixed(1)}

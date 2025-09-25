@@ -9,25 +9,17 @@ const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
 const { getPaginationParams } = require('@utils/pagination');
 const { getPriceRanges } = require('@utils/priceUtils');
 exports.getSearchResults = catchAsync(async (req, res) => {
-  // --- INICIO DEBUG ---
   const q = req.query;
   const search = (q.q || '').trim();
-  const debugLog = (...args) => { try { console.log(...args); } catch(e){} };
-  debugLog('--- [getSearchResults] INICIO ---');
-  debugLog('QUERY RECIBIDA:', q);
 
   // 1. Construcción de filtro y sort
   const artworkFilter = buildArtworkFilter(q);
   const sort = getArtworkSort(q.sort);
-  debugLog('Filtro generado para obras:', artworkFilter);
-  debugLog('Sort generado para obras:', sort);
-
-
 
   // --- PAGINATION LOGIC ---
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 100);
 
-  debugLog('Consultando base de datos...');
+  // Consultas paralelas (sin ratings)
   const [
     totalArtworks,
     artworks,
@@ -52,45 +44,19 @@ exports.getSearchResults = catchAsync(async (req, res) => {
       { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
     ])
   ]);
-  debugLog('Total de obras encontradas:', totalArtworks);
-  debugLog('Primeras obras devueltas:', artworks && artworks.length ? artworks.map(a => ({ id: a._id, title: a.title, price_cents: a.price_cents, views: a.views, createdAt: a.createdAt })) : artworks);
-  debugLog('Materiales únicos:', materialsAgg);
-  debugLog('Bounds de precio:', boundsAgg);
-
 
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
-
-
   const materials = materialsAgg.map(m => m.material).filter(Boolean);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
-  debugLog('Rango de precio aplicado:', appliedPrice);
 
-  // 4. Buscar artistas cuyo nombre coincida
+  // Buscar artistas cuyo nombre coincida
   const artistFilter = search ? { name: { $regex: search, $options: 'i' } } : {};
-  debugLog('Filtro para artistas:', artistFilter);
   const matchingArtists = search ? await User.find(artistFilter) : [];
-  debugLog('Artistas encontrados:', matchingArtists && matchingArtists.length ? matchingArtists.map(a => a.name) : matchingArtists);
 
-  // 5. Buscar exposiciones cuyo título coincida
+  // Buscar exposiciones cuyo título coincida
   const exhibitionFilter = search ? { title: { $regex: search, $options: 'i' } } : {};
-  debugLog('Filtro para exposiciones:', exhibitionFilter);
   const exhibitions = search ? await Exhibition.find(exhibitionFilter) : [];
-  debugLog('Exposiciones encontradas:', exhibitions && exhibitions.length ? exhibitions.map(e => e.title) : exhibitions);
-
-  // 6. Renderizar vista
-  debugLog('Renderizando vista searchResults con', {
-    artworks: artworks && artworks.length,
-    artists: matchingArtists && matchingArtists.length,
-    exhibitions: exhibitions && exhibitions.length,
-    totalArtworks,
-    search,
-    q,
-    priceBounds,
-    appliedPrice,
-    materials: materials && materials.length
-  });
-  debugLog('--- [getSearchResults] FIN ---');
 
   res.status(200).render('public/searchResults', {
     title: search ? `Buscar: ${search}` : 'Buscar',

@@ -61,6 +61,7 @@ function toCentsOrThrow(value, fieldName = 'amount') {
 
 // =======================
 // --- NUEVO: búsqueda paginada pública de obras ---
+// (sin ratings)
 exports.searchArtworksPaged = catchAsync(async (req, res) => {
   const qRaw    = (req.query.q || '').trim();
   const page    = Math.max(1, parseInt(req.query.page || '1', 10));

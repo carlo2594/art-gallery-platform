@@ -53,10 +53,6 @@ const artworkSchema = new mongoose.Schema(
 
     /* ------ Metrics (inmutables) ------ */
     views: { type: Number, default: 0 },
-    ratings: {
-      average: { type: Number, default: 0 },
-      count: { type: Number, default: 0 },
-    },
     commentsCount: { type: Number, default: 0 },
 
     /* ------ Workflow ----- */
