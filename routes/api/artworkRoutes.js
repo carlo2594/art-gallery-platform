@@ -24,8 +24,6 @@ router.get(
 /* ------------------------------------------------------------------ */
 
 
-// ⬇️ NUEVO: endpoint JSON para búsqueda paginada (para tu UI sin recarga)
-router.get('/search', artworkController.searchArtworksPaged);
 router.get('/',    artworkController.getAllArtworks); // acepta req.query.status/include
 router.get('/:id', artworkController.getApprovedArtwork);
 /* ------------------------------------------------------------------ */

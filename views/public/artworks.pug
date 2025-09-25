@@ -25,12 +25,12 @@ block content
 
   // === Masonry Grid estilo Codrops ===
   section.my-5
-    .container-xxl
+    .container-xxl.artworks-flex
       if artworks && artworks.length
-        include _artworkGrid.pug
-
-        // Bootstrap-style pagination (reutilizable)
-        include _artworkPagination.pug
+        // Contenedor flex column: grid y paginador
+        .artworks-grid-paginate
+          include _artworkGrid.pug
+          include _artworkPagination.pug
       else
         .text-center.py-5
           p.mb-2 No hay obras publicadas todavía.

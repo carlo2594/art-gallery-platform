@@ -1,3 +1,64 @@
+
+/* =========================
+   1. VARIABLES Y BASE
+   ========================= */
+:root {
+  --ox-yellow: #F5C45E;
+  --ox-blue:   #102E50;
+  --ox-orange: #E78B48;
+  --ox-red:    #BE3D2A;
+  --ox-beige:  #F7F6EF;
+  --font-title:    'Montserrat', sans-serif;
+  --font-subtitle: 'Lora', serif;
+  --art-max-h: 68rem;
+}
+html {
+  font-size: 62.5%;
+  height: 100%;
+  min-height: 100%;
+}
+body {
+  font-family: var(--font-title);
+  background-color: var(--ox-beige);
+  color: #111;
+  font-size: 1.2rem;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.main-content { flex: 1 0 auto; }
+footer, .footer { flex-shrink: 0; }
+
+/* =========================
+   2. GRID Y PAGINADOR DE OBRAS
+   ========================= */
+/* Flex para grid y paginador siempre abajo */
+.artworks-flex {
+  display: flex;
+  flex-direction: column;
+  min-height: 48rem;
+}
+.artworks-grid-paginate {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+#grid {
+  min-height: 24rem;
+}
+#pager-obras {
+  margin-top: auto;
+}
+/* Oculta el paginador mientras carga (legacy, por si se usa en otros lados) */
+.pager-hidden {
+  display: none !important;
+}
+
+/* =========================
+   3. TARJETAS DE OBRAS (CARDS)
+   ========================= */
 /* Shadow for artwork card (image + label) */
 .art-card-shadow {
   box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08);
@@ -20,12 +81,9 @@
 .art-label .h4 {
   color: #222;
 }
-/* Oculta el paginador mientras carga */
-.pager-hidden {
-  display: none !important;
-}
+
 /* =========================
-   PAGINATION OX CUSTOM
+   4. PAGINACIÓN CUSTOM OX
    ========================= */
 .pagination-ox {
   display: flex;
@@ -84,37 +142,10 @@
 .pagination-ox .page-link:focus-visible {
   outline: 2px solid var(--ox-orange);
 }
+
 /* =========================
-   VARIABLES Y BASE
+   5. NAVBAR Y SEARCHBAR
    ========================= */
-:root {
-  --ox-yellow: #F5C45E;
-  --ox-blue:   #102E50;
-  --ox-orange: #E78B48;
-  --ox-red:    #BE3D2A;
-  --ox-beige:  #F7F6EF;
-  --font-title:    'Montserrat', sans-serif;
-  --font-subtitle: 'Lora', serif;
-  --art-max-h: 68rem;
-}
-html {
-  font-size: 62.5%;
-  height: 100%;
-  min-height: 100%;
-}
-body {
-  font-family: var(--font-title);
-  background-color: var(--ox-beige);
-  color: #111;
-  font-size: 1.2rem;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-.main-content { flex: 1 0 auto; }
-footer, .footer { flex-shrink: 0; }
 
 /* =========================
    NAVBAR

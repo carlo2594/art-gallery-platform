@@ -2,17 +2,28 @@
 // public/js/main.js
 'use strict';
 
+
 document.addEventListener('DOMContentLoaded', function () {
-  // Mostrar el paginador solo cuando el grid de obras es visible (Intersection Observer)
+  // Eliminada la lógica de mostrar/ocultar el paginador dinámicamente
+  // Mostrar el paginador solo cuando el grid de obras esté completamente cargado o si el usuario hace scroll y el grid es visible
   var grid = document.getElementById('grid');
   var pager = document.getElementById('pager-obras');
+  var pagerShown = false;
+  function showPager() {
+    if (pager && !pagerShown) {
+      // Oculta completamente antes de mostrar
+      pager.style.display = 'none';
+      pager.classList.add('pager-hidden');
+      // Forzar reflow antes de mostrar (previene glitches de layout)
+      void pager.offsetHeight;
+      pager.style.display = '';
+      pager.classList.remove('pager-hidden');
+      pagerShown = true;
+    }
+  }
   if (grid && pager && grid.children.length > 0) {
     var images = grid.querySelectorAll('img');
     var loaded = 0;
-    var showPager = function() {
-      pager.style.display = '';
-      pager.classList.remove('pager-hidden');
-    };
     if (images.length === 0) {
       showPager();
     } else {
@@ -32,6 +43,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     }
+    // Mostrar el paginador si el usuario hace scroll y el grid es visible
+    function onScrollShowPager() {
+      if (pagerShown) return;
+      var rect = grid.getBoundingClientRect();
+      var windowHeight = (window.innerHeight || document.documentElement.clientHeight);
+      // Si el grid está parcialmente visible en la ventana
+      if (rect.top < windowHeight && rect.bottom > 0) {
+        showPager();
+        window.removeEventListener('scroll', onScrollShowPager);
+      }
+    }
+    window.addEventListener('scroll', onScrollShowPager);
   }
 
   // Limpia inputs vacíos en formularios de filtros antes de enviar

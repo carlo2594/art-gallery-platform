@@ -8,6 +8,7 @@ const Exhibition = require('@models/exhibitionModel');
 const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
 const { getPaginationParams } = require('@utils/pagination');
 const { getPriceRanges } = require('@utils/priceUtils');
+
 exports.getSearchResults = catchAsync(async (req, res) => {
   const q = req.query;
   const search = (q.q || '').trim();

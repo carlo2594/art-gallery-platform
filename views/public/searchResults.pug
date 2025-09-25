@@ -39,12 +39,11 @@ block content
             - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
             - var actionUrl = '/search';
             include _artworkFilters.pug
-        .container-xxl
+        .container-xxl.artworks-flex
           if artworks && artworks.length
-            include _artworkGrid.pug
-
-            // Bootstrap-style pagination (reutilizable)
-            include _artworkPagination.pug
+            .artworks-grid-paginate
+              include _artworkGrid.pug
+              include _artworkPagination.pug
           else
             h3.h5.mt-4.text-muted No se encontraron obras.
 
