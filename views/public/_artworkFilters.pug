@@ -6,7 +6,7 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
   else if q && q.q
     input(type='hidden' name='q' value=q.q)
   // Chips de orden
-  - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}, {label: 'Mejores ratings', value: 'top_rated'}, {label: 'Más comentados', value: 'most_commented'}]
+  - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}]
   each opt in opts
     button.chip.btn(
       type='submit'
