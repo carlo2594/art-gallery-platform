@@ -3,6 +3,36 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Mostrar el paginador solo cuando el grid de obras es visible (Intersection Observer)
+  var grid = document.getElementById('grid');
+  var pager = document.getElementById('pager-obras');
+  if (grid && pager && grid.children.length > 0) {
+    var images = grid.querySelectorAll('img');
+    var loaded = 0;
+    var showPager = function() {
+      pager.style.display = '';
+      pager.classList.remove('pager-hidden');
+    };
+    if (images.length === 0) {
+      showPager();
+    } else {
+      images.forEach(function(img) {
+        if (img.complete) {
+          loaded++;
+          if (loaded === images.length) showPager();
+        } else {
+          img.addEventListener('load', function() {
+            loaded++;
+            if (loaded === images.length) showPager();
+          });
+          img.addEventListener('error', function() {
+            loaded++;
+            if (loaded === images.length) showPager();
+          });
+        }
+      });
+    }
+  }
 
   // Limpia inputs vacíos en formularios de filtros antes de enviar
   document.querySelectorAll('form.offcanvas-body, form#quickChips').forEach(form => {

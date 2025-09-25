@@ -58,9 +58,10 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
       .d-flex.flex-wrap.gap-2
         each m in (typeof materials !== 'undefined' && materials ? materials : [])
           if m
+            - var matCap = m.charAt(0).toUpperCase() + m.slice(1)
             label.chip
               input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
-              span= m
+              span= matCap
     // Tamaño en cm (rango)
     .filter-block
       label.form-label.mb-2 Tamaño (ancho x alto)

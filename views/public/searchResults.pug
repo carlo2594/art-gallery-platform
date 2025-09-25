@@ -30,36 +30,80 @@ block content
       // OBRAS TAB
       .tab-pane.active#tab-obras
         // Filtros solo visibles en el tab Obras
-        // Set variables before including the filter fragment
-        - var q = typeof q !== 'undefined' ? q : {};
-        - var materials = typeof materials !== 'undefined' ? materials : [];
-        - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
-        - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
-        - var actionUrl = '/search';
-        .artwork-filters.mt-3.mb-3(id="artwork-filters")
-          include _artworkFilters.pug
+        section.filters-toolbar.py-2
+          .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+            // Set variables before including the filter fragment
+            - var q = typeof q !== 'undefined' ? q : {};
+            - var materials = typeof materials !== 'undefined' ? materials : [];
+            - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+            - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+            - var actionUrl = '/search';
+            include _artworkFilters.pug
         .container-xxl
           if artworks && artworks.length
             ul.grid.effect-2#grid
               each a in artworks
                 li
-                  a(href=`/artworks/${a.slug || a._id}`)
-                    img(src=a.imageUrl)
-                  .mt-2.text-muted
-                    span= a.title
-                    if a.artist
-                      |  · 
-                      span.text-secondary= a.artist.name
-                    if typeof a.price_cents === 'number'
-                      |  · 
-                      span= '$' + (a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:2})
-                    else if typeof a.price === 'number'
-                      |  · 
-                      span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-            nav.mt-4.mb-4.d-flex.justify-content-center#pager-obras(aria-label="Paginación obras" data-tab="obras")
-              ul.pagination-ox.pagination-lg
-                li.page-item.active
-                  a.page-link.tabindex-0(href=`?q=${search}&tab=obras&page=1` data-page="1" aria-current="page") 1
+                  .card.h-100.bg-white.border-0.shadow-none.art-card-shadow
+                    a(href=`/artworks/${a.slug || a._id}`)
+                      img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
+                    .card-body.p-3.art-label.art-card-shadow
+                      if a.artist
+                        .fw-bold.mb-1= a.artist.name
+                      if a.title
+                        .mb-1
+                          = a.title
+                          if a.createdAt
+                            | ,
+                            = new Date(a.createdAt).getFullYear()
+                      if a.material
+                        - var matCap = a.material.charAt(0).toUpperCase() + a.material.slice(1)
+                        .mb-1= matCap
+                      if a.size
+                        .mb-1= a.size
+                      if typeof a.price_cents === 'number'
+                        .mb-1
+                          | $
+                          = (a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})
+                      // Website and Instagram (if available)
+                      .d-flex.justify-content-between.align-items-center.mb-1
+                        if a.website
+                          span.small= a.website
+                        if a.instagram
+                          span.small= '@' + a.instagram.replace(/^@/, '')
+                      // Extra info: views, date, comments, ratings
+                      .d-flex.flex-wrap.gap-2.small.text-muted
+                        if typeof a.views === 'number'
+                          span Vistas: #{a.views}
+                        if a.createdAt
+                          span Fecha: #{new Date(a.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
+                        if typeof a.commentsCount === 'number'
+                          span Comentarios: #{a.commentsCount}
+                        if a.ratings && typeof a.ratings.average === 'number'
+                          span Calificación: #{a.ratings.average.toFixed(1)}
+
+            // Bootstrap-style pagination
+            if artworks && artworks.length > 0 && totalPages > 1
+              nav.mt-4.mb-4.d-flex.justify-content-center#pager-obras.pager-hidden(style="display:none" aria-label="Paginación obras" data-tab="obras")
+                ul.pagination-ox.pagination-lg
+                  // Previous button
+                  li.page-item(class=page === 1 ? 'disabled' : '')
+                    a.page-link(href=`?q=${search || ''}&tab=obras&page=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}` aria-label="Anterior")
+                      span(aria-hidden="true") &laquo;
+                  // Page numbers (show up to 5 pages, center current)
+                  - var startPage = Math.max(1, page - 2);
+                  - var endPage = Math.min(totalPages, page + 2);
+                  - if (endPage - startPage < 4) {
+                  -   if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+                  -   else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+                  - }
+                  each p in Array(endPage - startPage + 1).fill().map((_,i) => startPage + i)
+                    li.page-item(class=p === page ? 'active' : '')
+                      a.page-link(href=`?q=${search || ''}&tab=obras&page=${p}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}` aria-current=(p === page ? 'page' : false))= p
+                  // Next button
+                  li.page-item(class=page === totalPages ? 'disabled' : '')
+                    a.page-link(href=`?q=${search || ''}&tab=obras&page=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}` aria-label="Siguiente")
+                      span(aria-hidden="true") &raquo;
           else
             h3.h5.mt-4.text-muted No se encontraron obras.
 

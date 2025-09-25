@@ -6,6 +6,8 @@ const Exhibition = require('@models/exhibitionModel');
 
 // /search?q=texto y filtros
 const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
+const { getPaginationParams } = require('@utils/pagination');
+const { getPriceRanges } = require('@utils/priceUtils');
 exports.getSearchResults = catchAsync(async (req, res) => {
   // --- INICIO DEBUG ---
   const q = req.query;
@@ -20,7 +22,11 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   debugLog('Filtro generado para obras:', artworkFilter);
   debugLog('Sort generado para obras:', sort);
 
-  // 2. Consulta a la base de datos
+
+
+  // --- PAGINATION LOGIC ---
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 100);
+
   debugLog('Consultando base de datos...');
   const [
     totalArtworks,
@@ -29,7 +35,11 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     boundsAgg
   ] = await Promise.all([
     Artwork.countDocuments(artworkFilter),
-    Artwork.find(artworkFilter).populate({ path: 'artist', select: 'name' }).sort(sort).limit(20),
+    Artwork.find(artworkFilter)
+      .populate({ path: 'artist', select: 'name' })
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage),
     Artwork.aggregate([
       { $match: { status: 'approved', deletedAt: null } },
       { $group: { _id: '$material', material: { $first: '$material' } } },
@@ -47,26 +57,13 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   debugLog('Materiales únicos:', materialsAgg);
   debugLog('Bounds de precio:', boundsAgg);
 
+
+  const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
+
+
   const materials = materialsAgg.map(m => m.material).filter(Boolean);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
-
-  // 3. Calcular rango aplicado
-  const toNumber = v => (v == null || v === '') ? null : Number(v);
-  let minCents = toNumber(q.minPrice) != null ? Math.round(Number(q.minPrice) * 100) : null;
-  let maxCents = toNumber(q.maxPrice) != null ? Math.round(Number(q.maxPrice) * 100) : null;
-  if (minCents === null && bounds.minPriceCents != null) minCents = bounds.minPriceCents;
-  if (maxCents === null && bounds.maxPriceCents != null) maxCents = bounds.maxPriceCents;
-  if (minCents != null && maxCents != null && minCents > maxCents) [minCents, maxCents] = [maxCents, minCents];
-  const priceBounds = {
-    minUSD: bounds.minPriceCents != null ? bounds.minPriceCents / 100 : null,
-    maxUSD: bounds.maxPriceCents != null ? bounds.maxPriceCents / 100 : null,
-    minCents: bounds.minPriceCents,
-    maxCents: bounds.maxPriceCents
-  };
-  const appliedPrice = {
-    minUSD: minCents != null ? minCents / 100 : null,
-    maxUSD: maxCents != null ? maxCents / 100 : null
-  };
+  const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
   debugLog('Rango de precio aplicado:', appliedPrice);
 
   // 4. Buscar artistas cuyo nombre coincida
@@ -105,7 +102,11 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     q,
     priceBounds,
     appliedPrice,
-    materials
+    materials,
+    page,
+    perPage,
+    totalPages,
+    skip
   });
 });
 
@@ -178,6 +179,13 @@ exports.getArtworks = catchAsync(async (req, res) => {
   const { getSort } = require('@utils/sortUtils');
   const { swapIfGreater } = require('@utils/boundsUtils');
 
+  // --- PAGINATION LOGIC ---
+  const DEFAULT_PER_PAGE = 24;
+  const MAX_PER_PAGE = 100;
+  const page = Math.max(1, parseInt(req.query.page || '1', 10));
+  const perPage = Math.max(1, Math.min(DEFAULT_PER_PAGE, parseInt(req.query.perPage || DEFAULT_PER_PAGE, 10)));
+  const skip = (page - 1) * perPage;
+
   const q = req.query;
   const filter = {};
 
@@ -198,7 +206,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
     const ors = [];
     if (orientations.includes('horizontal')) ors.push({ $expr: { $gt: ['$width_cm', '$height_cm'] } });
     if (orientations.includes('vertical'))   ors.push({ $expr: { $gt: ['$height_cm', '$width_cm'] } });
-    if (orientations.includes('cuadrado'))   ors.push({ $expr: { $eq: ['$width_cm', '$height_cm'] } });
+    if (orientations.includes('cuadrado'))   ors.push({ $eq: ['$width_cm', '$height_cm'] });
     if (ors.length) filter.$or = ors;
   }
 
@@ -240,11 +248,17 @@ exports.getArtworks = catchAsync(async (req, res) => {
   // 3) Ordenación
   const sort = getSort(q.sort);
 
-  // 4) Consulta final
-  const artworks = await Artwork
-    .findApproved(filter)
-    .sort(sort)
-    .populate({ path: 'artist', select: 'name' });
+  // 4) Consulta final: paginada
+  const [totalArtworks, artworks] = await Promise.all([
+    Artwork.countDocuments({ status: 'approved', deletedAt: null, ...filter }),
+    Artwork.findApproved(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage)
+      .populate({ path: 'artist', select: 'name' })
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
 
   // Para la vista
   const priceBounds = {
@@ -272,7 +286,12 @@ exports.getArtworks = catchAsync(async (req, res) => {
     q,
     priceBounds,   // rango total desde BD
     appliedPrice,  // rango aplicado (query o defaults)
-    materials      // materiales únicos para filtros
+    materials,     // materiales únicos para filtros
+    page,
+    perPage,
+    totalPages,
+    skip,
+    totalArtworks
   });
 });
 

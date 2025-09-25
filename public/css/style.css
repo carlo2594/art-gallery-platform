@@ -1,3 +1,29 @@
+/* Shadow for artwork card (image + label) */
+.art-card-shadow {
+  box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08);
+  border-radius: 0.7rem;
+  background: #fff;
+}
+/* Minimalist gallery-style label for artwork cards */
+.art-label {
+  font-family: 'Georgia', 'Times New Roman', Times, serif;
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 1.25rem 1rem 1.5rem 1rem;
+}
+.art-label .h5 {
+  font-style: italic;
+  letter-spacing: 0.5px;
+}
+.art-label .h4 {
+  color: #222;
+}
+/* Oculta el paginador mientras carga */
+.pager-hidden {
+  display: none !important;
+}
 /* =========================
    PAGINATION OX CUSTOM
    ========================= */
