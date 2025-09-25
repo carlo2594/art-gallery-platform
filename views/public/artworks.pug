@@ -4,11 +4,13 @@ block content
   // Barra de chips + botón filtros (fragmento reutilizable)
   section.filters-toolbar.py-2
     .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+      // Set variables before including the filter fragment
+      - var q = typeof q !== 'undefined' ? q : {};
+      - var materials = typeof materials !== 'undefined' ? materials : [];
+      - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+      - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+      - var actionUrl = '/artworks';
       include _artworkFilters.pug
-      // Pasa las variables necesarias: q, materials, priceBounds, appliedPrice, actionUrl='/artworks'
-          option(value='price_desc' selected=(q && q.sort==='price_desc')) Precio: mayor a menor
-          option(value='top_rated' selected=(q && q.sort==='top_rated')) Mejores ratings
-          option(value='most_commented' selected=(q && q.sort==='most_commented')) Más comentados
 
       // ...
 

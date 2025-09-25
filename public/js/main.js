@@ -1,137 +1,4 @@
-// ⬇️⬇️ NUEVO: paginación simple para searchResults (tab Obras) ⬇️⬇️
-document.addEventListener('DOMContentLoaded', function () {
-  // Mostrar/ocultar filtros según tab activo
-  function updateArtworkFiltersVisibility() {
-    var tab = new URLSearchParams(location.search).get('tab') || 'obras';
-    var filters = document.getElementById('artwork-filters');
-    if (filters) filters.classList.toggle('d-none', tab !== 'obras');
-  }
-  document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function (el) {
-    el.addEventListener('shown.bs.tab', function (e) {
-      updateArtworkFiltersVisibility();
-    });
-  });
-  updateArtworkFiltersVisibility();
-
-  const grid = document.querySelector('#grid');
-  const pagerObras = document.querySelector('#pager-obras');
-  if (!grid || !pagerObras) return; // solo en searchResults (tab Obras)
-
-  const perPage = 20;
-
-  // Serializa los filtros del formulario
-  function getFilterParams() {
-    const params = {};
-    const form = document.getElementById('quickChips');
-    if (form) {
-      new FormData(form).forEach((v, k) => { if (v !== '') params[k] = v; });
-    }
-    // También agrega q de la barra de búsqueda si existe
-    const q = new URLSearchParams(location.search).get('q') || '';
-    if (q) params.q = q;
-    return params;
-  }
-
-  const renderObras = (items) => {
-    grid.innerHTML = items.map(a => `
-      <li>
-        <a href="/artworks/${a.slug || a._id}">
-          <img src="${a.imageUrl || ''}" alt="">
-        </a>
-        <div class="mt-2 text-muted">
-          <span>${a.title || ''}</span>
-          ${a.artist ? ` · <span class="text-secondary">${a.artist.name}</span>` : ''}
-        </div>
-      </li>
-    `).join('');
-
-    try {
-      if (window.imagesLoaded && window.Masonry) {
-        window.imagesLoaded(grid, function () {
-          new window.Masonry(grid, {
-            itemSelector: 'li',
-            columnWidth: 'li',
-            percentPosition: true,
-            transitionDuration: '0.2s'
-          });
-        });
-      }
-      if (window.AnimOnScroll) {
-        new window.AnimOnScroll(grid, { minDuration: 0.4, maxDuration: 0.7, viewportFactor: 0.2 });
-      }
-    } catch (e) {}
-  };
-
-  const renderPager = (page, pages) => {
-    const q = new URLSearchParams(location.search).get('q') || '';
-    const mkHref = (p) => `?q=${encodeURIComponent(q)}&tab=obras&page=${p}`;
-    let html = '';
-    const maxButtons = 7;
-    let start = Math.max(1, page - 3);
-    let end = Math.min(pages, start + maxButtons - 1);
-    if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
-
-    html += `<a class="btn btn-sm btn-outline-secondary me-2 ${page<=1?'disabled':''}" href="${mkHref(page-1)}" data-page="${page-1}">Atrás</a>`;
-    for (let p = start; p <= end; p++) {
-      html += `<a class="btn btn-sm me-2 ${p===page?'btn-primary':'btn-outline-secondary'}" href="${mkHref(p)}" data-page="${p}" ${p===page?'aria-current="page"':''}>${p}</a>`;
-    }
-    html += `<a class="btn btn-sm btn-outline-secondary ${page>=pages?'disabled':''}" href="${mkHref(page+1)}" data-page="${page+1}">Siguiente</a>`;
-    pagerObras.innerHTML = html;
-
-    pagerObras.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', (e) => {
-        const next = parseInt(a.getAttribute('data-page'), 10);
-        if (!isNaN(next) && next >= 1 && next <= pages) {
-          e.preventDefault();
-          loadPage(next, true);
-        }
-      });
-    });
-  };
-
-  async function loadPage(page = 1, push = false) {
-    const params = getFilterParams();
-    params.page = page;
-    params.perPage = perPage;
-    const res = await axios.get('/api/v1/artworks/search', { params });
-    const { items, pages } = res.data || { items: [], pages: 0 };
-    renderObras(items);
-    renderPager(page, pages);
-    if (push) {
-      const url = new URL(location.href);
-      // Actualiza los parámetros de la URL
-      Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-      url.searchParams.set('tab', 'obras');
-      url.searchParams.set('page', String(page));
-      history.pushState({ tab: 'obras', page }, '', url.toString());
-    }
-  }
-
-  // popstate para back/forward del navegador
-  window.addEventListener('popstate', () => {
-    const p = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
-    loadPage(p, false);
-    updateArtworkFiltersVisibility();
-  });
-
-  // Intercepta submit de filtros para recargar vía AJAX
-  document.getElementById('quickChips')?.addEventListener('submit', function(e) {
-    e.preventDefault();
-    loadPage(1, true);
-  });
-
-  // Intercepta cambio de tab hacia "Obras" para cargar página 1 sin recarga
-  document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(el => {
-    el.addEventListener('shown.bs.tab', (e) => {
-      const tab = e.target.getAttribute('data-tab');
-      if (tab === 'obras') loadPage(1, true);
-    });
-  });
-
-  // Carga inicial respetando ?page=
-  const initialPage = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
-  loadPage(initialPage, false);
-});
+// Eliminado: paginación AJAX y carga dinámica de obras en searchResults (tab Obras). Ahora todo es server-side.
 // public/js/main.js
 'use strict';
 
@@ -157,453 +24,174 @@ document.addEventListener('DOMContentLoaded', function () {
   const setBtnState = (btn, disabled, text) => {
     if (!btn) return;
     btn.disabled = !!disabled;
-    if (typeof text === 'string') btn.textContent = text;
+    if (text != null) btn.textContent = text;
   };
 
-  const debounce = (fn, wait = 200) => {
-    let t;
-    return (...args) => {
-      clearTimeout(t);
-      t = setTimeout(() => fn(...args), wait);
-    };
-  };
+  const parseQS = () => Object.fromEntries(new URLSearchParams(location.search).entries());
 
-  /* ------------------------------- */
-  /* Login / SignUp                  */
-  /* ------------------------------- */
-  const loginSignUpForm = document.querySelector('.login-signin-form');
-  if (loginSignUpForm) {
-    loginSignUpForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const submitBtn = loginSignUpForm.querySelector('button[type="submit"]');
-      setBtnState(submitBtn, true, 'Enviando...');
-
-      const modeAttr = loginSignUpForm.getAttribute('data-mode');
-      const mode = (window.loginSignUpMode || modeAttr || '').trim() === 'signUp' ? 'signUp' : 'login';
-      const url = mode === 'signUp' ? '/api/v1/auth/signup' : '/api/v1/auth/login';
-
-      const emailInput = loginSignUpForm.querySelector('input[name="email"]');
-      if (!emailInput) {
-        alert('No se encontró el campo de correo electrónico.');
-        setBtnState(submitBtn, false, mode === 'signUp' ? 'Registrarse' : 'Iniciar sesión');
-        return;
-      }
-
-      const email = (emailInput.value || '').trim();
-      if (!email) {
-        alert('Ingresa tu correo.');
-        setBtnState(submitBtn, false, mode === 'signUp' ? 'Registrarse' : 'Iniciar sesión');
-        return;
-      }
-
-      let password = '';
-      if (mode !== 'signUp') {
-        const passwordInput = loginSignUpForm.querySelector('input[name="password"]');
-        password = (passwordInput && passwordInput.value) || '';
-      }
-
-      const data = { email };
-      if (password) data.password = password;
-
-      if (mode === 'signUp') {
-        const nameInput = loginSignUpForm.querySelector('input[name="name"]');
-        if (nameInput) data.name = (nameInput.value || '').trim() || email;
-      }
-
-      try {
-        const res = await axios.post(url, data);
-
-        // usar "next" si el backend lo manda
-        const next = res?.data?.data?.next || res?.data?.next;
-
-        if (mode !== 'signUp' && (res?.data?.success || res?.data?.token || next)) {
-          window.location = next || '/';
-          return;
-        } else if (res.status === 201 || res?.data?.success) {
-          // Estado "revisa tu correo" para sign up con magic link/password
-          const form = loginSignUpForm;
-          const wrapper = form.parentElement || document.body;
-          form.style.display = 'none';
-          const panel = document.createElement('div');
-          panel.className = 'check-email-state';
-          panel.innerHTML = `
-            <h1 class="h3 mb-2">Revisa tu correo</h1>
-            <p>Te enviamos un enlace para crear tu contraseña en <strong>${email}</strong>. El enlace expira en 24 horas.</p>
-            <p class="mb-3">Si no lo ves, revisa spam o espera unos segundos.</p>
-            <div class="stack">
-              <a class="btn btn-primary w-100" href="/">Volver al inicio</a>
-            </div>
-          `;
-          wrapper.appendChild(panel);
-          return;
-        } else {
-          alert(res?.data?.message || 'Acción completada');
-        }
-      } catch (err) {
-        alert(err?.response?.data?.message || 'Error al enviar el formulario');
-      } finally {
-        setBtnState(submitBtn, false, mode === 'signUp' ? 'Registrarse' : 'Iniciar sesión');
-      }
-    });
-  }
-
-  /* ------------------------------- */
-  /* Forgot Password                 */
-  /* ------------------------------- */
-  const forgotForm = document.querySelector('.forgot-password-form');
-  if (forgotForm) {
-    forgotForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const btn = forgotForm.querySelector('button[type="submit"]');
-      setBtnState(btn, true, 'Enviando...');
-
-      const email = (forgotForm.querySelector('input[name="email"]')?.value || '').trim();
-      if (!email) {
-        alert('Ingresa tu correo.');
-        setBtnState(btn, false, 'Enviar enlace');
-        return;
-      }
-
-      try {
-        const res = await axios.post('/api/v1/auth/password/forgot', { email });
-        alert(res?.data?.message || 'Si el email existe, se enviará un enlace.');
-      } catch (err) {
-        // Respuesta deliberadamente ambigua por seguridad
-        alert(err?.response?.data?.message || 'Si el email existe, se enviará un enlace.');
-      } finally {
-        setBtnState(btn, false, 'Enviar enlace');
-      }
-    });
-  }
-
-  /* ------------------------------- */
-  /* Reset Password                  */
-  /* ------------------------------- */
-  const resetForm = document.querySelector('.reset-password-form');
-  if (resetForm) {
-    resetForm.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      const btn = resetForm.querySelector('button[type="submit"]');
-      setBtnState(btn, true, 'Actualizando...');
-
-      const uid = resetForm.querySelector('input[name="uid"]')?.value || '';
-      const token = resetForm.querySelector('input[name="token"]')?.value || '';
-      const newPassword = resetForm.querySelector('input[name="newPassword"]')?.value || '';
-      const confirmPassword = resetForm.querySelector('input[name="confirmPassword"]')?.value || '';
-
-      // Leer el valor del checkbox "Recuérdame" como booleano
-      const rememberInput = resetForm.querySelector('input[name="remember"]');
-      const remember = !!(rememberInput && rememberInput.checked);
-
-      if (newPassword !== confirmPassword) {
-        alert('Las contraseñas no coinciden');
-        setBtnState(btn, false, 'Cambiar contraseña');
-        return;
-      }
-
-      try {
-        const data = { uid, token, newPassword };
-        if (remember) data.remember = true;
-
-        const res = await axios.post('/api/v1/auth/password/reset', data);
-        alert(res?.data?.message || 'Contraseña actualizada.');
-
-        const next = res?.data?.data?.next;
-        if (next) {
-          window.location = next;
-          return;
-        }
-        if ((res?.data?.message || '').toLowerCase().includes('correctamente')) {
-          window.location = '/';
-        }
-      } catch (err) {
-        alert(err?.response?.data?.message || 'Error al restablecer contraseña');
-      } finally {
-        setBtnState(btn, false, 'Cambiar contraseña');
-      }
-    });
-  }
-
-  /* ------------------------------- */
-  /* Gallery Wall: reveal on scroll  */
-  /* ------------------------------- */
-  // Detecta los primeros 3 items de la primera fila visual y los marca como 'first-item' y visibles
-  const wallItems = document.querySelectorAll('.gallery-wall-item');
-
-  // Si no hay ítems, no hacemos nada
-  if (!wallItems.length) return;
-
-  // Marcar primeros 3 de la primera fila
-  const markFirstRow = () => {
-    let minTop = Infinity;
-    wallItems.forEach(el => { if (el.offsetTop < minTop) minTop = el.offsetTop; });
-    const firstRowItems = Array.from(wallItems)
-      .filter(el => el.offsetTop === minTop)
-      .slice(0, 3);
-
-    // Limpia posibles marcas anteriores
-    wallItems.forEach(el => el.classList.remove('first-item'));
-
-    firstRowItems.forEach(el => el.classList.add('first-item'));
-  };
-
-  // Estado inicial: los first-item visibles, el resto con clase de reveal
-  const applyInitialRevealState = () => {
-    wallItems.forEach(el => {
-      el.classList.remove('is-visible', 'reveal-on-scroll');
-      if (el.classList.contains('first-item')) {
-       
-      } else {
-        el.classList.add('reveal-on-scroll');
-      }
-    });
-  };
-
-  // Queue + IntersectionObserver
-  const STAGGER_MS = 320;   // separa cada ítem 0.32s (comentario corregido)
-  const queue = [];
-  let flushing = false;
-
-  const flushQueue = () => {
-    if (!queue.length) { flushing = false; return; }
-    const el = queue.shift();
-    el.classList.add('is-visible'); // dispara la transición CSS
-    setTimeout(flushQueue, STAGGER_MS);
-  };
-
-  const io = new IntersectionObserver((entries, obs) => {
-    // Toma los que entran al viewport y ordénalos por posición vertical
-    const toShow = entries
-      .filter(e => e.isIntersecting && !e.target.dataset.revealed)
-      .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-
-    toShow.forEach(e => {
-      e.target.dataset.revealed = '1'; // evita repetir
-      queue.push(e.target);
-      obs.unobserve(e.target);         // solo una vez
-    });
-
-    if (!flushing && queue.length) {
-      flushing = true;
-      flushQueue();
+  // Marca el tab activo basado en ?tab=
+  const tabs = document.querySelectorAll('[data-ox-tab]');
+  const qs = parseQS();
+  const activeTab = qs.tab || (tabs[0] && tabs[0].dataset.oxTab);
+  tabs.forEach(tabBtn => {
+    const isActive = tabBtn.dataset.oxTab === activeTab;
+    tabBtn.classList.toggle('active', isActive);
+    const target = document.querySelector(tabBtn.getAttribute('data-bs-target'));
+    if (target) {
+      target.classList.toggle('show', isActive);
+      target.classList.toggle('active', isActive);
     }
-  }, {
-    rootMargin: '0px 0px -10% 0px',  // empieza un poco antes del bottom
-    threshold: 0.2                   // cuando ~20% del ítem es visible
   });
 
-  // Observar todos los que no sean first-item (esos ya están visibles)
-  const observeRevealItems = () => {
-    wallItems.forEach(el => {
-      if (!el.classList.contains('first-item')) {
-        io.observe(el);
-      }
+  // Al hacer click en un tab, navega preservando filtros SSR
+  tabs.forEach(tabBtn => {
+    tabBtn.addEventListener('click', (e) => {
+      // Permite que Bootstrap active visualmente el tab, pero forzamos navegación SSR
+      const url = new URL(location.href);
+      url.searchParams.set('tab', tabBtn.dataset.oxTab);
+      url.searchParams.set('page', '1');
+      // No tocamos otros filtros/orden: quedan en la URL
+      location.href = url.toString();
     });
-  };
+  });
 
-  // Oculta la última fila si está incompleta (responsive)
-  setTimeout(() => {
-    const rows = {};
-    wallItems.forEach(el => {
-      const top = el.offsetTop;
-      if (!rows[top]) rows[top] = [];
-      rows[top].push(el);
-    });
-    const rowTops = Object.keys(rows).map(Number).sort((a, b) => a - b);
-    if (rowTops.length) {
-      const lastRow = rows[rowTops[rowTops.length - 1]];
-      let fullRowSize = 0;
-      for (let i = 0; i < rowTops.length - 1; i++) {
-        fullRowSize = Math.max(fullRowSize, rows[rowTops[i]].length);
-      }
-      // Si la última fila está incompleta, ocúltala
-      if (lastRow.length < fullRowSize) {
-        lastRow.forEach(el => {
-          // Solo oculta si el elemento NO está visible (no tiene is-visible)
-          if (!el.classList.contains('is-visible')) {
-            el.style.display = 'none';
-          }
-        });
-      }
+  // Paginación SSR: los enlaces ya vienen con href correcto desde la vista (searchResults.pug)
+  // Solo manejamos accesibilidad/UX mínima (scroll al inicio del listado al navegar, si el navegador mantiene pos)
+  const obrasList = document.querySelector('#tab-obras');
+  if (obrasList) {
+    const pager = obrasList.querySelector('#pager-obras');
+    if (pager) {
+      pager.addEventListener('click', (e) => {
+        const a = e.target.closest('a.page-link');
+        if (!a) return;
+        // Dejar que el navegador navegue normalmente; solo mejoramos UX
+        // Nota: si quieres comportamiento SPA, quita esto (pero el usuario pidió SSR)
+        // window.scrollTo({ top: obrasList.offsetTop - 24, behavior: 'smooth' });
+      });
     }
-  }, 500); // Espera a que el layout esté listo
-
-  // Espera a que las imágenes de la pared estén listas (o usa un pequeño timeout de respaldo)
-  const wallRoot = document.querySelector('.gallery-wall-grid') || document;
-  const whenImagesSettled = (root) => {
-    const imgs = root.querySelectorAll ? root.querySelectorAll('.gallery-wall-item img') : [];
-    const pending = [];
-    imgs.forEach(img => {
-      if (!img.complete) {
-        pending.push(new Promise(res => {
-          img.addEventListener('load', res, { once: true });
-          img.addEventListener('error', res, { once: true });
-        }));
-      }
-    });
-    if (!pending.length) return Promise.resolve();
-    // Fianza por si alguna imagen tarda demasiado
-    const safety = new Promise(res => setTimeout(res, 800));
-    return Promise.race([Promise.all(pending), safety]);
-  };
-
-  // Inicialización de la galería
-  whenImagesSettled(wallRoot).then(() => {
-    markFirstRow();
-    applyInitialRevealState();
-    observeRevealItems();
-    updateIncompleteLastRow();
-  }).catch(() => {
-    // Si algo falla, al menos intenta proceder
-    markFirstRow();
-    applyInitialRevealState();
-    observeRevealItems();
-    updateIncompleteLastRow();
-  });
-
-  // Recalcular solo la "última fila incompleta" en resize (no tocamos animaciones ya lanzadas)
-  window.addEventListener('resize', debounce(updateIncompleteLastRow, 150));
-
-  function isFirstRowItem(item, allItems) {
-    if (!item || !allItems?.length) return false;
-    let minTop = Infinity;
-    allItems.forEach(el => { if (el.offsetTop < minTop) minTop = el.offsetTop; });
-    return item.offsetTop === minTop;
   }
 
-  // Enviar chips al cambiar (opcional: auto-submit)
-  document.getElementById('quickChips')?.addEventListener('change', e => {
-    if(e.target.matches('input[type="checkbox"]')) e.currentTarget.submit();
+  // --------- Resto de la UI general (no relacionado al AJAX de /search) ---------
+
+  // Copiar al portapapeles
+  document.querySelectorAll('[data-copy]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const targetSel = btn.getAttribute('data-copy');
+      const node = document.querySelector(targetSel);
+      if (!node) return;
+      try {
+        await navigator.clipboard.writeText(node.innerText.trim());
+        const prev = btn.textContent;
+        setBtnState(btn, true, '¡Copiado!');
+        setTimeout(() => setBtnState(btn, false, prev), 1000);
+      } catch (err) {
+        console.error('No se pudo copiar', err);
+      }
+    });
   });
 
-  // --- helpers usados arriba ---
-  function updateIncompleteLastRow() {
-    // función dummy para mantener compatibilidad con el flujo anterior
-  }
-});
-
-// ⬇️⬇️ NUEVO: segundo listener dedicado a la paginación de la página de búsqueda (no interfiere con la galería) ⬇️⬇️
-document.addEventListener('DOMContentLoaded', function () {
-  const grid = document.querySelector('#grid');
-  const pagerObras = document.querySelector('#pager-obras');
-  if (!grid || !pagerObras) return; // solo corre en searchResults.pug (tab Obras)
-
-  const qs = (s, r = document) => r.querySelector(s);
-  const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
-
-  const urlParams = new URLSearchParams(location.search);
-  const q = urlParams.get('q') || '';
-  const perPage = 20;
-
-  const renderObras = (items) => {
-    grid.innerHTML = items.map(a => `
-      <li>
-        <a href="/artworks/${a.slug || a._id}">
-          <img src="${a.imageUrl || ''}" alt="">
-        </a>
-        <div class="mt-2 text-muted">
-          <span>${a.title || ''}</span>
-          ${a.artist ? ` · <span class="text-secondary">${a.artist.name}</span>` : ''}
-          ${Number.isFinite(a.price_cents) ? ` · <span>$${(a.price_cents/100).toLocaleString('en-US')}</span>` : (typeof a.price === 'number' ? ` · <span>${(a.price).toLocaleString('en-US',{style:'currency',currency:'USD'})}</span>` : '')}
-        </div>
-      </li>
-    `).join('');
-
-    // Re-inicializa Masonry/ImagesLoaded/AnimOnScroll si están disponibles globalmente
-    try {
-      if (window.imagesLoaded && window.Masonry) {
-        window.imagesLoaded(grid, function () {
-          new window.Masonry(grid, {
-            itemSelector: 'li',
-            columnWidth: 'li',
-            percentPosition: true,
-            transitionDuration: '0.2s'
-          });
-        });
-      }
-      if (window.AnimOnScroll) {
-        new window.AnimOnScroll(grid, { minDuration: 0.4, maxDuration: 0.7, viewportFactor: 0.2 });
-      }
-    } catch (e) { /* no-op */ }
-  };
-
-  const renderPager = (nav, page, pages) => {
-  // Maneja navegación con el historial (back/forward)
-  window.addEventListener('popstate', () => {
-    const p = parseInt(new URLSearchParams(location.search).get('page') || '1', 10);
-    loadPage(p, /*push=*/false);
+  // Mostrar/ocultar contraseña
+  document.querySelectorAll('[data-toggle-password]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.querySelector(btn.getAttribute('data-toggle-password'));
+      if (!target) return;
+      const isPwd = target.type === 'password';
+      target.type = isPwd ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', String(isPwd));
+    });
   });
-    const mkHref = (p) => `?q=${encodeURIComponent(q)}&tab=obras&page=${p}`;
-    let html = '';
-    const maxButtons = 7;
-    let start = Math.max(1, page - 3);
-    let end = Math.min(pages, start + maxButtons - 1);
-    if (end - start + 1 < maxButtons) start = Math.max(1, end - maxButtons + 1);
 
-    html += `<a class="btn btn-sm btn-outline-secondary me-2 ${page<=1?'disabled':''}" href="${mkHref(page-1)}" data-page="${page-1}">Atrás</a>`;
-    for (let p = start; p <= end; p++) {
-      html += `<a class="btn btn-sm me-2 ${p===page?'btn-primary':'btn-outline-secondary'}" href="${mkHref(p)}" data-page="${p}" ${p===page?'aria-current="page"':''}>${p}</a>`;
-    }
-    html += `<a class="btn btn-sm btn-outline-secondary ${page>=pages?'disabled':''}" href="${mkHref(page+1)}" data-page="${page+1}">Siguiente</a>`;
+  // Muestra el nombre de archivo seleccionado en inputs file
+  document.querySelectorAll('input[type=file]').forEach(input => {
+    input.addEventListener('change', () => {
+      const nameEl = input.closest('.form-group, .mb-3, .input-group')?.querySelector('[data-file-name]');
+      if (nameEl) nameEl.textContent = input.files?.[0]?.name || '';
+    });
+  });
 
-    nav.innerHTML = html;
+  // Desplegables con auto-submit (chips rápidos)
+  document.querySelectorAll('[data-autosubmit]').forEach(select => {
+    select.addEventListener('change', () => {
+      const form = select.closest('form');
+      if (form) form.submit();
+    });
+  });
 
-    qsa('a', nav).forEach(a => {
-      a.addEventListener('click', (e) => {
-        const next = parseInt(a.getAttribute('data-page'), 10);
-        if (!isNaN(next) && next >= 1 && next <= pages) {
-          e.preventDefault();
-          loadPage(next, true);
-        }
+  // Evita submit doble
+  document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', () => {
+      const btn = form.querySelector('button[type=submit], input[type=submit]');
+      setBtnState(btn, true);
+      setTimeout(() => setBtnState(btn, false), 1500);
+    });
+  });
+
+  // Offcanvas: al cerrar, resetea inputs con data-reset-on-close
+  document.querySelectorAll('.offcanvas').forEach(oc => {
+    oc.addEventListener('hidden.bs.offcanvas', () => {
+      oc.querySelectorAll('[data-reset-on-close]')?.forEach(el => {
+        if (el.matches('input[type=checkbox], input[type=radio]')) el.checked = false;
+        else if (el.matches('input, select, textarea')) el.value = '';
       });
     });
-  };
+  });
 
-  async function loadPage(page = 1, push = false) {
-    try {
-      const res = await axios.get('/api/v1/artworks/search', { params: { q, page, perPage } });
-      const { items, pages } = res.data || { items: [], pages: 0 };
-      renderObras(items);
-      renderPager(pagerObras, page, pages);
-
-      // Scroll up al contenedor principal de resultados
-      const section = document.querySelector('.container-xxl.my-4') || document.querySelector('#searchTabs') || document.body;
-      if (section && typeof section.scrollIntoView === 'function') {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      if (push) {
-        const url = new URL(location.href);
-        url.searchParams.set('q', q);
-        url.searchParams.set('tab', 'obras');
-        url.searchParams.set('page', String(page));
-        history.pushState({ tab: 'obras', page }, '', url.toString());
-      }
-    } catch (err) {
-      // Si falla, deja el SSR como fallback
-      console.error('Error cargando página de obras:', err);
-    }
+  // Tooltips de Bootstrap
+  if (window.bootstrap) {
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
   }
 
-  // Intercepta cambio de tab hacia "Obras" para cargar página 1 sin recarga
-  qsa('a[data-bs-toggle="tab"]').forEach(el => {
-    el.addEventListener('shown.bs.tab', (e) => {
-      const tab = e.target.getAttribute('data-tab');
-      if (tab === 'obras') loadPage(1, true);
+  // Evita que inputs numéricos tengan valores no válidos
+  document.querySelectorAll('input[type=number][min], input[type=number][max]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const min = inp.min !== '' ? Number(inp.min) : null;
+      const max = inp.max !== '' ? Number(inp.max) : null;
+      let v = Number(inp.value);
+      if (!Number.isFinite(v)) return;
+      if (min != null && v < min) inp.value = String(min);
+      if (max != null && v > max) inp.value = String(max);
     });
   });
 
-  // Carga inicial respetando ?page=
-  const initialPage = parseInt(urlParams.get('page') || '1', 10);
-  loadPage(initialPage, false);
+  // Enlaces que requieren confirmación
+  document.querySelectorAll('[data-confirm]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const msg = a.getAttribute('data-confirm') || '¿Seguro?';
+      if (!confirm(msg)) {
+        e.preventDefault();
+      }
+    });
+  });
+
+  // ------- (Opcional) Scroll al hash preservando offset por header fijo
+  if (location.hash) {
+    const target = document.querySelector(location.hash);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
 });
 
-// Ocultar imagen login-signin-side-img si supera el 50vw (display: none)
-const loginSideImg = document.querySelector('.login-signin-side-img');
+// ------ Código que existía antes y es independiente de /search (login, etc.) ------
+
+// Mostrar/ocultar password y validación simple de formularios (si aplica en tu app)
+(function() {
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.prototype.slice.call(forms).forEach(function(form) {
+    form.addEventListener('submit', function (event) {
+      if (!form.checkValidity()) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+
+// Ajuste responsivo de imágenes en el login (ejemplo genérico)
+const loginSideImg = document.querySelector('[data-login-side-img]');
 function checkLoginSideImgWidth() {
   if (!loginSideImg) return;
   const vw = window.innerWidth;

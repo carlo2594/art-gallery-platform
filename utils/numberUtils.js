@@ -4,6 +4,8 @@
  */
 // utils/numberUtils.js
 function toNumber(x) {
-  return (x !== undefined && x !== '' ? Number(x) : undefined);
+  if (x === undefined || x === null || x === '') return null;
+  const n = Number(x);
+  return isNaN(n) ? null : n;
 }
 module.exports = { toNumber };

@@ -1,5 +1,10 @@
 // Filtros de obras reutilizables para artworks.pug y searchResults.pug
 form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
+  // Mantener el término de búsqueda si existe
+  if typeof search !== 'undefined' && search
+    input(type='hidden' name='q' value=search)
+  else if q && q.q
+    input(type='hidden' name='q' value=q.q)
   // Chips de orden
   - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}, {label: 'Mejores ratings', value: 'top_rated'}, {label: 'Más comentados', value: 'most_commented'}]
   each opt in opts
@@ -36,6 +41,11 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
     h5#filtersTitle Filtros
     button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
   form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
+    // Mantener el término de búsqueda si existe
+    if typeof search !== 'undefined' && search
+      input(type='hidden' name='q' value=search)
+    else if q && q.q
+      input(type='hidden' name='q' value=q.q)
     if q && q.type
       each t in (Array.isArray(q.type)? q.type : [q.type]) 
         input(type='hidden' name='type' value=t)
@@ -46,7 +56,7 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
     .filter-block
       label.form-label.mb-2 Material
       .d-flex.flex-wrap.gap-2
-        each m in materials
+        each m in (typeof materials !== 'undefined' && materials ? materials : [])
           if m
             label.chip
               input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))

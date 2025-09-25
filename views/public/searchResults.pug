@@ -30,27 +30,33 @@ block content
       // OBRAS TAB
       .tab-pane.active#tab-obras
         // Filtros solo visibles en el tab Obras
+        // Set variables before including the filter fragment
+        - var q = typeof q !== 'undefined' ? q : {};
+        - var materials = typeof materials !== 'undefined' ? materials : [];
+        - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+        - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+        - var actionUrl = '/search';
         .artwork-filters.mt-3.mb-3(id="artwork-filters")
           include _artworkFilters.pug
-          // Pasa las variables necesarias: q, materials, priceBounds, appliedPrice, actionUrl='/search'
         .container-xxl
           if artworks && artworks.length
-            h3.h5.mb-3 Obras encontradas
-            ul.grid.effect-2#grid(data-tab="obras")
-              each a, i in artworks
+            ul.grid.effect-2#grid
+              each a in artworks
                 li
                   a(href=`/artworks/${a.slug || a._id}`)
                     img(src=a.imageUrl)
                   .mt-2.text-muted
                     span= a.title
                     if a.artist
-                      |  ·
+                      |  · 
                       span.text-secondary= a.artist.name
-                    if typeof a.price === 'number'
-                      |  ·
+                    if typeof a.price_cents === 'number'
+                      |  · 
+                      span= '$' + (a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:2})
+                    else if typeof a.price === 'number'
+                      |  · 
                       span= a.price.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
             nav.mt-4.mb-4.d-flex.justify-content-center#pager-obras(aria-label="Paginación obras" data-tab="obras")
-              // El paginador real lo maneja el JS, aquí solo el primer botón
               ul.pagination-ox.pagination-lg
                 li.page-item.active
                   a.page-link.tabindex-0(href=`?q=${search}&tab=obras&page=1` data-page="1" aria-current="page") 1
