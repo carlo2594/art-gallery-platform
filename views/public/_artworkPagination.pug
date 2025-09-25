@@ -1,0 +1,38 @@
+// views/public/_artworkPagination.pug
+// Requiere: page, totalPages, q, (opcional: search, tab)
+// Uso: include _artworkPagination.pug
+if typeof page !== 'undefined' && typeof totalPages !== 'undefined' && totalPages > 1
+  - var navAttrs = { style: 'display:none', class: 'mt-4 mb-4 d-flex justify-content-center pager-hidden', id: 'pager-obras', 'aria-label': 'Paginación obras' };
+  - if (typeof tab !== 'undefined') navAttrs['data-tab'] = tab;
+  nav(&attributes(navAttrs))
+    ul.pagination-ox.pagination-lg
+      // Previous button
+      li.page-item(class=page === 1 ? 'disabled' : '')
+        a.page-link(
+          href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+            ? `?q=${search || ''}&tab=${tab}&page=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`
+            : `?page=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`)
+          aria-label="Anterior")
+          span(aria-hidden="true") &laquo;
+      // Page numbers (show up to 5 pages, center current)
+      - var startPage = Math.max(1, page - 2);
+      - var endPage = Math.min(totalPages, page + 2);
+      - if (endPage - startPage < 4) {
+      -   if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+      -   else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+      - }
+      each p in Array(endPage - startPage + 1).fill().map((_,i) => startPage + i)
+        li.page-item(class=p === page ? 'active' : '')
+          a.page-link(
+            href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+              ? `?q=${search || ''}&tab=${tab}&page=${p}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`
+              : `?page=${p}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`)
+            aria-current=(p === page ? 'page' : false))= p
+      // Next button
+      li.page-item(class=page === totalPages ? 'disabled' : '')
+        a.page-link(
+          href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+            ? `?q=${search || ''}&tab=${tab}&page=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`
+            : `?page=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.material ? `&material=${q.material}` : ''}`)
+          aria-label="Siguiente")
+          span(aria-hidden="true") &raquo;
