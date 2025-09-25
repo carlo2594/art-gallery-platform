@@ -52,17 +52,26 @@ const artworkSchema = new mongoose.Schema(
     material_norm: { type: String, index: true },
 
     /* ------ Metrics (inmutables) ------ */
-    views: { type: Number, default: 0 },
-    commentsCount: { type: Number, default: 0 },
+
+  views: { type: Number, default: 0 },
+
+  // Conteo de favoritos
+  favoritesCount: { type: Number, default: 0 },
+
+    // Fecha de creación en inglés (formato largo)
+    createdAt_en: { type: String },
 
     /* ------ Workflow ----- */
+
     status: { type: String, enum: STATUS, default: 'draft', index: true },
+
     review: {
       reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       reviewedAt: { type: Date },
       rejectReason: { type: String },
       comment: { type: String, trim: true },
     },
+
 
     /* ------ Soft-delete (papelera) ------ */
     deletedAt: { type: Date, default: null },
@@ -174,6 +183,12 @@ artworkSchema.pre('save', function (next) {
   // Asegurar entero y no-negativo para el precio
   if (typeof this.price_cents === 'number') {
     this.price_cents = Math.max(0, Math.round(this.price_cents));
+  }
+
+  // Calcular fecha de creación en inglés (ej: September 25, 2025)
+  if (this.createdAt) {
+    const date = new Date(this.createdAt);
+    this.createdAt_en = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
   next();

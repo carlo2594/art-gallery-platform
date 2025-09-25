@@ -8,8 +8,6 @@ function getSort(sortParam) {
     : sortParam === 'recent'             ? { createdAt: -1 }
     : sortParam === 'price_asc'          ? { price_cents: 1, _id: -1 }
     : sortParam === 'price_desc'         ? { price_cents: -1, _id: -1 }
-    : sortParam === 'top_rated'          ? { 'ratings.average': -1, 'ratings.count': -1, _id: -1 }
-    : sortParam === 'most_commented'     ? { commentsCount: -1, _id: -1 }
     : { _id: -1 };
 }
 module.exports = { getSort };

@@ -1,6 +1,5 @@
 const artworkRoutes     = require('@routes/api/artworkRoutes');
 const exhibitionRoutes  = require('@routes/api/exhibitionRoutes');
-const commentRoutes     = require('@routes/api/commentRoutes');
 const userRoutes        = require('@routes/api/userRoutes');
 const authRoutes        = require('@routes/api/authRoutes');
 const favoriteRoutes    = require('@routes/api/favoriteRoutes');
@@ -22,7 +21,6 @@ module.exports = app => {
   app.use('/api/v1/favorites',   favoriteRoutes);
   app.use('/api/v1/artworks',    artworkRoutes);
   app.use('/api/v1/exhibitions', exhibitionRoutes);
-  app.use('/api/v1/comments',    commentRoutes);
   app.use('/api/v1/artwork-views', artworkViewRoutes); 
 
 

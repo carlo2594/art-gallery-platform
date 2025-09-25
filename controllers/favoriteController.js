@@ -4,7 +4,8 @@ const AppError = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');
 const mongoose = require('mongoose');
 
-// Añadir un favorito
+
+// Añadir un favorito y actualizar favoritesCount
 exports.addFavorite = catchAsync(async (req, res, next) => {
   const artworkId = req.body.artworkId || req.body.artwork;
   const userId = req.user._id;
@@ -26,11 +27,14 @@ exports.addFavorite = catchAsync(async (req, res, next) => {
   }
 
   const favorite = await Favorite.create({ user: userId, artwork: artworkId });
+  // Incrementa el contador de favoritos
+  await artwork.updateOne({ $inc: { favoritesCount: 1 } });
 
   sendResponse(res, favorite, 'Artwork added to favorites', 201);
 });
 
-// Eliminar un favorito
+
+// Eliminar un favorito y actualizar favoritesCount
 exports.removeFavorite = catchAsync(async (req, res, next) => {
   const { artworkId } = req.params;
   const userId = req.user._id;
@@ -45,6 +49,9 @@ exports.removeFavorite = catchAsync(async (req, res, next) => {
   if (!result) {
     return next(new AppError('Favorite not found', 404));
   }
+
+  // Decrementa el contador de favoritos
+  await require('@models/artworkModel').findByIdAndUpdate(artworkId, { $inc: { favoritesCount: -1 } });
 
   sendResponse(res, null, 'Artwork removed from favorites', 204);
 });

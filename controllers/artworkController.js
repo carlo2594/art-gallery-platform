@@ -1,33 +1,29 @@
 
-// controllers/artworkController.js
+
 
 // =======================
-// IMPORTS
+// IMPORTS Y CONSTANTES
 // =======================
+const AppError = require('@utils/appError');
+const filterObject = require('@utils/filterObject');
+const sendResponse = require('@utils/sendResponse');
+const { sendMail } = require('@services/mailer');
+const { upload, deleteImage } = require('@utils/cloudinaryImage');
+const Artwork = require('@models/artworkModel');
+const mongoose = require('mongoose');
+const catchAsync = require('@utils/catchAsync');
 const {
   verifyAspect,
   buildTransformedUrl,
   getAspectPolicy,
   buildAspectErrorPayload
 } = require('@utils/aspectUtils');
-const mongoose = require('mongoose');
-const Artwork      = require('@models/artworkModel');
-const catchAsync   = require('@utils/catchAsync');
-const AppError     = require('@utils/appError');
-const filterObject = require('@utils/filterObject');
-const sendResponse = require('@utils/sendResponse');
-const { sendMail } = require('@services/mailer');
-const { upload, deleteImage } = require('@utils/cloudinaryImage');
-
-// =======================
-// CONSTANTES
-// =======================
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
+
 
 // =======================
 // HELPERS
 // =======================
-/** Si la obra ya está en el status solicitado, responde y corta. */
 function checkAlreadyInStatus(res, art, status, mensaje) {
   if (art.status === status) {
     return res.status(400).json({
@@ -38,19 +34,10 @@ function checkAlreadyInStatus(res, art, status, mensaje) {
   return false;
 }
 
-/** Normaliza strings para filtros */
-const norm = s => (s || '')
-  .normalize('NFD')
-  .replace(/\[\u0300-\u036f]/g, '')
-  .toLowerCase()
-  .trim();
-
-/** Convierte dólares (string/number) a centavos (entero no-negativo). Lanza AppError si inválido. */
 function toCentsOrThrow(value, fieldName = 'amount') {
   if (value === undefined || value === null || value === '') {
     throw new AppError(`El campo "${fieldName}" es obligatorio.`, 400);
   }
-  // Permitir "$", comas y espacios
   const cleaned = String(value).replace(/[$,\s]/g, '');
   const num = Number(cleaned);
   if (!isFinite(num)) throw new AppError(`"${fieldName}" no es un número válido.`, 400);
@@ -58,6 +45,103 @@ function toCentsOrThrow(value, fieldName = 'amount') {
   if (cents < 0) throw new AppError(`"${fieldName}" no puede ser negativo.`, 400);
   return cents;
 }
+
+
+// =======================
+// PATCH /:id/start-review  submitted → under_review (admin)
+// =======================
+exports.startReview = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido.', 400));
+  }
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  if (!art) return next(new AppError('Obra no encontrada.', 404));
+
+  if (art.status === 'under_review') {
+    return res.status(400).json({ status: 'fail', message: 'La obra ya está en revisión.' });
+  }
+
+  art.status = 'under_review';
+  art.review = { reviewedBy: req.user.id };
+  await art.save();
+
+  // Notificar al artista que su obra está en revisión
+  if (art.artist && art.artist.email) {
+    await sendMail({
+      to: art.artist.email,
+      subject: 'Tu obra está en revisión',
+      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.\n\nTan pronto sea aprobada o rechazada, te notificaremos.`
+    });
+  }
+
+  sendResponse(res, art, 'La revisión de la obra ha iniciado.');
+});
+
+// =======================
+// PATCH /:id/approve  under_review → approved (admin)
+// =======================
+exports.approveArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido.', 400));
+  }
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  if (!art) return next(new AppError('Obra no encontrada.', 404));
+
+  if (art.status === 'approved') {
+    return res.status(400).json({ status: 'fail', message: 'La obra ya está aprobada.' });
+  }
+
+  art.status = 'approved';
+  art.review = { reviewedBy: req.user.id, reviewedAt: new Date() };
+  await art.save();
+
+  // Notificar al artista que su obra fue aprobada
+  if (art.artist && art.artist.email) {
+    await sendMail({
+      to: art.artist.email,
+      subject: '¡Tu obra fue aprobada!',
+      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.\n\nYa es visible para el público que visita la página.`
+    });
+  }
+
+  sendResponse(res, art, 'La obra fue aprobada.');
+});
+
+// =======================
+// PATCH /:id/reject  under_review → rejected (admin)
+// =======================
+exports.rejectArtwork = catchAsync(async (req, res, next) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    return next(new AppError('ID de obra inválido.', 400));
+  }
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  if (!art) return next(new AppError('Obra no encontrada.', 404));
+
+  if (art.status === 'rejected') {
+    return res.status(400).json({ status: 'fail', message: 'La obra ya está rechazada.' });
+  }
+
+  if (!req.body.reason || typeof req.body.reason !== 'string' || req.body.reason.trim() === '') {
+    return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+  }
+
+  art.status = 'rejected';
+  art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: req.body.reason };
+  await art.save();
+
+  // Notificar al artista que su obra fue rechazada
+  if (art.artist && art.artist.email) {
+    await sendMail({
+      to: art.artist.email,
+      subject: 'Tu obra fue rechazada',
+      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.\nMotivo: ${req.body.reason}`
+    });
+  }
+
+  sendResponse(res, art, 'La obra fue rechazada.');
+});
+
+
 
 
 
@@ -402,87 +486,8 @@ Puedes consultar el historial de aprobaciones para validar el estado final de la
   sendResponse(res, art, 'La obra fue enviada a revisión.');
 });
 
-/** PATCH /:id/start-review  submitted → under_review (admin) */
-exports.startReview = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return next(new AppError('ID de obra inválido.', 400));
-  }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
-  if (!art) return next(new AppError('Obra no encontrada.', 404));
 
-  if (checkAlreadyInStatus(res, art, 'under_review', 'La obra ya está en revisión.')) return;
-
-  await art.startReview(req.user.id);
-
-  // Notificar al artista que su obra está en revisión
-  if (art.artist && art.artist.email) {
-    await sendMail({
-      to: art.artist.email,
-      subject: 'Tu obra está en revisión',
-      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.
-
-Tan pronto sea aprobada o rechazada, te notificaremos`
-    });
-  }
-
-  sendResponse(res, art, 'La revisión de la obra ha iniciado.');
-});
-
-/** PATCH /:id/approve  under_review → approved (admin) */
-exports.approveArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return next(new AppError('ID de obra inválido.', 400));
-  }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
-  if (!art) return next(new AppError('Obra no encontrada.', 404));
-
-  if (checkAlreadyInStatus(res, art, 'approved', 'La obra ya está aprobada.')) return;
-
-  await art.approve(req.user.id);
-
-  // Notificar al artista que su obra fue aprobada
-  if (art.artist && art.artist.email) {
-    await sendMail({
-      to: art.artist.email,
-      subject: '¡Tu obra fue aprobada!',
-      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.
-
-Ya es visible para el público que visita la página de`
-    });
-  }
-
-  sendResponse(res, art, 'La obra fue aprobada.');
-});
-
-/** PATCH /:id/reject  under_review → rejected (admin) */
-exports.rejectArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-    return next(new AppError('ID de obra inválido.', 400));
-  }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
-  if (!art) return next(new AppError('Obra no encontrada.', 404));
-
-  if (checkAlreadyInStatus(res, art, 'rejected', 'La obra ya está rechazada.')) return;
-
-  // Validar que venga motivo de rechazo
-  if (!req.body.reason || typeof req.body.reason !== 'string' || req.body.reason.trim() === '') {
-    return next(new AppError('Debes especificar el motivo del rechazo.', 400));
-  }
-
-  await art.reject(req.user.id, req.body.reason);
-
-  // Notificar al artista que su obra fue rechazada
-  if (art.artist && art.artist.email) {
-    await sendMail({
-      to: art.artist.email,
-      subject: 'Tu obra fue rechazada',
-      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.
-Motivo: ${req.body.reason}`
-    });
-  }
-
-  sendResponse(res, art, 'La obra fue rechazada.');
-});
+// Los métodos de revisión han sido eliminados porque el modelo ya no soporta review.
 
 /* ------------------------------------------------------------------ */
 /*  Obtener obras por estado                                          */
