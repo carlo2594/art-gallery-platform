@@ -15,6 +15,7 @@ function getSort(sortParam, type = 'artwork') {
     : sortParam === 'recent'             ? { createdAt: -1 }
     : sortParam === 'price_asc'          ? { price_cents: 1, _id: -1 }
     : sortParam === 'price_desc'         ? { price_cents: -1, _id: -1 }
+    : sortParam === 'most_favorited'     ? { favoritesCount: -1, _id: -1 }
     : { _id: -1 };
 }
 module.exports = { getSort };

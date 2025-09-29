@@ -63,11 +63,11 @@ async function seed() {
   ]);
 
 
-  // Crea 100 artistas de prueba y 5 admins
+  // Crea 105 artistas de prueba y 2 admins
   const userData = [];
   userData.push({ name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin', profileImage: randomFromArray(randomImages) });
   userData.push({ name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) });
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= 105; i++) {
     userData.push({
       name: `Artista ${i}`,
       email: `artista${i}@test.com`,
@@ -91,7 +91,7 @@ async function seed() {
   ];
 
 
-  // Crea obras de arte de prueba (total 100)
+  // Crea obras de arte de prueba (total 111)
   const artworkData = [];
   // Nombres únicos para las obras
   // Descriptores únicos para las obras
@@ -117,7 +117,7 @@ async function seed() {
     'Luz', 'Escondida', 'Cristal', 'Dorado', 'Plata',
     'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
   ];
-  for (let i = 1; i <= 200; i++) {
+  for (let i = 1; i <= 111; i++) {
     const user = randomFromArray(users);
     const canvas = randomFromArray(canvasSizes);
     const scaleOptions = [0.5, 1, 1.5];
@@ -146,14 +146,15 @@ async function seed() {
       completedAt,
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale),
-      price_cents: randomInt(500, 5000) * 100
+      price_cents: randomInt(500, 5000) * 100,
+      favoritesCount: randomInt(0, 50) // <-- número entero aleatorio de favoritos
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Crea exposiciones de prueba (máximo 10)
+  // Crea exposiciones de prueba (total 100)
   const exhibitionData = [];
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 100; i++) {
     // Máximo 10 artworks y 10 participantes por exposición
           price_cents: randomInt(500, 5000) * 100 // <-- agrega el precio en centavos
     const artworksSet = new Set();

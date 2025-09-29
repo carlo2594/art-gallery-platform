@@ -45,8 +45,6 @@ const sendErrorDev = (err, req, res) => {
       stack:   err.stack
     });
   }
-  // Vistas → página de error con stack en consola
-  console.error('ERROR 💥', err);
   return res.status(err.statusCode).render('public/error', {
     title: 'Algo salió mal',
     msg:   err.message
@@ -63,7 +61,6 @@ const sendErrorProd = (err, req, res) => {
       });
     }
     // Bug inesperado
-    console.error('ERROR 💥', err);
     return res.status(500).json({
       status:  'error',
       message: 'Algo salió mal.'
@@ -78,7 +75,6 @@ const sendErrorProd = (err, req, res) => {
     });
   }
   // Bug inesperado en producción
-  console.error('ERROR 💥', err);
   return res.status(500).render('public/error', {
     title: 'Algo salió mal',
     msg:   'Por favor inténtalo más tarde.'

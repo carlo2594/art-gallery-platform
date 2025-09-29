@@ -6,7 +6,13 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
   else if q && q.q
     input(type='hidden' name='q' value=q.q)
   // Chips de orden
-  - var opts = [{label: 'Relevancia', value: ''}, {label: 'Populares', value: 'popular'}, {label: 'Recientes', value: 'recent'}]
+  -
+    var opts = [
+      {label: 'Relevancia', value: ''},
+      {label: 'Populares', value: 'popular'},
+      {label: 'Recientes', value: 'recent'},
+      {label: 'Más Favoritos', value: 'most_favorited'}
+    ];
   each opt in opts
     button.chip.btn(
       type='submit'
@@ -109,6 +115,7 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
         option(value='') Selecciona
         option(value='price_asc' selected=(q && q.sort==='price_asc')) Menor a mayor
         option(value='price_desc' selected=(q && q.sort==='price_desc')) Mayor a menor
+        option(value='most_favorited' selected=(q && q.sort==='most_favorited')) Más Favoritos
     .mt-auto.d-flex.gap-2.sticky-apply
       a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
       button.btn.btn-apply.flex-fill(type='submit') Ver resultados

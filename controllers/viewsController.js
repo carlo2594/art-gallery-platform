@@ -46,9 +46,6 @@ const { getPriceRanges } = require('@utils/priceUtils');
 
 exports.getSearchResults = catchAsync(async (req, res) => {
   const q = req.query;
-  // Debug: Verifica el valor de sort recibido para artistas
-  console.log('FULL QUERY:', req.query);
-  console.log('ARTIST SORT PARAM:', q.sort);
   const search = (q.q || '').trim();
 
   // 1. Construcción de filtro y sort

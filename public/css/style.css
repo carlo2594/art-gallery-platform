@@ -136,8 +136,40 @@ footer, .footer { flex-shrink: 0; }
   background: #fff;
 }
 /* Minimalist gallery-style label for artwork cards */
+.artwork-meta-items {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.7rem;
+}
+.artwork-flex-row {
+  display: flex;
+  flex-direction: row;
+  gap: 2.5rem;
+}
+.museum-label {
+  min-width: 180px;
+  max-width: 260px;
+  box-shadow: none;
+  border: none;
+  border-radius: 0;
+}
+.artwork-meta {
+  min-width: 140px;
+  max-width: 220px;
+}
+@media (max-width: 767px) {
+  .artwork-flex-row {
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  .museum-label, .artwork-meta {
+    min-width: 0;
+    max-width: 100%;
+  }
+}
 .art-label {
-  font-family: 'Georgia', 'Times New Roman', Times, serif;
+  font-family: 'Montserrat', 'Arial', sans-serif;
   background: #fff;
   border: 1.5px solid #222;
   border-radius: 0.5rem;
@@ -614,12 +646,16 @@ section.join-artists {
 }
 /* Minimalist gallery-style label for artwork cards */
 .art-label {
-  font-family: 'Georgia', 'Times New Roman', Times, serif;
+  font-family: 'Montserrat', 'Arial', sans-serif;
   background: #fff;
   border: 1.5px solid #222;
   border-radius: 0.5rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   padding: 1.25rem 1rem 1.5rem 1rem;
+}
+/* Museo price serious font */
+.museum-price.fw-bold.fs-5.mt-2 {
+  font-family: 'Lora', serif;
 }
 .art-label .h5 {
   font-style: italic;
