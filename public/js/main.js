@@ -96,13 +96,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Al hacer click en un tab, navega preservando filtros SSR
+  // Al hacer click en un tab, navega preservando filtros SSR y resetea paginación
   tabs.forEach(tabBtn => {
     tabBtn.addEventListener('click', (e) => {
       // Permite que Bootstrap active visualmente el tab, pero forzamos navegación SSR
       const url = new URL(location.href);
       url.searchParams.set('tab', tabBtn.dataset.oxTab);
-      url.searchParams.set('page', '1');
+      url.searchParams.set('page', '1'); // Reset page for artworks/exhibitions
+      url.searchParams.delete('artistPage'); // Always reset artistPage when switching tab
+      if (tabBtn.dataset.oxTab === 'artistas') {
+        url.searchParams.set('artistPage', '1'); // Reset artistPage for artists tab
+      }
       // No tocamos otros filtros/orden: quedan en la URL
       location.href = url.toString();
     });

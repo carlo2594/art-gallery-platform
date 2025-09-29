@@ -1,4 +1,4 @@
-ul.grid.effect-2#grid
+ul.grid.effect-2#grid.mb-5
   each a in artworks
     li
        .card.h-100.bg-white.border-0.shadow-none.art-card-shadow
@@ -26,5 +26,7 @@ ul.grid.effect-2#grid
            .d-flex.flex-wrap.gap-2.small.text-muted
              if typeof a.views === 'number'
                span Vistas: #{a.views}
+             if a.completedAt
+               span Creación artística: #{new Date(a.completedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
              if a.createdAt
-               span Fecha: #{new Date(a.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
+               span Publicación: #{new Date(a.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}

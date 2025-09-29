@@ -13,16 +13,16 @@ block content
   .container-xxl.my-4
     // Tabs
     - const artworksCount = typeof totalArtworks !== 'undefined' ? totalArtworks : (artworks ? artworks.length : 0);
-    - const artistsCount = artists ? artists.length : 0;
+    - const artistsCount = typeof totalArtists !== 'undefined' ? totalArtists : (artists ? artists.length : 0);
     - const exhibitionsCount = exhibitions ? exhibitions.length : 0;
     - const totalCount = artworksCount + artistsCount + exhibitionsCount;
     ul.nav.nav-tabs.mb-4#searchTabs(role="tablist")
       li.nav-item.flex-fill.text-center
-        a.nav-link.active.w-100(href="#tab-obras", data-bs-toggle="tab", data-tab="obras", role="tab") Obras (#{artworksCount})
+        a.nav-link.active.w-100(href="#tab-obras", data-bs-toggle="tab", data-ox-tab="obras", role="tab", data-bs-target="#tab-obras") Obras (#{artworksCount})
       li.nav-item.flex-fill.text-center
-        a.nav-link.w-100(href="#tab-artistas", data-bs-toggle="tab", data-tab="artistas", role="tab") Artistas (#{artistsCount})
+        a.nav-link.w-100(href="#tab-artistas", data-bs-toggle="tab", data-ox-tab="artistas", role="tab", data-bs-target="#tab-artistas") Artistas (#{artistsCount})
       li.nav-item.flex-fill.text-center
-        a.nav-link.w-100(href="#tab-exposiciones", data-bs-toggle="tab", data-tab="exposiciones", role="tab") Exposiciones (#{exhibitionsCount})
+        a.nav-link.w-100(href="#tab-exposiciones", data-bs-toggle="tab", data-ox-tab="exposiciones", role="tab", data-bs-target="#tab-exposiciones") Exposiciones (#{exhibitionsCount})
 
     // Tab Contents
     .tab-content
@@ -49,18 +49,23 @@ block content
 
       // ARTISTAS TAB
       .tab-pane#tab-artistas
-        if artistsCount
-          h3.h5.mb-3 Artistas encontrados
-          ul.list-group.mb-4#list-artistas
-            each artist, i in artists.slice(0,12)
-              li.list-group-item
-                a(href=`/artistas/${artist._id}`)
-                  | #{artist.name}
-          if artistsCount > 12
-            .d-flex.justify-content-end.mb-3
-              button.btn.btn-outline-primary.btn-sm(data-more="artistas") Ver más
-        else
-          h3.h5.mt-4.text-muted No se encontraron artistas.
+        // Filtros solo visibles si hay resultados en el tab Artistas
+        if artistsCount > 0
+          section.filters-toolbar.py-2
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+              - var q = typeof q !== 'undefined' ? q : {};
+              - var actionUrl = '/search';
+              include _artistFilters.pug
+        .container-xxl.artworks-flex
+          if artists && artists.length
+            .artworks-grid-paginate
+              include _artistGrid.pug
+              - var page = typeof artistPage !== 'undefined' ? artistPage : 1;
+              - var totalPages = typeof artistTotalPages !== 'undefined' ? artistTotalPages : 1;
+              - var tab = 'artistas';
+              include _artistPagination.pug
+          else
+            h3.h5.mt-4.text-muted No se encontraron artistas.
 
       // EXPOSICIONES TAB
       .tab-pane#tab-exposiciones

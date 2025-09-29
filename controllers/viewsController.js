@@ -11,6 +11,9 @@ const { getPriceRanges } = require('@utils/priceUtils');
 
 exports.getSearchResults = catchAsync(async (req, res) => {
   const q = req.query;
+  // Debug: Verifica el valor de sort recibido para artistas
+  console.log('FULL QUERY:', req.query);
+  console.log('ARTIST SORT PARAM:', q.sort);
   const search = (q.q || '').trim();
 
   // 1. Construcción de filtro y sort
@@ -51,9 +54,29 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
-  // Buscar artistas cuyo nombre coincida
-  const artistFilter = search ? { name: { $regex: search, $options: 'i' } } : {};
-  const matchingArtists = search ? await User.find(artistFilter) : [];
+  // --- ARTISTAS: Filtros, paginación y orden ---
+  const { buildArtistFilter } = require('@utils/artistSearch');
+  const { getSort } = require('@utils/sortUtils');
+  const artistFilter = buildArtistFilter(q, search);
+  // Normaliza el sort para artistas (evita errores por casing o valores vacíos)
+  let artistSortParam = q.sort;
+  if (!artistSortParam || (artistSortParam !== 'name_asc' && artistSortParam !== 'name_desc' && artistSortParam !== 'recent' && artistSortParam !== 'oldest')) {
+    artistSortParam = 'name_asc';
+  }
+  const artistSort = getSort(artistSortParam, 'artist');
+
+  // Paginación
+  const { page: artistPage, perPage: artistPerPage, skip: artistSkip } = getPaginationParams({
+    page: q.artistPage || q.page,
+    perPage: q.artistPerPage || 15
+  }, 15, 100);
+
+  const totalArtists = await User.countDocuments(artistFilter);
+  const matchingArtists = await User.find(artistFilter)
+    .sort(artistSort)
+    .skip(artistSkip)
+    .limit(artistPerPage);
+  const artistTotalPages = Math.max(1, Math.ceil(totalArtists / artistPerPage));
 
   // Buscar exposiciones cuyo título coincida
   const exhibitionFilter = search ? { title: { $regex: search, $options: 'i' } } : {};
@@ -65,6 +88,9 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     artists: matchingArtists,
     exhibitions,
     totalArtworks,
+    totalArtists,
+    artistPage,
+    artistTotalPages,
     search,
     q,
     priceBounds,

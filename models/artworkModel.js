@@ -13,9 +13,10 @@ const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 
 const artworkSchema = new mongoose.Schema(
   {
-    /* ------ Basics ------ */
-    title: { type: String, required: true, trim: true },
-    description: { type: String, trim: true },
+  /* ------ Basics ------ */
+  title: { type: String, required: true, trim: true },
+  description: { type: String, trim: true },
+  completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
     /* ------ Relations ------ */
     artist: {

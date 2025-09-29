@@ -5,9 +5,7 @@ const mongoose = require('mongoose');
 const Artwork = require('../models/artworkModel');
 const User = require('../models/userModel');
 const Exhibition = require('../models/exhibitionModel');
-const Comment = require('../models/commentModel');
 const Favorite = require('../models/favoriteModel');
-const Rating = require('../models/ratingViewModel');
 const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
@@ -60,21 +58,25 @@ async function seed() {
     User.deleteMany({}),
     Artwork.deleteMany({}),
     Exhibition.deleteMany({}),
-    Comment.deleteMany({}),
-    Favorite.deleteMany({}),
-    Rating.deleteMany({}),
+  Favorite.deleteMany({}),
     ArtworkView.deleteMany({}) // <-- AGREGA ESTA LÍNEA
   ]);
 
 
-  // Crea usuarios de prueba (solo 5)
-  const userData = [
-    { name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin' },
-    { name: 'Artista Uno', email: 'artista1@test.com', password: '123456', role: 'artist' },
-    { name: 'Artista Dos', email: 'artista2@test.com', password: '123456', role: 'artist' },
-    { name: 'Visitante', email: 'visitante@test.com', password: '123456', role: 'artist' },
-    { name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) }
-  ];
+  // Crea 100 artistas de prueba y 5 admins
+  const userData = [];
+  userData.push({ name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin', profileImage: randomFromArray(randomImages) });
+  userData.push({ name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) });
+  for (let i = 1; i <= 100; i++) {
+    userData.push({
+      name: `Artista ${i}`,
+      email: `artista${i}@test.com`,
+      password: '123456',
+      role: 'artist',
+      bio: `Bio de Artista ${i}`,
+      profileImage: randomFromArray(randomImages)
+    });
+  }
   const users = await User.insertMany(userData);
 
   // Tamaños reales de canvas (en cm)
@@ -125,6 +127,11 @@ async function seed() {
       descriptor = `${descriptor} ${Math.ceil(i / artworkDescriptors.length)}`;
     }
     const title = `Obra ${descriptor}`;
+    // Genera una fecha aleatoria entre 1990 y 2022 para completedAt
+    const year = randomInt(1990, 2022);
+    const month = randomInt(0, 11);
+    const day = randomInt(1, 28);
+    const completedAt = new Date(year, month, day);
     artworkData.push({
       title,
       description: `Descripción de la obra \"${title}\"`,
@@ -136,8 +143,7 @@ async function seed() {
       artist: user._id,
       status: "approved",
       views: randomInt(0, 500),
-      ratings: { count: randomInt(0, 20), average: randomInt(1, 5) },
-      commentsCount: randomInt(0, 10),
+      completedAt,
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale),
       price_cents: randomInt(500, 5000) * 100
@@ -176,43 +182,21 @@ async function seed() {
   }
   const exhibitions = await Exhibition.insertMany(exhibitionData);
 
-  // Crea comentarios de prueba (máximo 10)
-  const commentData = [];
-  for (let i = 1; i <= 10; i++) {
-    const user = randomFromArray(users);
-    const artwork = randomFromArray(artworks);
-    commentData.push({
-      artwork: artwork._id,
-      text: `Comentario ${i} sobre la obra.`,
-      user: user._id
-    });
-    artwork.commentsCount = (artwork.commentsCount || 0) + 1;
-  }
-  await Comment.insertMany(commentData);
-  for (const artwork of artworks) {
-    await artwork.save();
-  }
+  // Comentarios eliminados
 
-  // Crea ratings de prueba (máximo 10)
-  const ratingData = [];
-  for (let i = 1; i <= 10; i++) {
-    const user = randomFromArray(users);
-    const artwork = randomFromArray(artworks);
-    ratingData.push({
-      artwork: artwork._id,
-      rating: randomInt(1, 5),
-      user: user._id
-    });
-  }
-  await Rating.insertMany(ratingData);
+  // Ratings eliminados
 
-  // Crea favoritos de prueba (máximo 10)
+  // Crea favoritos de prueba (máximo 10) y actualiza favoritesCount en el artwork
   const favoriteData = [];
   for (let i = 1; i <= 10; i++) {
+    const artwork = randomFromArray(artworks);
+    const user = randomFromArray(users);
     favoriteData.push({
-      artwork: randomFromArray(artworks)._id,
-      user: randomFromArray(users)._id
+      artwork: artwork._id,
+      user: user._id
     });
+    artwork.favoritesCount = (artwork.favoritesCount || 0) + 1;
+    await artwork.save();
   }
   await Favorite.insertMany(favoriteData);
 

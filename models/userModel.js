@@ -21,11 +21,11 @@ const userSchema = new mongoose.Schema({
     default: 'artist',
     select: false
   },
-  profileImage: String,
-  bio:          String,
+  profileImage: { type: String, trim: true },
+  bio: { type: String, trim: true },
   active: { type: Boolean, default: true, select: false },
-  lastLoginAt: { type: Date},
-  createdAt:    { type: Date, default: Date.now }
+  lastLoginAt: { type: Date },
+  createdAt: { type: Date, default: Date.now }
 });
 
 /* ---------- Hash de contraseña ---------- */

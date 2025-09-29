@@ -3,7 +3,14 @@
  * Maps sort parameters to sort objects for database queries.
  */
 // utils/sortUtils.js
-function getSort(sortParam) {
+function getSort(sortParam, type = 'artwork') {
+  if (type === 'artist') {
+    return sortParam === 'recent'     ? { createdAt: -1 }
+         : sortParam === 'oldest'     ? { createdAt: 1 }
+         : sortParam === 'name_desc'  ? { name: -1 }
+         : { name: 1 };
+  }
+  // Artwork sorts
   return sortParam === 'popular'         ? { views: -1 }
     : sortParam === 'recent'             ? { createdAt: -1 }
     : sortParam === 'price_asc'          ? { price_cents: 1, _id: -1 }
