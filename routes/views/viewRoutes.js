@@ -17,6 +17,10 @@ router.get('/signup', viewsController.getSignUp);  // alias consistente
 router.get('/signUp', viewsController.getSignUp);  // (opcional) mantener compat
 
 
+
+// Vista de artistas
+router.get('/artists', viewsController.getArtistsView);
+
 // Vista para reset password (antes de otras rutas)
 router.get('/reset-password', viewsController.getResetPassword);
 

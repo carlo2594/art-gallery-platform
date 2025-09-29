@@ -4,6 +4,41 @@ const Artwork = require('@models/artworkModel');
 const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
 
+// Vista de todos los artistas
+exports.getArtistsView = catchAsync(async (req, res) => {
+  const q = req.query;
+  const search = (q.q || '').trim();
+  const { buildArtistFilter } = require('@utils/artistSearch');
+  const { getSort } = require('@utils/sortUtils');
+  // Normaliza el sort para artistas
+  let artistSortParam = q.sort;
+  if (!artistSortParam || (artistSortParam !== 'name_asc' && artistSortParam !== 'name_desc' && artistSortParam !== 'recent' && artistSortParam !== 'oldest')) {
+    artistSortParam = 'name_asc';
+  }
+  const artistSort = getSort(artistSortParam, 'artist');
+  const artistFilter = buildArtistFilter(q, search);
+  // Paginación: usa artistPage para SSR paginator
+  const artistPage = Number(req.query.artistPage) || 1;
+  const perPage = 15;
+  const skip = (artistPage - 1) * perPage;
+  const totalArtists = await User.countDocuments(artistFilter);
+  const artists = await User.find(artistFilter)
+    .sort(artistSort)
+    .skip(skip)
+    .limit(perPage);
+  const totalPages = Math.max(1, Math.ceil(totalArtists / perPage));
+  res.status(200).render('public/artists', {
+    title: 'Artistas',
+    artists,
+    totalArtists,
+    page: artistPage,
+    perPage,
+    totalPages,
+    q
+  });
+});
+
+
 // /search?q=texto y filtros
 const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
 const { getPaginationParams } = require('@utils/pagination');
