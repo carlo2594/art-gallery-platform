@@ -22,6 +22,7 @@ const userSchema = new mongoose.Schema({
     select: false
   },
   profileImage: { type: String, trim: true },
+  profileImagePublicId: { type: String, trim: true },
   bio: { type: String, trim: true },
   active: { type: Boolean, default: true, select: false },
   lastLoginAt: { type: Date },

@@ -6,8 +6,10 @@ const filterObject = require('@utils/filterObject');
 const AppError = require('@utils/appError');
 const Artwork = require('@models/artworkModel');
 const Exhibition = require('@models/exhibitionModel');
+
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
+const handleDuplicateKeyError = require('@utils/handleDuplicateKeyError');
 
 // CRUD estándar
 exports.getAllUsers = factory.getAll(User);
@@ -64,7 +66,11 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // Actualiza los campos permitidos
   Object.assign(user, filteredBody);
-  await user.save();
+  try {
+    await user.save();
+  } catch (err) {
+    return handleDuplicateKeyError(err, res, next);
+  }
 
   // Si el email cambió, notifica al nuevo email
   if (filteredBody.email && filteredBody.email !== oldEmail) {
@@ -217,7 +223,11 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   await handleProfileImage(user, req, filteredBody);
 
   Object.assign(user, filteredBody);
-  await user.save();
+  try {
+    await user.save();
+  } catch (err) {
+    return handleDuplicateKeyError(err, res, next);
+  }
 
   sendResponse(res, user, 'Usuario actualizado');
 });

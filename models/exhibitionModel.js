@@ -6,6 +6,17 @@ const exhibitionSchema = new mongoose.Schema({
   description: String,
   coverImage: String,
   images: [String], // Imágenes adicionales
+
+  location: {
+    type: {
+      type: String,
+      enum: ['physical', 'virtual'],
+      required: false
+    },
+    address: { type: String }, // solo si es physical
+    url: { type: String }      // solo si es virtual
+  },
+
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' },
