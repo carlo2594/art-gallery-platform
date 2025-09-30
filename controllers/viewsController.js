@@ -110,9 +110,29 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     .limit(artistPerPage);
   const artistTotalPages = Math.max(1, Math.ceil(totalArtists / artistPerPage));
 
-  // Buscar exposiciones cuyo título coincida
-  const exhibitionFilter = search ? { title: { $regex: search, $options: 'i' } } : {};
-  const exhibitions = search ? await Exhibition.find(exhibitionFilter) : [];
+  // --- Filtros y orden para exposiciones ---
+  const exhibitionFilter = {};
+  if (search) {
+    exhibitionFilter.title = { $regex: search, $options: 'i' };
+  }
+  if (q.type) {
+    // Permitir multi-tipo (array) o string
+    const types = Array.isArray(q.type) ? q.type : [q.type];
+    exhibitionFilter['location.type'] = { $in: types };
+  }
+  // Filtro por año de inicio (startDate)
+  if (q.minYear || q.maxYear) {
+    exhibitionFilter.startDate = {};
+    if (q.minYear) exhibitionFilter.startDate.$gte = new Date(Number(q.minYear), 0, 1);
+    if (q.maxYear) exhibitionFilter.startDate.$lte = new Date(Number(q.maxYear), 11, 31, 23, 59, 59, 999);
+  }
+  // Ordenamiento
+  let exhibitionSort = {};
+  if (q.sort === 'recent') exhibitionSort = { startDate: -1 };
+  else if (q.sort === 'oldest') exhibitionSort = { startDate: 1 };
+  else exhibitionSort = { _id: -1 };
+  // Buscar exposiciones aplicando filtros y orden
+  const exhibitions = await Exhibition.find(exhibitionFilter).sort(exhibitionSort);
 
   res.status(200).render('public/searchResults', {
     title: search ? `Buscar: ${search}` : 'Buscar',

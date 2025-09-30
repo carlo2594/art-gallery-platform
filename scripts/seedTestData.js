@@ -151,11 +151,11 @@ async function seed() {
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Crea exposiciones de prueba (máximo 10)
+  // Crea exposiciones de prueba (máximo 10, mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
+  const participantRoles = ['artista', 'curador', 'coordinador', 'invitado'];
   for (let i = 1; i <= 10; i++) {
     // Máximo 10 artworks y 10 participantes por exposición
-          price_cents: randomInt(500, 5000) * 100 // <-- agrega el precio en centavos
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
       artworksSet.add(artworks[randomInt(0, artworks.length - 1)]._id);
@@ -168,13 +168,39 @@ async function seed() {
       participantsSet.add(randomFromArray(users)._id);
       if (participantsSet.size === users.length) break;
     }
-    const participantsArray = Array.from(participantsSet);
+    // Participantes con rol
+    const participantsArray = Array.from(participantsSet).map(uid => ({
+      user: uid,
+      role: randomFromArray(participantRoles)
+    }));
+
+    // Alternar entre física y virtual
+    let location;
+    if (i % 2 === 1) {
+      // Física
+      location = {
+        type: 'physical',
+        address: `Dirección Ficticia ${i} Centro, Ciudad`,
+        url: undefined
+      };
+    } else {
+      // Virtual
+      location = {
+        type: 'virtual',
+        address: undefined,
+        url: `https://exposicion-virtual${i}.test.com`
+      };
+    }
 
     // Genera imágenes para la exposición
     const coverImage = randomFromArray(randomImages);
     // 3-6 imágenes adicionales, sin repetir coverImage
     const shuffled = randomImages.filter(img => img !== coverImage).sort(() => 0.5 - Math.random());
     const images = shuffled.slice(0, randomInt(3, 6));
+
+    // Status alternando entre 'published', 'draft', 'archived'
+    const statusOptions = ['published', 'draft', 'archived'];
+    const status = statusOptions[i % statusOptions.length];
 
     exhibitionData.push({
       title: `Exposición ${i}`,
@@ -185,7 +211,9 @@ async function seed() {
       createdBy: randomFromArray(users)._id,
       participants: participantsArray,
       coverImage,
-      images
+      images,
+      location,
+      status
     });
   }
   const exhibitions = await Exhibition.insertMany(exhibitionData);

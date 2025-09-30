@@ -3,6 +3,7 @@
 // Filtros de exposiciones reutilizables para searchResults.pug
 div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
   form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
+    input(type='hidden' name='tab' value='exposiciones')
     // Mantener el término de búsqueda si existe
     if typeof search !== 'undefined' && search
       input(type='hidden' name='q' value=search)
@@ -33,20 +34,27 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
     h5#filtersTitle Filtros
     button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
   form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
+    input(type='hidden' name='tab' value='exposiciones')
     // Mantener el término de búsqueda si existe
     if typeof search !== 'undefined' && search
       input(type='hidden' name='q' value=search)
     else if q && q.q
       input(type='hidden' name='q' value=q.q)
-    // Filtro: tipo de exposición (solo Física y Virtual)
+    // Filtro: año de inicio de la exposición
     .filter-block
-      label.form-label.mb-2 Tipo de exposición
-      .d-flex.flex-wrap.gap-2
-        - var typeOpts = [{label: 'Física', value: 'physical'}, {label: 'Virtual', value: 'virtual'}];
-        each opt in typeOpts
-          label.chip
-            input(type='checkbox' name='type' value=opt.value checked=(Array.isArray(q && q.type) ? q.type.includes(opt.value) : (q && q.type) === opt.value))
-            span= opt.label
+      label.form-label.mb-2 Año de inicio
+      .row.g-2
+        .col-6
+          input.form-control(type='number' name='minYear' placeholder='Año mín.' value=(q && q.minYear ? q.minYear : ''))
+        .col-6
+          input.form-control(type='number' name='maxYear' placeholder='Año máx.' value=(q && q.maxYear ? q.maxYear : ''))
+    // Ordenar por fecha de inicio
+    .filter-block
+      label.form-label.mb-2 Ordenar por fecha
+      select.form-select(name='sort')
+        option(value='') Selecciona
+        option(value='recent' selected=(q && q.sort==='recent')) Más recientes
+        option(value='oldest' selected=(q && q.sort==='oldest')) Más antiguas
     .mt-auto.d-flex.gap-2.sticky-apply
       a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
       button.btn.btn-apply.flex-fill(type='submit') Ver resultados
