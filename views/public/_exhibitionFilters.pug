@@ -1,50 +1,52 @@
 
 
-// Filtros de exposiciones para searchResults.pug
-//- Variables esperadas: q (query object), actionUrl (form action), exhibitionTypes, statuses
-
-
-.d-flex.flex-wrap.align-items-center.gap-2
-  form#exhibitionFilters(method='GET', action=actionUrl, class='d-flex flex-wrap gap-2 align-items-center')
-    // Chips de tipo de exposición
-    .chip-group.d-flex.align-items-center.gap-1
-      - var typeOpts = [];
-      - typeOpts.push({label: 'Físicas', value: 'physical'});
-      - typeOpts.push({label: 'Virtuales', value: 'virtual'});
-      each opt in typeOpts
-        button.chip.btn(type='submit', name='type', value=opt.value, class=(q && q.type === opt.value ? 'active' : ''))= opt.label
-    //- Chips de estado eliminados por solicitud
-  button.btn.btn-outline-secondary.ms-auto(type='button', data-bs-toggle='offcanvas', data-bs-target='#exhibitionFiltersDrawer', aria-controls='exhibitionFiltersDrawer')
+// Filtros de exposiciones reutilizables para searchResults.pug
+div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+  form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
+    // Mantener el término de búsqueda si existe
+    if typeof search !== 'undefined' && search
+      input(type='hidden' name='q' value=search)
+    else if q && q.q
+      input(type='hidden' name='q' value=q.q)
+    // Chips de tipo de exposición (solo Física y Virtual)
+    - var typeOpts = [{label: 'Física', value: 'physical'}, {label: 'Virtual', value: 'virtual'}];
+    each opt in typeOpts
+      button.chip.btn(
+        type='submit'
+        name='type'
+        value=opt.value
+        class=(q && q.type === opt.value ? 'active' : '')
+      )= opt.label
+    // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
+  // Botón Filtros fuera del form para evitar submit accidental y asegurar funcionalidad
+  button.btn.btn-outline-secondary.ms-auto(
+    type='button'
+    data-bs-toggle='offcanvas'
+    data-bs-target='#exhibitionFiltersDrawer'
+    aria-controls='exhibitionFiltersDrawer'
+  )
     i.fa-solid.fa-filter.me-1
     | Filtros
 
-// Offcanvas con filtros avanzados
-div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1', aria-labelledby='exhibitionFiltersTitle')
+div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
   .offcanvas-header
-    h5#exhibitionFiltersTitle Filtros avanzados
-    button.btn-close(type='button', data-bs-dismiss='offcanvas', aria-label='Cerrar')
-  form.offcanvas-body.d-flex.flex-column.gap-4(method='GET', action=actionUrl)
-    if q && q.type
-      input(type='hidden', name='type', value=q.type)
-    if q && q.status
-      input(type='hidden', name='status', value=q.status)
+    h5#filtersTitle Filtros
+    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
+  form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
+    // Mantener el término de búsqueda si existe
+    if typeof search !== 'undefined' && search
+      input(type='hidden' name='q' value=search)
+    else if q && q.q
+      input(type='hidden' name='q' value=q.q)
+    // Filtro: tipo de exposición (solo Física y Virtual)
     .filter-block
-      label.form-label.mb-2(for='startDate') Fecha de inicio
-      input.form-control(type='date', name='startDate', id='startDate', value=(q && q.startDate ? q.startDate : ''))
-    .filter-block
-      label.form-label.mb-2(for='endDate') Fecha de cierre
-      input.form-control(type='date', name='endDate', id='endDate', value=(q && q.endDate ? q.endDate : ''))
-
-
-    //- (Eliminado bloque duplicado y malformado de Limpiar/Filtrar/Estado)
-    // Ordenar
-    .filter-block
-      label.form-label.mb-2 Ordenar por
-      select.form-select(name='expoSort')
-        option(value='recent' selected=(q.expoSort === 'recent' || !q.expoSort)) Más recientes
-        option(value='oldest' selected=(q.expoSort === 'oldest')) Más antiguas
-        option(value='title_asc' selected=(q.expoSort === 'title_asc')) Título A-Z
-        option(value='title_desc' selected=(q.expoSort === 'title_desc')) Título Z-A
+      label.form-label.mb-2 Tipo de exposición
+      .d-flex.flex-wrap.gap-2
+        - var typeOpts = [{label: 'Física', value: 'physical'}, {label: 'Virtual', value: 'virtual'}];
+        each opt in typeOpts
+          label.chip
+            input(type='checkbox' name='type' value=opt.value checked=(Array.isArray(q && q.type) ? q.type.includes(opt.value) : (q && q.type) === opt.value))
+            span= opt.label
     .mt-auto.d-flex.gap-2.sticky-apply
       a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
       button.btn.btn-apply.flex-fill(type='submit') Ver resultados
