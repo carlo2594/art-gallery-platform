@@ -170,6 +170,12 @@ async function seed() {
     }
     const participantsArray = Array.from(participantsSet);
 
+    // Genera imágenes para la exposición
+    const coverImage = randomFromArray(randomImages);
+    // 3-6 imágenes adicionales, sin repetir coverImage
+    const shuffled = randomImages.filter(img => img !== coverImage).sort(() => 0.5 - Math.random());
+    const images = shuffled.slice(0, randomInt(3, 6));
+
     exhibitionData.push({
       title: `Exposición ${i}`,
       description: `Descripción de la exposición ${i}`,
@@ -177,7 +183,9 @@ async function seed() {
       endDate: new Date(2025, i, 15),
       artworks: artworksArray,
       createdBy: randomFromArray(users)._id,
-      participants: participantsArray
+      participants: participantsArray,
+      coverImage,
+      images
     });
   }
   const exhibitions = await Exhibition.insertMany(exhibitionData);

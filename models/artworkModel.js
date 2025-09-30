@@ -28,8 +28,7 @@ const artworkSchema = new mongoose.Schema(
     exhibitions: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Exhibition',
-        index: true // (2) Indexación para búsquedas por exposición
+        ref: 'Exhibition'
       },
     ],
 

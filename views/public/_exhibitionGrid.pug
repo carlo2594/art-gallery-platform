@@ -1,0 +1,83 @@
+//- Grid de exposiciones estilo card-overlay Bootstrap
+
+//- Eliminado espacio en blanco inicial
+//- Si exhibitions es un array, mostrar cada una en su propia sección tipo hero
+if Array.isArray(exhibitions)
+  each expo in exhibitions
+    section.article-template.exhibition-section(style="min-height:100vh;")
+      // Cover Image
+      if expo.coverImage
+        .article-template__hero-container.exhibition-hero-container
+          .article-template__hero-adapt.media.exhibition-hero-adapt
+            img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(src=expo.coverImage, alt=expo.title)
+      else
+        .article-template__hero-container.exhibition-hero-container
+          svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice")
+            title Placeholder
+            rect(width="100%" height="100%" fill="#343a40")
+            text(x="50%" y="50%" fill="#eceeef" dy=".3em") Expo
+      // Details
+      .article-template__content.page-width.page-width--narrow.center.exhibition-content-flex
+        // Title
+        h2.article-template__title.mb-2(style="font-size:2.8rem; font-weight:700; color:var(--ox-blue);")= expo.title
+        // Dates
+        if expo.startDate && expo.endDate
+          p.mb-1
+            span.fas.fa-calendar-alt.me-2(style="color:var(--ox-orange);")
+            span(style="font-size:1.3rem; color:#444;")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
+        // Location
+        if expo.location && expo.location.type
+          p.mb-1
+            if expo.location.type === 'physical' && expo.location.address
+              span.fas.fa-map-marker-alt.me-2(style="color:var(--ox-red);")
+              span(style="font-size:1.3rem; color:#444;")= expo.location.address
+            else if expo.location.type === 'virtual' && expo.location.url
+              span.fas.fa-globe.me-2(style="color:var(--ox-blue);")
+              a.text-dark(href=expo.location.url, target="_blank", style="font-size:1.3rem; color:#444;text-decoration:underline;") Virtual
+        // Description (truncated)
+        if expo.description
+          - const desc = expo.description.length > 180 ? expo.description.slice(0, 180) + '…' : expo.description;
+          p.mb-3(style="font-size:1.4rem; color:#222; font-family:var(--font-subtitle); font-style:italic;")= desc
+        // Details button
+        p
+          a.btn.btn-sm.btn-outline-primary(href=`/exposiciones/${expo._id}`) Ver detalles
+//- Si exhibition es un objeto individual, mostrar detalle
+else if exhibition
+  .article-template
+    .article-template__hero-container.mb-5
+      .card.text-bg-dark.shadow-sm.h-100.mb-5
+        if exhibition.coverImage
+          img.card-img(src=exhibition.coverImage, alt=exhibition.title, style="object-fit:cover; height:300px; width:100%;")
+        else
+          svg.bd-placeholder-img.card-img(width="100%" height="300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice")
+            title Placeholder
+            rect(width="100%" height="100%" fill="#343a40")
+            text(x="50%" y="50%" fill="#eceeef" dy=".3em") Expo
+        .card-img-overlay.d-flex.flex-column.justify-content-end
+          h2.article-template__title.card-title= exhibition.title
+          if exhibition.description
+            p.card-text.article-template__content= exhibition.description
+          if exhibition.startDate && exhibition.endDate
+            p.card-text.mb-1
+              small= `Del ${new Date(exhibition.startDate).toLocaleDateString()} al ${new Date(exhibition.endDate).toLocaleDateString()}`
+          if exhibition.location && exhibition.location.type
+            p.card-text.mb-1
+              if exhibition.location.type === 'physical' && exhibition.location.address
+                small
+                  i.fas.fa-map-marker-alt.me-1
+                  |  #{exhibition.location.address}
+              else if exhibition.location.type === 'virtual' && exhibition.location.url
+                small
+                  i.fas.fa-globe.me-1
+                  a.text-white(href=exhibition.location.url, target="_blank") Virtual
+          p.card-text
+            a.btn.btn-sm.btn-outline-light(href=`/exposiciones/${exhibition._id}`) Ver detalles
+  header.page-width.page-width--narrow
+    h1.article-template__title= exhibition.title
+  .article-template__social-sharing.page-width.page-width--narrow
+    // Aquí puedes poner botones de compartir si quieres
+  .article-template__content.page-width.page-width--narrow.rte
+    p= exhibition.description
+    // Puedes agregar fechas, ubicación, etc.
+  .article-template__back.element-margin-top.center
+    a.article-template__link.link.animate-arrow(href="/exposiciones") Volver a exposiciones

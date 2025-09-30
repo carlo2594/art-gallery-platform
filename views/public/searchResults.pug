@@ -70,14 +70,7 @@ block content
       // EXPOSICIONES TAB
       .tab-pane#tab-exposiciones
         if exhibitionsCount
-          h3.h5.mb-3 Exposiciones encontradas
-          ul.list-group#list-exposiciones
-            each expo, i in exhibitions.slice(0,12)
-              li.list-group-item
-                a(href=`/exposiciones/${expo._id}`)
-                  | #{expo.title}
-          if exhibitionsCount > 12
-            .d-flex.justify-content-end.mb-3
-              button.btn.btn-outline-primary.btn-sm(data-more="exposiciones") Ver más
+          .container-xxl.artworks-flex
+            include _exhibitionGrid.pug
         else
           h3.h5.mt-4.text-muted No se encontraron exposiciones.

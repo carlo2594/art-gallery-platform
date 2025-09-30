@@ -1,3 +1,7 @@
+.article-template:first-of-type {
+  margin-top: 4rem;
+}
+
 
 /* =========================
    1. VARIABLES Y BASE
@@ -32,8 +36,71 @@ body {
 footer, .footer { flex-shrink: 0; }
 
 /* =========================
-   2. NAVBAR Y SEARCHBAR
+   2. UTILIDADES Y HELPERS
    ========================= */
+/* Aquí puedes agregar utilidades globales si las necesitas */
+
+/* =========================
+   3. LAYOUTS GENERALES
+   ========================= */
+/* Aquí puedes agregar reglas de layout generales si las necesitas */
+
+/* =========================
+   4. COMPONENTES GLOBALES
+   ========================= */
+/* Navbar, Footer, Paginación, Chips, Botones, Offcanvas, Filtros */
+
+/* =========================
+   5. SECCIONES ESPECÍFICAS
+   ========================= */
+/* Exhibition Hero (GRID/DETAIL) */
+.exhibition-hero-container {
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: hidden;
+}
+.exhibition-hero-adapt {
+  width: 100%;
+  padding-bottom: 41.5%;
+  position: relative;
+  overflow: hidden;
+}
+.exhibition-hero-img-absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.exhibition-content-flex {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.exhibition-hero-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+
+.article-template > * {
+  margin-bottom: 3rem;
+}
+
+/* =========================
+  2. NAVBAR Y SEARCHBAR
+  ========================= */
 /* Espaciado inferior navbar y estilos principales */
 .main-navbar {
   margin-bottom: 2.2rem;
@@ -102,8 +169,8 @@ footer, .footer { flex-shrink: 0; }
 }
 
 /* =========================
-   3. GRID Y PAGINADOR DE OBRAS
-   ========================= */
+  3. GRID Y PAGINADOR DE OBRAS
+  ========================= */
 /* Flex para grid y paginador siempre abajo */
 .artworks-flex {
   display: flex;
@@ -126,78 +193,50 @@ footer, .footer { flex-shrink: 0; }
   display: none !important;
 }
 
-/* =========================
-   4. TARJETAS DE OBRAS (CARDS)
-   ========================= */
-/* Shadow for artwork card (image + label) */
-.art-card-shadow {
-  box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08);
-  border-radius: 0.7rem;
-  background: #fff;
-}
-/* Minimalist gallery-style label for artwork cards */
-.artwork-meta-items {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.7rem;
-}
-.artwork-flex-row {
-  display: flex;
-  flex-direction: row;
-  gap: 2.5rem;
-}
-.museum-label {
-  min-width: 180px;
-  max-width: 260px;
-  box-shadow: none;
-  border: none;
-  border-radius: 0;
-}
-.artwork-meta {
-  min-width: 140px;
-  max-width: 220px;
-}
-@media (max-width: 767px) {
-  .artwork-flex-row {
-    flex-direction: column;
-    gap: 1.2rem;
-  }
-  .museum-label, .artwork-meta {
-    min-width: 0;
-    max-width: 100%;
-  }
-}
-.art-label {
-  font-family: 'Montserrat', 'Arial', sans-serif;
-  background: #fff;
-  border: 1.5px solid #222;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  padding: 1.25rem 1rem 1.5rem 1rem;
-}
-.art-label .h5 {
-  font-style: italic;
-  letter-spacing: 0.5px;
-}
-.art-label .h4 {
-  color: #222;
-}
+
+
 
 /* =========================
-   5. PAGINACIÓN CUSTOM OX
+   0. EXHIBITION HERO (GRID/DETAIL)
    ========================= */
-.pagination-ox {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+/* Containers and image layout for exhibition hero sections */
+.exhibition-hero-container {
+  flex: 0 0 auto;
+  width: 100%;
+  overflow: hidden;
 }
-.pagination-ox .page-item {
-  display: inline-block;
+.exhibition-hero-adapt {
+  width: 100%;
+  padding-bottom: 41.5%;
+  position: relative;
+  overflow: hidden;
+}
+.exhibition-hero-img-absolute {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.exhibition-content-flex {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+.exhibition-hero-image {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 }
 .pagination-ox .page-link {
   font-size: 2.1rem;
@@ -246,8 +285,8 @@ footer, .footer { flex-shrink: 0; }
 }
 
 /* =========================
-   6. CHIPS Y BOTONES
-   ========================= */
+  6. CHIPS Y BOTONES
+  ========================= */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -276,8 +315,8 @@ footer, .footer { flex-shrink: 0; }
 }
 
 /* =========================
-   7. HERO SECTION
-   ========================= */
+  7. HERO SECTION (LANDING, ETC)
+  ========================= */
 section.hero {
   min-height: calc(100vh - 6rem);
   display: flex;
@@ -352,8 +391,8 @@ section.hero .hero-description {
 }
 
 /* =========================
-   8. JOIN ARTISTS SECTION
-   ========================= */
+  8. JOIN ARTISTS SECTION
+  ========================= */
 section.join-artists {
   position: relative;
   margin-top: 5rem;
@@ -398,8 +437,8 @@ section.join-artists {
 }
 
 /* =========================
-   9. OFFCANVAS Y FILTROS
-   ========================= */
+  9. OFFCANVAS Y FILTROS
+  ========================= */
 .offcanvas .filter-block {
   border-top: 1px solid #eee;
   padding-top: 1rem;
@@ -412,8 +451,8 @@ section.join-artists {
 }
 
 /* =========================
-   10. LOGIN/SIGNIN
-   ========================= */
+  10. LOGIN/SIGNIN
+  ========================= */
 .login-signin-btn {
   background: var(--ox-yellow) !important;
   color: var(--ox-blue) !important;
@@ -438,8 +477,8 @@ section.join-artists {
 }
 
 /* =========================
-   11. FOOTER
-   ========================= */
+  11. FOOTER
+  ========================= */
 .footer {
   background-color: var(--ox-blue) !important;
   color: var(--ox-beige) !important;
@@ -510,8 +549,8 @@ section.join-artists {
 }
 
 /* =========================
-   12. MEDIA QUERIES
-   ========================= */
+  12. MEDIA QUERIES
+  ========================= */
 @media (min-width: 992px) {
   .logo-navbar { margin-right: 1rem; }
   .hero-row {
