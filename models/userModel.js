@@ -17,8 +17,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true, select: false },   // hash no se envía
   role: {
     type: String,
-    enum: ['artist', 'admin'],
-    default: 'artist',
+    enum: ['artist', 'admin', 'collector'],
+    default: 'collector',
     select: false
   },
   profileImage: { type: String, trim: true },
