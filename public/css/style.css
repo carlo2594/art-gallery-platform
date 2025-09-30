@@ -1,3 +1,11 @@
+/* Fade-in animation for first 6 artist images */
+.fade-in-img {
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+.fade-in-img.loaded {
+  opacity: 1;
+}
 .article-template:first-of-type {
   margin-top: 4rem;
 }

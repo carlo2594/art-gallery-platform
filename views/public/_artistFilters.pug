@@ -61,26 +61,4 @@ form#artistChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
   ) Antiguos primero
   // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
 
-// Offcanvas con filtros avanzados (solo búsqueda por nombre)
-button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#artistFiltersDrawer' aria-controls='artistFiltersDrawer')
-  i.fa-solid.fa-filter.me-1
-  | Filtros
 
-div.offcanvas.offcanvas-end#artistFiltersDrawer(tabindex='-1' aria-labelledby='artistFiltersTitle')
-  .offcanvas-header
-    h5#artistFiltersTitle Filtros de artistas
-    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
-  form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
-    input(type='hidden' name='tab' value='artistas')
-    // Mantener el término de búsqueda si existe
-    if typeof search !== 'undefined' && search
-      input(type='hidden' name='q' value=search)
-    else if q && q.q
-      input(type='hidden' name='q' value=q.q)
-    // Filtro por nombre
-    .filter-block
-      label.form-label.mb-2 Nombre
-      input.form-control(type='text' name='name' placeholder='Buscar por nombre' value=(q && q.name ? q.name : ''))
-    .mt-auto.d-flex.gap-2.sticky-apply
-      a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
-      button.btn.btn-apply.flex-fill(type='submit') Ver resultados
