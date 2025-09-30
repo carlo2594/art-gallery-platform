@@ -1,6 +1,3 @@
-
-
-
 // =======================
 // IMPORTS Y CONSTANTES
 // =======================
@@ -10,7 +7,8 @@ const sendResponse = require('@utils/sendResponse');
 const { sendMail } = require('@services/mailer');
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const Artwork = require('@models/artworkModel');
-const mongoose = require('mongoose');
+const arrayUnique = require('@utils/arrayUnique');
+const isValidObjectId = require('@utils/isValidObjectId');
 const catchAsync = require('@utils/catchAsync');
 const {
   verifyAspect,
@@ -51,7 +49,7 @@ function toCentsOrThrow(value, fieldName = 'amount') {
 // PATCH /:id/start-review  submitted → under_review (admin)
 // =======================
 exports.startReview = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
@@ -81,7 +79,7 @@ exports.startReview = catchAsync(async (req, res, next) => {
 // PATCH /:id/approve  under_review → approved (admin)
 // =======================
 exports.approveArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
@@ -111,7 +109,7 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 // PATCH /:id/reject  under_review → rejected (admin)
 // =======================
 exports.rejectArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
@@ -204,7 +202,7 @@ exports.getAllArtworks = catchAsync(async (req, res, next) => {
 });
 
 exports.getArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findOne({ _id: req.params.id }).populate('artist exhibitions');
@@ -228,7 +226,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Permitimos amount (USD) o price_cents (entero)
   const allowed = [
     'title', 'description', 'type', 'width_cm', 'height_cm', 'material',
-    'exhibitions', 'status', 'amount', 'price_cents'
+    'exhibitions', 'status', 'amount', 'price_cents', 'images'
   ];
 
   if (!req.body || Object.keys(req.body).length === 0) {
@@ -253,10 +251,10 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     });
   }
 
-  if (!req.file) {
+  if (!req.file && (!req.body.images || req.body.images.length === 0)) {
     return res.status(400).json({
       status: 'fail',
-      error: { code: 'NO_IMAGE', message: 'Debes subir una imagen.' }
+      error: { code: 'NO_IMAGE', message: 'Debes subir al menos una imagen.' }
     });
   }
 
@@ -274,12 +272,15 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('Debes especificar el precio (amount en USD o price_cents).', 400));
   }
 
-  // Sube la imagen a Cloudinary
-  const imageResult = await upload(req.file.path);
+  // Sube la imagen principal a Cloudinary
+  let imageResult = null;
+  if (req.file) {
+    imageResult = await upload(req.file.path);
+  }
   const widthCm = Number(req.body.width_cm);
   const heightCm = Number(req.body.height_cm);
-  const imgW = imageResult.width;
-  const imgH = imageResult.height;
+  const imgW = imageResult ? imageResult.width : undefined;
+  const imgH = imageResult ? imageResult.height : undefined;
 
   // Validar dimensiones
   if (!isFinite(widthCm) || !isFinite(heightCm) || widthCm <= 0 || heightCm <= 0) {
@@ -289,31 +290,43 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     });
   }
 
-  const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
-  const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
-  const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
-  const aspectPolicy = getAspectPolicy();
+  let imageUrlToSave = imageResult ? imageResult.secure_url : (req.body.images && req.body.images[0]);
+  let imagePublicId = imageResult ? imageResult.public_id : undefined;
+  let imageWidth_px = imgW;
+  let imageHeight_px = imgH;
 
-  let imageUrlToSave = imageResult.secure_url;
-  if (!aspect.ok) {
-    const payload = buildAspectErrorPayload({
-      widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg
-    });
-    if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
-      return res.status(400).json({ status: 'fail', error: payload });
+  if (imageResult) {
+    const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+    const padBg = process.env.CLOUDINARY_PAD || 'white';
+    const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+    const aspectPolicy = getAspectPolicy();
+    if (!aspect.ok) {
+      const payload = buildAspectErrorPayload({
+        widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg
+      });
+      if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
+        return res.status(400).json({ status: 'fail', error: payload });
+      }
+      imageUrlToSave = buildTransformedUrl(imageResult.secure_url, {
+        policy: aspectPolicy, widthCm, heightCm, bg: padBg
+      });
     }
-    imageUrlToSave = buildTransformedUrl(imageResult.secure_url, {
-      policy: aspectPolicy, widthCm, heightCm, bg: padBg
-    });
   }
 
   const data = filterObject(req.body, ...allowed);
   data.artist = req.user.id;
   data.imageUrl = imageUrlToSave;
-  data.imagePublicId = imageResult.public_id;
-  data.imageWidth_px = imgW;
-  data.imageHeight_px = imgH;
+  data.imagePublicId = imagePublicId;
+  data.imageWidth_px = imageWidth_px;
+  data.imageHeight_px = imageHeight_px;
   data.price_cents = priceCents; // <-- guarda el precio en centavos
+
+  // Si se subieron imágenes adicionales, guárdalas en el array images
+  if (req.body.images && Array.isArray(req.body.images)) {
+    data.images = arrayUnique([imageUrlToSave, ...req.body.images.filter(Boolean)]);
+  } else if (imageUrlToSave) {
+    data.images = [imageUrlToSave];
+  }
 
   const artwork = await Artwork.create(data);
   sendResponse(res, artwork, 'Obra creada correctamente.', 201);
@@ -324,14 +337,13 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 
 exports.updateArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
 
-  // El artista puede editar campos básicos; admin además exhibitions.
-  // Ambos pueden editar precio mediante amount o price_cents.
+  // El artista puede editar campos básicos; admin además exhibitions e images.
   const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'material', 'amount', 'price_cents'];
-  const adminAllowed  = [...artistAllowed, 'exhibitions'];
+  const adminAllowed  = [...artistAllowed, 'exhibitions', 'images'];
   const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
 
   if (Object.keys(req.body).some(key => !allowedFields.includes(key))) {
@@ -368,7 +380,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     const imgW = imageResult.width;
     const imgH = imageResult.height;
     const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
-    const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
+    const padBg = process.env.CLOUDINARY_PAD || 'white';
     const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
 
     if (!aspect.ok) {
@@ -386,6 +398,14 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     art.imagePublicId = imageResult.public_id;
     art.imageWidth_px = imgW;
     art.imageHeight_px = imgH;
+    // (3) Si hay un array de images, actualiza también la galería
+    if (Array.isArray(art.images)) {
+      if (!art.images.includes(art.imageUrl)) {
+        art.images.unshift(art.imageUrl);
+      }
+    } else {
+      art.images = [art.imageUrl];
+    }
   }
   // Si NO suben imagen nueva pero cambian width_cm/height_cm y hay px guardados
   else if ((dataToUpdate.width_cm || dataToUpdate.height_cm) && art.imageWidth_px && art.imageHeight_px) {
@@ -394,7 +414,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     const imgW = art.imageWidth_px;
     const imgH = art.imageHeight_px;
     const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
-    const padBg = process.env.CLOUDINARY_PAD_BG || 'white';
+    const padBg = process.env.CLOUDINARY_PAD || 'white';
     const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
     if (!aspect.ok && (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy))) {
       const payload = buildAspectErrorPayload({ widthCm, heightCm, imgW, imgH, secureUrl: art.imageUrl, tolerance, padBg });
@@ -402,6 +422,13 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     }
     // Si es pad/fill, podrías actualizar la URL, pero solo si lo deseas
   }
+
+  // (3) Si el admin envía un array de images, actualiza la galería
+  if (req.user.role === 'admin' && Array.isArray(dataToUpdate.images)) {
+    art.images = arrayUnique([art.imageUrl, ...dataToUpdate.images.filter(Boolean)]);
+    delete dataToUpdate.images;
+  }
+
 
   Object.assign(art, dataToUpdate);
   await art.save({ validateModifiedOnly: true });
@@ -426,7 +453,7 @@ exports.moveToTrash = async (req, res) => {
 };
 
 exports.restoreArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findById(req.params.id);
@@ -444,7 +471,7 @@ exports.restoreArtwork = catchAsync(async (req, res, next) => {
 
 /** PATCH /:id/submit  draft → submitted */
 exports.submitArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   // Busca la obra y el artista
@@ -511,7 +538,7 @@ exports.getArtworksByStatus = catchAsync(async (req, res, next) => {
 });
 
 exports.getApprovedArtwork = catchAsync(async (req, res, next) => {
-  if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+  if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
   const art = await Artwork.findOne({

@@ -1,21 +1,28 @@
 const mongoose = require('mongoose');
 
+
 const exhibitionSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: String,
   coverImage: String,
-  // Opcional: fechas de inicio / fin si las necesitas
-  startDate: Date,
-  endDate: Date,
+  images: [String], // Imágenes adicionales
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  status: { type: String, enum: ['draft', 'published', 'archived'], default: 'draft' },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
   participants: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    role: { type: String } // Ej: 'curador', 'artista', etc.
   }],
+  artworks: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Artwork'
+  }],
+  deletedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

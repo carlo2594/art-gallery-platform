@@ -17,4 +17,8 @@ router.post('/', requireUser, exhibitionController.createExhibition);
 router.patch('/:id', requireUser, isOwner(Exhibition), exhibitionController.updateExhibition);
 router.delete('/:id', requireUser, isOwner(Exhibition), exhibitionController.deleteExhibition);
 
+// Añadir o quitar obras de una exhibición (solo dueño o admin)
+router.post('/:id/add-artwork', requireUser, isOwner(Exhibition), exhibitionController.addArtwork);
+router.post('/:id/remove-artwork', requireUser, isOwner(Exhibition), exhibitionController.removeArtwork);
+
 module.exports = router;

@@ -15,7 +15,8 @@ exports.addFavorite = catchAsync(async (req, res, next) => {
   }
 
   // Verifica que la obra exista y no esté eliminada
-  const artwork = await require('@models/artworkModel').findById(artworkId);
+  const Artwork = require('@models/artworkModel');
+  const artwork = await Artwork.findById(artworkId);
   if (!artwork) {
     return next(new AppError('La obra no existe', 404));
   }
@@ -27,8 +28,8 @@ exports.addFavorite = catchAsync(async (req, res, next) => {
   }
 
   const favorite = await Favorite.create({ user: userId, artwork: artworkId });
-  // Incrementa el contador de favoritos
-  await artwork.updateOne({ $inc: { favoritesCount: 1 } });
+  // Recalcula el contador de favoritos
+  await Artwork.recalculateFavoritesCount(artworkId);
 
   sendResponse(res, favorite, 'Artwork added to favorites', 201);
 });
@@ -50,8 +51,9 @@ exports.removeFavorite = catchAsync(async (req, res, next) => {
     return next(new AppError('Favorite not found', 404));
   }
 
-  // Decrementa el contador de favoritos
-  await require('@models/artworkModel').findByIdAndUpdate(artworkId, { $inc: { favoritesCount: -1 } });
+  // Recalcula el contador de favoritos
+  const Artwork = require('@models/artworkModel');
+  await Artwork.recalculateFavoritesCount(artworkId);
 
   sendResponse(res, null, 'Artwork removed from favorites', 204);
 });
