@@ -3,33 +3,31 @@
 
 const express = require('express');
 const router = express.Router();
-const viewsController = require('@controllers/viewsController'); 
+const viewsController = require('@controllers/viewsController');
 
-// Búsqueda global
-router.get('/search', viewsController.getSearchResults);
+// =================== PÁGINA DE INICIO ===================
+router.get('/', viewsController.getHome);
 
-
-
-// Página de inicio de sesión
+// =================== AUTENTICACIÓN =====================
 router.get('/login', viewsController.getLogin);
-
-router.get('/signup', viewsController.getSignUp);  // alias consistente
-router.get('/signUp', viewsController.getSignUp);  // (opcional) mantener compat
-
-
-
-// Vista de artistas
-router.get('/artists', viewsController.getArtistsView);
-
-// Vista para reset password (antes de otras rutas)
+router.get('/signup', viewsController.getSignUp);   // alias consistente
+router.get('/signUp', viewsController.getSignUp);   // (opcional) mantener compat
 router.get('/reset-password', viewsController.getResetPassword);
-
 router.get('/welcome', viewsController.getWelcome);
 
+// =================== ARTISTAS ==========================
+router.get('/artists', viewsController.getArtistsView);
+
+// =================== OBRAS =============================
 router.get('/artworks', viewsController.getArtworks);
 
+// =================== EXPOSICIONES ======================
+// Vista de exposiciones públicas
+router.get('/exhibitions', (req, res) => {
+  res.render('public/exhibitions', { title: 'Exposiciones · Galería del Ox' });
+});
 
-// Página de inicio
-router.get('/', viewsController.getHome);
+// =================== BÚSQUEDA GLOBAL ===================
+router.get('/search', viewsController.getSearchResults);
 
 module.exports = router;
