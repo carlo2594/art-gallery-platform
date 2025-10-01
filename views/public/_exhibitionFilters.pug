@@ -10,14 +10,9 @@ div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
     else if q && q.q
       input(type='hidden' name='q' value=q.q)
     // Chips de tipo de exposición (solo Física y Virtual)
-    - var typeOpts = [{label: 'Física', value: 'physical'}, {label: 'Virtual', value: 'virtual'}];
+    - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
     each opt in typeOpts
-      button.chip.btn(
-        type='submit'
-        name='type'
-        value=opt.value
-        class=(q && q.type === opt.value ? 'active' : '')
-      )= opt.label
+      button.chip.btn(type='submit', name='type', value=opt.value, class=((!q || !q.type) && opt.value === '' ? 'active' : (q && q.type === opt.value ? 'active' : '')))= opt.label
     // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
   // Botón Filtros fuera del form para evitar submit accidental y asegurar funcionalidad
   button.btn.btn-outline-secondary.ms-auto(

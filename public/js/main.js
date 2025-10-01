@@ -1,9 +1,8 @@
-// Eliminado: paginación AJAX y carga dinámica de obras en searchResults (tab Obras). Ahora todo es server-side.
-// public/js/main.js
+// --- Chips rápidos de exposiciones: siempre envía el parámetro type ---
 'use strict';
 
-
 document.addEventListener('DOMContentLoaded', function () {
+
   // Eliminada la lógica de mostrar/ocultar el paginador dinámicamente
   // Mostrar el paginador solo cuando el grid de obras esté completamente cargado o si el usuario hace scroll y el grid es visible
   var grid = document.getElementById('grid');
