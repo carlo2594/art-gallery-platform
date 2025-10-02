@@ -9,6 +9,17 @@ div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
       input(type='hidden' name='q' value=search)
     else if q && q.q
       input(type='hidden' name='q' value=q.q)
+    // Preservar rango de fechas si existe al usar chips
+    if q && q.minDate
+      input(type='hidden' name='minDate' value=q.minDate)
+    if q && q.maxDate
+      input(type='hidden' name='maxDate' value=q.maxDate)
+    if q && q.minYear && !q.minDate
+      - var _minDateFromYear = `${q.minYear}-01-01`
+      input(type='hidden' name='minDate' value=_minDateFromYear)
+    if q && q.maxYear && !q.maxDate
+      - var _maxDateFromYear = `${q.maxYear}-12-31`
+      input(type='hidden' name='maxDate' value=_maxDateFromYear)
     // Chips de tipo de exposición (solo Física y Virtual)
     - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
     each opt in typeOpts
@@ -35,20 +46,22 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
       input(type='hidden' name='q' value=search)
     else if q && q.q
       input(type='hidden' name='q' value=q.q)
-    // Filtro: año de inicio de la exposición
+    // Filtro: rango de fechas de la exposición
     .filter-block
-      label.form-label.mb-2 Año de inicio
+      label.form-label.mb-2 Rango de fechas
       .row.g-2
         .col-6
-          input.form-control(type='number' name='minYear' placeholder='Año mín.' value=(q && q.minYear ? q.minYear : ''))
+          - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
+          input.form-control(type='date' name='minDate' placeholder='Desde' min=_minBound value=(q && q.minDate ? q.minDate : (q && q.minYear ? `${q.minYear}-01-01` : '')))
         .col-6
-          input.form-control(type='number' name='maxYear' placeholder='Año máx.' value=(q && q.maxYear ? q.maxYear : ''))
+          - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
+          input.form-control(type='date' name='maxDate' placeholder='Hasta' max=_maxBound value=(q && q.maxDate ? q.maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : '')))
     // Ordenar por fecha de inicio
     .filter-block
       label.form-label.mb-2 Ordenar por fecha
       select.form-select(name='sort')
         option(value='') Selecciona
-        option(value='recent' selected=(q && q.sort==='recent')) Más recientes
+        option(value='recent' selected=(q && q.sort==='recent')) Más futuras
         option(value='oldest' selected=(q && q.sort==='oldest')) Más antiguas
     .mt-auto.d-flex.gap-2.sticky-apply
       a.btn.btn-light.flex-fill(href=actionUrl) Limpiar

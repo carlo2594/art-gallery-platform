@@ -120,11 +120,19 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     const types = Array.isArray(q.type) ? q.type : [q.type];
     exhibitionFilter['location.type'] = { $in: types };
   }
-  // Filtro por año de inicio (startDate)
-  if (q.minYear || q.maxYear) {
+  // Filtro por rango de fechas (startDate) con compatibilidad hacia atrás (minYear/maxYear)
+  const minDateStr = q.minDate || (q.minYear ? `${q.minYear}-01-01` : null);
+  const maxDateStr = q.maxDate || (q.maxYear ? `${q.maxYear}-12-31` : null);
+  if (minDateStr || maxDateStr) {
     exhibitionFilter.startDate = {};
-    if (q.minYear) exhibitionFilter.startDate.$gte = new Date(Number(q.minYear), 0, 1);
-    if (q.maxYear) exhibitionFilter.startDate.$lte = new Date(Number(q.maxYear), 11, 31, 23, 59, 59, 999);
+    if (minDateStr) {
+      const d = new Date(minDateStr);
+      if (!isNaN(d)) exhibitionFilter.startDate.$gte = d;
+    }
+    if (maxDateStr) {
+      const d = new Date(maxDateStr);
+      if (!isNaN(d)) exhibitionFilter.startDate.$lte = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+    }
   }
   // Ordenamiento
   let exhibitionSort = {};
@@ -137,6 +145,30 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     page: q.exhibitionPage || q.page,
     perPage: q.exhibitionPerPage || 10
   }, 10, 50);
+
+  // Bounds de fechas disponibles para exposiciones según filtros actuales (sin rango aplicado)
+  // Nota: usamos los filtros base (title/type) pero ignoramos min/maxDate/Year del usuario para obtener el rango total posible
+  const baseExhFilterForBounds = (() => {
+    const f = {};
+    if (search) f.title = { $regex: search, $options: 'i' };
+    if (q.type) {
+      const types = Array.isArray(q.type) ? q.type : [q.type];
+      f['location.type'] = { $in: types };
+    }
+    return f;
+  })();
+
+  const boundsExh = await Exhibition.aggregate([
+    { $match: baseExhFilterForBounds },
+    { $group: { _id: null, minStart: { $min: '$startDate' }, maxStart: { $max: '$startDate' } } },
+    { $project: { _id: 0, minStart: 1, maxStart: 1 } }
+  ]);
+  const exhDateBounds = boundsExh[0] || { minStart: null, maxStart: null };
+  const toDateInput = d => d ? new Date(d).toISOString().slice(0,10) : null;
+  const exhibitionDateBounds = {
+    min: toDateInput(exhDateBounds.minStart),
+    max: toDateInput(exhDateBounds.maxStart)
+  };
 
   const totalExhibitions = await Exhibition.countDocuments(exhibitionFilter);
   const exhibitions = await Exhibition.find(exhibitionFilter)
@@ -165,7 +197,8 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     page,
     perPage,
     totalPages,
-    skip
+    skip,
+    exhibitionDateBounds
   });
 });
 
