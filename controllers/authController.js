@@ -4,7 +4,10 @@ const bcrypt = require('bcryptjs');
 const User = require('@models/userModel');
 const PasswordResetToken = require('@models/passwordResetTokenModel');
 const { signToken } = require('@utils/jwt');
+const { parseRememberMe, getJwtCookieOptions } = require('@utils/authUtils');
+const { normalizeEmail } = require('@utils/emailUtils');
 const sendResponse = require('@utils/sendResponse');
+const { wantsHTML } = require('@utils/http');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const { sendMail } = require('@services/mailer');
@@ -25,7 +28,7 @@ exports.signup = catchAsync(async (req, res) => {
   if (req.body.name) name = req.body.name;
   else if (email) name = email.split('@')[0];
 
-  const normalizedEmail = (email || '').trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(email);
 
   const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
@@ -64,7 +67,7 @@ exports.signup = catchAsync(async (req, res) => {
 /* ------------------------------------------------------------------ */
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password, remember } = req.body;
-  const normalizedEmail = (email || '').trim().toLowerCase();
+  const normalizedEmail = normalizeEmail(email);
 
   // El schema oculta password → hay que seleccionarlo para comparar
   const user = await User.findOne({ email: normalizedEmail, active: true })
@@ -77,21 +80,8 @@ exports.login = catchAsync(async (req, res, next) => {
   const token = signToken(user._id);
 
   // "remember" puede venir como on/true/1/etc.
-  const rememberMe =
-    remember === true ||
-    remember === 'true' ||
-    remember === 'on' ||
-    remember === 1 ||
-    remember === '1' ||
-    remember === 'remember-me';
-
-  // cookie 30d si remember, si no 7d
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000
-  };
+  const rememberMe = parseRememberMe(remember);
+  const cookieOptions = getJwtCookieOptions({ rememberMe });
   res.cookie('jwt', token, cookieOptions);
 
   const isFirstLogin = !user.lastLoginAt;
@@ -106,8 +96,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const fallbackUrl = isFirstLogin ? '/welcome' : '/?welcome=1';
   const destination = nextFromSession || nextFromQuery || fallbackUrl;
 
-  const wantsHTML = req.accepts(['html', 'json']) === 'html';
-  if (wantsHTML) return res.redirect(303, destination);
+  if (wantsHTML(req)) return res.redirect(303, destination);
 
   return sendResponse(res, { token, next: destination }, 'User logged in');
 });
@@ -123,8 +112,7 @@ exports.logout = catchAsync(async (req, res) => {
     path: '/'
   });
 
-  const wantsHTML = req.accepts(['html', 'json']) === 'html';
-  if (wantsHTML) return res.redirect(303, '/');
+  if (wantsHTML(req)) return res.redirect(303, '/');
   return sendResponse(res, null, 'Sesión cerrada');
 });
 
@@ -210,21 +198,8 @@ exports.resetPassword = catchAsync(async (req, res) => {
   const jwtToken = signToken(user._id);
 
   // "remember" puede venir como on/true/1/etc.
-  const rememberMe =
-    remember === true ||
-    remember === 'true' ||
-    remember === 'on' ||
-    remember === 1 ||
-    remember === '1' ||
-    remember === 'remember-me';
-
-  // cookie 30d si remember, si no 7d
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : 7 * 24 * 60 * 60 * 1000
-  };
+  const rememberMe = parseRememberMe(remember);
+  const cookieOptions = getJwtCookieOptions({ rememberMe });
   res.cookie('jwt', jwtToken, cookieOptions);
 
   resetToken.used = true;
@@ -237,8 +212,7 @@ exports.resetPassword = catchAsync(async (req, res) => {
   });
 
   // Redirige si es HTML y es el primer login
-  const wantsHTML = req.accepts(['html', 'json']) === 'html';
-  if (wantsHTML && isFirstLogin) {
+  if (wantsHTML(req) && isFirstLogin) {
     return res.redirect(303, '/welcome');
   }
   if (isFirstLogin) {

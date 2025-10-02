@@ -1,10 +1,12 @@
 const ArtworkView = require('@models/artworkViewModel');
 
+const { getClientIp } = require('@utils/request');
+
 // Create a new artwork view
 exports.createView = async (req, res) => {
   try {
     const { artwork } = req.body;
-    const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const ip = getClientIp(req);
     const view = new ArtworkView({ artwork, ip });
     await view.save();
     res.status(201).json(view);

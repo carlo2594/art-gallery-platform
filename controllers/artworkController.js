@@ -10,6 +10,8 @@ const Artwork = require('@models/artworkModel');
 const arrayUnique = require('@utils/arrayUnique');
 const isValidObjectId = require('@utils/isValidObjectId');
 const catchAsync = require('@utils/catchAsync');
+const { toCentsOrThrow } = require('@utils/priceInput');
+const { getInvalidFields, isEmptyBody } = require('@utils/validation');
 const {
   verifyAspect,
   buildTransformedUrl,
@@ -32,17 +34,7 @@ function checkAlreadyInStatus(res, art, status, mensaje) {
   return false;
 }
 
-function toCentsOrThrow(value, fieldName = 'amount') {
-  if (value === undefined || value === null || value === '') {
-    throw new AppError(`El campo "${fieldName}" es obligatorio.`, 400);
-  }
-  const cleaned = String(value).replace(/[$,\s]/g, '');
-  const num = Number(cleaned);
-  if (!isFinite(num)) throw new AppError(`"${fieldName}" no es un número válido.`, 400);
-  const cents = Math.round(num * 100);
-  if (cents < 0) throw new AppError(`"${fieldName}" no puede ser negativo.`, 400);
-  return cents;
-}
+// moved to @utils/priceInput
 
 
 // =======================
@@ -65,10 +57,11 @@ exports.startReview = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra está en revisión
   if (art.artist && art.artist.email) {
+    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
     await sendMail({
       to: art.artist.email,
-      subject: 'Tu obra está en revisión',
-      text: `Hola ${art.artist.name || ''}, tu obra "${art.title}" ha iniciado el proceso de revisión.\n\nTan pronto sea aprobada o rechazada, te notificaremos.`
+      subject: artworkStatusSubject('under_review'),
+      text: artworkStatusText({ status: 'under_review', artistName: art.artist.name, artworkTitle: art.title })
     });
   }
 
@@ -95,10 +88,11 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra fue aprobada
   if (art.artist && art.artist.email) {
+    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
     await sendMail({
       to: art.artist.email,
-      subject: '¡Tu obra fue aprobada!',
-      text: `¡Felicidades ${art.artist.name || ''}! Tu obra "${art.title}" ha sido aprobada para exhibición.\n\nYa es visible para el público que visita la página.`
+      subject: artworkStatusSubject('approved'),
+      text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title })
     });
   }
 
@@ -129,10 +123,11 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra fue rechazada
   if (art.artist && art.artist.email) {
+    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
     await sendMail({
       to: art.artist.email,
-      subject: 'Tu obra fue rechazada',
-      text: `Hola ${art.artist.name || ''}, lamentamos informarte que tu obra "${art.title}" fue rechazada.\nMotivo: ${req.body.reason}`
+      subject: artworkStatusSubject('rejected'),
+      text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason: req.body.reason })
     });
   }
 
@@ -229,14 +224,14 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     'exhibitions', 'status', 'amount', 'price_cents', 'images'
   ];
 
-  if (!req.body || Object.keys(req.body).length === 0) {
+  if (isEmptyBody(req.body)) {
     return res.status(400).json({
       status: 'fail',
       error: { code: 'INVALID_BODY', message: 'El cuerpo de la solicitud no puede estar vacío.' }
     });
   }
 
-  const invalidFields = Object.keys(req.body).filter(key => !allowed.includes(key));
+  const invalidFields = getInvalidFields(req.body, allowed);
   if (invalidFields.length > 0) {
     return res.status(400).json({
       status: 'fail',
@@ -502,11 +497,12 @@ Si no ves la obra en el queue de aprobación, es posible que ya fue aprobada o r
 Puedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
   }
 
+  const { adminSubmissionSubject, adminSubmissionText } = require('@services/emailTemplates');
   for (const admin of admins) {
     await sendMail({
       to: admin.email,
-      subject: 'Nueva obra enviada para revisión',
-      text: `Se ha enviado una nueva obra para revisión:\n\n${artworkInfo}\n${extraInfo}`
+      subject: adminSubmissionSubject(),
+      text: adminSubmissionText({ art, artist: art.artist })
     });
   }
 

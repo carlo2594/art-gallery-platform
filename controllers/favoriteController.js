@@ -2,7 +2,7 @@ const Favorite = require('@models/favoriteModel');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');
-const mongoose = require('mongoose');
+const isValidObjectId = require('@utils/isValidObjectId');
 
 
 // Añadir un favorito y actualizar favoritesCount
@@ -41,7 +41,7 @@ exports.removeFavorite = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
 
   // Validar formato de ObjectId
-  if (!mongoose.Types.ObjectId.isValid(artworkId)) {
+  if (!isValidObjectId(artworkId)) {
     return next(new AppError('ID inválido', 400));
   }
 
