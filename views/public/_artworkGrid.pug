@@ -1,9 +1,11 @@
 ul.grid.effect-2#grid.mb-5
   each a in artworks
     li
-       .card.h-100.bg-white.border-0.shadow-none.art-card-shadow
-         a(href=`/artworks/${a.slug || a._id}`)
+       .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
+         a(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
            img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
+         // Full-card stretched link so the info area is clickable too
+         a.stretched-link(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
          .card-body.p-3.art-label.art-card-shadow
            .artwork-flex-row.d-flex.flex-row.gap-3
              // --- Columna izquierda: Museo Card Block ---
@@ -15,6 +17,9 @@ ul.grid.effect-2#grid.mb-5
                if a.material
                  - var matCap = a.material.charAt(0).toUpperCase() + a.material.slice(1)
                  .museum-material.mt-1= matCap
+               if a.completedAt
+                 .museum-created.mt-1
+                   | #{new Date(a.completedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
                if typeof a.price_cents === 'number'
                  .museum-price.fw-bold.fs-5.mt-2
                    | $
@@ -39,10 +44,6 @@ ul.grid.effect-2#grid.mb-5
                    span
                      i.fa.fa-heart.me-1.text-danger
                      | #{a.favoritesCount}
-                 if a.completedAt
-                   span
-                     i.fa.fa-calendar-check.me-1.text-warning
-                     | Creación: #{new Date(a.completedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
                  if a.createdAt
                    span
                      i.fa.fa-calendar-plus.me-1.text-success

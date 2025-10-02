@@ -4,9 +4,12 @@
   .row.row-cols-1.row-cols-sm-2.row-cols-md-3.g-3
     each artist in artists
       .col
-        .card.shadow-sm.h-100
+        .card.shadow-sm.h-100.position-relative
+          // Full-card click target (place first for reliability)
+          a.stretched-link(href=`/artistas/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
           if artist.profileImage
-            img.card-img-top(src=artist.profileImage, alt=artist.name, height="225", style="object-fit:cover;")
+            a(href=`/artistas/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
+              img.card-img-top(src=artist.profileImage, alt=artist.name, height="225", style="object-fit:cover;")
           else
             svg.bd-placeholder-img.card-img-top(height="225", width="100%", xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice")
               title Placeholder

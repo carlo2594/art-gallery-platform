@@ -7,27 +7,31 @@ html.no-js(lang='es')
     meta(http-equiv='X-UA-Compatible' content='IE=edge,chrome=1')
     meta(name='viewport' content='width=device-width, initial-scale=1')
 
-    // CSS de Bootstrap y tus estilos
+    //- CSS de Bootstrap y tus estilos
+ 
+    link(rel='preconnect' href='https://fonts.googleapis.com')
+    link(rel='preconnect' href='https://fonts.gstatic.com' crossorigin)
+    link(rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap')
     link(rel='stylesheet' href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css')
     link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet' href='/css/style.css')
     link(rel='stylesheet' href='/css/component.css')
     script(src='/js/modernizr.custom.js')
 
-    // Permite que las vistas inyecten CSS/JS extra en <head>
+    //- Permite que las vistas inyecten CSS/JS extra en <head>
     block headExtra
 
   body
     if !hideNavbar
-      // Navbar: Expande a partir de lg (colapsa < 992px)
+      //- Navbar: Expande a partir de lg (colapsa < 992px)
       nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Navbar principal')
         .container-fluid.navbar-container
-          // Brand (logo + título) — queda a la izquierda
+          //- Brand (logo + título) — queda a la izquierda
           a.navbar-brand.d-flex.align-items-center.navbar-logo-link(href='/')
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-1.text-uppercase.fw-bold.navbar-title Galería del Ox
 
-          // Botón hamburguesa
+          //- Botón hamburguesa
           button.navbar-toggler(
             type='button'
             data-bs-toggle='collapse'
@@ -37,14 +41,14 @@ html.no-js(lang='es')
             aria-label='Abrir menú')
             span.navbar-toggler-icon
 
-          // Contenido colapsable
-          // Nota: en mobile el contenido se centra; en lg+ el ul usa ms-lg-auto para irse a la derecha
+          //- Contenido colapsable
+          //- Nota: en mobile el contenido se centra; en lg+ el ul usa ms-lg-auto para irse a la derecha
           .collapse.navbar-collapse#navbarsExample05.text-center
-            // Buscador — centrado en mobile, centrado entre brand y links en desktop
+            //- Buscador — centrado en mobile, centrado entre brand y links en desktop
             form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(action='/search' method='GET' role='search' aria-label='Buscar')
               input.form-control.searchbar-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
 
-            // Links principales — al extremo derecho en lg+ con ms-lg-auto; centrados en mobile
+            //- Links principales — al extremo derecho en lg+ con ms-lg-auto; centrados en mobile
             ul.navbar-nav.navbar-links.ms-lg-auto.mx-auto.mb-2.mb-lg-0.fs-5
               li.nav-item
                 a.nav-link.me-lg-3(href='/artworks') Obras
@@ -81,7 +85,7 @@ html.no-js(lang='es')
     if !hideFooter
       include ./footer.pug
 
-    // JS al final del body (orden importante)
+    //- JS al final del body (orden importante)
     script(src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js')
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/masonry.pkgd.min.js')
@@ -89,10 +93,10 @@ html.no-js(lang='es')
     script(src='/js/classie.js')
     script(src='/js/AnimOnScroll.js')
 
-    // Permite que vistas inyecten JS (por ejemplo, inicializaciones específicas) ANTES de main.js
+    //- Permite que vistas inyecten JS (por ejemplo, inicializaciones específicas) ANTES de main.js
     block scriptsExtra
     
     script(src='/js/masonry-init.js')
 
-    // Tu JS global
+    //- Tu JS global
     script(src='/js/main.js')

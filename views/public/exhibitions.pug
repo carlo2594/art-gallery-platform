@@ -17,4 +17,5 @@ block content
     .artworks-grid-paginate
       include _exhibitionGrid.pug
       // Paginación SSR
-      include _exhibitionPagination.pug
+      if typeof exhibitionTotalPages !== 'undefined' && exhibitionTotalPages > 1
+        include _exhibitionPagination.pug
