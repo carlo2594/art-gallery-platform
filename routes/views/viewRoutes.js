@@ -22,10 +22,9 @@ router.get('/artists', viewsController.getArtistsView);
 router.get('/artworks', viewsController.getArtworks);
 
 // =================== EXPOSICIONES ======================
-// Vista de exposiciones públicas
-router.get('/exhibitions', (req, res) => {
-  res.render('public/exhibitions', { title: 'Exposiciones · Galería del Ox' });
-});
+// Vista de exposiciones públicas (alias en ES y EN)
+router.get('/exposiciones', viewsController.getExhibitionsView);
+router.get('/exhibitions', viewsController.getExhibitionsView);
 
 // =================== BÚSQUEDA GLOBAL ===================
 router.get('/search', viewsController.getSearchResults);

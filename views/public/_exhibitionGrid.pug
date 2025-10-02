@@ -3,44 +3,58 @@
 //- Eliminado espacio en blanco inicial
 //- Si exhibitions es un array, mostrar cada una en su propia sección tipo hero
 if Array.isArray(exhibitions)
-  each expo in exhibitions
-    section.article-template.exhibition-section(style="min-height:100vh;")
-      // Cover Image
-      if expo.coverImage
-        .article-template__hero-container.exhibition-hero-container
-          .article-template__hero-adapt.media.exhibition-hero-adapt
-            img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(src=expo.coverImage, alt=expo.title)
-      else
-        .article-template__hero-container.exhibition-hero-container
-          svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice")
-            title Placeholder
-            rect(width="100%" height="100%" fill="#343a40")
-            text(x="50%" y="50%" fill="#eceeef" dy=".3em") Expo
-      // Details
-      .article-template__content.page-width.page-width--narrow.center.exhibition-content-flex
-        // Title
-        h2.article-template__title.mb-2(style="font-size:2.8rem; font-weight:700; color:var(--ox-blue);")= expo.title
-        // Dates
-        if expo.startDate && expo.endDate
-          p.mb-1
-            span.fas.fa-calendar-alt.me-2(style="color:var(--ox-orange);")
-            span(style="font-size:1.3rem; color:#444;")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
-        // Location
-        if expo.location && expo.location.type
-          p.mb-1
-            if expo.location.type === 'physical' && expo.location.address
-              span.fas.fa-map-marker-alt.me-2(style="color:var(--ox-red);")
-              span(style="font-size:1.3rem; color:#444;")= expo.location.address
-            else if expo.location.type === 'virtual' && expo.location.url
-              span.fas.fa-globe.me-2(style="color:var(--ox-blue);")
-              a.text-dark(href=expo.location.url, target="_blank", style="font-size:1.3rem; color:#444;text-decoration:underline;") Virtual
-        // Description (truncated)
-        if expo.description
-          - const desc = expo.description.length > 180 ? expo.description.slice(0, 180) + '…' : expo.description;
-          p.mb-3(style="font-size:1.4rem; color:#222; font-family:var(--font-subtitle); font-style:italic;")= desc
-        // Details button
-        p
-          a.btn.btn-sm.btn-outline-primary(href=`/exposiciones/${expo._id}`) Ver detalles
+  if exhibitions.length
+    each expo in exhibitions
+      section.article-template.exhibition-section(style="min-height:100vh;")
+        // Cover Image
+        if expo.coverImage
+          .article-template__hero-container.exhibition-hero-container
+            .article-template__hero-adapt.media.exhibition-hero-adapt
+              img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(src=expo.coverImage, alt=expo.title)
+        else
+          .article-template__hero-container.exhibition-hero-container
+            svg.bd-placeholder-img(width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice")
+              title Placeholder
+              rect(width="100%" height="100%" fill="#343a40")
+              text(x="50%" y="50%" fill="#eceeef" dy=".3em") Expo
+        // Details
+        .article-template__content.page-width.page-width--narrow.center.exhibition-content-flex
+          // Title
+          h2.article-template__title.mb-2(style="font-size:2.8rem; font-weight:700; color:var(--ox-blue);")= expo.title
+          // Dates
+          if expo.startDate && expo.endDate
+            p.mb-1
+              span.fas.fa-calendar-alt.me-2(style="color:var(--ox-orange);")
+              span(style="font-size:1.3rem; color:#444;")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
+          // Location
+          if expo.location && expo.location.type
+            p.mb-1
+              if expo.location.type === 'physical' && expo.location.address
+                span.fas.fa-map-marker-alt.me-2(style="color:var(--ox-red);")
+                span(style="font-size:1.3rem; color:#444;")= expo.location.address
+              else if expo.location.type === 'virtual' && expo.location.url
+                span.fas.fa-globe.me-2(style="color:var(--ox-blue);")
+                a.text-dark(href=expo.location.url, target="_blank", style="font-size:1.3rem; color:#444;text-decoration:underline;") Virtual
+          // Description (truncated)
+          if expo.description
+            - const desc = expo.description.length > 180 ? expo.description.slice(0, 180) + '…' : expo.description;
+            p.mb-3(style="font-size:1.4rem; color:#222; font-family:var(--font-subtitle); font-style:italic;")= desc
+          // Details button
+          p
+            a.btn.btn-sm.btn-outline-primary(href=`/exposiciones/${expo._id}`) Ver detalles
+  else
+    .container-xxl.py-5
+      .row.justify-content-center
+        .col-lg-8.text-center
+          h3.h4.mb-2 No hay exposiciones que coincidan con tus filtros
+          p.text-muted.mb-4 Prueba ajustar el rango de fechas, el tipo o
+            |  
+            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exposiciones') limpiar los filtros
+          //- Skeleton placeholders (no usan scroll-snap)
+          .d-grid.gap-3
+            .skeleton.skeleton-hero
+            .skeleton.skeleton-hero
+            .skeleton.skeleton-hero
   //- Lenis smooth scroll (only for exhibitions listing)
   script(src="https://unpkg.com/@studio-freight/lenis@1.0.39/bundled/lenis.min.js")
   script.

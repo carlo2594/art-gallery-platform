@@ -157,6 +157,49 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   });
 });
 
+// Vista de exposiciones públicas (listado con filtros y paginación)
+exports.getExhibitionsView = catchAsync(async (req, res) => {
+  const q = req.query;
+  const search = (q.q || '').trim();
+
+  // Utils específicos de exposiciones
+  const { buildExhibitionFilter, getExhibitionSort, getExhibitionDateBounds } = require('@utils/exhibitionSearch');
+  const { getPaginationParams } = require('@utils/pagination');
+
+  // Filtro y orden
+  const exhibitionFilter = buildExhibitionFilter(q, search);
+  const exhibitionSort = getExhibitionSort(q.sort);
+
+  // Paginación (usa exhibitionPage para coherencia con parciales)
+  const { page: exhibitionPage, perPage: exhibitionPerPage, skip: exhibitionSkip } = getPaginationParams({
+    page: q.exhibitionPage || q.page,
+    perPage: q.exhibitionPerPage || 10
+  }, 10, 50);
+
+  // Bounds de fechas disponibles (basado en filtros base, sin rango aplicado)
+  const baseExhFilterForBounds = buildExhibitionFilter({ type: q.type }, search);
+  const exhibitionDateBounds = await getExhibitionDateBounds(Exhibition, baseExhFilterForBounds);
+
+  // Consulta principal
+  const totalExhibitions = await Exhibition.countDocuments(exhibitionFilter);
+  const exhibitions = await Exhibition.find(exhibitionFilter)
+    .sort(exhibitionSort)
+    .skip(exhibitionSkip)
+    .limit(exhibitionPerPage);
+  const exhibitionTotalPages = Math.max(1, Math.ceil(totalExhibitions / exhibitionPerPage));
+
+  res.status(200).render('public/exhibitions', {
+    title: 'Exposiciones · Galería del Ox',
+    exhibitions,
+    totalExhibitions,
+    exhibitionPage,
+    exhibitionTotalPages,
+    q,
+    search,
+    exhibitionDateBounds
+  });
+});
+
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
   const artworks = await Artwork

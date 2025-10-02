@@ -1,39 +1,43 @@
 
 
-// Filtros de exposiciones reutilizables para searchResults.pug
-div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
-  form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
-    input(type='hidden' name='tab' value='exposiciones')
-    // Mantener el término de búsqueda si existe
-    if typeof search !== 'undefined' && search
-      input(type='hidden' name='q' value=search)
-    else if q && q.q
-      input(type='hidden' name='q' value=q.q)
-    // Preservar rango de fechas si existe al usar chips
-    if q && q.minDate
-      input(type='hidden' name='minDate' value=q.minDate)
-    if q && q.maxDate
-      input(type='hidden' name='maxDate' value=q.maxDate)
-    if q && q.minYear && !q.minDate
-      - var _minDateFromYear = `${q.minYear}-01-01`
-      input(type='hidden' name='minDate' value=_minDateFromYear)
-    if q && q.maxYear && !q.maxDate
-      - var _maxDateFromYear = `${q.maxYear}-12-31`
-      input(type='hidden' name='maxDate' value=_maxDateFromYear)
-    // Chips de tipo de exposición (solo Física y Virtual)
-    - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
-    each opt in typeOpts
-      button.chip.btn(type='submit', name='type', value=opt.value, class=((!q || !q.type) && opt.value === '' ? 'active' : (q && q.type === opt.value ? 'active' : '')))= opt.label
-    // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
-  // Botón Filtros fuera del form para evitar submit accidental y asegurar funcionalidad
-  button.btn.btn-outline-secondary.ms-auto(
-    type='button'
-    data-bs-toggle='offcanvas'
-    data-bs-target='#exhibitionFiltersDrawer'
-    aria-controls='exhibitionFiltersDrawer'
-  )
-    i.fa-solid.fa-filter.me-1
-    | Filtros
+// Filtros de exposiciones reutilizables
+- var q = typeof q !== 'undefined' ? q : {}
+- var actionUrl = typeof actionUrl !== 'undefined' ? actionUrl : '/exposiciones'
+
+section.filters-toolbar.py-2
+  div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+    form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
+      input(type='hidden' name='tab' value='exposiciones')
+      // Mantener el término de búsqueda si existe
+      if typeof search !== 'undefined' && search
+        input(type='hidden' name='q' value=search)
+      else if q && q.q
+        input(type='hidden' name='q' value=q.q)
+      // Preservar rango de fechas si existe al usar chips
+      if q && q.minDate
+        input(type='hidden' name='minDate' value=q.minDate)
+      if q && q.maxDate
+        input(type='hidden' name='maxDate' value=q.maxDate)
+      if q && q.minYear && !q.minDate
+        - var _minDateFromYear = `${q.minYear}-01-01`
+        input(type='hidden' name='minDate' value=_minDateFromYear)
+      if q && q.maxYear && !q.maxDate
+        - var _maxDateFromYear = `${q.maxYear}-12-31`
+        input(type='hidden' name='maxDate' value=_maxDateFromYear)
+      // Chips de tipo de exposición (solo Física y Virtual)
+      - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
+      each opt in typeOpts
+        button.chip.btn(type='submit', name='type', value=opt.value, class=((!q || !q.type) && opt.value === '' ? 'active' : (q && q.type === opt.value ? 'active' : '')))= opt.label
+      // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
+    // Botón Filtros fuera del form para evitar submit accidental y asegurar funcionalidad
+    button.btn.btn-outline-secondary.ms-auto(
+      type='button'
+      data-bs-toggle='offcanvas'
+      data-bs-target='#exhibitionFiltersDrawer'
+      aria-controls='exhibitionFiltersDrawer'
+    )
+      i.fa-solid.fa-filter.me-1
+      | Filtros
 
 div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
   .offcanvas-header

@@ -130,6 +130,29 @@ body.exhibitions-scroll-snap .exhibition-section {
 }
 
 /* =========================
+   Skeletons (simple placeholders for empty exhibitions)
+   ========================= */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #eee;
+  border-radius: 1rem;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%);
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.4s infinite;
+}
+.skeleton-hero { height: 40vh; }
+@media (max-width: 767.98px) { .skeleton-hero { height: 28vh; } }
+@keyframes skeleton-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* =========================
   2. NAVBAR Y SEARCHBAR
   ========================= */
 /* Espaciado inferior navbar y estilos principales */

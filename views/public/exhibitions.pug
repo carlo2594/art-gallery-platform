@@ -2,7 +2,19 @@
 extends ../layouts/public
 
 block content
-  .container-xxl.py-5
-    h2.h3.mb-4 Exposiciones
-    p.text-muted Aquí se mostrarán las exposiciones públicas.
-    //- Agrega aquí el grid/listado de exposiciones o el contenido que desees
+  // Contexto para los parciales
+  - var actionUrl = '/exposiciones'
+
+  .container-xxl.py-4
+    header.d-flex.align-items-baseline.justify-content-between.mb-3
+      h1.h3.mb-0 Exposiciones
+
+  // Filtros (chips + offcanvas)
+  include _exhibitionFilters.pug
+
+  // Grid de exposiciones (secciones a pantalla completa)
+  .container-xxl.artworks-flex
+    .artworks-grid-paginate
+      include _exhibitionGrid.pug
+      // Paginación SSR
+      include _exhibitionPagination.pug
