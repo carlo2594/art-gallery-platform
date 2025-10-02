@@ -1,529 +1,197 @@
-/* Fade-in animation for first 6 artist images */
-.fade-in-img {
-  opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
-}
-.fade-in-img.loaded {
-  opacity: 1;
-}
-.article-template:first-of-type {
-  margin-top: 4rem;
-}
+/* ==========================================
+  0. HELPERS & ANIMATIONS
+  ========================================== */
+.fade-in-img { opacity: 0; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1); }
+.fade-in-img.loaded { opacity: 1; }
+.article-template:first-of-type { margin-top: 4rem; }
+.article-template > * { margin-bottom: 3rem; }
 
+/* Skeletons (simple placeholders for empty exhibitions) */
+.skeleton { position: relative; overflow: hidden; background: #eee; border-radius: 1rem; }
+.skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%); transform: translateX(-100%); animation: skeleton-shimmer 1.4s infinite; }
+.skeleton-hero { height: 40vh; }
+@media (max-width: 767.98px) { .skeleton-hero { height: 28vh; } }
+@keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
 
-/* =========================
-   1. VARIABLES Y BASE
-   ========================= */
+/* ==========================================
+  1. VARIABLES & BASE
+  ========================================== */
 :root {
   --ox-yellow: #F5C45E;
   --ox-blue:   #102E50;
   --ox-orange: #E78B48;
   --ox-red:    #BE3D2A;
   --ox-beige:  #F7F6EF;
-  /* UI font */
-  --font-title:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-  /* Artwork/label font */
-  --font-subtitle: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-title: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; /* UI font */
+  --font-subtitle: 'Newsreader', Georgia, 'Times New Roman', serif;                 /* Artwork/label font */
   --art-max-h: 68rem;
 }
-html {
-  font-size: 62.5%;
-  height: 100%;
-  min-height: 100%;
-}
-body {
-  font-family: var(--font-title);
-  background-color: var(--ox-beige);
-  color: #111;
-  font-size: 1.2rem;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+html { font-size: 62.5%; height: 100%; min-height: 100%; }
+body { font-family: var(--font-title); background-color: var(--ox-beige); color: #111; font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .main-content { flex: 1 0 auto; }
 footer, .footer { flex-shrink: 0; }
 
-/* =========================
-   2. UTILIDADES Y HELPERS
-   ========================= */
-/* Aquí puedes agregar utilidades globales si las necesitas */
+/* ==========================================
+  2. COMPONENTS: NAVBAR & SEARCHBAR
+  ========================================== */
+.main-navbar { margin-bottom: 2.2rem; background-color: var(--ox-beige) !important; box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10); border-bottom: none; }
+.navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
+.navbar-light .navbar-toggler { border: none; }
+.logo-navbar { max-height: 5rem; width: auto; display: block; }
+.navbar-title { color: var(--ox-blue); font-family: var(--font-title); font-weight: 700; letter-spacing: 0.1em; font-size: 1.6rem; text-transform: uppercase; }
+.navbar .nav-link { color: var(--ox-blue); text-transform: uppercase; font-size: 1.4rem; font-weight: 500; }
+.navbar .nav-link:hover, .navbar .nav-link:focus { background-color: var(--ox-yellow); color: var(--ox-blue); border-radius: 2rem; }
+.main-navbar .navbar-collapse { width: 100%; padding: .5rem 0; }
+/* Searchbar */
+.searchbar-navbar { position: relative; width: 100%; }
+.searchbar-input { height: 4.2rem; font-size: 1.6rem; padding-right: 3rem; border-radius: 2rem; border: 2px solid var(--ox-yellow); width: 100%; }
+.searchbar-input:focus { border-color: var(--ox-orange); outline: none; box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15); }
+.searchbar-input::placeholder { font-family: var(--font-title); font-style: italic; color: #bbb; padding-left: 1rem; }
+.search-icon { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--ox-yellow); pointer-events: none; display: flex; align-items: center; font-size: 1.7rem; }
 
-/* =========================
-   3. LAYOUTS GENERALES
-   ========================= */
-/* Aquí puedes agregar reglas de layout generales si las necesitas */
+/* ==========================================
+  3. SECTIONS: EXHIBITIONS (GRID/DETAIL)
+  ========================================== */
+.exhibition-hero-container { flex: 0 0 auto; width: 100%; overflow: hidden; }
+.exhibition-hero-adapt { width: 100%; padding-bottom: 41.5%; position: relative; overflow: hidden; }
+.exhibition-hero-img-absolute { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.exhibition-content-flex { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+.exhibition-hero-image { width: 100%; max-width: 100%; max-height: 100%; height: auto; object-fit: cover; object-position: center; display: block; margin-left: auto; margin-right: auto; }
+/* Scroll-snap (only exhibitions pages) */
+.exhibition-section .exhibition-hero-container { margin-top: 3rem; }
+body.exhibitions-scroll-snap { scroll-snap-type: y proximity; overscroll-behavior-y: none; }
+body.exhibitions-scroll-snap .exhibition-section { scroll-snap-align: start; scroll-snap-stop: always; }
 
-/* =========================
-   4. COMPONENTES GLOBALES
-   ========================= */
-/* Navbar, Footer, Paginación, Chips, Botones, Offcanvas, Filtros */
+/* ==========================================
+  4. SECTIONS: HERO (LANDING)
+  ========================================== */
+section.hero { min-height: calc(100vh - 6rem); display: flex; align-items: center; overflow: hidden; }
+.hero-content > * { margin-bottom: 2rem; max-width: 48rem; }
+.hero-content > *:last-child { margin-bottom: 0; }
+section.hero .hero-description { font-family: var(--font-subtitle) !important; font-style: italic !important; font-weight: 400 !important; font-size: 2rem !important; color: var(--ox-blue) !important; }
+.hero-row { display: flex; flex-direction: column; }
+.hero-image-container { order: 1; }
+.hero-text { order: 2; }
+.hero-cta .btn-primary { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; border-radius: 2rem !important; font-weight: 700; font-size: 1.5rem; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10); text-transform: uppercase; padding: 1rem 2.5rem; transition: background 0.2s, color 0.2s; }
+.hero-cta .btn-primary:hover, .hero-cta .btn-primary:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
 
-/* =========================
-   5. SECCIONES ESPECÍFICAS
-   ========================= */
-/* Exhibition Hero (GRID/DETAIL) */
-.exhibition-hero-container {
-  flex: 0 0 auto;
-  width: 100%;
-  overflow: hidden;
+/* ==========================================
+  5. SECTIONS: JOIN ARTISTS
+  ========================================== */
+section.join-artists { position: relative; margin-top: 5rem; }
+.join-artists-bg { width: 100%; height: auto; display: block; border-radius: 2rem; object-fit: cover; }
+.join-artists-card { width: 80%; max-width: 120rem; height: 80%; max-height: 80rem; min-height: 16rem; padding-left: 1.5rem; padding-right: 1.5rem; background: rgba(255,255,255,0.32); backdrop-filter: blur(16px); border-radius: 2rem; box-shadow: 0 8px 32px rgba(16,46,80,0.18), 0 2px 8px rgba(16,46,80,0.10); display: flex; flex-direction: column; justify-content: center; }
+.join-artists-card .card-body { padding: 2rem; }
+.join-artists-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; padding: .75rem 2.5rem !important; font-size: 1.15rem !important; border-radius: 2rem !important; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15); }
+.join-artists-btn:hover, .join-artists-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+
+/* ==========================================
+  6. LAYOUT: ARTWORKS GRID & PAGER
+  ========================================== */
+.artworks-flex { display: flex; flex-direction: column; min-height: 48rem; }
+.artworks-grid-paginate { display: flex; flex-direction: column; flex: 1 1 auto; }
+#grid { min-height: 24rem; }
+#pager-obras { margin-top: auto; }
+.pager-hidden { display: none !important; }
+
+/* ==========================================
+  7. COMPONENTS: ART CARDS & LABELS
+  ========================================== */
+.art-card-shadow { box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08); border-radius: 0.7rem; background: #fff; }
+.art-label { font-family: var(--font-subtitle); background: #fff; border: 1.5px solid #222; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 1.25rem 1rem 1.5rem 1rem; letter-spacing: 0.005em; }
+.museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
+.art-label .h5 { font-style: italic; letter-spacing: 0.02em; }
+.art-label .h4 { color: #222; }
+.museum-artist { font-weight: 700; letter-spacing: 0.02em; }
+.museum-title { font-style: italic; font-weight: 600; }
+.museum-material, .museum-created { font-variant-caps: small-caps; letter-spacing: 0.02em; }
+
+/* ==========================================
+  8. COMPONENTS: PAGINATION (OX)
+  ========================================== */
+.pagination-ox { display: flex; justify-content: center; align-items: center; gap: 0.6rem; padding: 0; margin: 0; list-style: none; }
+.pagination-ox .page-item { display: inline-block; }
+.pagination-ox .page-link { font-size: 2.1rem; font-family: var(--font-title); color: var(--ox-blue); background: #fff; border: 2px solid var(--ox-yellow); border-radius: 1.5rem; padding: 0.7rem 1.6rem; margin: 0 0.1rem; font-weight: 600; transition: background 0.2s, color 0.2s, border 0.2s; outline: none; cursor: pointer; }
+.pagination-ox .page-link:hover { background: var(--ox-orange); color: var(--ox-beige); border-color: var(--ox-orange); }
+.pagination-ox .page-link:focus, .pagination-ox .page-link:active { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); outline: 2px solid var(--ox-orange); }
+.pagination-ox .page-item.active .page-link, .pagination-ox .page-link[aria-current="page"] { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); font-weight: 700; outline: 2px solid var(--ox-orange); }
+.pagination-ox .page-link[disabled], .pagination-ox .page-item.disabled .page-link { color: #bbb; background: #f7f6ef; border-color: #eee; cursor: not-allowed; pointer-events: none; }
+.pagination-ox .page-link:focus-visible { outline: 2px solid var(--ox-orange); }
+
+/* ==========================================
+  9. COMPONENTS: CHIPS & BUTTONS
+  ========================================== */
+.chip { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .9rem; border: 2px solid var(--ox-yellow); border-radius: 2rem; cursor: pointer; user-select: none; font-size: 1.3rem; color: var(--ox-blue); background: #fff; }
+.chip input { display: none; }
+.chip input:checked + span { font-weight: 700; }
+.chip:has(input:checked) { background: var(--ox-yellow); }
+.btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
+.btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
+
+/* ==========================================
+  10. AUTH (LOGIN/SIGNIN)
+  ========================================== */
+.login-signin-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; border-radius: 2rem !important; font-weight: 700; font-size: 1.5rem; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10); transition: background 0.2s, color 0.2s; }
+.login-signin-btn:hover, .login-signin-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+.login-signin-side-img { max-height: 100vh; width: auto; height: 100vh; display: block; object-fit: cover; }
+
+/* ==========================================
+  11. OFFCANVAS & FILTERS
+  ========================================== */
+.offcanvas .filter-block { border-top: 1px solid #eee; padding-top: 1rem; }
+.sticky-apply { position: sticky; bottom: 0; background: #fff; padding-top: .75rem; }
+
+/* ==========================================
+  12. FOOTER
+  ========================================== */
+.footer { background-color: var(--ox-blue) !important; color: var(--ox-beige) !important; font-family: var(--font-title), sans-serif !important; }
+.footer-quote { font-family: var(--font-subtitle), serif; font-weight: 400; font-style: italic; font-size: 2.4rem; line-height: 1; letter-spacing: 0; text-align: center; color: var(--ox-beige); margin: 0 0 .6rem; }
+.footer .row.d-flex.align-items-center { font-size: 1.6rem; line-height: 1.35; }
+.footer .nav-link, .footer p, .footer a { color: var(--ox-beige) !important; }
+.footer a { color: var(--ox-beige) !important; font-size: 1.6rem !important; line-height: 1.35; text-decoration: none; }
+.footer .nav { display: flex; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: .25rem; }
+.footer .nav li { flex: 0 0 auto; }
+.footer .nav-link { white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
+.footer .nav::-webkit-scrollbar { height: 6px; }
+.footer .container-xxl, .footer .container { max-width: 1440px; padding-left: 2rem; padding-right: 2rem; }
+.logo-footer { max-height: 8rem; width: auto; display: block; }
+.footer-title { font-family: var(--font-title); font-weight: 700; font-size: 1.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ox-beige) !important; margin-left: 1rem; display: inline-block; }
+.footer-quote { margin-bottom: 1rem; }
+.footer .container-xxl > * + * { margin-top: 1.2rem; }
+
+/* ==========================================
+  13. MEDIA QUERIES
+  ========================================== */
+@media (min-width: 992px) {
+  .logo-navbar { margin-right: 1rem; }
+  #navbarsExample05 form[role="search"] .searchbar-input { width: 32rem; }
+  .hero-row { flex-direction: row; align-items: center; justify-content: center; }
+  .hero-text { order: 1; }
+  .hero-image-container { order: 2; }
 }
-.exhibition-hero-adapt {
-  width: 100%;
-  padding-bottom: 41.5%;
-  position: relative;
-  overflow: hidden;
+@media (max-width: 1399.98px) {
+  #navbarsExample05 form[role="search"] { margin-left: auto; margin-right: auto; max-width: 60rem; width: 100%; display: flex; justify-content: center; }
+  #navbarsExample05 .navbar-nav .nav-item:first-child { margin-top: 1.2rem; }
+  #navbarsExample05 .navbar-nav .nav-item { margin-bottom: 1.2rem; }
+  #navbarsExample05 form[role="search"] { margin-bottom: 1.2rem; }
 }
-.exhibition-hero-img-absolute {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+@media (max-width: 991.98px) {
+  #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
+  #navbarsExample05 .navbar-nav { align-items: center; }
+  #navbarsExample05 form[role="search"] { width: 100%; }
+  #navbarsExample05 .searchbar-input { width: 100%; }
+  .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .hero-text { align-items: center; display: flex; flex-direction: column; }
+  .footer .row { --bs-gutter-y: 1rem; }
 }
-.exhibition-content-flex {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .hero-text { align-items: center; display: flex; flex-direction: column; }
 }
-.exhibition-hero-image {
-  width: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
+@media (max-width: 1500px) {
+  .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; white-space: normal !important; justify-content: center !important; gap: .5rem 1rem; }
+  .footer .nav li { flex: 0 0 auto; margin-bottom: .6rem; }
+  .footer .nav-link { display: inline-block; white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
 }
-
-/* =========================
-   EXHIBITIONS: SCROLL SNAP + FADE-IN (only when JS adds the classes)
-   ========================= */
-/* Add spacing above each exhibition hero image */
-.exhibition-section .exhibition-hero-container {
-  margin-top: 3rem;
-}
-
-/* Enable vertical scroll snapping only on exhibitions pages */
-body.exhibitions-scroll-snap {
-  scroll-snap-type: y proximity;
-  overscroll-behavior-y: none;
-}
-/* Each exhibition section snaps to viewport start */
-body.exhibitions-scroll-snap .exhibition-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-}
-/* Add bottom breathing room so you can scroll past the last exhibition without snapping up */
-/* With proximity + Lenis, no extra bottom breathing room needed */
-/* Fade-in animation only when JS marks enhanced mode */
-/* Removed fade-in; Lenis smooths scroll globally */
-
-
-
-.article-template > * {
-  margin-bottom: 3rem;
-}
-
-/* =========================
-   Skeletons (simple placeholders for empty exhibitions)
-   ========================= */
-.skeleton {
-  position: relative;
-  overflow: hidden;
-  background: #eee;
-  border-radius: 1rem;
-}
-.skeleton::after {
-  content: '';
-  position: absolute;
-  /* ==========================================
-     0. HELPERS & ANIMATIONS
-     ========================================== */
-  .fade-in-img {
-    opacity: 0;
-    transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
-  }
-  .fade-in-img.loaded { opacity: 1; }
-  .article-template:first-of-type { margin-top: 4rem; }
-  .article-template > * { margin-bottom: 3rem; }
-
-  /* Skeletons (simple placeholders for empty exhibitions) */
-  .skeleton { position: relative; overflow: hidden; background: #eee; border-radius: 1rem; }
-  .skeleton::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%);
-    transform: translateX(-100%);
-    animation: skeleton-shimmer 1.4s infinite;
-  }
-  .skeleton-hero { height: 40vh; }
-  @media (max-width: 767.98px) { .skeleton-hero { height: 28vh; } }
-  @keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
-
-  /* ==========================================
-     1. VARIABLES & BASE
-     ========================================== */
-  :root {
-    --ox-yellow: #F5C45E;
-    --ox-blue:   #102E50;
-    --ox-orange: #E78B48;
-    --ox-red:    #BE3D2A;
-    --ox-beige:  #F7F6EF;
-    /* UI font */
-    --font-title:    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-    /* Artwork/label font */
-    --font-subtitle: 'Newsreader', Georgia, 'Times New Roman', serif;
-    --art-max-h: 68rem;
-  }
-  html {
-    font-size: 62.5%;
-    height: 100%;
-    min-height: 100%;
-  }
-  body {
-    font-family: var(--font-title);
-    background-color: var(--ox-beige);
-    color: #111;
-    font-size: 1.2rem;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  .main-content { flex: 1 0 auto; }
-  footer, .footer { flex-shrink: 0; }
-
-  /* ==========================================
-     2. COMPONENTS: NAVBAR & SEARCHBAR
-     ========================================== */
-  .main-navbar {
-    margin-bottom: 2.2rem;
-    background-color: var(--ox-beige) !important;
-    box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10);
-    border-bottom: none;
-  }
-  .navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
-  .navbar-light .navbar-toggler { border: none; }
-  .logo-navbar { max-height: 5rem }
-  .navbar-title {
-    color: var(--ox-blue);
-    font-family: var(--font-title);
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    font-size: 1.6rem;
-    text-transform: uppercase;
-  }
-  .navbar .nav-link {
-    color: var(--ox-blue);
-    text-transform: uppercase;
-    font-size: 1.4rem;
-    font-weight: 500;
-  }
-  .navbar .nav-link:hover,
-  .navbar .nav-link:focus {
-    background-color: var(--ox-yellow);
-    color: var(--ox-blue);
-    border-radius: 2rem;
-  }
-  .main-navbar .navbar-collapse {
-    width: 100%;
-    padding: .5rem 0;
-  }
-  /* Searchbar */
-  .searchbar-navbar { position: relative; width: 100%; }
-  .searchbar-input {
-    height: 4.2rem;
-    font-size: 1.6rem;
-    padding-right: 3rem;
-    border-radius: 2rem;
-    border: 2px solid var(--ox-yellow);
-    width: 100%;
-  }
-  .searchbar-input:focus {
-    border-color: var(--ox-orange);
-    outline: none;
-    box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15);
-  }
-  .searchbar-input::placeholder {
-    font-family: var(--font-title);
-    font-style: italic;
-    color: #bbb;
-    padding-left: 1rem;
-  }
-  .search-icon {
-    position: absolute;
-    right: 1.2rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--ox-yellow);
-    pointer-events: none;
-    display: flex;
-    align-items: center;
-    font-size: 1.7rem;
-  }
-
-  /* ==========================================
-     3. SECTIONS: EXHIBITIONS (GRID/DETAIL)
-     ========================================== */
-  .exhibition-hero-container {
-    flex: 0 0 auto;
-    width: 100%;
-    overflow: hidden;
-  }
-  .exhibition-hero-adapt {
-    width: 100%;
-    padding-bottom: 41.5%;
-    position: relative;
-    overflow: hidden;
-  }
-  .exhibition-hero-img-absolute {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .exhibition-content-flex {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .exhibition-hero-image {
-    width: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    height: auto;
-    object-fit: cover;
-    object-position: center;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  /* Scroll-snap (only exhibitions pages) */
-  .exhibition-section .exhibition-hero-container { margin-top: 3rem; }
-  body.exhibitions-scroll-snap { scroll-snap-type: y proximity; overscroll-behavior-y: none; }
-  body.exhibitions-scroll-snap .exhibition-section { scroll-snap-align: start; scroll-snap-stop: always; }
-
-  /* ==========================================
-     4. SECTIONS: HERO (LANDING)
-     ========================================== */
-  section.hero {
-    min-height: calc(100vh - 6rem);
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-  }
-  .hero-content > * { margin-bottom: 2rem; max-width: 48rem; }
-  .hero-content > *:last-child { margin-bottom: 0; }
-  section.hero .hero-description {
-    font-family: var(--font-subtitle) !important;
-    font-style: italic !important;
-    font-weight: 400 !important;
-    font-size: 2rem !important;
-    color: var(--ox-blue) !important;
-  }
-  .hero-row { display: flex; flex-direction: column; }
-  .hero-image-container { order: 1; }
-  .hero-text { order: 2; }
-  .hero-cta .btn-primary {
-    background: var(--ox-yellow) !important;
-    color: var(--ox-blue) !important;
-    border: none !important;
-    border-radius: 2rem !important;
-    font-weight: 700;
-    font-size: 1.5rem;
-    box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10);
-    text-transform: uppercase;
-    padding: 1rem 2.5rem;
-    transition: background 0.2s, color 0.2s;
-  }
-  .hero-cta .btn-primary:hover,
-  .hero-cta .btn-primary:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
-
-  /* ==========================================
-     5. SECTIONS: JOIN ARTISTS
-     ========================================== */
-  section.join-artists { position: relative; margin-top: 5rem; }
-  .join-artists-bg { width: 100%; height: auto; display: block; border-radius: 2rem; object-fit: cover; }
-  .join-artists-card {
-    width: 80%; max-width: 120rem;
-    height: 80%; max-height: 80rem;
-    min-height: 16rem;
-    padding-left: 1.5rem; padding-right: 1.5rem;
-    background: rgba(255,255,255,0.32);
-    backdrop-filter: blur(16px);
-    border-radius: 2rem;
-    box-shadow: 0 8px 32px rgba(16,46,80,0.18), 0 2px 8px rgba(16,46,80,0.10);
-    display: flex; flex-direction: column; justify-content: center;
-  }
-  .join-artists-card .card-body { padding: 2rem; }
-  .join-artists-btn {
-    background: var(--ox-yellow) !important; color: var(--ox-blue) !important;
-    border: none !important; padding: .75rem 2.5rem !important;
-    font-size: 1.15rem !important; border-radius: 2rem !important;
-    box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15);
-  }
-  .join-artists-btn:hover,
-  .join-artists-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
-
-  /* ==========================================
-     6. LAYOUT: ARTWORKS GRID & PAGER
-     ========================================== */
-  .artworks-flex { display: flex; flex-direction: column; min-height: 48rem; }
-  .artworks-grid-paginate { display: flex; flex-direction: column; flex: 1 1 auto; }
-  #grid { min-height: 24rem; }
-  #pager-obras { margin-top: auto; }
-  .pager-hidden { display: none !important; }
-
-  /* ==========================================
-     7. COMPONENTS: ART CARDS & LABELS
-     ========================================== */
-  .art-card-shadow {
-    box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08);
-    border-radius: 0.7rem; background: #fff;
-  }
-  .art-label {
-    font-family: var(--font-subtitle);
-    background: #fff;
-    border: 1.5px solid #222;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 1.25rem 1rem 1.5rem 1rem;
-    letter-spacing: 0.005em;
-  }
-  .museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
-  .art-label .h5 { font-style: italic; letter-spacing: 0.02em; }
-  .art-label .h4 { color: #222; }
-  .museum-artist { font-weight: 700; letter-spacing: 0.02em; }
-  .museum-title { font-style: italic; font-weight: 600; }
-  .museum-material, .museum-created { font-variant-caps: small-caps; letter-spacing: 0.02em; }
-
-  /* ==========================================
-     8. COMPONENTS: PAGINATION (OX)
-     ========================================== */
-  .pagination-ox { display: flex; justify-content: center; align-items: center; gap: 0.6rem; padding: 0; margin: 0; list-style: none; }
-  .pagination-ox .page-item { display: inline-block; }
-  .pagination-ox .page-link {
-    font-size: 2.1rem; font-family: var(--font-title);
-    color: var(--ox-blue); background: #fff;
-    border: 2px solid var(--ox-yellow); border-radius: 1.5rem;
-    padding: 0.7rem 1.6rem; margin: 0 0.1rem;
-    font-weight: 600; transition: background 0.2s, color 0.2s, border 0.2s;
-    outline: none; cursor: pointer;
-  }
-  .pagination-ox .page-link:hover { background: var(--ox-orange); color: var(--ox-beige); border-color: var(--ox-orange); }
-  .pagination-ox .page-link:focus, .pagination-ox .page-link:active { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); outline: 2px solid var(--ox-orange); }
-  .pagination-ox .page-item.active .page-link,
-  .pagination-ox .page-link[aria-current="page"] { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); font-weight: 700; outline: 2px solid var(--ox-orange); }
-  .pagination-ox .page-link[disabled], .pagination-ox .page-item.disabled .page-link { color: #bbb; background: #f7f6ef; border-color: #eee; cursor: not-allowed; pointer-events: none; }
-  .pagination-ox .page-link:focus-visible { outline: 2px solid var(--ox-orange); }
-
-  /* ==========================================
-     9. COMPONENTS: CHIPS & BUTTONS
-     ========================================== */
-  .chip { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .9rem; border: 2px solid var(--ox-yellow); border-radius: 2rem; cursor: pointer; user-select: none; font-size: 1.3rem; color: var(--ox-blue); background: #fff; }
-  .chip input { display: none; }
-  .chip input:checked + span { font-weight: 700; }
-  .chip:has(input:checked) { background: var(--ox-yellow); }
-  .btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
-  .btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
-
-  /* ==========================================
-     10. AUTH (LOGIN/SIGNIN)
-     ========================================== */
-  .login-signin-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; border-radius: 2rem !important; font-weight: 700; font-size: 1.5rem; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10); transition: background 0.2s, color 0.2s; }
-  .login-signin-btn:hover,
-  .login-signin-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
-  .login-signin-side-img { max-height: 100vh; width: auto; height: 100vh; display: block; object-fit: cover; }
-
-  /* ==========================================
-     11. OFFCANVAS & FILTERS
-     ========================================== */
-  .offcanvas .filter-block { border-top: 1px solid #eee; padding-top: 1rem; }
-  .sticky-apply { position: sticky; bottom: 0; background: #fff; padding-top: .75rem; }
-
-  /* ==========================================
-     12. FOOTER
-     ========================================== */
-  .footer { background-color: var(--ox-blue) !important; color: var(--ox-beige) !important; font-family: var(--font-title), sans-serif !important; }
-  .footer-quote { font-family: var(--font-subtitle), serif; font-weight: 400; font-style: italic; font-size: 2.4rem; line-height: 1; letter-spacing: 0; text-align: center; color: var(--ox-beige); margin: 0 0 .6rem; }
-  .footer .row.d-flex.align-items-center { font-size: 1.6rem; line-height: 1.35; }
-  .footer .nav-link, .footer p, .footer a { color: var(--ox-beige) !important; }
-  .footer a { color: var(--ox-beige) !important; font-size: 1.6rem !important; line-height: 1.35; text-decoration: none; }
-  .footer .nav { display: flex; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: .25rem; }
-  .footer .nav li { flex: 0 0 auto; }
-  .footer .nav-link { white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
-  .footer .nav::-webkit-scrollbar { height: 6px; }
-  .footer .container-xxl, .footer .container { max-width: 1440px; padding-left: 2rem; padding-right: 2rem; }
-  .logo-footer { max-height: 8rem; width: auto; display: block; }
-  .footer-title { font-family: var(--font-title); font-weight: 700; font-size: 1.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ox-beige) !important; margin-left: 1rem; display: inline-block; }
-  .footer-quote { margin-bottom: 1rem; }
-  .footer .container-xxl > * + * { margin-top: 1.2rem; }
-
-  /* ==========================================
-     13. MEDIA QUERIES
-     ========================================== */
-  /* Navbar: big screens */
-  @media (min-width: 992px) {
-    .logo-navbar { margin-right: 1rem; }
-    #navbarsExample05 form[role="search"] .searchbar-input { width: 32rem; }
-    /* Hero layout */
-    .hero-row { flex-direction: row; align-items: center; justify-content: center; }
-    .hero-text { order: 1; }
-    .hero-image-container { order: 2; }
-  }
-
-  /* Navbar: tablet/desktop wrap */
-  @media (max-width: 1399.98px) {
-    #navbarsExample05 form[role="search"] {
-      margin-left: auto; margin-right: auto; max-width: 60rem; width: 100%; display: flex; justify-content: center;
-    }
-    #navbarsExample05 .navbar-nav .nav-item:first-child { margin-top: 1.2rem; }
-    #navbarsExample05 .navbar-nav .nav-item { margin-bottom: 1.2rem; }
-    #navbarsExample05 form[role="search"] { margin-bottom: 1.2rem; }
-  }
-
-  /* Mobile: navbar and hero centering */
-  @media (max-width: 991.98px) {
-    #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
-    #navbarsExample05 .navbar-nav { align-items: center; }
-    #navbarsExample05 form[role="search"] { width: 100%; }
-    #navbarsExample05 .searchbar-input { width: 100%; }
-    .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .hero-text { align-items: center; display: flex; flex-direction: column; }
-    .footer .row { --bs-gutter-y: 1rem; }
-  }
-
-  /* Tablet-only hero centering */
-  @media (min-width: 768px) and (max-width: 991.98px) {
-    .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-    .hero-text { align-items: center; display: flex; flex-direction: column; }
-  }
-
-  /* Footer responsive */
-  @media (max-width: 1500px) {
-    .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; white-space: normal !important; justify-content: center !important; gap: .5rem 1rem; }
-    .footer .nav li { flex: 0 0 auto; margin-bottom: .6rem; }
-    .footer .nav-link { display: inline-block; white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
-  }
-  @media (min-width: 1456px) {
-    .footer .container-xxl, .footer .container { max-width: 1600px; }
-  }
-  @media (max-width: 1455px) {
-    .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; justify-content: center !important; gap: .8rem 1.2rem !important; }
-    .footer .nav li { margin: 0; }
-  }
-  border: none !important;
-
-  border-radius: 2rem !important;
+@media (min-width: 1456px) { .footer .container-xxl, .footer .container { max-width: 1600px; } }
+@media (max-width: 1455px) { .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; justify-content: center !important; gap: .8rem 1.2rem !important; } .footer .nav li { margin: 0; } }
