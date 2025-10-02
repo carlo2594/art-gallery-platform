@@ -100,6 +100,29 @@ footer, .footer { flex-shrink: 0; }
   margin-right: auto;
 }
 
+/* =========================
+   EXHIBITIONS: SCROLL SNAP + FADE-IN (only when JS adds the classes)
+   ========================= */
+/* Add spacing above each exhibition hero image */
+.exhibition-section .exhibition-hero-container {
+  margin-top: 3rem;
+}
+
+/* Enable vertical scroll snapping only on exhibitions pages */
+body.exhibitions-scroll-snap {
+  scroll-snap-type: y proximity;
+  overscroll-behavior-y: none;
+}
+/* Each exhibition section snaps to viewport start */
+body.exhibitions-scroll-snap .exhibition-section {
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+/* Add bottom breathing room so you can scroll past the last exhibition without snapping up */
+/* With proximity + Lenis, no extra bottom breathing room needed */
+/* Fade-in animation only when JS marks enhanced mode */
+/* Removed fade-in; Lenis smooths scroll globally */
+
 
 
 .article-template > * {
@@ -244,7 +267,6 @@ footer, .footer { flex-shrink: 0; }
   display: block;
   margin-left: auto;
   margin-right: auto;
-}
 }
 .pagination-ox .page-link {
   font-size: 2.1rem;

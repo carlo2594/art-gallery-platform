@@ -2,6 +2,12 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', function () {
+  // Exhibitions-only: enable vertical scroll snap (Lenis will handle smoothness)
+  (function enableExhibitionsScrollSnap() {
+    const sections = document.querySelectorAll('section.exhibition-section');
+    if (!sections || sections.length < 2) return; // only apply on listing with 2+ sections
+    document.body.classList.add('exhibitions-scroll-snap');
+  })();
 
   // Eliminada la lógica de mostrar/ocultar el paginador dinámicamente
   // Mostrar el paginador solo cuando el grid de obras esté completamente cargado o si el usuario hace scroll y el grid es visible

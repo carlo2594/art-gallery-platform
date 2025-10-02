@@ -41,6 +41,22 @@ if Array.isArray(exhibitions)
         // Details button
         p
           a.btn.btn-sm.btn-outline-primary(href=`/exposiciones/${expo._id}`) Ver detalles
+  //- Lenis smooth scroll (only for exhibitions listing)
+  script(src="https://unpkg.com/@studio-freight/lenis@1.0.39/bundled/lenis.min.js")
+  script.
+    (function(){
+      try {
+        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced || !window.Lenis) return;
+        var lenis = new Lenis({
+          autoRaf: true,
+          duration: 1.3,
+          easing: function(t){ return Math.sin((t * Math.PI) / 2); } // easeOutSine
+        });
+        // Ensure body gets the snap class (CSS uses proximity)
+        document.body.classList.add('exhibitions-scroll-snap');
+      } catch(e) { /* noop */ }
+    })();
 //- Si exhibition es un objeto individual, mostrar detalle
 else if exhibition
   .article-template
