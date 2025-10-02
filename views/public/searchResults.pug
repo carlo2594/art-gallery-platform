@@ -14,7 +14,7 @@ block content
     // Tabs
     - const artworksCount = typeof totalArtworks !== 'undefined' ? totalArtworks : (artworks ? artworks.length : 0);
     - const artistsCount = typeof totalArtists !== 'undefined' ? totalArtists : (artists ? artists.length : 0);
-    - const exhibitionsCount = exhibitions ? exhibitions.length : 0;
+    - const exhibitionsCount = typeof totalExhibitions !== 'undefined' ? totalExhibitions : (exhibitions ? exhibitions.length : 0);
     - const totalCount = artworksCount + artistsCount + exhibitionsCount;
     ul.nav.nav-tabs.mb-4#searchTabs(role="tablist")
       li.nav-item.flex-fill.text-center
@@ -79,5 +79,9 @@ block content
         .container-xxl.artworks-flex
           if exhibitions && exhibitions.length
             include _exhibitionGrid.pug
+            // Paginación para exposiciones (mostrar si hay más de 1 página)
+            - var tab = 'exposiciones';
+            if typeof exhibitionTotalPages !== 'undefined' && exhibitionTotalPages > 1
+              include _exhibitionPagination.pug
           else
             h3.h5.mt-4.text-muted No se encontraron exposiciones.

@@ -95,19 +95,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Al hacer click en un tab, navega preservando filtros SSR y resetea paginación
+  // Al hacer click en un tab, NO recargamos la página: actualizamos la URL y mantenemos la paginación existente
   tabs.forEach(tabBtn => {
-    tabBtn.addEventListener('click', (e) => {
-      // Permite que Bootstrap active visualmente el tab, pero forzamos navegación SSR
+    tabBtn.addEventListener('click', () => {
       const url = new URL(location.href);
       url.searchParams.set('tab', tabBtn.dataset.oxTab);
-      url.searchParams.set('page', '1'); // Reset page for artworks/exhibitions
-      url.searchParams.delete('artistPage'); // Always reset artistPage when switching tab
-      if (tabBtn.dataset.oxTab === 'artistas') {
-        url.searchParams.set('artistPage', '1'); // Reset artistPage for artists tab
+      // No forzamos page=1 ni reiniciamos artistPage/exhibitionPage
+      history.replaceState(null, '', url.toString());
+      if (tabBtn.dataset.oxTab === 'obras' && typeof window.__oxRelayoutGrid === 'function') {
+        setTimeout(() => window.__oxRelayoutGrid(), 60);
       }
-      // No tocamos otros filtros/orden: quedan en la URL
-      location.href = url.toString();
+    });
+  });
+
+  // Si en algún flujo Bootstrap maneja tabs sin navegación (p.ej. historial o cache),
+  // forzamos relayout de Masonry cuando el tab de Obras se hace visible
+  document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(el => {
+    el.addEventListener('shown.bs.tab', (ev) => {
+      const targetSel = ev.target.getAttribute('data-bs-target');
+      if (!targetSel) return;
+      const isObras = targetSel === '#tab-obras';
+      if (isObras && typeof window.__oxRelayoutGrid === 'function') {
+        // Pequeño delay para que el layout y las imágenes estén presentes
+        setTimeout(() => window.__oxRelayoutGrid(), 60);
+      }
     });
   });
 

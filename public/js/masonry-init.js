@@ -16,6 +16,8 @@
       grid.querySelectorAll('li').forEach(function (li) {
         li.classList.add('shown');
       });
+      // Asegura que el grid quede visible
+      grid.style.opacity = '1';
     };
 
     // Si faltan librerías base, muestra sin animación
@@ -25,15 +27,39 @@
       return;
     }
 
+    // Exponer un helper para relayout desde otros scripts (e.g., al cambiar de tab)
+    window.__oxRelayoutGrid = function () {
+      try {
+        if (!grid) return;
+        if (typeof window.imagesLoaded === 'function') {
+          window.imagesLoaded(grid, function () {
+            if (window.__oxMasonry && typeof window.__oxMasonry.layout === 'function') {
+              window.__oxMasonry.layout();
+            }
+          });
+        } else if (window.__oxMasonry && typeof window.__oxMasonry.layout === 'function') {
+          window.__oxMasonry.layout();
+        }
+      } catch (_) {}
+    };
+
+    // Oculta el grid hasta que apliquemos el layout para evitar el "salto" inicial
+    if (!grid.style.transition) {
+      grid.style.transition = 'opacity 120ms ease';
+    }
+    grid.style.opacity = '0';
+
     // Espera a que carguen las imágenes antes de inicializar el layout
     window.imagesLoaded(grid, function () {
       try {
-        new window.Masonry(grid, {
+        var msnry = new window.Masonry(grid, {
           itemSelector: 'li',
           columnWidth: 'li',
           percentPosition: true,
           transitionDuration: '0.2s'
         });
+        // Guarda la instancia globalmente para relayout posterior
+        window.__oxMasonry = msnry;
       } catch (e) {
         console.warn('[masonry-init] Error iniciando Masonry:', e);
       }
@@ -49,6 +75,15 @@
         // Si no existe AnimOnScroll, revela sin animación
         revealFallback();
       }
+
+      // Muestra el grid tras aplicar layout
+      requestAnimationFrame(function () {
+        grid.style.opacity = '1';
+        // Asegura un relayout final por si el grid estaba oculto
+        if (window.__oxRelayoutGrid) {
+          setTimeout(window.__oxRelayoutGrid, 50);
+        }
+      });
     });
   }
 })();

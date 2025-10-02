@@ -151,11 +151,11 @@ async function seed() {
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Crea exposiciones de prueba (máximo 10, mitad físicas y mitad virtuales, con status y participantes con rol)
+  // Crea 100 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
   const participantRoles = ['artista', 'curador', 'coordinador', 'invitado'];
-  for (let i = 1; i <= 10; i++) {
-    // Máximo 10 artworks y 10 participantes por exposición
+  for (let i = 1; i <= 100; i++) {
+    // Hasta 10 artworks y 10 participantes por exposición
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
       artworksSet.add(artworks[randomInt(0, artworks.length - 1)]._id);

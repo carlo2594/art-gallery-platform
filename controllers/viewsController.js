@@ -131,8 +131,19 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   if (q.sort === 'recent') exhibitionSort = { startDate: -1 };
   else if (q.sort === 'oldest') exhibitionSort = { startDate: 1 };
   else exhibitionSort = { _id: -1 };
-  // Buscar exposiciones aplicando filtros y orden
-  const exhibitions = await Exhibition.find(exhibitionFilter).sort(exhibitionSort);
+  
+  // Paginación para exposiciones
+  const { page: exhibitionPage, perPage: exhibitionPerPage, skip: exhibitionSkip } = getPaginationParams({
+    page: q.exhibitionPage || q.page,
+    perPage: q.exhibitionPerPage || 10
+  }, 10, 50);
+
+  const totalExhibitions = await Exhibition.countDocuments(exhibitionFilter);
+  const exhibitions = await Exhibition.find(exhibitionFilter)
+    .sort(exhibitionSort)
+    .skip(exhibitionSkip)
+    .limit(exhibitionPerPage);
+  const exhibitionTotalPages = Math.max(1, Math.ceil(totalExhibitions / exhibitionPerPage));
 
   res.status(200).render('public/searchResults', {
     title: search ? `Buscar: ${search}` : 'Buscar',
@@ -141,7 +152,10 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     exhibitions,
     totalArtworks,
     totalArtists,
+    totalExhibitions,
     artistPage,
+    exhibitionPage,
+    exhibitionTotalPages,
     artistTotalPages,
     search,
     q,
