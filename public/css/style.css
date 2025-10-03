@@ -135,10 +135,10 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .login-signin-btn:hover, .login-signin-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
 .login-signin-side-img { max-height: 100vh; width: auto; height: 100vh; display: block; object-fit: cover; }
 /* Hide side image below 1150px; show at >=1150px (overrides Bootstrap d-none/d-lg-block) */
-@media (max-width: 1049.98px) {
+@media (max-width: 1199.98px) {
   .login-signin-container .login-signin-img-col { display: none !important; }
 }
-@media (min-width: 1050px) {
+@media (min-width: 1200px) {
   .login-signin-container .login-signin-img-col { display: block !important; }
 }
 

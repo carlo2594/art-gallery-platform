@@ -233,7 +233,9 @@ exports.getSignUp = (req, res) => {
     title: 'Registrarse · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
-    mode: 'signUp'
+    mode: 'signUp',
+    error: req.query.error,
+    success: req.query.success
   });
 };
 
@@ -244,7 +246,9 @@ exports.getLogin = (req, res) => {
     title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
-    mode: 'login'
+    mode: 'login',
+    error: req.query.error,
+    success: req.query.success
   });
 };
 

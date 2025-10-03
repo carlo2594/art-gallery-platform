@@ -32,6 +32,12 @@ exports.signup = catchAsync(async (req, res) => {
 
   const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
+    if (wantsHTML(req)) {
+      // Redirige a login con mensaje
+      const url = new URL(`${req.protocol}://${req.get('host')}/login`);
+      url.searchParams.set('error', 'El correo ya está registrado. Inicia sesión.');
+      return res.redirect(303, url.toString());
+    }
     return sendResponse(res, null, 'El correo ya está registrado.', 400);
   }
 
@@ -59,6 +65,11 @@ exports.signup = catchAsync(async (req, res) => {
     text: `Bienvenido, ${name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
   });
 
+  if (wantsHTML(req)) {
+    const url = new URL(`${req.protocol}://${req.get('host')}/login`);
+    url.searchParams.set('success', 'Registro iniciado. Revisa tu correo para crear la contraseña.');
+    return res.redirect(303, url.toString());
+  }
   return sendResponse(res, null, 'Registro iniciado. Revisa tu correo para crear la contraseña.', 201);
 });
 

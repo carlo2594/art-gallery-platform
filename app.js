@@ -48,7 +48,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Parsers
 app.use(express.json({ limit: '10kb' }));
-// app.use(express.urlencoded({ extended: true, limit: '10kb' })); // si vas a procesar formularios
+app.use(express.urlencoded({ extended: true, limit: '10kb' })); // necesario para procesar formularios HTML
 
 /* ----------------------- Rutas principales ---------------------- */
 require('./routes')(app);
