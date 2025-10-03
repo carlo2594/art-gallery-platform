@@ -389,3 +389,10 @@ exports.getArtworks = catchAsync(async (req, res) => {
   });
 });
 
+// Vista ¿Quiénes somos?
+exports.getAbout = (req, res) => {
+  res.status(200).render('public/about', {
+    title: '¿Quiénes somos? · Galería del Ox'
+  });
+};
+

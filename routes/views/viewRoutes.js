@@ -15,6 +15,9 @@ router.get('/signUp', viewsController.getSignUp);   // (opcional) mantener compa
 router.get('/reset-password', viewsController.getResetPassword);
 router.get('/welcome', viewsController.getWelcome);
 
+// =================== QUIÉNES SOMOS =====================
+router.get('/about', viewsController.getAbout);
+
 // =================== ARTISTAS ==========================
 router.get('/artists', viewsController.getArtistsView);
 
@@ -22,8 +25,7 @@ router.get('/artists', viewsController.getArtistsView);
 router.get('/artworks', viewsController.getArtworks);
 
 // =================== EXPOSICIONES ======================
-// Vista de exposiciones públicas (alias en ES y EN)
-router.get('/exposiciones', viewsController.getExhibitionsView);
+
 router.get('/exhibitions', viewsController.getExhibitionsView);
 
 // =================== BÚSQUEDA GLOBAL ===================
