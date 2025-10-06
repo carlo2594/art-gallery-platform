@@ -1,0 +1,158 @@
+extends ../layouts/public
+
+block content
+  main.main-content
+    // Hero Section - Estilo Google Arts & Culture
+    section.artist-profile-hero.position-relative(style="min-height: 100vh; overflow: hidden;")
+      // Imagen de fondo
+      .hero-background.position-absolute.w-100.h-100
+        if artist.profileImage
+          img.hero-bg-image.w-100.h-100(
+            src=artist.profileImage, 
+            alt=artist.name,
+            style="object-fit: cover; object-position: center;"
+          )
+        else
+          .hero-bg-placeholder.w-100.h-100(
+            style="background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);"
+          )
+      
+      // Overlay oscuro
+      .hero-overlay.position-absolute.w-100.h-100(
+        style="background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);"
+      )
+      
+      // Contenido superpuesto
+      .hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
+        .container
+          .row
+            .col-lg-8
+              .artist-hero-info.text-white.pb-5
+                h1.hero-title.display-2.fw-bold.mb-3(style="font-family: var(--font-title); text-shadow: 0 2px 8px rgba(0,0,0,0.5);")= artist.name
+                
+                if artist.createdAt
+                  h2.hero-subtitle.h4.mb-4.text-white-50(style="font-family: var(--font-subtitle); font-weight: 300; text-shadow: 0 1px 4px rgba(0,0,0,0.5);")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                
+                if artist.bio
+                  p.hero-bio.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); max-width: 600px;")= artist.bio
+                
+                // Información adicional compacta
+                .hero-meta.d-flex.flex-wrap.gap-4.mb-4
+                  if artist.location
+                    .meta-item.d-flex.align-items-center
+                      i.fas.fa-map-marker-alt.me-2.text-warning
+                      span.text-white-75= artist.location
+                  
+                  if artist.website
+                    .meta-item
+                      a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
+                        i.fas.fa-globe.me-2
+                        span Sitio web
+                
+                // Acciones del usuario
+                .hero-actions.d-flex.gap-3
+                  button.btn.btn-outline-light.btn-lg.px-4(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                    i.fas.fa-heart.me-2
+                    | Seguir
+                  
+                  button.btn.btn-outline-light.btn-lg.px-4(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                    i.fas.fa-share.me-2
+                    | Compartir
+            
+            .col-lg-4
+              // Estadísticas flotantes
+              .stats-floating.text-white.pb-5
+                .row.g-3
+                  .col-6
+                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .stat-number.h2.fw-bold.mb-0.text-warning= stats.totalArtworks
+                      .stat-label.small.text-white-75 Obras
+                  
+                  .col-6
+                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .stat-number.h2.fw-bold.mb-0.text-warning= stats.totalViews.toLocaleString()
+                      .stat-label.small.text-white-75 Vistas
+                  
+                  if stats.avgPrice > 0
+                    .col-6
+                      .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                        .stat-number.h3.fw-bold.mb-0.text-warning= `$${Math.round(stats.avgPrice).toLocaleString()}`
+                        .stat-label.small.text-white-75 Promedio
+                  
+                  .col-6
+                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .stat-number.h3.fw-bold.mb-0.text-warning= stats.materials.length
+                      .stat-label.small.text-white-75 Materiales
+
+    // Sección de obras del artista
+    if artworks && artworks.length > 0
+      section.artist-artworks.py-5(style="background: #f8f9fa;")
+        .container
+          .row.mb-5
+            .col-12.text-center
+              h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+              p.lead.text-muted= `Descubre las ${stats.totalArtworks} obras de este talentoso artista`
+
+          // Grid de obras usando el estilo de _artworkGrid.pug
+          ul.grid.effect-2#grid.mb-5
+            each artwork in artworks
+              li
+                .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
+                  a(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
+                    img.card-img-top.art-card-shadow(src=artwork.imageUrl, alt=artwork.title)
+                  // Full-card stretched link so the info area is clickable too
+                  a.stretched-link(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
+                  .card-body.grid-card-body
+                    .grid-card-flex
+                      // --- Columna izquierda: Información de la obra ---
+                      .grid-card-info
+                        // Título principal de la obra
+                        if artwork.title
+                          h4.grid-card-title= artwork.title
+                        
+                        // Información del artista
+                        if artwork.artist
+                          h6.grid-card-artist= artwork.artist.name
+                        
+                        // Detalles técnicos
+                        .grid-card-details
+                          if artwork.material
+                            - var matCap = artwork.material.charAt(0).toUpperCase() + artwork.material.slice(1)
+                            .grid-card-detail-item= matCap
+                          
+                          if artwork.completedAt
+                            .grid-card-detail-item= new Date(artwork.completedAt).getFullYear()
+                        
+                        // Precio
+                        if typeof artwork.price_cents === 'number'
+                          h5.grid-card-price $#{(artwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
+                      
+                      // --- Columna derecha: Estadísticas ---
+                      .grid-card-stats.d-flex.flex-column.justify-content-end
+                        if artwork.createdAt
+                          .grid-card-stat-item Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        
+                        if typeof artwork.views === 'number' && artwork.views > 0
+                          .grid-card-stat-item #{artwork.views.toLocaleString()} visualizaciones
+                        
+                        if typeof artwork.favoritesCount === 'number' && artwork.favoritesCount > 0
+                          .grid-card-stat-item #{artwork.favoritesCount.toLocaleString()} favoritos
+
+    else
+      // No hay obras
+      section.no-artworks.py-5.text-center
+        .container
+          .row.justify-content-center
+            .col-lg-6
+              i.fas.fa-palette.fa-4x.text-muted.mb-4
+              h3.h4.mb-3.text-muted= `${artist.name} aún no tiene obras publicadas`
+              p.text-muted Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+
+    // Botón para volver
+    section.back-navigation.py-4
+      .container
+        .row
+          .col-12.text-center
+            a.btn.btn-outline-primary.btn-lg(href="/artists", style="border-radius: 2rem; padding: 0.75rem 2rem;")
+              i.fas.fa-arrow-left.me-2
+              | Volver a Artistas

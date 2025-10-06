@@ -20,6 +20,7 @@ router.get('/about', viewsController.getAbout);
 
 // =================== ARTISTAS ==========================
 router.get('/artists', viewsController.getArtistsView);
+router.get('/artists/:id', viewsController.getArtistDetail);
 
 // =================== OBRAS =============================
 router.get('/artworks', viewsController.getArtworks);

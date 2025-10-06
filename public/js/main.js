@@ -404,4 +404,74 @@ document.addEventListener('DOMContentLoaded', function() {
     // Recentrar en resize de ventana
     window.addEventListener('resize', centerStatsToButton);
   }
+
+  // Inicializar Masonry para grids relacionados
+  initRelatedGrid();
 });
+
+// ------ Related Artworks Grid (Masonry) ------
+
+// Función para inicializar Masonry en obras relacionadas
+function initRelatedGrid() {
+  const relatedGrid = document.getElementById('related-grid');
+  if (!relatedGrid) return; // No hay obras relacionadas
+
+  // Fallback para mostrar sin animación si faltan librerías
+  const revealFallback = function() {
+    relatedGrid.querySelectorAll('li').forEach(function(li) {
+      li.classList.add('shown');
+    });
+    relatedGrid.style.opacity = '1';
+  };
+
+  // Verificar que las librerías estén disponibles
+  if (typeof window.imagesLoaded !== 'function' || typeof window.Masonry !== 'function') {
+    revealFallback();
+    return;
+  }
+
+  // Ocultar temporalmente para evitar salto visual
+  relatedGrid.style.transition = 'opacity 120ms ease';
+  relatedGrid.style.opacity = '0';
+
+  // Esperar a que carguen las imágenes
+  window.imagesLoaded(relatedGrid, function() {
+    try {
+      const msnry = new window.Masonry(relatedGrid, {
+        itemSelector: 'li',
+        columnWidth: 'li',
+        percentPosition: true,
+        transitionDuration: '0.2s'
+      });
+
+      // Guardar instancia globalmente para relayout posterior
+      window.__oxRelatedMasonry = msnry;
+
+      // Efecto de animación si está disponible
+      if (typeof window.AnimOnScroll === 'function') {
+        new window.AnimOnScroll(relatedGrid, {
+          minDuration: 0.4,
+          maxDuration: 0.7,
+          viewportFactor: 0.2
+        });
+      } else {
+        revealFallback();
+      }
+
+      // Mostrar el grid
+      requestAnimationFrame(function() {
+        relatedGrid.style.opacity = '1';
+        // Relayout final
+        setTimeout(function() {
+          if (msnry && typeof msnry.layout === 'function') {
+            msnry.layout();
+          }
+        }, 50);
+      });
+
+    } catch (e) {
+      console.warn('[related-grid] Error iniciando Masonry:', e);
+      revealFallback();
+    }
+  });
+}

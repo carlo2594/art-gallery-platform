@@ -3,7 +3,10 @@
  * Utilities for building artist filters and sort objects for queries.
  */
 function buildArtistFilter(q, search) {
-  const filter = {};
+  const filter = {
+    role: 'artist' // Solo usuarios con role de artista
+  };
+  
   if (search) {
     filter.name = { $regex: search, $options: 'i' };
   }

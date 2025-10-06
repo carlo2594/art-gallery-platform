@@ -110,22 +110,51 @@ block content
       .row.mt-5
         .col-12
           h3.mb-4 Más obras de #{artwork.artist.name}
-          .row
+          
+          // Grid usando el estilo de _artworkGrid.pug
+          ul.grid.effect-2#related-grid.mb-5
             each relatedArtwork in relatedArtworks
-              .col-md-6.col-lg-4.col-xl-3.mb-4
-                .card.h-100.shadow-sm.artwork-card(data-aos="fade-up")
-                  .position-relative
-                    img.card-img-top(
-                      src=relatedArtwork.imageUrl
-                      alt=relatedArtwork.title
-                      style="height: 250px; object-fit: cover;"
-                    )
-                    .card-img-overlay.p-0
-                      a.stretched-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}`)
-                  .card-body
-                    h6.card-title.mb-2= relatedArtwork.title
-                    if relatedArtwork.price_cents && relatedArtwork.price_cents > 0
-                      .price.fw-bold.text-primary $#{(relatedArtwork.price_cents / 100).toLocaleString('en-US')}
+              li
+                .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
+                  a(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` aria-label=`Ver obra: ${relatedArtwork.title || ''}`)
+                    img.card-img-top.art-card-shadow(src=relatedArtwork.imageUrl, alt=relatedArtwork.title)
+                  // Full-card stretched link so the info area is clickable too
+                  a.stretched-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` aria-label=`Ver obra: ${relatedArtwork.title || ''}`)
+                  .card-body.grid-card-body
+                    .grid-card-flex
+                      // --- Columna izquierda: Información de la obra ---
+                      .grid-card-info
+                        // Título principal de la obra
+                        if relatedArtwork.title
+                          h4.grid-card-title= relatedArtwork.title
+                        
+                        // Información del artista
+                        if relatedArtwork.artist
+                          h6.grid-card-artist= relatedArtwork.artist.name
+                        
+                        // Detalles técnicos
+                        .grid-card-details
+                          if relatedArtwork.material
+                            - var matCap = relatedArtwork.material.charAt(0).toUpperCase() + relatedArtwork.material.slice(1)
+                            .grid-card-detail-item= matCap
+                          
+                          if relatedArtwork.completedAt
+                            .grid-card-detail-item= new Date(relatedArtwork.completedAt).getFullYear()
+                        
+                        // Precio
+                        if typeof relatedArtwork.price_cents === 'number'
+                          h5.grid-card-price $#{(relatedArtwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
+                      
+                      // --- Columna derecha: Estadísticas ---
+                      .grid-card-stats.d-flex.flex-column.justify-content-end
+                        if relatedArtwork.createdAt
+                          .grid-card-stat-item Publicado el #{new Date(relatedArtwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        
+                        if typeof relatedArtwork.views === 'number' && relatedArtwork.views > 0
+                          .grid-card-stat-item #{relatedArtwork.views.toLocaleString()} visualizaciones
+                        
+                        if typeof relatedArtwork.favoritesCount === 'number' && relatedArtwork.favoritesCount > 0
+                          .grid-card-stat-item #{relatedArtwork.favoritesCount.toLocaleString()} favoritos
 
     // Botón volver
     .row.mt-5

@@ -212,6 +212,105 @@ section.hero .hero-description { font-family: var(--font-subtitle) !important; f
   border-radius: 50%;
 }
 
+/* ==========================================
+  4.2. SECTIONS: ARTIST DETAIL PAGE (GOOGLE ARTS STYLE)
+  ========================================== */
+.artist-profile-hero {
+  min-height: 100vh;
+  position: relative;
+}
+
+.hero-bg-image {
+  filter: brightness(0.8) contrast(1.1);
+  transition: transform 0.5s ease;
+}
+
+.hero-bg-placeholder {
+  background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero-bio {
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  line-height: 1.6;
+}
+
+.meta-item {
+  font-size: 0.95rem;
+}
+
+.stats-floating .stat-item {
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.stats-floating .stat-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255,255,255,0.2) !important;
+}
+
+.hero-actions .btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.hero-actions .btn:hover {
+  background: rgba(255,255,255,0.2) !important;
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+}
+
+.artwork-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(16, 46, 80, 0.15);
+}
+
+.artwork-card:hover .artwork-image {
+  transform: scale(1.05);
+}
+
+.section-title {
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--ox-yellow);
+  border-radius: 2px;
+}
+
+@media (max-width: 991.98px) {
+  .hero-content {
+    position: static;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .stats-floating {
+    margin-top: 2rem;
+  }
+}
+
 @media (max-width: 991.98px) {
   .about-main-title { 
     font-size: 3.8rem; 
@@ -449,6 +548,68 @@ section.join-artists { position: relative; margin-top: 5rem; }
   border-color: var(--ox-yellow);
   color: var(--ox-blue);
   transform: translateY(-1px);
+}
+
+/* ==========================================
+  EXHIBITION GRID SYSTEM - Image Overlay Design
+  ========================================== */
+
+.exhibition-section {
+  overflow: hidden;
+  transition: transform 0.4s ease;
+  cursor: pointer;
+}
+
+.exhibition-section:hover {
+  transform: scale(1.02);
+}
+
+.exhibition-hero-container {
+  overflow: hidden;
+}
+
+.exhibition-hero-image {
+  transition: transform 0.4s ease;
+}
+
+.exhibition-section:hover .exhibition-hero-image {
+  transform: scale(1.05);
+}
+
+.exhibition-placeholder {
+  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+}
+
+.exhibition-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(16, 46, 80, 0.95) 0%,
+    rgba(16, 46, 80, 0.8) 40%,
+    rgba(16, 46, 80, 0.6) 70%,
+    rgba(16, 46, 80, 0.2) 90%,
+    transparent 100%
+  );
+  backdrop-filter: blur(3px);
+  transition: opacity 0.4s ease;
+}
+
+.exhibition-title {
+  font-family: var(--font-title);
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7);
+}
+
+.exhibition-description {
+  font-family: var(--font-subtitle);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 70%;
+}
+
+.exhibition-info .fas {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.exhibition-info span {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 .museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
 .art-label .h5 { font-style: italic; letter-spacing: 0.02em; }

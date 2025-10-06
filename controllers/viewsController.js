@@ -23,13 +23,18 @@ exports.getArtistsView = catchAsync(async (req, res) => {
   const skip = (artistPage - 1) * perPage;
   const totalArtists = await User.countDocuments(artistFilter);
   const artists = await User.find(artistFilter)
+    .select('+role') // Incluir role ya que tiene select: false
     .sort(artistSort)
     .skip(skip)
     .limit(perPage);
+  
+  // Filtrar solo artistas después de la consulta (por seguridad adicional)
+  const filteredArtists = artists.filter(artist => artist.role === 'artist');
+  
   const totalPages = Math.max(1, Math.ceil(totalArtists / perPage));
   res.status(200).render('public/artists', {
     title: 'Artistas',
-    artists,
+    artists: filteredArtists,
     totalArtists,
     page: artistPage,
     perPage,
@@ -105,9 +110,13 @@ exports.getSearchResults = catchAsync(async (req, res) => {
 
   const totalArtists = await User.countDocuments(artistFilter);
   const matchingArtists = await User.find(artistFilter)
+    .select('+role') // Incluir role ya que tiene select: false
     .sort(artistSort)
     .skip(artistSkip)
     .limit(artistPerPage);
+  
+  // Filtrar solo artistas después de la consulta
+  const filteredMatchingArtists = matchingArtists.filter(artist => artist.role === 'artist');
   const artistTotalPages = Math.max(1, Math.ceil(totalArtists / artistPerPage));
 
   // --- Filtros y orden para exposiciones ---
@@ -135,7 +144,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   res.status(200).render('public/searchResults', {
     title: search ? `Buscar: ${search}` : 'Buscar',
     artworks,
-    artists: matchingArtists,
+    artists: filteredMatchingArtists,
     exhibitions,
     totalArtworks,
     totalArtists,
@@ -464,6 +473,68 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
     title: `${artwork.title} · Galería del Ox`,
     artwork,
     relatedArtworks
+  });
+});
+
+// Vista de detalle de artista individual
+exports.getArtistDetail = catchAsync(async (req, res, next) => {
+  const AppError = require('@utils/appError');
+  const isValidObjectId = require('@utils/isValidObjectId');
+  
+  const artistId = req.params.id;
+  
+  // Buscar artista por ID o slug
+  let artist;
+  if (isValidObjectId(artistId)) {
+    // Buscar por ID y redirigir al slug si existe
+    artist = await User.findOne({
+      _id: artistId,
+      role: 'artist'
+    }).select('name bio profileImage createdAt slug email location website social +role');
+    
+    if (artist && artist.slug) {
+      return res.redirect(301, `/artists/${artist.slug}`);
+    }
+  } else {
+    // Buscar por slug
+    artist = await User.findOne({
+      slug: artistId,
+      role: 'artist'
+    }).select('name bio profileImage createdAt slug email location website social +role');
+  }
+
+  if (!artist) {
+    return next(new AppError('Artista no encontrado', 404));
+  }
+
+  // Obtener obras del artista (aprobadas y no borradas)
+  const artworks = await Artwork.find({
+    artist: artist._id,
+    status: 'approved',
+    deletedAt: null
+  })
+  .populate({ path: 'artist', select: 'name' })
+  .sort({ createdAt: -1 });
+
+  // Estadísticas del artista
+  const stats = {
+    totalArtworks: artworks.length,
+    totalViews: artworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
+    avgPrice: artworks.length > 0 
+      ? artworks.reduce((sum, artwork) => sum + (artwork.price_cents || 0), 0) / artworks.length / 100
+      : 0,
+    materials: [...new Set(artworks.map(artwork => artwork.material).filter(Boolean))],
+    types: [...new Set(artworks.map(artwork => artwork.type).filter(Boolean))]
+  };
+
+  // Incrementar vistas del perfil (opcional - si tienes el campo en el modelo)
+  // await User.findByIdAndUpdate(artist._id, { $inc: { profileViews: 1 } });
+
+  res.status(200).render('public/artistDetail', {
+    title: `${artist.name} · Galería del Ox`,
+    artist,
+    artworks,
+    stats
   });
 });
 
