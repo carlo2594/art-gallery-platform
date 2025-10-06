@@ -2,7 +2,7 @@
 
 // Filtros de exposiciones reutilizables
 - var q = typeof q !== 'undefined' ? q : {}
-- var actionUrl = typeof actionUrl !== 'undefined' ? actionUrl : '/exposiciones'
+- var actionUrl = typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions'
 
 section.filters-toolbar.py-2
   div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
@@ -56,10 +56,34 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
       .row.g-2
         .col-6
           - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
-          input.form-control(type='date' name='minDate' placeholder='Desde' min=_minBound value=(q && q.minDate ? q.minDate : (q && q.minYear ? `${q.minYear}-01-01` : '')))
-        .col-6
           - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
-          input.form-control(type='date' name='maxDate' placeholder='Hasta' max=_maxBound value=(q && q.maxDate ? q.maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : '')))
+          - var _minPlaceholder = _minBound ? `Desde (${new Date(_minBound).toLocaleDateString('es-ES')})` : 'Desde'
+          input.form-control(
+            type='date' 
+            name='minDate' 
+            placeholder=_minPlaceholder
+            min=_minBound
+            max=_maxBound
+            value=(q && q.minDate ? q.minDate : (q && q.minYear ? `${q.minYear}-01-01` : ''))
+            title=_minBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+          )
+        .col-6
+          - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
+          - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
+          - var _maxPlaceholder = _maxBound ? `Hasta (${new Date(_maxBound).toLocaleDateString('es-ES')})` : 'Hasta'
+          input.form-control(
+            type='date' 
+            name='maxDate' 
+            placeholder=_maxPlaceholder
+            min=_minBound
+            max=_maxBound
+            value=(q && q.maxDate ? q.maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : ''))
+            title=_maxBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+          )
+      if _minBound && _maxBound
+        .col-12
+          small.text-muted.mt-1 
+            | Rango disponible: #{new Date(_minBound).toLocaleDateString('es-ES')} - #{new Date(_maxBound).toLocaleDateString('es-ES')}
     // Ordenar por fecha de inicio
     .filter-block
       label.form-label.mb-2 Ordenar por fecha

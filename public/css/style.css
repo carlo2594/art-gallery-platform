@@ -375,6 +375,81 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .grid-card-stat-item:first-child {
   font-weight: 600;
 }
+
+/* ==========================================
+  ARTIST GRID SYSTEM - Image Overlay Design
+  ========================================== */
+
+.artist-card {
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.artist-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(16, 46, 80, 0.2);
+}
+
+.artist-image-container {
+  overflow: hidden;
+}
+
+.artist-image {
+  transition: transform 0.3s ease;
+}
+
+.artist-card:hover .artist-image {
+  transform: scale(1.05);
+}
+
+.artist-placeholder {
+  background: linear-gradient(135deg, #55595c 0%, #6c757d 100%);
+}
+
+.artist-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(16, 46, 80, 0.9) 0%,
+    rgba(16, 46, 80, 0.7) 60%,
+    rgba(16, 46, 80, 0.3) 90%,
+    transparent 100%
+  );
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+
+.artist-name {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.artist-bio {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.artist-member-since {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.btn-outline-overlay {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--ox-blue);
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.btn-outline-overlay:hover {
+  background: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+  color: var(--ox-blue);
+  transform: translateY(-1px);
+}
 .museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
 .art-label .h5 { font-style: italic; letter-spacing: 0.02em; }
 .art-label .h4 { color: #222; }
