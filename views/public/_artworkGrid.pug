@@ -6,45 +6,38 @@ ul.grid.effect-2#grid.mb-5
            img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
          // Full-card stretched link so the info area is clickable too
          a.stretched-link(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
-         .card-body.p-3.art-label.art-card-shadow
-           .artwork-flex-row.d-flex.flex-row.gap-3
-             // --- Columna izquierda: Museo Card Block ---
-             .museum-label.p-3.flex-grow-1.d-flex.flex-column.align-items-start
-               if a.artist
-                 .museum-artist.fw-bold.fs-5= a.artist.name
+         .card-body.grid-card-body
+           .grid-card-flex
+             // --- Columna izquierda: Información de la obra ---
+             .grid-card-info
+               // Título principal de la obra
                if a.title
-                 .museum-title.fs-6.mt-1= a.title
-               if a.material
-                 - var matCap = a.material.charAt(0).toUpperCase() + a.material.slice(1)
-                 .museum-material.mt-1= matCap
-               if a.completedAt
-                 .museum-created.mt-1
-                   | #{new Date(a.completedAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
+                 h4.grid-card-title= a.title
+               
+               // Información del artista
+               if a.artist
+                 h6.grid-card-artist= a.artist.name
+               
+               // Detalles técnicos
+               .grid-card-details
+                 if a.material
+                   - var matCap = a.material.charAt(0).toUpperCase() + a.material.slice(1)
+                   .grid-card-detail-item= matCap
+                 
+                 if a.completedAt
+                   .grid-card-detail-item= new Date(a.completedAt).getFullYear()
+               
+               // Precio
                if typeof a.price_cents === 'number'
-                 .museum-price.fw-bold.fs-5.mt-2
-                   | $
-                   = (a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})
-             // --- Columna derecha: Meta info ---
-             .artwork-meta.flex-grow-1.d-flex.flex-column.justify-content-between.align-items-end
-               .artwork-meta-items.d-flex.flex-column.align-items-end.gap-2
-                 if a.website
-                   span.small.text-muted
-                     i.fa.fa-globe.me-1
-                     = a.website
-                 if a.instagram
-                   span.small.text-muted
-                     i.fa.fa-instagram.me-1
-                     | @
-                     = a.instagram.replace(/^@/, '')
-                 if typeof a.views === 'number'
-                   span
-                     i.fa.fa-eye.me-1.text-info
-                     | #{a.views}
-                 if typeof a.favoritesCount === 'number'
-                   span
-                     i.fa.fa-heart.me-1.text-danger
-                     | #{a.favoritesCount}
-                 if a.createdAt
-                   span
-                     i.fa.fa-calendar-plus.me-1.text-success
-                     | Publicación: #{new Date(a.createdAt).toLocaleDateString('es-MX', { year: 'numeric', month: 'short', day: 'numeric' })}
+                 h5.grid-card-price $#{(a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
+             
+             // --- Columna derecha: Estadísticas ---
+             .grid-card-stats.d-flex.flex-column.justify-content-end
+               if a.createdAt
+                 .grid-card-stat-item Publicado el #{new Date(a.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+               
+               if typeof a.views === 'number' && a.views > 0
+                 .grid-card-stat-item #{a.views.toLocaleString()} visualizaciones
+               
+               if typeof a.favoritesCount === 'number' && a.favoritesCount > 0
+                 .grid-card-stat-item #{a.favoritesCount.toLocaleString()} favoritos
