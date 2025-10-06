@@ -568,15 +568,10 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
-  // Estadísticas del artista (basadas en todas las obras, no filtradas)
+  // Estadísticas del artista (solo técnicas, ya que es lo único que se muestra)
   const stats = {
     totalArtworks: allArtworks.length,
-    totalViews: allArtworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
-    avgPrice: allArtworks.length > 0 
-      ? allArtworks.reduce((sum, artwork) => sum + (artwork.price_cents || 0), 0) / allArtworks.length / 100
-      : 0,
-    techniques: [...new Set(allArtworks.map(artwork => artwork.technique).filter(Boolean))],
-    types: [...new Set(allArtworks.map(artwork => artwork.type).filter(Boolean))]
+    techniques: [...new Set(allArtworks.map(artwork => artwork.technique).filter(Boolean))]
   };
 
   // Incrementar vistas del perfil (opcional - si tienes el campo en el modelo)
@@ -586,7 +581,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     title: `${artist.name} · Galería del Ox`,
     artist,
     artworks, // Obras paginadas y filtradas
-    stats, // Estadísticas generales
+    stats, // Solo técnicas y total de obras
     techniques, // Para filtros
     priceBounds, // Para filtros de precio
     appliedPrice, // Precios aplicados

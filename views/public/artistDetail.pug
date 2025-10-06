@@ -79,29 +79,21 @@ block content
                     | Compartir
             
             .col-lg-4
-              // Estadísticas flotantes
+              // Técnicas del artista
               .stats-floating.text-white.pb-5
-                .row.g-3
-                  .col-6
-                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                      .stat-number.h2.fw-bold.mb-0.text-warning= stats.totalArtworks
-                      .stat-label.small.text-white-75 Obras
-                  
-                  .col-6
-                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                      .stat-number.h2.fw-bold.mb-0.text-warning= stats.totalViews.toLocaleString()
-                      .stat-label.small.text-white-75 Vistas
-                  
-                  if stats.avgPrice > 0
-                    .col-6
-                      .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                        .stat-number.h3.fw-bold.mb-0.text-warning= `$${Math.round(stats.avgPrice).toLocaleString()}`
-                        .stat-label.small.text-white-75 Promedio
-                  
-                  .col-6
-                    .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                      .stat-number.h3.fw-bold.mb-0.text-warning= stats.techniques.length
-                      .stat-label.small.text-white-75 Técnicas
+                .row.g-3.justify-content-center
+                  .col-10
+                    .stat-item.text-center.p-4(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .stat-label.small.text-white-75.mb-3 Técnicas
+                      .techniques-list
+                        if stats.techniques && stats.techniques.length > 0
+                          each technique in stats.techniques.slice(0, 4)
+                            - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
+                            .technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
+                          if stats.techniques.length > 4
+                            .small.text-white-50 +#{stats.techniques.length - 4} más
+                        else
+                          .small.text-white-50 Sin técnicas
 
     // Sección de obras del artista
     if artworks && artworks.length > 0
