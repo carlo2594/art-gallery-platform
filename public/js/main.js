@@ -279,3 +279,95 @@ if (loginSideImg) {
   window.addEventListener('DOMContentLoaded', checkLoginSideImgWidth);
   checkLoginSideImgWidth();
 }
+
+// ------ Artwork Detail Functions ------
+
+// Función para toggle de favoritos (implementar según tu lógica existente)
+function toggleFavorite(artworkId) {
+  // Aquí implementarías la lógica para agregar/quitar de favoritos
+  console.log('Toggle favorite for artwork:', artworkId);
+  // Ejemplo de implementación con fetch:
+  /*
+  fetch(`/api/v1/favorites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ artworkId: artworkId })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Actualizar UI según respuesta
+  })
+  .catch(error => console.error('Error:', error));
+  */
+}
+
+// Make toggleFavorite available globally
+window.toggleFavorite = toggleFavorite;
+
+// ------ Lightbox Functions ------
+
+// Lightbox functionality for artwork detail page
+function initLightbox() {
+  const body = document.body;
+  const thumb = document.getElementById('artwork-thumb');
+  const lb = document.getElementById('lightbox');
+  
+  if (!thumb || !lb) return; // Solo ejecutar si estamos en la página de detalle de obra
+  
+  const lbImg = document.getElementById('lightboxImg');
+  const btnClose = lb.querySelector('.lightbox__close');
+
+  function openLightbox(src, alt) {
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    lb.classList.add('open');
+    body.classList.add('noscroll');
+    // Enfocar el botón para accesibilidad
+    setTimeout(() => btnClose.focus(), 10);
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open');
+    body.classList.remove('noscroll');
+    // Limpiar para liberar memoria en móviles
+    lbImg.removeAttribute('src');
+    thumb.focus?.();
+  }
+
+  // Abrir al hacer click en la miniatura
+  thumb.addEventListener('click', (e) => {
+    const img = e.currentTarget.querySelector('img');
+    if (!img) return;
+    const src = img.getAttribute('data-full') || img.src;
+    openLightbox(src, img.alt);
+  });
+
+  // Cerrar con botón
+  btnClose.addEventListener('click', closeLightbox);
+
+  // Cerrar con ESC
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && lb.classList.contains('open')) {
+      closeLightbox();
+    }
+  });
+
+  // Cerrar al hacer click fuera de la imagen (en el fondo)
+  lb.addEventListener('click', (e) => {
+    const clickedBackdrop = e.target === lb;
+    if (clickedBackdrop) closeLightbox();
+  });
+
+  // Opcional: doble click dentro del lightbox para ajustar a 100% / contain
+  let toggled = false;
+  lbImg.addEventListener('dblclick', () => {
+    toggled = !toggled;
+    lbImg.style.objectFit = toggled ? 'none' : 'contain';
+    lbImg.style.cursor = toggled ? 'zoom-out' : 'default';
+  });
+}
+
+// Initialize lightbox when DOM is ready
+document.addEventListener('DOMContentLoaded', initLightbox);

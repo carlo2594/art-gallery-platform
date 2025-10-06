@@ -15,6 +15,7 @@ const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
     title: { type: String, required: true, trim: true },
+    slug: { type: String, unique: true, index: true }, // URL-friendly version of title
     description: { type: String, trim: true },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
@@ -201,7 +202,36 @@ artworkSchema.statics.recalculateFavoritesCount = async function (artworkId) {
 
 /* ====== Hooks ====== */
 
-artworkSchema.pre('save', function (next) {
+// Función para generar slug único
+function generateSlug(title) {
+  return title
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remover acentos
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
+    .replace(/\s+/g, '-') // espacios a guiones
+    .replace(/-+/g, '-') // múltiples guiones a uno
+    .replace(/^-|-$/g, ''); // remover guiones al inicio y final
+}
+
+artworkSchema.pre('save', async function (next) {
+  // Generar slug si es nuevo documento o cambió el título
+  if (this.isNew || this.isModified('title')) {
+    let baseSlug = generateSlug(this.title);
+    let slug = baseSlug;
+    let counter = 1;
+    
+    // Verificar unicidad del slug
+    while (await this.constructor.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    this.slug = slug;
+  }
+
   // Derivar size si hay medidas
   if (typeof this.width_cm === 'number' && typeof this.height_cm === 'number') {
     this.size = `${this.width_cm} x ${this.height_cm} cm`;

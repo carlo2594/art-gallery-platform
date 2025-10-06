@@ -396,3 +396,74 @@ exports.getAbout = (req, res) => {
   });
 };
 
+// Vista de detalle de obra individual
+exports.getArtworkDetail = catchAsync(async (req, res, next) => {
+  const isValidObjectId = require('@utils/isValidObjectId');
+  const AppError = require('@utils/appError');
+  
+  const { id } = req.params;
+  let artwork;
+
+  // Intentar buscar por slug primero, luego por ID si es un ObjectId válido
+  if (isValidObjectId(id)) {
+    // Si es un ObjectId válido, buscar por ID (para compatibilidad con URLs antiguas)
+    artwork = await Artwork.findOne({ 
+      _id: id, 
+      status: 'approved', 
+      deletedAt: null 
+    })
+    .populate({ 
+      path: 'artist', 
+      select: 'name email profileImage bio location website social' 
+    })
+    .populate({ 
+      path: 'exhibitions', 
+      select: 'title description startDate endDate location status'
+    });
+    
+    // Si se encontró la obra por ID, redirigir a la URL con slug
+    if (artwork && artwork.slug) {
+      return res.redirect(301, `/artworks/${artwork.slug}`);
+    }
+  } else {
+    // Buscar por slug
+    artwork = await Artwork.findOne({ 
+      slug: id, 
+      status: 'approved', 
+      deletedAt: null 
+    })
+    .populate({ 
+      path: 'artist', 
+      select: 'name email profileImage bio location website social' 
+    })
+    .populate({ 
+      path: 'exhibitions', 
+      select: 'title description startDate endDate location status'
+    });
+  }
+
+  if (!artwork) {
+    return next(new AppError('Obra no encontrada.', 404));
+  }
+
+  // Incrementar contador de vistas
+  await Artwork.findByIdAndUpdate(artwork._id, { $inc: { views: 1 } });
+
+  // Buscar obras relacionadas del mismo artista (excluyendo la actual)
+  const relatedArtworks = await Artwork.find({
+    artist: artwork.artist._id,
+    _id: { $ne: artwork._id },
+    status: 'approved',
+    deletedAt: null
+  })
+  .populate({ path: 'artist', select: 'name' })
+  .limit(6)
+  .sort({ createdAt: -1 });
+
+  res.status(200).render('public/artworkDetail', {
+    title: `${artwork.title} · Galería del Ox`,
+    artwork,
+    relatedArtworks
+  });
+});
+

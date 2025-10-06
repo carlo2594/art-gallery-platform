@@ -23,6 +23,7 @@ router.get('/artists', viewsController.getArtistsView);
 
 // =================== OBRAS =============================
 router.get('/artworks', viewsController.getArtworks);
+router.get('/artworks/:id', viewsController.getArtworkDetail);
 
 // =================== EXPOSICIONES ======================
 

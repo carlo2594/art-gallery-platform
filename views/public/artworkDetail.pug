@@ -1,0 +1,158 @@
+extends ../layouts/public
+
+block content
+  .container.mt-5
+    .row
+      // Imagen de la obra con lightbox
+      .col-lg-8
+        .artwork-image-container.mb-4
+          figure.art-thumb#artwork-thumb
+            img(
+              src=artwork.imageUrl
+              alt=artwork.title
+              data-full=artwork.imageUrl
+            )
+      
+      // Información de la obra
+      .col-lg-4
+        .artwork-info.ps-lg-4
+          h1.display-5.fw-bold.mb-3= artwork.title
+          
+          // Información del artista
+          if artwork.artist
+            .artist-info.mb-4.p-3.bg-light.rounded
+              h5.mb-2 Artista
+              .d-flex.align-items-center
+                if artwork.artist.profileImage
+                  img.rounded-circle.me-3(
+                    src=artwork.artist.profileImage
+                    alt=artwork.artist.name
+                    style="width: 50px; height: 50px; object-fit: cover;"
+                  )
+                .artist-details
+                  h6.mb-1.fw-bold= artwork.artist.name
+                  if artwork.artist.location
+                    small.text-muted= artwork.artist.location
+          
+          // Detalles de la obra
+          .artwork-details.mb-4
+            if artwork.description
+              .mb-3
+                h6.fw-bold Descripción
+                p.text-muted= artwork.description
+            
+            .row.g-3
+              if artwork.material
+                .col-sm-6
+                  strong Material:
+                  br
+                  span.text-muted= artwork.material
+              
+              if artwork.type
+                .col-sm-6
+                  strong Tipo:
+                  br
+                  span.text-muted= artwork.type
+              
+              if artwork.width_cm && artwork.height_cm
+                .col-sm-6
+                  strong Dimensiones:
+                  br
+                  span.text-muted #{artwork.width_cm} × #{artwork.height_cm} cm
+              
+              if artwork.completedAt
+                .col-sm-6
+                  strong Fecha:
+                  br
+                  span.text-muted= new Date(artwork.completedAt).getFullYear()
+              
+              if artwork.price_cents && artwork.price_cents > 0
+                .col-12
+                  .price-info.p-3.bg-primary.bg-opacity-10.rounded.text-center
+                    h5.mb-0.text-primary $#{(artwork.price_cents / 100).toLocaleString('en-US')} USD
+          
+          // Estadísticas
+          .artwork-stats.mb-4.text-center
+            small.text-muted #{artwork.views || 0} visualizaciones
+          
+          // Botones de acción
+          .action-buttons
+            .d-grid.gap-2
+              if user
+                button.btn.btn-outline-danger.btn-lg(
+                  type="button"
+                  onclick=`toggleFavorite('${artwork._id}')`
+                )
+                  i.fas.fa-heart.me-2
+                  span Agregar a favoritos
+              else
+                a.btn.btn-outline-primary.btn-lg(href="/login")
+                  i.fas.fa-sign-in-alt.me-2
+                  span Iniciar sesión para guardar
+
+    // Exposiciones relacionadas
+    if artwork.exhibitions && artwork.exhibitions.length > 0
+      .row.mt-5
+        .col-12
+          h3.mb-4 Exposiciones donde aparece esta obra
+          .row
+            each exhibition in artwork.exhibitions
+              .col-md-6.col-lg-4.mb-3
+                .card.h-100.shadow-sm
+                  .card-body
+                    h5.card-title= exhibition.title
+                    if exhibition.description
+                      p.card-text.text-muted= exhibition.description.substring(0, 100) + '...'
+                    if exhibition.location
+                      p.card-text
+                        small.text-muted
+                          i.fas.fa-map-marker-alt.me-1
+                          = exhibition.location
+                    if exhibition.startDate
+                      p.card-text
+                        small.text-muted
+                          i.fas.fa-calendar.me-1
+                          = new Date(exhibition.startDate).toLocaleDateString()
+
+    // Obras relacionadas del mismo artista
+    if relatedArtworks && relatedArtworks.length > 0
+      .row.mt-5
+        .col-12
+          h3.mb-4 Más obras de #{artwork.artist.name}
+          .row
+            each relatedArtwork in relatedArtworks
+              .col-md-6.col-lg-4.col-xl-3.mb-4
+                .card.h-100.shadow-sm.artwork-card(data-aos="fade-up")
+                  .position-relative
+                    img.card-img-top(
+                      src=relatedArtwork.imageUrl
+                      alt=relatedArtwork.title
+                      style="height: 250px; object-fit: cover;"
+                    )
+                    .card-img-overlay.p-0
+                      a.stretched-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}`)
+                  .card-body
+                    h6.card-title.mb-2= relatedArtwork.title
+                    if relatedArtwork.price_cents && relatedArtwork.price_cents > 0
+                      .price.fw-bold.text-primary $#{(relatedArtwork.price_cents / 100).toLocaleString('en-US')}
+
+    // Botón volver
+    .row.mt-5
+      .col-12.text-center
+        a.btn.btn-secondary.btn-lg(href="/artworks")
+          i.fas.fa-arrow-left.me-2
+          span Volver a obras
+
+  // Lightbox overlay
+  #lightbox.lightbox(
+    role="dialog"
+    aria-modal="true"
+    aria-label="Vista ampliada de la obra"
+  )
+    button.lightbox__close(type="button" aria-label="Cerrar (Esc)")
+      // Ícono X
+      svg(viewBox="0 0 24 24" fill="none" aria-hidden="true")
+        path(d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z" fill="currentColor")
+      span.sr-only Cerrar
+    .lightbox__inner
+      img#lightboxImg.lightbox__img(alt="")

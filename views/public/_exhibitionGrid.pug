@@ -41,7 +41,7 @@ if Array.isArray(exhibitions)
             p.mb-3(style="font-size:1.4rem; color:#222; font-family:var(--font-subtitle); font-style:italic;")= desc
           // Details button
           p
-            a.btn.btn-sm.btn-outline-primary(href=`/exposiciones/${expo._id}`) Ver detalles
+            a.btn.btn-sm.btn-outline-primary(href=`/exhibitions/${expo._id}`) Ver detalles
   else
     .container-xxl.py-5
       .row.justify-content-center
@@ -49,7 +49,7 @@ if Array.isArray(exhibitions)
           h3.h4.mb-2 No hay exposiciones que coincidan con tus filtros
           p.text-muted.mb-4 Prueba ajustar el rango de fechas, el tipo o
             |  
-            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exposiciones') limpiar los filtros
+            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions') limpiar los filtros
           //- Skeleton placeholders (no usan scroll-snap)
           .d-grid.gap-3
             .skeleton.skeleton-hero
@@ -101,7 +101,7 @@ else if exhibition
                   i.fas.fa-globe.me-1
                   a.text-white(href=exhibition.location.url, target="_blank") Virtual
           p.card-text
-            a.btn.btn-sm.btn-outline-light(href=`/exposiciones/${exhibition._id}`) Ver detalles
+            a.btn.btn-sm.btn-outline-light(href=`/exhibitions/${exhibition._id}`) Ver detalles
   header.page-width.page-width--narrow
     h1.article-template__title= exhibition.title
   .article-template__social-sharing.page-width.page-width--narrow
@@ -110,4 +110,4 @@ else if exhibition
     p= exhibition.description
     // Puedes agregar fechas, ubicación, etc.
   .article-template__back.element-margin-top.center
-    a.article-template__link.link.animate-arrow(href="/exposiciones") Volver a exposiciones
+    a.article-template__link.link.animate-arrow(href="/exhibitions") Volver a exposiciones
