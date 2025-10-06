@@ -48,6 +48,25 @@ block content
                       a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
                         i.fas.fa-globe.me-2
                         span Sitio web
+                  
+                  // Redes sociales
+                  if artist.social && artist.social.instagram
+                    .meta-item
+                      a.text-warning.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
+                        i.fab.fa-instagram.me-2
+                        span Instagram
+                  
+                  if artist.social && artist.social.x
+                    .meta-item
+                      a.text-warning.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
+                        i.fab.fa-x.me-2
+                        span X
+                  
+                  if artist.social && artist.social.facebook
+                    .meta-item
+                      a.text-warning.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
+                        i.fab.fa-facebook.me-2
+                        span Facebook
                 
                 // Acciones del usuario
                 .hero-actions.d-flex.gap-3

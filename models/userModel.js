@@ -32,7 +32,7 @@ const userSchema = new mongoose.Schema({
   website: { type: String, trim: true },
   social: {
     instagram: { type: String, trim: true },
-    twitter: { type: String, trim: true },
+    x: { type: String, trim: true },
     facebook: { type: String, trim: true }
   },
   active: { type: Boolean, default: true, select: false },

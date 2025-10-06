@@ -119,6 +119,11 @@ async function seed() {
     bio: 'Artista contemporáneo especializado en pintura abstracta y escultura moderna. Con más de 15 años de experiencia, ha expuesto en galerías de todo el mundo.',
     location: 'Barcelona, España',
     website: 'https://leonardo-martinez-art.com',
+    social: {
+      instagram: 'leonardo_martinez_art',
+      x: 'leo_martinez_art',
+      facebook: 'leonardo.martinez.artist'
+    },
     profileImage: randomFromArray(randomImages),
     slug: 'leonardo-martinez'
   });
