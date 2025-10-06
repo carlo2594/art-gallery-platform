@@ -21,7 +21,8 @@ block content
           // Información del artista
           if artwork.artist
             .mb-3
-              h6.text-uppercase.fw-bold.mb-1.text-muted= artwork.artist.name
+              h6.text-uppercase.fw-bold.mb-1.text-muted
+                a.text-decoration-none.text-muted(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
               if artwork.artist.location
                 small.text-muted= artwork.artist.location
           
