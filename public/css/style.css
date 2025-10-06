@@ -401,9 +401,23 @@ section.join-artists { position: relative; margin-top: 5rem; }
   border: 2px solid var(--bs-primary);
 }
 
+/* Main artwork section with full height */
+.artwork-detail-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
 @media (max-width: 768px) {
   .artwork-info {
     margin-top: 2rem;
+  }
+  
+  .artwork-detail-main {
+    min-height: auto;
+    align-items: flex-start;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
   }
 }
 
@@ -411,8 +425,8 @@ section.join-artists { position: relative; margin-top: 5rem; }
   15. LIGHTBOX ZOOM EFFECT
   ========================================== */
 :root {
-  --overlay-bg: rgba(255,255,255,.85);
-  --close-size: 42px;
+  --overlay-bg: rgba(255,255,255,0.9);
+  --close-size: 4.2rem;
 }
 
 /* Contenedor de la miniatura */
@@ -468,6 +482,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   place-items: center;
   transform: scale(.98);
   transition: transform .22s ease;
+  padding: 2rem;
 }
 
 .lightbox.open .lightbox__inner {
@@ -475,18 +490,20 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .lightbox__img {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 80vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
   object-fit: contain;
-  border-radius: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,.15), 0 8px 16px rgba(0,0,0,.1);
+  border-radius: 0.8rem;
+  box-shadow: 0 2rem 4rem rgba(0,0,0,.15), 0 0.8rem 1.6rem rgba(0,0,0,.1);
 }
 
 /* Botón cerrar (X) */
 .lightbox__close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 1.6rem;
+  right: 1.6rem;
   width: var(--close-size);
   height: var(--close-size);
   display: inline-grid;
@@ -494,12 +511,12 @@ section.join-artists { position: relative; margin-top: 5rem; }
   border: 0;
   border-radius: 999px;
   background: rgba(0,0,0,.15);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(0.8rem);
+  -webkit-backdrop-filter: blur(0.8rem);
   color: var(--ox-blue);
   cursor: pointer;
   transition: background .2s ease, transform .08s ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+  box-shadow: 0 0.4rem 1.2rem rgba(0,0,0,.1);
 }
 
 .lightbox__close:hover { 
@@ -512,8 +529,8 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .lightbox__close svg { 
-  width: 22px; 
-  height: 22px; 
+  width: 2.2rem; 
+  height: 2.2rem; 
 }
 
 /* Ocultar scroll del body al abrir */

@@ -1,10 +1,10 @@
 extends ../layouts/public
 
 block content
-  .container.mt-5
-    .row
+  .container-xxl.mt-5
+    .row.artwork-detail-main
       // Imagen de la obra con lightbox
-      .col-lg-8
+      .col-xl-8
         .artwork-image-container.mb-4
           figure.art-thumb#artwork-thumb
             img(
@@ -14,8 +14,8 @@ block content
             )
       
       // Información de la obra
-      .col-lg-4
-        .artwork-info.ps-lg-4
+      .col-xl-4
+        .artwork-info.ps-xl-4.px-4
           h1.display-5.fw-bold.mb-3= artwork.title
           
           // Información del artista
