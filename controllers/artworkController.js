@@ -173,8 +173,8 @@ exports.getAllArtworks = catchAsync(async (req, res, next) => {
 
   // Filtros normalizados
   const normArr = a => (Array.isArray(a) ? a : a ? [a] : []).map(norm);
-  if (req.query.type)     filter.type_norm     = { $in: normArr(req.query.type) };
-  if (req.query.material) filter.material_norm = { $in: normArr(req.query.material) };
+  if (req.query.type)      filter.type_norm      = { $in: normArr(req.query.type) };
+  if (req.query.technique) filter.technique_norm = { $in: normArr(req.query.technique) };
 
   // Filtro por precio (acepta minPrice/maxPrice en USD o minPriceCents/maxPriceCents)
   const priceFilter = {};
@@ -220,7 +220,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
 
   // Permitimos amount (USD) o price_cents (entero)
   const allowed = [
-    'title', 'description', 'type', 'width_cm', 'height_cm', 'material',
+    'title', 'description', 'type', 'width_cm', 'height_cm', 'technique',
     'exhibitions', 'status', 'amount', 'price_cents', 'images'
   ];
 
@@ -337,7 +337,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   }
 
   // El artista puede editar campos básicos; admin además exhibitions e images.
-  const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'material', 'amount', 'price_cents'];
+  const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'amount', 'price_cents'];
   const adminAllowed  = [...artistAllowed, 'exhibitions', 'images'];
   const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
 

@@ -64,7 +64,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const [
     totalArtworks,
     artworks,
-    materialsAgg,
+    techniquesAgg,
     boundsAgg
   ] = await Promise.all([
     Artwork.countDocuments(artworkFilter),
@@ -75,9 +75,9 @@ exports.getSearchResults = catchAsync(async (req, res) => {
       .limit(perPage),
     Artwork.aggregate([
       { $match: { status: 'approved', deletedAt: null } },
-      { $group: { _id: '$material', material: { $first: '$material' } } },
-      { $project: { _id: 0, material: 1 } },
-      { $sort: { material: 1 } }
+      { $group: { _id: '$technique', technique: { $first: '$technique' } } },
+      { $project: { _id: 0, technique: 1 } },
+      { $sort: { technique: 1 } }
     ]),
     Artwork.aggregate([
       { $match: { status: 'approved', deletedAt: null } },
@@ -87,7 +87,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
-  const materials = materialsAgg.map(m => m.material).filter(Boolean);
+  const techniques = techniquesAgg.map(m => m.technique).filter(Boolean);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
@@ -157,7 +157,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     q,
     priceBounds,
     appliedPrice,
-    materials,
+    techniques,
     page,
     perPage,
     totalPages,
@@ -294,9 +294,9 @@ exports.getArtworks = catchAsync(async (req, res) => {
 
   // Facetas básicas (normalizadas)
   const typesN = normArr(q.type);
-  const matsN  = normArr(q.material);
-  if (typesN.length) filter.type_norm     = { $in: typesN };
-  if (matsN.length)  filter.material_norm = { $in: matsN };
+  const techsN  = normArr(q.technique);
+  if (typesN.length) filter.type_norm      = { $in: typesN };
+  if (techsN.length) filter.technique_norm = { $in: techsN };
 
   // Rango de tamaño (cm)
   const minw = toNumber(q.minw), maxw = toNumber(q.maxw), minh = toNumber(q.minh), maxh = toNumber(q.maxh);
@@ -324,14 +324,14 @@ exports.getArtworks = catchAsync(async (req, res) => {
   ]);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
 
-  // 2) Obtener materiales únicos desde la base de datos (solo aprobados y no borrados)
-  const materialsAgg = await Artwork.aggregate([
+  // 2) Obtener técnicas únicas desde la base de datos (solo aprobados y no borrados)
+  const techniquesAgg = await Artwork.aggregate([
     { $match: { status: 'approved', deletedAt: null } },
-    { $group: { _id: '$material', material: { $first: '$material' } } },
-    { $project: { _id: 0, material: 1 } },
-    { $sort: { material: 1 } }
+    { $group: { _id: '$technique', technique: { $first: '$technique' } } },
+    { $project: { _id: 0, technique: 1 } },
+    { $sort: { technique: 1 } }
   ]);
-  const materials = materialsAgg.map(m => m.material).filter(Boolean);
+  const techniques = techniquesAgg.map(m => m.technique).filter(Boolean);
 
   let minCents = readMinCentsFromQuery(q);
   let maxCents = readMaxCentsFromQuery(q);
@@ -389,7 +389,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
     q,
     priceBounds,   // rango total desde BD
     appliedPrice,  // rango aplicado (query o defaults)
-    materials,     // materiales únicos para filtros
+    techniques,    // técnicas únicas para filtros
     page,
     perPage,
     totalPages,
@@ -535,7 +535,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     totalArtworks,
     artworks,
     allArtworks, // Para estadísticas generales
-    materialsAgg,
+    techniquesAgg,
     boundsAgg
   ] = await Promise.all([
     // Total con filtros aplicados
@@ -548,12 +548,12 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
       .limit(perPage),
     // Todas las obras del artista para estadísticas (sin filtros adicionales)
     Artwork.find(baseFilter).populate({ path: 'artist', select: 'name' }),
-    // Materiales disponibles del artista
+    // Técnicas disponibles del artista
     Artwork.aggregate([
       { $match: baseFilter },
-      { $group: { _id: '$material', material: { $first: '$material' } } },
-      { $project: { _id: 0, material: 1 } },
-      { $sort: { material: 1 } }
+      { $group: { _id: '$technique', technique: { $first: '$technique' } } },
+      { $project: { _id: 0, technique: 1 } },
+      { $sort: { technique: 1 } }
     ]),
     // Rangos de precio del artista
     Artwork.aggregate([
@@ -564,7 +564,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
-  const materials = materialsAgg.map(m => m.material).filter(Boolean);
+  const techniques = techniquesAgg.map(m => m.technique).filter(Boolean);
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
@@ -575,7 +575,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     avgPrice: allArtworks.length > 0 
       ? allArtworks.reduce((sum, artwork) => sum + (artwork.price_cents || 0), 0) / allArtworks.length / 100
       : 0,
-    materials: [...new Set(allArtworks.map(artwork => artwork.material).filter(Boolean))],
+    techniques: [...new Set(allArtworks.map(artwork => artwork.technique).filter(Boolean))],
     types: [...new Set(allArtworks.map(artwork => artwork.type).filter(Boolean))]
   };
 
@@ -587,7 +587,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     artist,
     artworks, // Obras paginadas y filtradas
     stats, // Estadísticas generales
-    materials, // Para filtros
+    techniques, // Para filtros
     priceBounds, // Para filtros de precio
     appliedPrice, // Precios aplicados
     page,

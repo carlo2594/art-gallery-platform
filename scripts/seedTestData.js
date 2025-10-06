@@ -187,9 +187,9 @@ async function seed() {
     const completedAt = new Date(year, month, day);
     
     const types = ['pintura', 'escultura', 'técnica mixta'];
-    const materials = ['óleo sobre lienzo', 'acrílico sobre papel', 'bronce', 'hierro forjado', 'técnica mixta'];
+    const techniques = ['óleo sobre lienzo', 'acrílico sobre papel', 'bronce', 'hierro forjado', 'técnica mixta'];
     const type = randomFromArray(types);
-    const material = randomFromArray(materials);
+    const technique = randomFromArray(techniques);
     
     artworkData.push({
       title,
@@ -198,9 +198,9 @@ async function seed() {
       imageUrl: randomFromArray(randomImages),
       imagePublicId: `leonardo-artwork-${i + 1}`,
       type,
-      material,
+      technique,
       type_norm: norm(type),
-      material_norm: norm(material),
+      technique_norm: norm(technique),
       createdBy: leonardoUser._id,
       artist: leonardoUser._id,
       status: "approved",
@@ -269,7 +269,7 @@ async function seed() {
     const completedAt = new Date(year, month, day);
     
     const type = ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4];
-    const material = ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5];
+    const technique = ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5];
     
     artworkData.push({
       title,
@@ -278,9 +278,9 @@ async function seed() {
       imageUrl: randomFromArray(randomImages),
       imagePublicId: `seeded-image-${i}`,
       type,
-      material,
+      technique,
       type_norm: norm(type),
-      material_norm: norm(material),
+      technique_norm: norm(technique),
       createdBy: user._id,
       artist: user._id,
       status: "approved",

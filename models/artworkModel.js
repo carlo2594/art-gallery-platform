@@ -45,7 +45,7 @@ const artworkSchema = new mongoose.Schema(
 
     type: { type: String },
     size: { type: String }, // texto derivado de width_cm/height_cm
-    material: { type: String },
+    technique: { type: String },
     // (1) Validaciones adicionales para dimensiones y precio
     width_cm: { type: Number, required: true, min: 1 },
     height_cm: { type: Number, required: true, min: 1 },
@@ -56,7 +56,7 @@ const artworkSchema = new mongoose.Schema(
 
     // Campos normalizados para búsquedas/indexación
     type_norm: { type: String, index: true },
-    material_norm: { type: String, index: true },
+    technique_norm: { type: String, index: true },
 
     /* ------ Metrics (inmutables) ------ */
     views: { type: Number, default: 0 },
@@ -93,7 +93,7 @@ artworkSchema.index({ exhibitions: 1 });
 
 /* Índices existentes */
 artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 días después de ir a la papelera
-artworkSchema.index({ type_norm: 1, material_norm: 1 });
+artworkSchema.index({ type_norm: 1, technique_norm: 1 });
 
 /* ====== Virtuals ====== */
 // Lectura conveniente del precio en dólares (USD)
@@ -238,7 +238,7 @@ artworkSchema.pre('save', async function (next) {
   }
   // Normalizar facetas
   this.type_norm = norm(this.type);
-  this.material_norm = norm(this.material);
+  this.technique_norm = norm(this.technique);
 
   // Asegurar entero y no-negativo para el precio
   if (typeof this.price_cents === 'number') {

@@ -8,9 +8,9 @@ const { getSort } = require('@utils/sortUtils');
 function buildArtworkFilter(q) {
   const filter = { status: 'approved', deletedAt: null };
   const typesN = normArr(q.type);
-  const matsN  = normArr(q.material);
-  if (typesN.length) filter.type_norm     = { $in: typesN };
-  if (matsN.length)  filter.material_norm = { $in: matsN };
+  const techsN = normArr(q.technique);
+  if (typesN.length) filter.type_norm      = { $in: typesN };
+  if (techsN.length) filter.technique_norm = { $in: techsN };
 
   // Tamaño
   const minw = toNumber(q.minw), maxw = toNumber(q.maxw), minh = toNumber(q.minh), maxh = toNumber(q.maxh);

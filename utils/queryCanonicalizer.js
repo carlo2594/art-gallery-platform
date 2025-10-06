@@ -12,7 +12,7 @@ function canonicalizeQuery(req, appliedPrice, priceBounds) {
 
   // Build canonical params
   const canonical = new URLSearchParams();
-  ['type','orientation','material'].forEach(k => {
+  ['type','orientation','technique'].forEach(k => {
     getSortedArray(req.query, k).forEach(v => {
       if (v !== undefined && v !== null && v !== '') canonical.append(k, v);
     });
@@ -36,7 +36,7 @@ function canonicalizeQuery(req, appliedPrice, priceBounds) {
 
   // Build original params, but sort array values for comparison
   const original = new URLSearchParams();
-  ['type','orientation','material'].forEach(k => {
+  ['type','orientation','technique'].forEach(k => {
     getSortedArray(req.query, k).forEach(v => {
       if (v !== undefined && v !== null && v !== '') original.append(k, v);
     });
