@@ -44,6 +44,33 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * Función para generar slug único
+ */
+function generateSlug(title) {
+  return title
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remover acentos
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
+    .replace(/\s+/g, '-') // espacios a guiones
+    .replace(/-+/g, '-') // múltiples guiones a uno
+    .replace(/^-|-$/g, ''); // remover guiones al inicio y final
+}
+
+/**
+ * Helper de normalización (quita tildes, pasa a minúsculas, recorta)
+ */
+function norm(s) {
+  return (s || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
 // Agrega el arreglo de statuses permitidos
 const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
 
@@ -63,11 +90,11 @@ async function seed() {
   ]);
 
 
-  // Crea 100 artistas de prueba y 5 admins
+  // Crea 20 artistas de prueba y 2 admins
   const userData = [];
   userData.push({ name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin', profileImage: randomFromArray(randomImages) });
   userData.push({ name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) });
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= 20; i++) {
     userData.push({
       name: `Artista ${i}`,
       email: `artista${i}@test.com`,
@@ -93,6 +120,7 @@ async function seed() {
 
   // Crea obras de arte de prueba (total 100)
   const artworkData = [];
+  const slugsUsed = new Set(); // Para asegurar slugs únicos
   // Nombres únicos para las obras
   // Descriptores únicos para las obras
   const artworkDescriptors = [
@@ -117,7 +145,7 @@ async function seed() {
     'Luz', 'Escondida', 'Cristal', 'Dorado', 'Plata',
     'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
   ];
-  for (let i = 1; i <= 200; i++) {
+  for (let i = 1; i <= 100; i++) {
     const user = randomFromArray(users);
     const canvas = randomFromArray(canvasSizes);
     const scaleOptions = [0.5, 1, 1.5];
@@ -127,18 +155,36 @@ async function seed() {
       descriptor = `${descriptor} ${Math.ceil(i / artworkDescriptors.length)}`;
     }
     const title = `Obra ${descriptor}`;
+    
+    // Generar slug único
+    let baseSlug = generateSlug(title);
+    let slug = baseSlug;
+    let counter = 1;
+    while (slugsUsed.has(slug)) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    slugsUsed.add(slug);
+    
     // Genera una fecha aleatoria entre 1990 y 2022 para completedAt
     const year = randomInt(1990, 2022);
     const month = randomInt(0, 11);
     const day = randomInt(1, 28);
     const completedAt = new Date(year, month, day);
+    
+    const type = ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4];
+    const material = ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5];
+    
     artworkData.push({
       title,
+      slug,
       description: `Descripción de la obra \"${title}\"`,
       imageUrl: randomFromArray(randomImages),
       imagePublicId: `seeded-image-${i}`,
-      type: ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4],
-      material: ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5],
+      type,
+      material,
+      type_norm: norm(type),
+      material_norm: norm(material),
       createdBy: user._id,
       artist: user._id,
       status: "approved",
@@ -146,15 +192,16 @@ async function seed() {
       completedAt,
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale),
-      price_cents: randomInt(500, 5000) * 100
+      price_cents: randomInt(500, 5000) * 100,
+      size: `${Math.round(canvas.width * scale)} x ${Math.round(canvas.height * scale)} cm`
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Crea 100 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
+  // Crea 10 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
   const participantRoles = ['artista', 'curador', 'coordinador', 'invitado'];
-  for (let i = 1; i <= 100; i++) {
+  for (let i = 1; i <= 10; i++) {
     // Hasta 10 artworks y 10 participantes por exposición
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
@@ -222,19 +269,40 @@ async function seed() {
 
   // Ratings eliminados
 
-  // Crea favoritos de prueba (máximo 10) y actualiza favoritesCount en el artwork
+  // Crea favoritos de prueba para cada obra (entre 0-15 favoritos por obra)
   const favoriteData = [];
-  for (let i = 1; i <= 10; i++) {
-    const artwork = randomFromArray(artworks);
-    const user = randomFromArray(users);
-    favoriteData.push({
-      artwork: artwork._id,
-      user: user._id
-    });
-    artwork.favoritesCount = (artwork.favoritesCount || 0) + 1;
+  const favoriteCountMap = new Map(); // Para llevar el conteo por artwork
+  
+  for (const artwork of artworks) {
+    // Cada obra tendrá entre 0-15 favoritos
+    const numFavorites = randomInt(0, 15);
+    const usersWhoFavorited = new Set();
+    
+    // Seleccionar usuarios únicos para esta obra
+    while (usersWhoFavorited.size < numFavorites && usersWhoFavorited.size < users.length) {
+      const user = randomFromArray(users);
+      if (!usersWhoFavorited.has(user._id.toString())) {
+        usersWhoFavorited.add(user._id.toString());
+        favoriteData.push({
+          artwork: artwork._id,
+          user: user._id
+        });
+      }
+    }
+    
+    // Actualizar el contador en el mapa
+    favoriteCountMap.set(artwork._id.toString(), usersWhoFavorited.size);
+  }
+  
+  // Insertar todos los favoritos
+  await Favorite.insertMany(favoriteData);
+  
+  // Actualizar favoritesCount en cada artwork
+  for (const artwork of artworks) {
+    const count = favoriteCountMap.get(artwork._id.toString()) || 0;
+    artwork.favoritesCount = count;
     await artwork.save();
   }
-  await Favorite.insertMany(favoriteData);
 
   // ...existing code...
   await mongoose.disconnect();

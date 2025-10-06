@@ -282,6 +282,30 @@ if (loginSideImg) {
 
 // ------ Artwork Detail Functions ------
 
+// Función para centrar estadísticas respecto al botón
+function centerStatsToButton() {
+  const actionSection = document.querySelector('.artwork-action-section');
+  const button = actionSection?.querySelector('.btn');
+  const stats = actionSection?.querySelector('.artwork-stats');
+  
+  if (!button || !stats) return;
+  
+  // Obtener dimensiones y posición del botón
+  const buttonRect = button.getBoundingClientRect();
+  const sectionRect = actionSection.getBoundingClientRect();
+  
+  // Calcular posición relativa del botón respecto a la sección
+  const buttonLeft = buttonRect.left - sectionRect.left;
+  const buttonWidth = buttonRect.width;
+  
+  // Establecer custom properties CSS
+  stats.style.setProperty('--button-width', `${buttonWidth}px`);
+  stats.style.setProperty('--button-left', `${buttonLeft}px`);
+  
+  // Agregar clase para activar el posicionamiento
+  stats.classList.add('centered-to-button');
+}
+
 // Función para toggle de favoritos (implementar según tu lógica existente)
 function toggleFavorite(artworkId) {
   // Aquí implementarías la lógica para agregar/quitar de favoritos
@@ -370,4 +394,14 @@ function initLightbox() {
 }
 
 // Initialize lightbox when DOM is ready
-document.addEventListener('DOMContentLoaded', initLightbox);
+document.addEventListener('DOMContentLoaded', function() {
+  initLightbox();
+  
+  // Centrar estadísticas al cargar la página
+  if (document.querySelector('.artwork-action-section')) {
+    centerStatsToButton();
+    
+    // Recentrar en resize de ventana
+    window.addEventListener('resize', centerStatsToButton);
+  }
+});

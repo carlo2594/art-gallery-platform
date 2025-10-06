@@ -16,79 +16,70 @@ block content
       // Información de la obra
       .col-xl-4
         .artwork-info.ps-xl-4.px-4
-          h1.display-5.fw-bold.mb-3= artwork.title
+          h1.display-4.fw-bold.mb-3= artwork.title
           
           // Información del artista
           if artwork.artist
-            .artist-info.mb-4.p-3.bg-light.rounded
-              h5.mb-2 Artista
-              .d-flex.align-items-center
-                if artwork.artist.profileImage
-                  img.rounded-circle.me-3(
-                    src=artwork.artist.profileImage
-                    alt=artwork.artist.name
-                    style="width: 50px; height: 50px; object-fit: cover;"
-                  )
-                .artist-details
-                  h6.mb-1.fw-bold= artwork.artist.name
-                  if artwork.artist.location
-                    small.text-muted= artwork.artist.location
+            .mb-3
+              h6.text-uppercase.fw-bold.mb-1.text-muted= artwork.artist.name
+              if artwork.artist.location
+                small.text-muted= artwork.artist.location
           
-          // Detalles de la obra
-          .artwork-details.mb-4
+          // Detalles técnicos
+          .artwork-details.mb-3
             if artwork.description
-              .mb-3
-                h6.fw-bold Descripción
-                p.text-muted= artwork.description
+              .mb-1
+                p.fs-5.text-muted.lh-base.mb-0= artwork.description
             
-            .row.g-3
+            .details-list.mt-0
               if artwork.material
-                .col-sm-6
-                  strong Material:
-                  br
+                .detail-item.mb-1
                   span.text-muted= artwork.material
               
-              if artwork.type
-                .col-sm-6
-                  strong Tipo:
-                  br
-                  span.text-muted= artwork.type
-              
-              if artwork.width_cm && artwork.height_cm
-                .col-sm-6
-                  strong Dimensiones:
-                  br
-                  span.text-muted #{artwork.width_cm} × #{artwork.height_cm} cm
-              
               if artwork.completedAt
-                .col-sm-6
-                  strong Fecha:
-                  br
+                .detail-item.mb-1
                   span.text-muted= new Date(artwork.completedAt).getFullYear()
               
-              if artwork.price_cents && artwork.price_cents > 0
-                .col-12
-                  .price-info.p-3.bg-primary.bg-opacity-10.rounded.text-center
-                    h5.mb-0.text-primary $#{(artwork.price_cents / 100).toLocaleString('en-US')} USD
+              if artwork.width_cm && artwork.height_cm
+                .detail-item.mb-1
+                  span.text-muted #{artwork.width_cm} × #{artwork.height_cm} cm / #{Math.round(artwork.width_cm / 2.54)} × #{Math.round(artwork.height_cm / 2.54)} in
           
-          // Estadísticas
-          .artwork-stats.mb-4.text-center
-            small.text-muted #{artwork.views || 0} visualizaciones
+          // Precio
+          if artwork.price_cents && artwork.price_cents > 0
+            .mb-3
+              h5.fw-bold.text-dark $#{(artwork.price_cents / 100).toLocaleString('en-US')} USD
           
-          // Botones de acción
-          .action-buttons
-            .d-grid.gap-2
+          // Sección de acción y estadísticas
+          .artwork-action-section.mb-3
+            // Botón de acción
+            .action-buttons.mb-3
               if user
-                button.btn.btn-outline-danger.btn-lg(
+                button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase(
                   type="button"
                   onclick=`toggleFavorite('${artwork._id}')`
+                  style="letter-spacing: 0.1em;"
                 )
-                  i.fas.fa-heart.me-2
-                  span Agregar a favoritos
+                  span INQUIRE TO PURCHASE
               else
-                a.btn.btn-outline-primary.btn-lg(href="/login")
-                  i.fas.fa-sign-in-alt.me-2
-                  span Iniciar sesión para guardar
+                a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase(
+                  href="/login"
+                  style="letter-spacing: 0.1em;"
+                )
+                  span INQUIRE TO PURCHASE
+            
+            // Estadísticas (solo mostrar si hay valores > 0)
+            .artwork-stats
+              // Fecha de publicación en la página
+              if artwork.createdAt
+                .stat-item.mb-2
+                  small.text-muted.fw-bold Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+              
+              if artwork.views && artwork.views > 0
+                .stat-item.mb-1
+                  small.text-muted #{artwork.views.toLocaleString()} visualizaciones
+              if artwork.favoritesCount && artwork.favoritesCount > 0
+                .stat-item
+                  small.text-muted #{artwork.favoritesCount.toLocaleString()} favoritos
 
     // Exposiciones relacionadas
     if artwork.exhibitions && artwork.exhibitions.length > 0

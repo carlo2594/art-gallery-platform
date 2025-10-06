@@ -408,6 +408,61 @@ section.join-artists { position: relative; margin-top: 5rem; }
   align-items: center;
 }
 
+/* Custom background colors */
+.bg-beige {
+  background-color: var(--ox-beige) !important;
+}
+
+/* Artwork detail minimal styling */
+.artwork-info .details-list {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1.5rem;
+}
+
+.artwork-info .detail-item {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.artwork-info h1 {
+  font-family: var(--font-title);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Artwork stats styling */
+.artwork-action-section {
+  position: relative;
+}
+
+.artwork-stats {
+  position: relative;
+}
+
+.artwork-stats.centered-to-button {
+  /* El JavaScript establecerá estas custom properties */
+  --button-width: 200px;
+  --button-left: 0px;
+  
+  position: absolute;
+  left: var(--button-left);
+  width: var(--button-width);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.artwork-stats .stat-item {
+  font-size: 1rem;
+  color: #999;
+}
+
+.artwork-stats .stat-item:not(:last-child)::after {
+  content: '•';
+  margin-left: 1rem;
+  color: #ddd;
+}
+
 @media (max-width: 768px) {
   .artwork-info {
     margin-top: 2rem;
@@ -425,7 +480,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   15. LIGHTBOX ZOOM EFFECT
   ========================================== */
 :root {
-  --overlay-bg: rgba(255,255,255,0.9);
+  --overlay-bg: rgba(247,246,239,0.9);
   --close-size: 4.2rem;
 }
 
@@ -434,7 +489,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   max-width: 100%;
   margin: 0 auto;
   aspect-ratio: 4/3;
-  background: #f6f6f6;
+  background: var(--ox-beige);
   display: block;
   position: relative;
   overflow: hidden;
