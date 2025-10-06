@@ -92,8 +92,37 @@ async function seed() {
 
   // Crea 20 artistas de prueba y 2 admins
   const userData = [];
-  userData.push({ name: 'Admin', email: 'admin@test.com', password: '123456', role: 'admin', profileImage: randomFromArray(randomImages) });
-  userData.push({ name: 'UsuarioExtra', email: 'usuarioextra@test.com', password: '123456', role: 'admin', bio: 'Bio de usuario extra', profileImage: randomFromArray(randomImages) });
+  userData.push({ 
+    name: 'Admin', 
+    email: 'admin@test.com', 
+    password: '123456', 
+    role: 'admin', 
+    profileImage: randomFromArray(randomImages),
+    slug: 'admin'
+  });
+  userData.push({ 
+    name: 'UsuarioExtra', 
+    email: 'usuarioextra@test.com', 
+    password: '123456', 
+    role: 'admin', 
+    bio: 'Bio de usuario extra', 
+    profileImage: randomFromArray(randomImages),
+    slug: 'usuario-extra'
+  });
+  
+  // Artista especial con 20 obras
+  userData.push({
+    name: 'Leonardo Martinez',
+    email: 'leonardo.martinez@test.com',
+    password: '123456',
+    role: 'artist',
+    bio: 'Artista contemporáneo especializado en pintura abstracta y escultura moderna. Con más de 15 años de experiencia, ha expuesto en galerías de todo el mundo.',
+    location: 'Barcelona, España',
+    website: 'https://leonardo-martinez-art.com',
+    profileImage: randomFromArray(randomImages),
+    slug: 'leonardo-martinez'
+  });
+  
   for (let i = 1; i <= 20; i++) {
     userData.push({
       name: `Artista ${i}`,
@@ -101,7 +130,8 @@ async function seed() {
       password: '123456',
       role: 'artist',
       bio: `Bio de Artista ${i}`,
-      profileImage: randomFromArray(randomImages)
+      profileImage: randomFromArray(randomImages),
+      slug: `artista-${i}`
     });
   }
   const users = await User.insertMany(userData);
@@ -118,10 +148,72 @@ async function seed() {
   ];
 
 
-  // Crea obras de arte de prueba (total 100)
+  // Crea obras de arte de prueba (total 120: 20 para Leonardo + 100 para otros)
   const artworkData = [];
   const slugsUsed = new Set(); // Para asegurar slugs únicos
-  // Nombres únicos para las obras
+  
+  // Encontrar a Leonardo Martinez (será el índice 2 después de Admin y UsuarioExtra)
+  const leonardoUser = users[2]; // Leonardo Martinez
+  
+  // Crear 20 obras específicamente para Leonardo Martinez
+  const leonardoArtworks = [
+    'Sinfonía Urbana', 'Reflejos del Alma', 'Danza Cósmica', 'Laberinto Interior',
+    'Susurros de Color', 'Geometría Emocional', 'Ritmos de la Naturaleza', 'Fragmentos de Luz',
+    'Metamorfosis Azul', 'Arquitectura de Sueños', 'Explosión Silenciosa', 'Equilibrio Dinámico',
+    'Textura del Tiempo', 'Vibraciones Doradas', 'Mosaico de Sentimientos', 'Ondas Cerebrales',
+    'Construcción Etérea', 'Paisaje Mental', 'Forma y Vacío', 'Energía Pura'
+  ];
+  
+  for (let i = 0; i < 20; i++) {
+    const canvas = randomFromArray(canvasSizes);
+    const scaleOptions = [0.8, 1, 1.2, 1.5];
+    const scale = randomFromArray(scaleOptions);
+    const title = leonardoArtworks[i];
+    
+    // Generar slug único
+    let baseSlug = generateSlug(title);
+    let slug = baseSlug;
+    let counter = 1;
+    while (slugsUsed.has(slug)) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    slugsUsed.add(slug);
+    
+    // Genera una fecha aleatoria entre 2015 y 2024 para Leonardo (más reciente)
+    const year = randomInt(2015, 2024);
+    const month = randomInt(0, 11);
+    const day = randomInt(1, 28);
+    const completedAt = new Date(year, month, day);
+    
+    const types = ['pintura', 'escultura', 'técnica mixta'];
+    const materials = ['óleo sobre lienzo', 'acrílico sobre papel', 'bronce', 'hierro forjado', 'técnica mixta'];
+    const type = randomFromArray(types);
+    const material = randomFromArray(materials);
+    
+    artworkData.push({
+      title,
+      slug,
+      description: `Una obra magistral que explora ${title.toLowerCase()}. Técnica refinada que combina elementos abstractos con una profunda exploración emocional.`,
+      imageUrl: randomFromArray(randomImages),
+      imagePublicId: `leonardo-artwork-${i + 1}`,
+      type,
+      material,
+      type_norm: norm(type),
+      material_norm: norm(material),
+      createdBy: leonardoUser._id,
+      artist: leonardoUser._id,
+      status: "approved",
+      views: randomInt(50, 800), // Más vistas para Leonardo
+      completedAt,
+      width_cm: Math.round(canvas.width * scale),
+      height_cm: Math.round(canvas.height * scale),
+      price_cents: randomInt(1500, 8000) * 100, // Precios más altos para Leonardo
+      size: `${Math.round(canvas.width * scale)} x ${Math.round(canvas.height * scale)} cm`
+    });
+  }
+  
+  // Nombres únicos para las obras de otros artistas
   // Descriptores únicos para las obras
   const artworkDescriptors = [
     'Aurora', 'Ecos', 'Reflejo', 'Caminos', 'Fragmentos',
@@ -145,8 +237,12 @@ async function seed() {
     'Luz', 'Escondida', 'Cristal', 'Dorado', 'Plata',
     'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
   ];
+  
+  // Crear obras para el resto de artistas (100 obras adicionales)
   for (let i = 1; i <= 100; i++) {
-    const user = randomFromArray(users);
+    // Excluir a Leonardo Martinez (índice 2) para que las obras se distribuyan entre otros artistas
+    const availableUsers = users.filter((user, index) => index !== 2);
+    const user = randomFromArray(availableUsers);
     const canvas = randomFromArray(canvasSizes);
     const scaleOptions = [0.5, 1, 1.5];
     const scale = randomFromArray(scaleOptions);
@@ -197,6 +293,21 @@ async function seed() {
     });
   }
   const artworks = await Artwork.insertMany(artworkData);
+
+  // Verificar que Leonardo tiene exactamente 20 obras
+  const leonardoArtworkCount = artworks.filter(artwork => 
+    artwork.artist.toString() === leonardoUser._id.toString()
+  ).length;
+  
+  console.log(`\n🎨 ARTISTA ESPECIAL CREADO:`);
+  console.log(`📝 Nombre: ${leonardoUser.name}`);
+  console.log(`📧 Email: ${leonardoUser.email}`);
+  console.log(`🖼️  Obras creadas: ${leonardoArtworkCount}`);
+  console.log(`🔗 Slug: leonardo-martinez`);
+  console.log(`📍 Ubicación: ${leonardoUser.location || 'Barcelona, España'}`);
+  console.log(`🌐 Sitio web: ${leonardoUser.website || 'https://leonardo-martinez-art.com'}`);
+  console.log(`� Bio: ${leonardoUser.bio}`);
+  console.log(`\n✅ Puedes encontrar a este artista en: /artists/leonardo-martinez\n`);
 
   // Crea 10 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
@@ -304,7 +415,6 @@ async function seed() {
     await artwork.save();
   }
 
-  // ...existing code...
   await mongoose.disconnect();
 }
 

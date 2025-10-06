@@ -13,7 +13,11 @@ const userSchema = new mongoose.Schema({
   validate: [validator.isEmail, 'Correo inválido'],
   select: false // <-- proteger email
 },
-
+  slug: {
+    type: String,
+    unique: true,
+    trim: true
+  },
   password: { type: String, required: true, select: false },   // hash no se envía
   role: {
     type: String,
@@ -24,9 +28,50 @@ const userSchema = new mongoose.Schema({
   profileImage: { type: String, trim: true },
   profileImagePublicId: { type: String, trim: true },
   bio: { type: String, trim: true },
+  location: { type: String, trim: true },
+  website: { type: String, trim: true },
+  social: {
+    instagram: { type: String, trim: true },
+    twitter: { type: String, trim: true },
+    facebook: { type: String, trim: true }
+  },
   active: { type: Boolean, default: true, select: false },
   lastLoginAt: { type: Date },
   createdAt: { type: Date, default: Date.now }
+});
+
+/* ---------- Función para generar slug ---------- */
+function generateSlug(name) {
+  return name
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // remover acentos
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
+    .replace(/\s+/g, '-') // espacios a guiones
+    .replace(/-+/g, '-') // múltiples guiones a uno
+    .replace(/^-|-$/g, ''); // remover guiones al inicio y final
+}
+
+/* ---------- Middleware para generar slug único ---------- */
+userSchema.pre('save', async function (next) {
+  // Generar slug si es nuevo documento o si cambió el nombre
+  if (this.isNew || this.isModified('name')) {
+    const baseSlug = generateSlug(this.name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Verificar si el slug ya existe y generar uno único
+    while (await this.constructor.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    
+    this.slug = slug;
+  }
+  
+  next();
 });
 
 /* ---------- Hash de contraseña ---------- */

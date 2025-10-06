@@ -480,8 +480,12 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
 exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const AppError = require('@utils/appError');
   const isValidObjectId = require('@utils/isValidObjectId');
+  const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
+  const { getPaginationParams } = require('@utils/pagination');
+  const { getPriceRanges } = require('@utils/priceUtils');
   
   const artistId = req.params.id;
+  const q = req.query;
   
   // Buscar artista por ID o slug
   let artist;
@@ -507,24 +511,72 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     return next(new AppError('Artista no encontrado', 404));
   }
 
-  // Obtener obras del artista (aprobadas y no borradas)
-  const artworks = await Artwork.find({
+  // --- FILTROS Y PAGINACIÓN PARA OBRAS DEL ARTISTA ---
+  
+  // Filtro base: obras del artista aprobadas y no borradas
+  const baseFilter = {
     artist: artist._id,
     status: 'approved',
     deletedAt: null
-  })
-  .populate({ path: 'artist', select: 'name' })
-  .sort({ createdAt: -1 });
+  };
 
-  // Estadísticas del artista
+  // Aplicar filtros adicionales (material, precio, etc.)
+  const artworkFilter = buildArtworkFilter(q);
+  const combinedFilter = { ...baseFilter, ...artworkFilter };
+  
+  // Paginación (máximo 9 obras por página)
+  const { page, perPage, skip } = getPaginationParams(req.query, 9, 9);
+  
+  // Ordenamiento
+  const sort = getArtworkSort(q.sort) || { createdAt: -1 };
+
+  // Consultas paralelas para obras paginadas y estadísticas generales
+  const [
+    totalArtworks,
+    artworks,
+    allArtworks, // Para estadísticas generales
+    materialsAgg,
+    boundsAgg
+  ] = await Promise.all([
+    // Total con filtros aplicados
+    Artwork.countDocuments(combinedFilter),
+    // Obras paginadas con filtros
+    Artwork.find(combinedFilter)
+      .populate({ path: 'artist', select: 'name' })
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage),
+    // Todas las obras del artista para estadísticas (sin filtros adicionales)
+    Artwork.find(baseFilter).populate({ path: 'artist', select: 'name' }),
+    // Materiales disponibles del artista
+    Artwork.aggregate([
+      { $match: baseFilter },
+      { $group: { _id: '$material', material: { $first: '$material' } } },
+      { $project: { _id: 0, material: 1 } },
+      { $sort: { material: 1 } }
+    ]),
+    // Rangos de precio del artista
+    Artwork.aggregate([
+      { $match: baseFilter },
+      { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
+      { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
+    ])
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
+  const materials = materialsAgg.map(m => m.material).filter(Boolean);
+  const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
+  const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
+
+  // Estadísticas del artista (basadas en todas las obras, no filtradas)
   const stats = {
-    totalArtworks: artworks.length,
-    totalViews: artworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
-    avgPrice: artworks.length > 0 
-      ? artworks.reduce((sum, artwork) => sum + (artwork.price_cents || 0), 0) / artworks.length / 100
+    totalArtworks: allArtworks.length,
+    totalViews: allArtworks.reduce((sum, artwork) => sum + (artwork.views || 0), 0),
+    avgPrice: allArtworks.length > 0 
+      ? allArtworks.reduce((sum, artwork) => sum + (artwork.price_cents || 0), 0) / allArtworks.length / 100
       : 0,
-    materials: [...new Set(artworks.map(artwork => artwork.material).filter(Boolean))],
-    types: [...new Set(artworks.map(artwork => artwork.type).filter(Boolean))]
+    materials: [...new Set(allArtworks.map(artwork => artwork.material).filter(Boolean))],
+    types: [...new Set(allArtworks.map(artwork => artwork.type).filter(Boolean))]
   };
 
   // Incrementar vistas del perfil (opcional - si tienes el campo en el modelo)
@@ -533,8 +585,17 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   res.status(200).render('public/artistDetail', {
     title: `${artist.name} · Galería del Ox`,
     artist,
-    artworks,
-    stats
+    artworks, // Obras paginadas y filtradas
+    stats, // Estadísticas generales
+    materials, // Para filtros
+    priceBounds, // Para filtros de precio
+    appliedPrice, // Precios aplicados
+    page,
+    perPage,
+    totalPages,
+    totalArtworks, // Total filtrado
+    q, // Query params para filtros
+    actionUrl: `/artists/${artist.slug || artist._id}` // Para formularios de filtro
   });
 });
 

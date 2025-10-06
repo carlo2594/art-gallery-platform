@@ -91,62 +91,85 @@ block content
           .row.mb-5
             .col-12.text-center
               h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
-              p.lead.text-muted= `Descubre las ${stats.totalArtworks} obras de este talentoso artista`
+              p.lead.text-muted= `Mostrando ${artworks.length} de ${totalArtworks} obras de este talentoso artista`
+
+          // Filtros para las obras del artista
+          .row.mb-4
+            .col-12
+              include _artworkFilters
 
           // Grid de obras usando el estilo de _artworkGrid.pug
-          ul.grid.effect-2#grid.mb-5
-            each artwork in artworks
-              li
-                .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
-                  a(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
-                    img.card-img-top.art-card-shadow(src=artwork.imageUrl, alt=artwork.title)
-                  // Full-card stretched link so the info area is clickable too
-                  a.stretched-link(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
-                  .card-body.grid-card-body
-                    .grid-card-flex
-                      // --- Columna izquierda: Información de la obra ---
-                      .grid-card-info
-                        // Título principal de la obra
-                        if artwork.title
-                          h4.grid-card-title= artwork.title
-                        
-                        // Información del artista
-                        if artwork.artist
-                          h6.grid-card-artist= artwork.artist.name
-                        
-                        // Detalles técnicos
-                        .grid-card-details
-                          if artwork.material
-                            - var matCap = artwork.material.charAt(0).toUpperCase() + artwork.material.slice(1)
-                            .grid-card-detail-item= matCap
+          .artworks-flex
+            .artworks-grid-paginate
+              ul.grid.effect-2#grid.mb-5
+                each artwork in artworks
+                  li
+                    .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
+                      a(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
+                        img.card-img-top.art-card-shadow(src=artwork.imageUrl, alt=artwork.title)
+                      // Full-card stretched link so the info area is clickable too
+                      a.stretched-link(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
+                      .card-body.grid-card-body
+                        .grid-card-flex
+                          // --- Columna izquierda: Información de la obra ---
+                          .grid-card-info
+                            // Título principal de la obra
+                            if artwork.title
+                              h4.grid-card-title= artwork.title
+                            
+                            // Información del artista
+                            if artwork.artist
+                              h6.grid-card-artist= artwork.artist.name
+                            
+                            // Detalles técnicos
+                            .grid-card-details
+                              if artwork.material
+                                - var matCap = artwork.material.charAt(0).toUpperCase() + artwork.material.slice(1)
+                                .grid-card-detail-item= matCap
+                              
+                              if artwork.completedAt
+                                .grid-card-detail-item= new Date(artwork.completedAt).getFullYear()
+                            
+                            // Precio
+                            if typeof artwork.price_cents === 'number'
+                              h5.grid-card-price $#{(artwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
                           
-                          if artwork.completedAt
-                            .grid-card-detail-item= new Date(artwork.completedAt).getFullYear()
-                        
-                        // Precio
-                        if typeof artwork.price_cents === 'number'
-                          h5.grid-card-price $#{(artwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
-                      
-                      // --- Columna derecha: Estadísticas ---
-                      .grid-card-stats.d-flex.flex-column.justify-content-end
-                        if artwork.createdAt
-                          .grid-card-stat-item Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                        
-                        if typeof artwork.views === 'number' && artwork.views > 0
-                          .grid-card-stat-item #{artwork.views.toLocaleString()} visualizaciones
-                        
-                        if typeof artwork.favoritesCount === 'number' && artwork.favoritesCount > 0
-                          .grid-card-stat-item #{artwork.favoritesCount.toLocaleString()} favoritos
+                          // --- Columna derecha: Estadísticas ---
+                          .grid-card-stats.d-flex.flex-column.justify-content-end
+                            if artwork.createdAt
+                              .grid-card-stat-item Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                            
+                            if typeof artwork.views === 'number' && artwork.views > 0
+                              .grid-card-stat-item #{artwork.views.toLocaleString()} visualizaciones
+                            
+                            if typeof artwork.favoritesCount === 'number' && artwork.favoritesCount > 0
+                              .grid-card-stat-item #{artwork.favoritesCount.toLocaleString()} favoritos
+
+              // Paginación
+              include _artworkPagination
 
     else
-      // No hay obras
+      // No hay obras (puede ser por filtros o porque realmente no tiene obras)
       section.no-artworks.py-5.text-center
         .container
+          // Mostrar filtros si hay obras del artista pero están filtradas
+          if stats.totalArtworks > 0
+            .row.mb-4
+              .col-12
+                include _artworkFilters
+          
           .row.justify-content-center
             .col-lg-6
               i.fas.fa-palette.fa-4x.text-muted.mb-4
-              h3.h4.mb-3.text-muted= `${artist.name} aún no tiene obras publicadas`
-              p.text-muted Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+              if stats.totalArtworks > 0
+                h3.h4.mb-3.text-muted No se encontraron obras con estos filtros
+                p.text-muted Prueba ajustar los filtros o
+                  |  
+                  a(href=actionUrl) limpiar todos los filtros
+                  |  para ver todas las obras de #{artist.name}
+              else
+                h3.h4.mb-3.text-muted= `${artist.name} aún no tiene obras publicadas`
+                p.text-muted Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
 
     // Botón para volver
     section.back-navigation.py-4
