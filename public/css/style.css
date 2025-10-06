@@ -27,7 +27,7 @@
   --art-max-h: 68rem;
 }
 html { font-size: 62.5%; height: 100%; min-height: 100%; }
-body { font-family: var(--font-title); background-color: var(--ox-beige); color: #111; font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+body { font-family: var(--font-title); background-color: var(--ox-beige); color: var(--ox-blue); font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .main-content { flex: 1 0 auto; }
 footer, .footer { flex-shrink: 0; }
 
@@ -420,7 +420,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   font-size: 1.3rem;
   line-height: 1.1;
   margin-bottom: 0.4rem;
-  color: #222;
+  color: var(--ox-blue);
 }
 
 .grid-card-artist {
@@ -455,7 +455,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   font-size: 1.2rem;
   line-height: 1;
   margin-bottom: 0;
-  color: #222;
+  color: var(--ox-blue);
   font-variant-numeric: lining-nums;
 }
 
@@ -613,7 +613,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 .museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
 .art-label .h5 { font-style: italic; letter-spacing: 0.02em; }
-.art-label .h4 { color: #222; }
+.art-label .h4 { color: var(--ox-blue); }
 .museum-artist { font-weight: 700; letter-spacing: 0.02em; }
 .museum-title { font-style: italic; font-weight: 600; }
 .museum-material, .museum-created { font-variant-caps: small-caps; letter-spacing: 0.02em; }
@@ -646,6 +646,90 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .btn-outline-primary { color: var(--ox-yellow) !important; border-color: var(--ox-yellow) !important; }
 .btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; }
 .text-primary { color: var(--ox-yellow) !important; }
+.bg-primary { background-color: var(--ox-yellow) !important; color: var(--ox-blue) !important; }
+.badge.bg-primary { background-color: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: 1px solid var(--ox-yellow) !important; }
+
+/* Technique badges specific styling */
+.artist-technique-badge.badge.bg-primary { 
+  background-color: var(--ox-yellow) !important; 
+  color: var(--ox-blue) !important; 
+  border: 1px solid var(--ox-yellow) !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 1.5rem;
+}
+
+/* Icon styling - ensure icons use ox-yellow */
+.fas, .fab, .fa {
+  color: var(--ox-yellow);
+}
+
+/* Icon exceptions - icons that should remain with their context color */
+.text-white .fas, .text-white .fab, .text-white .fa,
+.text-warning .fas, .text-warning .fab, .text-warning .fa,
+.text-muted .fas, .text-muted .fab, .text-muted .fa {
+  color: inherit;
+}
+
+/* Social media links - responsive text colors, icons remain ox-yellow */
+.artist-meta-desktop a, .artist-meta-mobile a {
+  color: var(--ox-blue) !important;
+}
+
+.artist-meta-desktop a .fas, .artist-meta-desktop a .fab,
+.artist-meta-mobile a .fas, .artist-meta-mobile a .fab {
+  color: var(--ox-yellow) !important;
+}
+
+/* Desktop social media links (≥992px) - text should be ox-beige */
+@media (min-width: 992px) {
+  .artist-meta-desktop a {
+    color: var(--ox-beige) !important;
+  }
+}
+
+/* Mobile social media links (<992px) - text should be ox-blue */
+@media (max-width: 991.98px) {
+  .artist-meta-mobile a {
+    color: var(--ox-blue) !important;
+  }
+}
+
+/* Follow button heart icon should be ox-blue */
+.artist-follow-btn .fas.fa-heart,
+.artist-follow-btn-mobile .fas.fa-heart {
+  color: var(--ox-blue) !important;
+}
+
+/* Follow button specific styling */
+.artist-follow-btn {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-yellow) !important;
+}
+
+.artist-follow-btn:hover,
+.artist-follow-btn:focus,
+.artist-follow-btn:active {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-orange) !important;
+}
+
+.artist-follow-btn-mobile {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-yellow) !important;
+}
+
+.artist-follow-btn-mobile:hover,
+.artist-follow-btn-mobile:focus,
+.artist-follow-btn-mobile:active {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-orange) !important;
+}
 
 /* ==========================================
   10. AUTH (LOGIN/SIGNIN)
