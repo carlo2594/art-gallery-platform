@@ -520,7 +520,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     deletedAt: null
   };
 
-  // Aplicar filtros adicionales (material, precio, etc.)
+  // Aplicar filtros adicionales (técnica, precio, etc.)
   const artworkFilter = buildArtworkFilter(q);
   const combinedFilter = { ...baseFilter, ...artworkFilter };
   

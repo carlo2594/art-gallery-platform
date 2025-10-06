@@ -58,16 +58,16 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
     if q && q.orientation
       each o in (Array.isArray(q.orientation)? q.orientation : [q.orientation]) 
         input(type='hidden' name='orientation' value=o)
-    // Material (multi)
+    // Technique (multi)
     .filter-block
-      label.form-label.mb-2 Material
+      label.form-label.mb-2 Técnica
       .d-flex.flex-wrap.gap-2
-        each m in (typeof materials !== 'undefined' && materials ? materials : [])
-          if m
-            - var matCap = m.charAt(0).toUpperCase() + m.slice(1)
+        each t in (typeof techniques !== 'undefined' && techniques ? techniques : [])
+          if t
+            - var techCap = t.charAt(0).toUpperCase() + t.slice(1)
             label.chip
-              input(type='checkbox' name='material' value=m checked=(Array.isArray(q && q.material) ? q.material.includes(m) : (q && q.material) === m))
-              span= matCap
+              input(type='checkbox' name='technique' value=t checked=(Array.isArray(q && q.technique) ? q.technique.includes(t) : (q && q.technique) === t))
+              span= techCap
     // Tamaño en cm (rango)
     .filter-block
       label.form-label.mb-2 Tamaño (ancho x alto)

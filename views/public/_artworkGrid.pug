@@ -20,9 +20,9 @@ ul.grid.effect-2#grid.mb-5
                
                // Detalles técnicos
                .grid-card-details
-                 if a.material
-                   - var matCap = a.material.charAt(0).toUpperCase() + a.material.slice(1)
-                   .grid-card-detail-item= matCap
+                 if a.technique
+                   - var techCap = a.technique.charAt(0).toUpperCase() + a.technique.slice(1)
+                   .grid-card-detail-item= techCap
                  
                  if a.completedAt
                    .grid-card-detail-item= new Date(a.completedAt).getFullYear()

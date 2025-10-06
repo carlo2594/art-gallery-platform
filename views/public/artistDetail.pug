@@ -81,8 +81,8 @@ block content
                   
                   .col-6
                     .stat-item.text-center.p-3(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                      .stat-number.h3.fw-bold.mb-0.text-warning= stats.materials.length
-                      .stat-label.small.text-white-75 Materiales
+                      .stat-number.h3.fw-bold.mb-0.text-warning= stats.techniques.length
+                      .stat-label.small.text-white-75 Técnicas
 
     // Sección de obras del artista
     if artworks && artworks.length > 0
@@ -93,70 +93,43 @@ block content
               h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
               p.lead.text-muted= `Mostrando ${artworks.length} de ${totalArtworks} obras de este talentoso artista`
 
-          // Filtros para las obras del artista
-          .row.mb-4
-            .col-12
-              include _artworkFilters
-
-          // Grid de obras usando el estilo de _artworkGrid.pug
-          .artworks-flex
+        // Filtros solo visibles si hay obras (cantidad > 0)
+        if totalArtworks > 0
+          section.filters-toolbar.py-2
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+              // Set variables before including the filter fragment
+              - var q = typeof q !== 'undefined' ? q : {};
+              - var techniques = typeof techniques !== 'undefined' ? techniques : [];
+              - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+              - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+              - var actionUrl = `/artists/${artist.slug || artist._id}`;
+              include _artworkFilters.pug
+        
+        .container-xxl.artworks-flex
+          if artworks && artworks.length
             .artworks-grid-paginate
-              ul.grid.effect-2#grid.mb-5
-                each artwork in artworks
-                  li
-                    .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
-                      a(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
-                        img.card-img-top.art-card-shadow(src=artwork.imageUrl, alt=artwork.title)
-                      // Full-card stretched link so the info area is clickable too
-                      a.stretched-link(href=`/artworks/${artwork.slug || artwork._id}` aria-label=`Ver obra: ${artwork.title || ''}`)
-                      .card-body.grid-card-body
-                        .grid-card-flex
-                          // --- Columna izquierda: Información de la obra ---
-                          .grid-card-info
-                            // Título principal de la obra
-                            if artwork.title
-                              h4.grid-card-title= artwork.title
-                            
-                            // Información del artista
-                            if artwork.artist
-                              h6.grid-card-artist= artwork.artist.name
-                            
-                            // Detalles técnicos
-                            .grid-card-details
-                              if artwork.material
-                                - var matCap = artwork.material.charAt(0).toUpperCase() + artwork.material.slice(1)
-                                .grid-card-detail-item= matCap
-                              
-                              if artwork.completedAt
-                                .grid-card-detail-item= new Date(artwork.completedAt).getFullYear()
-                            
-                            // Precio
-                            if typeof artwork.price_cents === 'number'
-                              h5.grid-card-price $#{(artwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
-                          
-                          // --- Columna derecha: Estadísticas ---
-                          .grid-card-stats.d-flex.flex-column.justify-content-end
-                            if artwork.createdAt
-                              .grid-card-stat-item Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                            
-                            if typeof artwork.views === 'number' && artwork.views > 0
-                              .grid-card-stat-item #{artwork.views.toLocaleString()} visualizaciones
-                            
-                            if typeof artwork.favoritesCount === 'number' && artwork.favoritesCount > 0
-                              .grid-card-stat-item #{artwork.favoritesCount.toLocaleString()} favoritos
-
-              // Paginación
-              include _artworkPagination
+              include _artworkGrid.pug
+              include _artworkPagination.pug
+          else
+            h3.h5.mt-4.text-muted No se encontraron obras con estos filtros.
 
     else
       // No hay obras (puede ser por filtros o porque realmente no tiene obras)
       section.no-artworks.py-5.text-center
         .container
+          h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+          
           // Mostrar filtros si hay obras del artista pero están filtradas
           if stats.totalArtworks > 0
-            .row.mb-4
-              .col-12
-                include _artworkFilters
+            section.filters-toolbar.py-2.mb-4
+              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+                // Set variables before including the filter fragment
+                - var q = typeof q !== 'undefined' ? q : {};
+                - var techniques = typeof techniques !== 'undefined' ? techniques : [];
+                - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+                - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+                - var actionUrl = `/artists/${artist.slug || artist._id}`;
+                include _artworkFilters.pug
           
           .row.justify-content-center
             .col-lg-6

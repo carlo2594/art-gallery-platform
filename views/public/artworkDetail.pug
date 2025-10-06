@@ -32,9 +32,9 @@ block content
                 p.fs-5.text-muted.lh-base.mb-0= artwork.description
             
             .details-list.mt-0
-              if artwork.material
+              if artwork.technique
                 .detail-item.mb-1
-                  span.text-muted= artwork.material
+                  span.text-muted= artwork.technique
               
               if artwork.completedAt
                 .detail-item.mb-1
@@ -134,9 +134,9 @@ block content
                         
                         // Detalles técnicos
                         .grid-card-details
-                          if relatedArtwork.material
-                            - var matCap = relatedArtwork.material.charAt(0).toUpperCase() + relatedArtwork.material.slice(1)
-                            .grid-card-detail-item= matCap
+                          if relatedArtwork.technique
+                            - var techCap = relatedArtwork.technique.charAt(0).toUpperCase() + relatedArtwork.technique.slice(1)
+                            .grid-card-detail-item= techCap
                           
                           if relatedArtwork.completedAt
                             .grid-card-detail-item= new Date(relatedArtwork.completedAt).getFullYear()
