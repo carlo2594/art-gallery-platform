@@ -312,36 +312,36 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .grid-card-stats {
   flex: 1;
   text-align: right;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 /* Typography with minimal spacing */
 .grid-card-title {
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   line-height: 1.1;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
   color: #222;
 }
 
 .grid-card-artist {
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   line-height: 1;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
   text-transform: uppercase;
   color: #666;
   letter-spacing: 0.02em;
 }
 
 .grid-card-details {
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.3rem;
 }
 
 .grid-card-detail-item {
-  font-size: 0.85rem;
+  font-size: 1rem;
   line-height: 1;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
   color: #888;
   font-variant-caps: small-caps;
   letter-spacing: 0.02em;
@@ -353,7 +353,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 
 .grid-card-price {
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 1.2rem;
   line-height: 1;
   margin-bottom: 0;
   color: #222;
@@ -361,9 +361,9 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .grid-card-stat-item {
-  font-size: 0.75rem;
+  font-size: 0.9rem;
   line-height: 1.1;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.2rem;
   color: #999;
   font-weight: normal;
 }
