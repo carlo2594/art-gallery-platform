@@ -1,112 +1,187 @@
 extends ../layouts/public
 
 block content
-  main.main-content
+  main.main-content.artist-detail-page
     // Hero Section - Estilo Google Arts & Culture
-    section.artist-profile-hero.position-relative(style="min-height: 100vh; overflow: hidden;")
+    section.artist-profile-hero.artist-hero-section.position-relative(style="min-height: 100vh; overflow: hidden;")
       // Imagen de fondo
-      .hero-background.position-absolute.w-100.h-100
+      .hero-background.artist-hero-bg.position-absolute.w-100.h-100
         if artist.profileImage
-          img.hero-bg-image.w-100.h-100(
+          img.hero-bg-image.artist-bg-image.w-100.h-100(
             src=artist.profileImage, 
             alt=artist.name,
             style="object-fit: cover; object-position: center;"
           )
         else
-          .hero-bg-placeholder.w-100.h-100(
+          .hero-bg-placeholder.artist-bg-placeholder.w-100.h-100(
             style="background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);"
           )
       
       // Overlay oscuro
-      .hero-overlay.position-absolute.w-100.h-100(
+      .hero-overlay.artist-hero-overlay.position-absolute.w-100.h-100(
         style="background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);"
       )
       
       // Contenido superpuesto
-      .hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
+      .hero-content.artist-hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
         .container
           .row
-            .col-lg-8
-              .artist-hero-info.text-white.pb-5
-                h1.hero-title.display-2.fw-bold.mb-3(style="font-family: var(--font-title); text-shadow: 0 2px 8px rgba(0,0,0,0.5);")= artist.name
+            // LAYOUT PARA DESKTOP (lg+): Contenido superpuesto
+            .col-lg-8.d-none.d-lg-block
+              .artist-hero-info.artist-info-desktop.text-white.pb-5
+                h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3(style="font-family: var(--font-title); text-shadow: 0 2px 8px rgba(0,0,0,0.5);")= artist.name
                 
                 if artist.createdAt
-                  h2.hero-subtitle.h4.mb-4.text-white-50(style="font-family: var(--font-subtitle); font-weight: 300; text-shadow: 0 1px 4px rgba(0,0,0,0.5);")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50(style="font-family: var(--font-subtitle); font-weight: 300; text-shadow: 0 1px 4px rgba(0,0,0,0.5);")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
                 
                 if artist.bio
-                  p.hero-bio.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); max-width: 600px;")= artist.bio
+                  p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); max-width: 600px;")= artist.bio
                 
                 // Información adicional compacta
-                .hero-meta.d-flex.flex-wrap.gap-4.mb-4
+                .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
                   if artist.location
-                    .meta-item.d-flex.align-items-center
+                    .meta-item.artist-location-item.d-flex.align-items-center
                       i.fas.fa-map-marker-alt.me-2.text-warning
                       span.text-white-75= artist.location
                   
                   if artist.website
-                    .meta-item
+                    .meta-item.artist-website-item
                       a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
                         i.fas.fa-globe.me-2
                         span Sitio web
                   
                   // Redes sociales
                   if artist.social && artist.social.instagram
-                    .meta-item
+                    .meta-item.artist-social-instagram
                       a.text-warning.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
                         i.fab.fa-instagram.me-2
                         span Instagram
                   
                   if artist.social && artist.social.x
-                    .meta-item
+                    .meta-item.artist-social-x
                       a.text-warning.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
                         i.fab.fa-x.me-2
-                        
+                        span X
                   
                   if artist.social && artist.social.facebook
-                    .meta-item
+                    .meta-item.artist-social-facebook
                       a.text-warning.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
                         i.fab.fa-facebook.me-2
                         span Facebook
                 
                 // Acciones del usuario
-                .hero-actions.d-flex.gap-3
-                  button.btn.btn-outline-light.btn-lg.px-4(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                .hero-actions.artist-actions-desktop.d-flex.gap-3
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
                     i.fas.fa-heart.me-2
                     | Seguir
                   
-                  button.btn.btn-outline-light.btn-lg.px-4(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
                     i.fas.fa-share.me-2
                     | Compartir
             
-            .col-lg-4
+            // ESTADÍSTICAS PARA DESKTOP (lg+)
+            .col-lg-4.d-none.d-lg-block
               // Técnicas del artista
-              .stats-floating.text-white.pb-5
+              .stats-floating.artist-stats-desktop.text-white.pb-5
                 .row.g-3.justify-content-center
                   .col-10
-                    .stat-item.text-center.p-4(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
-                      .stat-label.small.text-white-75.mb-3 Técnicas
-                      .techniques-list
+                    .stat-item.artist-techniques-card.text-center.p-4(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .stat-label.artist-techniques-label.small.text-white-75.mb-3 Técnicas
+                      .techniques-list.artist-techniques-list
                         if stats.techniques && stats.techniques.length > 0
-                          each technique in stats.techniques.slice(0, 4)
+                          each technique in stats.techniques.slice(0, 10)
                             - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
-                            .technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
-                          if stats.techniques.length > 4
-                            .small.text-white-50 +#{stats.techniques.length - 4} más
+                            .technique-item.artist-technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
+                          if stats.techniques.length > 10
+                            .small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} más
                         else
-                          .small.text-white-50 Sin técnicas
+                          .small.text-white-50.artist-no-techniques Sin técnicas
+
+    // LAYOUT PARA MÓVIL/TABLET (< lg): Contenido debajo de la imagen
+    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5(style="background: #f8f9fa;")
+      .container
+        .row
+          .col-12.text-center.mb-4
+            // Información del artista para móvil
+            h1.hero-title.artist-name-mobile.display-4.fw-bold.mb-3(style="font-family: var(--font-title); color: var(--ox-blue);")= artist.name
+            
+            if artist.createdAt
+              h2.hero-subtitle.artist-member-since-mobile.h5.mb-4.text-muted(style="font-family: var(--font-subtitle); font-weight: 300;")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+            
+            if artist.bio
+              p.hero-bio.artist-bio-mobile.lead.mb-4.text-dark(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5;")= artist.bio
+        
+        .row.mb-4
+          .col-12
+            // Información adicional para móvil
+            .hero-meta.artist-meta-mobile.d-flex.flex-wrap.justify-content-center.gap-4.mb-4
+              if artist.location
+                .meta-item.artist-location-mobile.d-flex.align-items-center
+                  i.fas.fa-map-marker-alt.me-2.text-primary
+                  span.text-muted= artist.location
+              
+              if artist.website
+                .meta-item.artist-website-mobile
+                  a.text-primary.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
+                    i.fas.fa-globe.me-2
+                    span Sitio web
+              
+              // Redes sociales para móvil
+              if artist.social && artist.social.instagram
+                .meta-item.artist-social-instagram-mobile
+                  a.text-primary.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
+                    i.fab.fa-instagram.me-2
+                    span Instagram
+              
+              if artist.social && artist.social.x
+                .meta-item.artist-social-x-mobile
+                  a.text-primary.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
+                    i.fab.fa-x.me-2
+                    span X
+              
+              if artist.social && artist.social.facebook
+                .meta-item.artist-social-facebook-mobile
+                  a.text-primary.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
+                    i.fab.fa-facebook.me-2
+                    span Facebook
+            
+            // Acciones del usuario para móvil
+            .hero-actions.artist-actions-mobile.d-flex.justify-content-center.gap-3.mb-4
+              button.btn.btn-primary.btn-lg.px-4.artist-follow-btn-mobile(style="border-radius: 2rem;")
+                i.fas.fa-heart.me-2
+                | Seguir
+              
+              button.btn.btn-outline-primary.btn-lg.px-4.artist-share-btn-mobile(style="border-radius: 2rem;")
+                i.fas.fa-share.me-2
+                | Compartir
+        
+        .row.justify-content-center
+          .col-md-8.col-lg-6
+            // Técnicas para móvil
+            .stat-item.artist-techniques-card-mobile.text-center.p-4.shadow-sm(style="background: white; border-radius: 1rem; border: 1px solid #e9ecef;")
+              .stat-label.artist-techniques-label-mobile.h5.mb-3.text-primary Técnicas
+              .techniques-list.artist-techniques-list-mobile
+                if stats.techniques && stats.techniques.length > 0
+                  each technique in stats.techniques.slice(0, 10)
+                    - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
+                    .technique-item.artist-technique-badge.badge.bg-primary.me-2.mb-2= capitalizedTechnique
+                  if stats.techniques.length > 10
+                    .small.text-muted.artist-techniques-more-mobile +#{stats.techniques.length - 10} más
+                else
+                  .small.text-muted.artist-no-techniques-mobile Sin técnicas
 
     // Sección de obras del artista
     if artworks && artworks.length > 0
-      section.artist-artworks.py-5(style="background: #f8f9fa;")
+      section.artist-artworks.artist-artworks-section.py-5(style="background: #f8f9fa;")
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
-              p.lead.text-muted= `Mostrando ${artworks.length} de ${totalArtworks} obras de este talentoso artista`
+              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+              p.lead.text-muted.artist-artworks-subtitle= `Mostrando ${artworks.length} de ${totalArtworks} obras de este talentoso artista`
 
         // Filtros solo visibles si hay obras (cantidad > 0)
         if totalArtworks > 0
-          section.filters-toolbar.py-2
+          section.filters-toolbar.artist-filters-section.py-2
             .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
               // Set variables before including the filter fragment
               - var q = typeof q !== 'undefined' ? q : {};
@@ -116,23 +191,23 @@ block content
               - var actionUrl = `/artists/${artist.slug || artist._id}`;
               include _artworkFilters.pug
         
-        .container-xxl.artworks-flex
+        .container-xxl.artworks-flex.artist-artworks-grid
           if artworks && artworks.length
-            .artworks-grid-paginate
+            .artworks-grid-paginate.artist-artworks-paginate
               include _artworkGrid.pug
               include _artworkPagination.pug
           else
-            h3.h5.mt-4.text-muted No se encontraron obras con estos filtros.
+            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No se encontraron obras con estos filtros.
 
     else
       // No hay obras (puede ser por filtros o porque realmente no tiene obras)
-      section.no-artworks.py-5.text-center
+      section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
-          h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
           
           // Mostrar filtros si hay obras del artista pero están filtradas
           if stats.totalArtworks > 0
-            section.filters-toolbar.py-2.mb-4
+            section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
               .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
                 // Set variables before including the filter fragment
                 - var q = typeof q !== 'undefined' ? q : {};
@@ -144,22 +219,22 @@ block content
           
           .row.justify-content-center
             .col-lg-6
-              i.fas.fa-palette.fa-4x.text-muted.mb-4
+              i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
               if stats.totalArtworks > 0
-                h3.h4.mb-3.text-muted No se encontraron obras con estos filtros
-                p.text-muted Prueba ajustar los filtros o
+                h3.h4.mb-3.text-muted.artist-filtered-message No se encontraron obras con estos filtros
+                p.text-muted.artist-filter-help Prueba ajustar los filtros o
                   |  
                   a(href=actionUrl) limpiar todos los filtros
                   |  para ver todas las obras de #{artist.name}
               else
-                h3.h4.mb-3.text-muted= `${artist.name} aún no tiene obras publicadas`
-                p.text-muted Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
+                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
 
     // Botón para volver
-    section.back-navigation.py-4
+    section.back-navigation.artist-back-navigation.py-4
       .container
         .row
           .col-12.text-center
-            a.btn.btn-outline-primary.btn-lg(href="/artists", style="border-radius: 2rem; padding: 0.75rem 2rem;")
+            a.btn.btn-outline-primary.btn-lg.artist-back-btn(href="/artists", style="border-radius: 2rem; padding: 0.75rem 2rem;")
               i.fas.fa-arrow-left.me-2
               | Volver a Artistas

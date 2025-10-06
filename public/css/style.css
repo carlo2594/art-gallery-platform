@@ -640,6 +640,13 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
 .btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
 
+/* Bootstrap primary color overrides */
+.btn-primary { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: var(--ox-orange) !important; color: var(--ox-beige) !important; border-color: var(--ox-orange) !important; }
+.btn-outline-primary { color: var(--ox-yellow) !important; border-color: var(--ox-yellow) !important; }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; }
+.text-primary { color: var(--ox-yellow) !important; }
+
 /* ==========================================
   10. AUTH (LOGIN/SIGNIN)
   ========================================== */
@@ -731,7 +738,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .price-info {
-  border: 2px solid var(--bs-primary);
+  border: 2px solid var(--ox-yellow);
 }
 
 /* Main artwork section with full height */
