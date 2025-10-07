@@ -13,6 +13,8 @@ router.get('/login', viewsController.getLogin);
 router.get('/signup', viewsController.getSignUp);   // alias consistente
 router.get('/signUp', viewsController.getSignUp);   // (opcional) mantener compat
 router.get('/reset-password', viewsController.getResetPassword);
+router.get('/reset-link-invalid', viewsController.getResetLinkInvalid);
+router.get('/forgot-password', viewsController.getForgotPassword);
 router.get('/welcome', viewsController.getWelcome);
 
 // =================== QUIÉNES SOMOS =====================

@@ -1,66 +1,45 @@
 # Copilot Instructions for Galeria-del-Ox-Node
 
-## Project Overview
-- **Type:** Node.js backend for an art gallery platform
-- **Stack:** Express, Mongoose (MongoDB), Pug (views), Cloudinary (media), Nodemailer (email)
-- **Entry Point:** `server.js` (connects to MongoDB, starts Express)
-- **App Setup:** `app.js` (middleware, view engine, static files, routes)
+## What this is
+- Node.js backend for an art gallery. Stack: Express, Mongoose (MongoDB), Pug views, Cloudinary (media), Nodemailer (email).
+- Entry: `server.js` connects to MongoDB with retry, then boots Express (`app.js`). Dev: `npm run dev`; Prod: `npm start`.
+- API prefix: `/api/v1/`. Dual routing: HTML views (`/`, `/admin`) and JSON API (see `routes/index.js`).
 
-## Key Architectural Patterns
-- **Modular Structure:**
-  - `controllers/` — Business logic for each resource (e.g., `artworkController.js`)
-  - `models/` — Mongoose schemas (e.g., `artworkModel.js`)
-  - `routes/` — API and view routes, grouped by resource and type
-  - `middlewares/` — Custom Express middleware (auth, sanitization, etc.)
-  - `services/` — Integrations (Cloudinary, mail, stats)
-  - `utils/` — Helpers (error handling, normalization, JWT, etc.)
-  - `views/` — Pug templates for public and admin UIs
-- **API Versioning:** All REST endpoints are under `/api/v1/`
-- **Dual Route System:** Both API routes (`/api/v1/`) and view routes (`/`, `/admin`) in separate files
-- **Database Resilience:** `server.js` includes retry logic for MongoDB connections with automatic reconnection
-- **DB Ready Middleware:** `ensureDbReady` blocks requests until MongoDB is connected (prevents 503 errors)
-- **Soft Deletes:** Many models use a `deletedAt` field for soft-deletion (not hard delete)
-- **Status Workflow:** Artworks flow through states: `draft` → `submitted` → `under_review` → `approved`/`rejected`
-- **Normalization:** Search/filter fields are normalized (e.g., `type_norm`) for accent-insensitive queries using NFD normalization
+## Architecture and routing
+- Folders: `controllers/`, `models/`, `routes/`, `middlewares/`, `services/`, `utils/`, `views/`, `public/`.
+- Module aliases: `@models`, `@controllers`, `@routes`, `@utils`, `@middlewares`, `@services` (see `_moduleAliases` in `package.json`).
+- `app.js` middleware: helmet, cookie-parser, `attachUserToViews`, `xss-clean`, custom `sanitize`, and `ensureDbReady` (blocks requests until Mongo is connected). Static files in `public/`; Pug views in `views/`.
+- `server.js` uses `connectWithRetry()` and reconnects on `disconnected`.
 
-## Developer Workflows
-- **Start (dev):** `npm run dev` (uses Node's `--watch` flag for auto-reloads)
-- **Start (prod):** `npm start`
-- **Environment:** Requires `.env` with MongoDB credentials, Cloudinary config, and email settings
-- **No built-in test scripts** (add tests as needed)
-- **Seed Data:** `node scripts/seedTestData.js` (drops DB and creates test data)
-- **Status Updates:** Artworks have dedicated endpoints for status transitions (e.g., `/start-review`, `/approve`)
+## Conventions to follow
+- Wrap async controllers with `utils/catchAsync`; throw `utils/appError` for HTTP errors.
+- Send JSON via `utils/sendResponse(res, data, message?, statusCode?, extra?)` → standardized `{ status, message, data }`.
+- Auth uses cookie-based JWT only. Protect endpoints with `middlewares/requireUser` (reads `req.cookies.jwt`).
+- HTML vs JSON: use `utils/http.wantsHTML(req)` to decide redirect vs JSON body.
 
-## Project-Specific Conventions
-- **Module Aliases:** Use `@models`, `@controllers`, etc. (see `_moduleAliases` in `package.json`)
-- **Error Handling:** Use `catchAsync` and `AppError` for async/HTTP errors
-- **Response Pattern:** Use `sendResponse` utility for consistent API responses
-- **Authorization:** Use `requireUser`, `isOwner`, and `restrictTo` middleware for access control
-- **Image Uploads:** Handled via Cloudinary (see `utils/cloudinaryImage.js`)
-- **Pagination:** Public artwork search uses paginated endpoints (see `artworkController.js`)
-- **Field Normalization:** Use `norm()` helper in models for accent-insensitive search (NFD normalization)
-- **Status Constants:** Define allowed statuses as arrays (e.g., `ALLOWED_STATUS` in controllers)
-- **Temporary File Cleanup:** Image upload utilities automatically delete temp files after Cloudinary upload
+## Auth flow (controllers/authController.js)
+- Signup: creates user with temp password and emails a create-password link to `/reset-password?uid=...&token=...&type=new`.
+- Login: sets `jwt` cookie; supports remember-me via `utils/authUtils.parseRememberMe` + `getJwtCookieOptions`.
+- Forgot/reset: issues token (15 min for reset, 24h for first password). `POST /api/v1/auth/password/reset` expects `{ uid, token, newPassword, remember? }` and logs the user in.
+- Rate limiting on `/signup` and `/login` via `middlewares/rateLimiter`.
 
-## Integration Points
-- **Cloudinary:** For image storage (see `services/cloudinary.js`)
-- **Nodemailer:** For email (see `services/mailer.js`)
-- **MongoDB:** Mongoose models, connection logic in `server.js`
-- **Connection Resilience:** Auto-retry connection logic with `connectWithRetry()` function
-- **Request Blocking:** `ensureDbReady` middleware prevents 503 errors during DB startup
+## Artworks domain (controllers/artworkController.js)
+- Status workflow: `draft → submitted → under_review → approved/rejected`; admin transitions via `/start-review`, `/approve`, `/reject`. Email via `services/emailTemplates` + `services/mailer`.
+- Soft delete: models use `deletedAt`; lifecycle helpers like `moveToTrash` and `restoreArtwork`.
+- Pricing: persist as `price_cents`. Accept request `amount` (USD string) or `price_cents` (int); convert with `utils/priceInput.toCentsOrThrow`.
+- Images: upload using `utils/cloudinaryImage.upload`; aspect check via `utils/aspectUtils.verifyAspect`. Behavior controlled by `getAspectPolicy()`; may pad/fill via Cloudinary. Env: `ASPECT_TOLERANCE`, `CLOUDINARY_PAD`.
+- Normalized filters: controllers query on normalized fields (e.g., `type_norm`, `technique_norm`) for accent-insensitive search.
 
-## Examples
-- **Add a new API route:**
-  - Create controller in `controllers/`
-  - Add route in `routes/api/`
-  - Register in `routes/index.js`
-- **Add a new view:**
-  - Add Pug template in `views/`
-  - Add route in `routes/views/`
+## Views and forms
+- Login/Signup page: `views/public/loginSignUp.pug` posts to `/api/v1/auth/signup` or `/api/v1/auth/login`. Remember-me checkbox name: `remember`.
+- Reset password page: `views/public/resetPassword.pug` posts to `/api/v1/auth/password/reset` with hidden `uid` and `token`.
 
-## References
-- **Key files:** `server.js`, `app.js`, `routes/index.js`, `controllers/`, `models/`
-- **For patterns:** See `artworkController.js` for search, status, and error conventions
+## Integrations and env
+- Cloudinary: `services/cloudinary.js`, helpers in `utils/cloudinaryImage.js`. Email: `services/mailer.js`.
+- Required env (non-exhaustive): `DATABASE`, `DATABASE_PASSWORD`, `JWT_SECRET`, `FRONTEND_URL`, Cloudinary creds, mailer creds. Uses `dotenv`.
 
----
-For questions about conventions or unclear patterns, check the relevant controller/model or ask for clarification.
+## Add something new
+- New API: create controller in `controllers/` (use `catchAsync`, `sendResponse`), add route in `routes/api/*.js`, mount in `routes/index.js` under `/api/v1/...`.
+- New view: add Pug in `views/`, add route in `routes/views/*`, mount in `routes/index.js` under `/` or `/admin`.
+
+If you spot divergences (pagination behavior, normalization helpers, etc.), call them out so we can update this guide.

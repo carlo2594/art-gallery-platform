@@ -182,6 +182,9 @@ exports.resetPassword = catchAsync(async (req, res) => {
   });
 
   if (!resetToken) {
+    if (wantsHTML(req)) {
+      return res.redirect(303, '/reset-link-invalid');
+    }
     return sendResponse(res, null, 'Token inválido o expirado.', 400);
   }
 
@@ -222,14 +225,12 @@ exports.resetPassword = catchAsync(async (req, res) => {
     text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`
   });
 
-  // Redirige si es HTML y es el primer login
-  if (wantsHTML(req) && isFirstLogin) {
+  // Redirige si es HTML (siempre) al welcome
+  if (wantsHTML(req)) {
     return res.redirect(303, '/welcome');
   }
-  if (isFirstLogin) {
-    return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
-  }
-  return sendResponse(res, null, 'Contraseña actualizada correctamente.');
+  // Para clientes API, indicar siguiente destino
+  return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
 });
 
 /* ------------------------------------------------------------------ */

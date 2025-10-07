@@ -1,5 +1,7 @@
 
 const catchAsync = require('@utils/catchAsync');
+const crypto = require('crypto');
+const PasswordResetToken = require('@models/passwordResetTokenModel');
 const Artwork = require('@models/artworkModel');
 const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
@@ -229,13 +231,45 @@ exports.getHome = catchAsync(async (req, res) => {
 
 
 
-// Vista para reset password
-exports.getResetPassword = (req, res) => {
+// Vista para reset password (prevalida el enlace)
+exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;
-  res.render('public/resetPassword', {
+
+  // Si faltan datos mínimos, muestra la página con error genérico
+  if (!uid || !token) {
+    return res.render('public/resetPassword', {
+      uid,
+      token,
+      isNewPassword: type === 'new',
+      error: 'El enlace no es válido o ya venció. Solicita uno nuevo.'
+    });
+  }
+
+  // Validar token (no usado y no expirado)
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const resetToken = await PasswordResetToken.findOne({
+    userId: uid,
+    tokenHash,
+    expiresAt: { $gt: Date.now() },
+    used: false
+  });
+
+  if (!resetToken) {
+    // Redirige a página dedicada para enlace inválido/expirado/ya usado
+    return res.redirect(303, '/reset-link-invalid');
+  }
+
+  return res.render('public/resetPassword', {
     uid,
     token,
     isNewPassword: type === 'new'
+  });
+});
+
+// Página dedicada: enlace de restablecimiento inválido/expirado/ya usado
+exports.getResetLinkInvalid = (req, res) => {
+  res.status(410).render('public/resetLinkInvalid', {
+    title: 'Enlace no válido · Galería del Ox'
   });
 };
 
@@ -260,6 +294,17 @@ exports.getLogin = (req, res) => {
     hideNavbar: true,
     hideFooter: true,
     mode: 'login',
+    error: req.query.error,
+    success: req.query.success
+  });
+};
+
+// Vista para "Olvidé mi contraseña"
+exports.getForgotPassword = (req, res) => {
+  res.render('public/forgotPassword', {
+    title: 'Recuperar contraseña · Galería del Ox',
+    hideNavbar: true,
+    hideFooter: true,
     error: req.query.error,
     success: req.query.success
   });

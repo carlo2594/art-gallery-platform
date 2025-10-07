@@ -44,6 +44,9 @@ block content
                     .form-check.text-start.my-3.login-signin-remember
                       input.form-check-input.login-signin-checkbox(type="checkbox", value="remember-me", id="checkDefault", name="remember")
                       label.form-check-label.login-signin-checkbox-label(for="checkDefault") Recuérdame
+                    // Enlace a página dedicada de recuperación
+                    .text-center.mt-2.mb-2.login-forgot-container
+                      a.login-forgot-page(href="/forgot-password") ¿Olvidaste tu contraseña?
 
                   if mode === 'signUp'
                     button.btn.btn-primary.w-100.py-2.mt-3.mb-3.login-signin-btn(type="submit") Registrarse
@@ -63,3 +66,5 @@ block content
           src="/img/sabiduria-nocturna-login.jpg",
           alt="Sabiduría Nocturna"
         )
+
+  // (sin scripts adicionales)
