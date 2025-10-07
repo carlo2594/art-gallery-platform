@@ -6,7 +6,11 @@ const { toNumber } = require('@utils/numberUtils');
 const { getSort } = require('@utils/sortUtils');
 
 function buildArtworkFilter(q) {
-  const filter = { status: 'approved', deletedAt: null };
+  const filter = { 
+    status: 'approved', 
+    deletedAt: null, 
+    availability: { $in: ['for_sale', 'reserved'] } // Solo obras disponibles
+  };
   const typesN = normArr(q.type);
   const techsN = normArr(q.technique);
   if (typesN.length) filter.type_norm      = { $in: typesN };

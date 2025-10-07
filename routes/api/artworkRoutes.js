@@ -1,6 +1,7 @@
 // routes/artworkRoutes.js
 const express           = require('express');
 const artworkController = require('@controllers/artworkController');
+const artworkAvailabilityController = require('@controllers/artworkAvailabilityController');
 const requireUser       = require('@middlewares/requireUser');
 const isOwner           = require('@middlewares/isOwner');
 const restrictTo        = require('@middlewares/restrictTo');
@@ -96,6 +97,58 @@ router.patch(
   requireUser,
   restrictTo('admin'),
   artworkController.rejectArtwork
+);
+
+/* ------------------------------------------------------------------ */
+/*  Gestión de Disponibilidad y Ventas                                */
+/* ------------------------------------------------------------------ */
+
+// Marcar como vendida (admin o dueño)
+router.patch(
+  '/:id/mark-sold',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.markArtworkSold
+);
+
+// Reservar obra (admin o dueño)
+router.patch(
+  '/:id/reserve',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.reserveArtwork
+);
+
+// Quitar reserva (admin o dueño)
+router.patch(
+  '/:id/unreserve',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.unreserveArtwork
+);
+
+// Marcar como no disponible para venta (admin o dueño)
+router.patch(
+  '/:id/not-for-sale',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.setNotForSale
+);
+
+// Marcar como en préstamo (admin o dueño)
+router.patch(
+  '/:id/on-loan',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.setOnLoan
+);
+
+// Volver a poner en venta (admin o dueño)
+router.patch(
+  '/:id/for-sale',
+  requireUser,
+  isOwner(Artwork, 'artist'),
+  artworkAvailabilityController.setForSale
 );
 
 // Lectura privada: ver cualquier obra si eres dueño o admin

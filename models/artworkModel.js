@@ -9,6 +9,7 @@ const norm = (s) =>
     .trim();
 
 const STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+const AVAILABILITY = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 
 const artworkSchema = new mongoose.Schema(
@@ -53,6 +54,19 @@ const artworkSchema = new mongoose.Schema(
     // --- Precio en USD (centavos) ---
     // Guarda siempre en centavos para evitar flotantes (ej. $3499.50 -> 349950)
     price_cents: { type: Number, required: true, min: 0, index: true },
+
+    // --- Disponibilidad y venta ---
+    availability: { type: String, enum: AVAILABILITY, default: 'not_for_sale', index: true },
+    soldAt: { type: Date },
+    reservedUntil: { type: Date },
+    sale: {
+      price_cents: { type: Number, min: 0 },
+      currency: { type: String, default: 'USD' },
+      buyerName: { type: String, trim: true },
+      buyerEmail: { type: String, trim: true },
+      channel: { type: String, enum: ['online', 'gallery', 'fair', 'private'] },
+      orderId: { type: String, trim: true },
+    },
 
     // Campos normalizados para búsquedas/indexación
     type_norm: { type: String, index: true },
@@ -133,6 +147,10 @@ artworkSchema.index({
   deletedAt: 1, 
   technique: 1 
 });
+
+// 7. Índices para disponibilidad y ventas
+artworkSchema.index({ availability: 1, status: 1, deletedAt: 1, createdAt: -1 });
+artworkSchema.index({ availability: 1, price_cents: 1 });
 
 /* Índices existentes */
 artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 días después de ir a la papelera
@@ -218,6 +236,44 @@ artworkSchema.methods.restore = function () {
 artworkSchema.methods.setDraft = function () {
   if (this.status === 'trashed') return this;
   this.status = 'draft';
+  return this.save();
+};
+
+/* ====== Métodos de Disponibilidad ====== */
+
+artworkSchema.methods.markSold = function (opts = {}) {
+  this.availability = 'sold';
+  this.soldAt = new Date();
+  this.sale = {
+    price_cents: typeof opts.price_cents === 'number' ? Math.max(0, Math.round(opts.price_cents)) : this.price_cents,
+    currency: opts.currency || 'USD',
+    buyerName: opts.buyerName,
+    buyerEmail: opts.buyerEmail,
+    channel: opts.channel,
+    orderId: opts.orderId,
+  };
+  return this.save();
+};
+
+artworkSchema.methods.reserve = function (untilDate) {
+  this.availability = 'reserved';
+  this.reservedUntil = untilDate instanceof Date ? untilDate : new Date(untilDate);
+  return this.save();
+};
+
+artworkSchema.methods.unreserve = function () {
+  this.availability = 'for_sale';
+  this.reservedUntil = undefined;
+  return this.save();
+};
+
+artworkSchema.methods.setNotForSale = function () {
+  this.availability = 'not_for_sale';
+  return this.save();
+};
+
+artworkSchema.methods.setOnLoan = function () {
+  this.availability = 'on_loan';
   return this.save();
 };
 

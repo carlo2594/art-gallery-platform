@@ -82,13 +82,13 @@ exports.getSearchResults = catchAsync(async (req, res) => {
       .skip(skip)
       .limit(perPage),
     Artwork.aggregate([
-      { $match: { status: 'approved', deletedAt: null } },
+      { $match: { status: 'approved', deletedAt: null, availability: { $in: ['for_sale', 'reserved'] } } },
       { $group: { _id: '$technique', technique: { $first: '$technique' } } },
       { $project: { _id: 0, technique: 1 } },
       { $sort: { technique: 1 } }
     ]).hint({ status: 1, deletedAt: 1, technique: 1 }),
     Artwork.aggregate([
-      { $match: { status: 'approved', deletedAt: null } },
+      { $match: { status: 'approved', deletedAt: null, availability: { $in: ['for_sale', 'reserved'] } } },
       { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
       { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
     ]).hint({ status: 1, deletedAt: 1, createdAt: -1 })
@@ -317,8 +317,13 @@ exports.getArtworks = catchAsync(async (req, res) => {
     if (ors.length) filter.$or = ors;
   }
 
-  // Base: aprobadas y no borradas
-  const baseMatch = { status: 'approved', deletedAt: null, ...filter };
+  // Base: aprobadas, no borradas y disponibles para venta
+  const baseMatch = { 
+    status: 'approved', 
+    deletedAt: null, 
+    availability: { $in: ['for_sale', 'reserved'] }, // Solo obras disponibles o reservadas
+    ...filter 
+  };
 
   // 1) Bounds (min/max) desde BD sin rango aplicado
   const boundsAgg = await Artwork.aggregate([

@@ -33,4 +33,8 @@ router.get('/exhibitions', viewsController.getExhibitionsView);
 // =================== BÚSQUEDA GLOBAL ===================
 router.get('/search', viewsController.getSearchResults);
 
+// =================== GESTIÓN DE VENTAS (Admin) =========
+router.get('/admin/sales', viewsController.getSalesManagement);
+router.get('/admin/sales/:id', viewsController.getSaleDetail);
+
 module.exports = router;
