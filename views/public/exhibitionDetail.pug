@@ -1,0 +1,129 @@
+extends ../layouts/public
+
+block content
+  main.main-content.exhibition-detail-page
+    // Hero Section (similar style to artist detail)
+    section.exhibition-hero.position-relative(style="min-height: 100vh; overflow: hidden;")
+      // Imagen de fondo
+      .hero-background.position-absolute.w-100.h-100
+        if exhibition && exhibition.coverImage
+          img.hero-bg-image.w-100.h-100(
+            src=exhibition.coverImage,
+            alt=(exhibition.title || exhibition.name || 'Exposición'),
+            style="object-fit: cover; object-position: center;"
+          )
+        else
+          .hero-bg-placeholder.w-100.h-100(
+            style="background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);"
+          )
+
+      // Overlay
+      .hero-overlay.position-absolute.w-100.h-100(style="background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);")
+
+      // Contenido superpuesto
+      .hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
+        .container
+          - var title = exhibition ? (exhibition.title || exhibition.name || 'Exposición') : 'Exposición';
+          - var startStr = '';
+          - var endStr = '';
+          - if (exhibition && exhibition.startDate) {
+          -   try { startStr = new Date(exhibition.startDate).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }); } catch(e) {}
+          - }
+          - if (exhibition && exhibition.endDate) {
+          -   try { endStr = new Date(exhibition.endDate).toLocaleDateString('es-MX', { year:'numeric', month:'long', day:'numeric' }); } catch(e) {}
+          - }
+          .row
+            .col-lg-8.d-none.d-lg-block
+              .text-white.pb-5
+                h1.display-2.fw-bold.mb-3(style="font-family: var(--font-title); text-shadow: 0 2px 8px rgba(0,0,0,0.5);")= title
+                if startStr || endStr
+                  h2.h4.mb-4.text-white-50(style="font-family: var(--font-subtitle); font-weight: 300; text-shadow: 0 1px 4px rgba(0,0,0,0.5);")= endStr ? `${startStr} – ${endStr}` : `${startStr}`
+                if exhibition && exhibition.description
+                  p.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); max-width: 720px;")= exhibition.description
+
+                // Meta compacta
+                .d-flex.flex-wrap.gap-4.mb-4
+                  if exhibition && exhibition.venue
+                    .d-flex.align-items-center
+                      i.fas.fa-map-marker-alt.me-2.text-warning
+                      span.text-white-75= exhibition.venue
+                  else if exhibition && exhibition.location
+                    .d-flex.align-items-center
+                      i.fas.fa-map-marker-alt.me-2.text-warning
+                      span.text-white-75= exhibition.location
+                  if exhibition && exhibition.type
+                    .d-flex.align-items-center
+                      i.fas.fa-tag.me-2.text-warning
+                      span.text-white-75= exhibition.type
+
+            // Tarjeta lateral (opcional)
+            .col-lg-4.d-none.d-lg-block
+              .text-white.pb-5
+                .row.g-3.justify-content-center
+                  .col-10
+                    .text-center.p-4(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                      .small.text-white-75.mb-2 Fechas
+                      if startStr || endStr
+                        .h6.mb-0= endStr ? `${startStr} – ${endStr}` : `${startStr}`
+                      else
+                        .small.text-white-50 Por anunciar
+                      hr.my-3.opacity-50
+                      .small.text-white-75.mb-2 Lugar
+                      if exhibition && (exhibition.venue || exhibition.location)
+                        .h6.mb-0= exhibition.venue || exhibition.location
+                      else
+                        .small.text-white-50 Por anunciar
+
+    // Contenido móvil (titulo, fechas, bio) – visible solo en < lg
+    section.exhibition-mobile.d-lg-none.py-5(style="background: var(--ox-beige);")
+      .container
+        .row
+          .col-12.text-center.mb-4
+            h1.display-4.fw-bold.mb-2(style="font-family: var(--font-title); color: var(--ox-blue);")= title
+            if startStr || endStr
+              h2.h5.mb-3.text-muted(style="font-family: var(--font-subtitle); font-weight: 300;")= endStr ? `${startStr} – ${endStr}` : `${startStr}`
+            if exhibition && exhibition.description
+              p.lead.mb-0.text-dark(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5;")= exhibition.description
+
+        .row.mt-4
+          .col-12
+            .d-flex.flex-wrap.justify-content-center.gap-4
+              if exhibition && (exhibition.venue || exhibition.location)
+                .d-flex.align-items-center
+                  i.fas.fa-map-marker-alt.me-2.text-primary
+                  span.text-muted= exhibition.venue || exhibition.location
+              if exhibition && exhibition.type
+                .d-flex.align-items-center
+                  i.fas.fa-tag.me-2.text-primary
+                  span.text-muted= exhibition.type
+
+    // Obras de la exposición
+    if artworks && artworks.length > 0
+      section.exhibition-artworks.py-5(style="background: var(--ox-beige);")
+        .container
+          .row.mb-5
+            .col-12.text-center
+              h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);") Obras en esta exposición
+              - var displayText = (typeof totalArtworks !== 'undefined' && typeof artworks !== 'undefined') ? (artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`) : `${artworks.length} obra${artworks.length === 1 ? '' : 's'}`
+              p.lead.text-muted= displayText
+
+        .container-xxl.artworks-flex(style="padding-left: 3rem; padding-right: 3rem;")
+          .artworks-grid-paginate
+            include _artworkGrid.pug
+            if typeof totalPages !== 'undefined' && totalPages > 1
+              include _artworkPagination.pug
+    else
+      section.no-artworks.py-5.text-center
+        .container
+          i.fas.fa-images.fa-3x.text-muted.mb-3
+          h3.h4.mb-2.text-muted No hay obras asociadas a esta exposición
+          p.text-muted Vuelve pronto para descubrir nuevas piezas.
+
+    // Botón para volver
+    section.back-navigation.py-4
+      .container
+        .row
+          .col-12.text-center
+            a.btn.btn-outline-primary.btn-lg(href="/exhibitions", style="border-radius: 2rem; padding: 0.75rem 2rem;")
+              i.fas.fa-arrow-left.me-2
+              | Volver a Exposiciones

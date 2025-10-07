@@ -85,6 +85,11 @@ exports.login = catchAsync(async (req, res, next) => {
     .select('+password lastLoginAt');
 
   if (!user || !(await user.correctPassword(password))) {
+    if (wantsHTML(req)) {
+      const url = new URL(`${req.protocol}://${req.get('host')}/login`);
+      url.searchParams.set('error', 'Correo o contraseña incorrectos');
+      return res.redirect(303, url.toString());
+    }
     return next(new AppError('Correo o contraseña incorrectos', 401));
   }
 
@@ -159,6 +164,13 @@ exports.forgotPassword = catchAsync(async (req, res) => {
     subject: 'Restablece tu contraseña',
     text: `Haz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\nEste enlace expira en 15 minutos.`
   });
+
+  // Flujos HTML: redirigir con mensaje amigable
+  if (wantsHTML(req)) {
+    const url = new URL(`${req.protocol}://${req.get('host')}/forgot-password`);
+    url.searchParams.set('success', 'Si el email existe, te enviaremos un enlace para restablecer tu contraseña.');
+    return res.redirect(303, url.toString());
+  }
 
   return sendResponse(res, null, 'Si el email existe, se enviará un enlace.');
 });

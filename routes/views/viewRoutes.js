@@ -31,6 +31,7 @@ router.get('/artworks/:id', viewsController.getArtworkDetail);
 // =================== EXPOSICIONES ======================
 
 router.get('/exhibitions', viewsController.getExhibitionsView);
+router.get('/exhibitions/:id', viewsController.getExhibitionDetail);
 
 // =================== BÚSQUEDA GLOBAL ===================
 router.get('/search', viewsController.getSearchResults);

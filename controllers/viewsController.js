@@ -560,3 +560,59 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   });
 });
 
+// Vista de detalle de exposición individual
+exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
+  const Exhibition = require('@models/exhibitionModel');
+  const Artwork = require('@models/artworkModel');
+  const idOrSlug = req.params.id;
+
+  // Intentar por ObjectId primero, luego por slug
+  let exhibition = null;
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(idOrSlug));
+  if (isObjectId) {
+    exhibition = await Exhibition.findOne({ _id: idOrSlug, deletedAt: null })
+      .populate({ path: 'createdBy', select: 'name' })
+      .populate({ path: 'participants.user', select: 'name' })
+      .lean();
+  }
+  if (!exhibition) {
+    exhibition = await Exhibition.findOne({ slug: idOrSlug, deletedAt: null })
+      .populate({ path: 'createdBy', select: 'name' })
+      .populate({ path: 'participants.user', select: 'name' })
+      .lean();
+  }
+
+  if (!exhibition) {
+    return res.status(404).render('public/error', {
+      title: 'Exposición no encontrada',
+      msg: 'No pudimos encontrar esta exposición.'
+    });
+  }
+
+  // Redirección canónica a slug si llegó por ObjectId y la exposición tiene slug
+  if (isObjectId && exhibition.slug) {
+    return res.redirect(301, `/exhibitions/${exhibition.slug}`);
+  }
+
+  // Cargar obras asociadas, mostrando solo aprobadas y no eliminadas
+  let artworks = [];
+  if (Array.isArray(exhibition.artworks) && exhibition.artworks.length) {
+    artworks = await Artwork.find({
+      _id: { $in: exhibition.artworks },
+      status: 'approved',
+      deletedAt: null
+    })
+    .populate({ path: 'artist', select: 'name' })
+    .lean();
+  }
+
+  const totalArtworks = artworks.length;
+
+  return res.status(200).render('public/exhibitionDetail', {
+    title: `${exhibition.title} · Galería del Ox`,
+    exhibition,
+    artworks,
+    totalArtworks
+  });
+});
+

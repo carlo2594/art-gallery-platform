@@ -1,8 +1,10 @@
 const mongoose = require('mongoose');
+const { norm } = require('@utils/normalizer');
 
 
 const exhibitionSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  slug:  { type: String, index: true, unique: true, sparse: true },
   description: String,
   coverImage: String,
   images: [String], // Imágenes adicionales
@@ -66,3 +68,18 @@ exhibitionSchema.index({ artworks: 1 });
 exhibitionSchema.index({ 'participants.user': 1 });
 
 module.exports = mongoose.model('Exhibition', exhibitionSchema);
+
+/* ---------------------- Hooks para slug ---------------------- */
+exhibitionSchema.pre('save', function(next) {
+  if (!this.isModified('title')) return next();
+  const base = String(this.title || '').trim();
+  if (!base) return next();
+  // slug simple: normaliza, reemplaza espacios y caracteres no alfanuméricos
+  const simple = norm(base)
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  this.slug = simple || undefined;
+  next();
+});

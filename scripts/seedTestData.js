@@ -1,4 +1,5 @@
 // Script para poblar la base de datos: elimina toda la base y crea datos de prueba variados
+require('module-alias/register');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
@@ -7,6 +8,8 @@ const User = require('../models/userModel');
 const Exhibition = require('../models/exhibitionModel');
 const Favorite = require('../models/favoriteModel');
 const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
+const Comment = require('../models/commentModel');
+const PasswordResetToken = require('../models/passwordResetTokenModel');
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
@@ -86,8 +89,10 @@ async function seed() {
     User.deleteMany({}),
     Artwork.deleteMany({}),
     Exhibition.deleteMany({}),
-  Favorite.deleteMany({}),
-    ArtworkView.deleteMany({}) // <-- AGREGA ESTA LÍNEA
+    Favorite.deleteMany({}),
+    ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÍNEA
+    Comment.deleteMany({}),
+    PasswordResetToken.deleteMany({})
   ]);
 
 
@@ -140,7 +145,13 @@ async function seed() {
       slug: `artista-${i}`
     });
   }
-  const users = await User.insertMany(userData);
+  // Usar create secuencial para disparar hooks (hash de password y slug único)
+  const users = [];
+  for (const data of userData) {
+    // Si falta name, el hook lo igualará al email
+    const created = await User.create(data);
+    users.push(created);
+  }
 
   // Tamaños reales de canvas (en cm)
   const canvasSizes = [
@@ -405,7 +416,29 @@ async function seed() {
       status
     });
   }
-  const exhibitions = await Exhibition.insertMany(exhibitionData);
+  // Agregar slug a cada exposición (insertMany no dispara pre-save hooks)
+  const usedExpoSlugs = new Set();
+  const exhibitionsWithSlug = exhibitionData.map((ex) => {
+    const base = generateSlug(ex.title);
+    let slug = base;
+    let n = 1;
+    while (usedExpoSlugs.has(slug)) {
+      slug = `${base}-${n++}`;
+    }
+    usedExpoSlugs.add(slug);
+    return { ...ex, slug };
+  });
+  const exhibitions = await Exhibition.insertMany(exhibitionsWithSlug);
+
+  // Backfill: agregar referencia de exposición en cada obra
+  for (const expo of exhibitions) {
+    if (Array.isArray(expo.artworks) && expo.artworks.length) {
+      await Artwork.updateMany(
+        { _id: { $in: expo.artworks } },
+        { $addToSet: { exhibitions: expo._id } }
+      );
+    }
+  }
 
   // Comentarios eliminados
 
