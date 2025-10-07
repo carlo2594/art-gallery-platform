@@ -571,14 +571,14 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(idOrSlug));
   if (isObjectId) {
     exhibition = await Exhibition.findOne({ _id: idOrSlug, deletedAt: null })
-      .populate({ path: 'createdBy', select: 'name' })
-      .populate({ path: 'participants.user', select: 'name' })
+      .populate({ path: 'createdBy', select: 'name slug' })
+      .populate({ path: 'participants.user', select: 'name slug' })
       .lean();
   }
   if (!exhibition) {
     exhibition = await Exhibition.findOne({ slug: idOrSlug, deletedAt: null })
-      .populate({ path: 'createdBy', select: 'name' })
-      .populate({ path: 'participants.user', select: 'name' })
+      .populate({ path: 'createdBy', select: 'name slug' })
+      .populate({ path: 'participants.user', select: 'name slug' })
       .lean();
   }
 
