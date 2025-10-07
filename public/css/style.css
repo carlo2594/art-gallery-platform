@@ -534,6 +534,19 @@ section.join-artists { position: relative; margin-top: 5rem; }
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+.artist-artworks-count {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: rgba(245, 196, 94, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.artist-artworks-count i {
+  color: var(--ox-yellow);
+}
+
 .btn-outline-overlay {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.5);

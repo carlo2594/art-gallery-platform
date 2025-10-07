@@ -20,5 +20,10 @@
             .artist-overlay.position-absolute.bottom-0.start-0.end-0.p-3
               .artist-info.text-white
                 h5.artist-name.fw-bold.mb-1= artist.name
-                if artist.createdAt
-                  .artist-member-since.small.opacity-75= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                .d-flex.justify-content-between.align-items-center
+                  if artist.createdAt
+                    .artist-member-since.small.opacity-75= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                  if artist.approvedArtworksCount
+                    .artist-artworks-count.small.opacity-85
+                      i.fas.fa-palette.me-1
+                      span= `${artist.approvedArtworksCount} obra${artist.approvedArtworksCount !== 1 ? 's' : ''}`

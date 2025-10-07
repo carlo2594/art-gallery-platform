@@ -14,33 +14,35 @@ const { findArtworkByIdOrSlug, incrementArtworkViews, getPopularArtworks } = req
 exports.getArtistsView = catchAsync(async (req, res) => {
   const q = req.query;
   const search = (q.q || '').trim();
-  const { buildArtistFilter } = require('@utils/artistSearch');
   const { getSort } = require('@utils/sortUtils');
+  const { getArtistsWithArtworksAndCount } = require('@utils/artistsWithArtworks');
+  
   // Normaliza el sort para artistas
   let artistSortParam = q.sort;
   if (!artistSortParam || (artistSortParam !== 'name_asc' && artistSortParam !== 'name_desc' && artistSortParam !== 'recent' && artistSortParam !== 'oldest')) {
     artistSortParam = 'name_asc';
   }
   const artistSort = getSort(artistSortParam, 'artist');
-  const artistFilter = buildArtistFilter(q, search);
+  
   // Paginación: usa artistPage para SSR paginator
   const artistPage = Number(req.query.artistPage) || 1;
   const perPage = 15;
   const skip = (artistPage - 1) * perPage;
-  const totalArtists = await User.countDocuments(artistFilter);
-  const artists = await User.find(artistFilter)
-    .select('+role') // Incluir role ya que tiene select: false
-    .sort(artistSort)
-    .skip(skip)
-    .limit(perPage);
-  
-  // Filtrar solo artistas después de la consulta (por seguridad adicional)
-  const filteredArtists = artists.filter(artist => artist.role === 'artist');
+
+  // Usar utility para obtener artistas con obras aprobadas
+  const { artists, total: totalArtists } = await getArtistsWithArtworksAndCount(
+    User, 
+    search, 
+    artistSort, 
+    skip, 
+    perPage
+  );
   
   const totalPages = Math.max(1, Math.ceil(totalArtists / perPage));
+  
   res.status(200).render('public/artists', {
     title: 'Artistas',
-    artists: filteredArtists,
+    artists,
     totalArtists,
     page: artistPage,
     perPage,
@@ -98,9 +100,9 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
   // --- ARTISTAS: Filtros, paginación y orden ---
-  const { buildArtistFilter } = require('@utils/artistSearch');
   const { getSort } = require('@utils/sortUtils');
-  const artistFilter = buildArtistFilter(q, search);
+  const { getArtistsWithArtworksAndCount } = require('@utils/artistsWithArtworks');
+  
   // Normaliza el sort para artistas (evita errores por casing o valores vacíos)
   let artistSortParam = q.sort;
   if (!artistSortParam || (artistSortParam !== 'name_asc' && artistSortParam !== 'name_desc' && artistSortParam !== 'recent' && artistSortParam !== 'oldest')) {
@@ -114,15 +116,15 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     perPage: q.artistPerPage || 15
   }, 15, 100);
 
-  const totalArtists = await User.countDocuments(artistFilter);
-  const matchingArtists = await User.find(artistFilter)
-    .select('+role') // Incluir role ya que tiene select: false
-    .sort(artistSort)
-    .skip(artistSkip)
-    .limit(artistPerPage);
-  
-  // Filtrar solo artistas después de la consulta
-  const filteredMatchingArtists = matchingArtists.filter(artist => artist.role === 'artist');
+  // Usar utility para obtener artistas con obras aprobadas
+  const { artists: matchingArtists, total: totalArtists } = await getArtistsWithArtworksAndCount(
+    User, 
+    search, 
+    artistSort, 
+    artistSkip, 
+    artistPerPage
+  );
+
   const artistTotalPages = Math.max(1, Math.ceil(totalArtists / artistPerPage));
 
   // --- Filtros y orden para exposiciones ---
@@ -150,7 +152,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   res.status(200).render('public/searchResults', {
     title: search ? `Buscar: ${search}` : 'Buscar',
     artworks,
-    artists: filteredMatchingArtists,
+    artists: matchingArtists,
     exhibitions,
     totalArtworks,
     totalArtists,
