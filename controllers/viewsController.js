@@ -4,6 +4,12 @@ const Artwork = require('@models/artworkModel');
 const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
 
+// Utilities optimizadas
+const { viewsCache } = require('@utils/cache');
+const { getAllTechniques, getGlobalPriceBounds, getArtistTechniques, getArtistPriceBounds } = require('@utils/aggregationHelpers');
+const { findArtistByIdOrSlug, getRelatedArtworks, buildArtistStats } = require('@utils/artistHelpers');
+const { findArtworkByIdOrSlug, incrementArtworkViews, getPopularArtworks } = require('@utils/artworkHelpers');
+
 // Vista de todos los artistas
 exports.getArtistsView = catchAsync(async (req, res) => {
   const q = req.query;
@@ -78,12 +84,12 @@ exports.getSearchResults = catchAsync(async (req, res) => {
       { $group: { _id: '$technique', technique: { $first: '$technique' } } },
       { $project: { _id: 0, technique: 1 } },
       { $sort: { technique: 1 } }
-    ]),
+    ]).hint({ status: 1, deletedAt: 1, technique: 1 }),
     Artwork.aggregate([
       { $match: { status: 'approved', deletedAt: null } },
       { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
       { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
-    ])
+    ]).hint({ status: 1, deletedAt: 1, createdAt: -1 })
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
@@ -211,11 +217,7 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
 
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  const artworks = await Artwork
-    .find({ deletedAt: null })
-    .sort({ views: -1 })
-    .limit(20)
-    .populate({ path: 'artist', select: 'name' });
+  const artworks = await getPopularArtworks(Artwork, 20);
 
   res.status(200).render('public/home', {
     title: 'Inicio · Galería del Ox',
@@ -321,17 +323,12 @@ exports.getArtworks = catchAsync(async (req, res) => {
     { $match: baseMatch },
     { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
     { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
-  ]);
+  ]).hint({ status: 1, deletedAt: 1, createdAt: -1 }); // Forzar uso del índice principal
+
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
 
   // 2) Obtener técnicas únicas desde la base de datos (solo aprobados y no borrados)
-  const techniquesAgg = await Artwork.aggregate([
-    { $match: { status: 'approved', deletedAt: null } },
-    { $group: { _id: '$technique', technique: { $first: '$technique' } } },
-    { $project: { _id: 0, technique: 1 } },
-    { $sort: { technique: 1 } }
-  ]);
-  const techniques = techniquesAgg.map(m => m.technique).filter(Boolean);
+  const techniques = await getAllTechniques(Artwork);
 
   let minCents = readMinCentsFromQuery(q);
   let maxCents = readMaxCentsFromQuery(q);
@@ -407,67 +404,20 @@ exports.getAbout = (req, res) => {
 
 // Vista de detalle de obra individual
 exports.getArtworkDetail = catchAsync(async (req, res, next) => {
-  const isValidObjectId = require('@utils/isValidObjectId');
-  const AppError = require('@utils/appError');
-  
   const { id } = req.params;
-  let artwork;
-
-  // Intentar buscar por slug primero, luego por ID si es un ObjectId válido
-  if (isValidObjectId(id)) {
-    // Si es un ObjectId válido, buscar por ID (para compatibilidad con URLs antiguas)
-    artwork = await Artwork.findOne({ 
-      _id: id, 
-      status: 'approved', 
-      deletedAt: null 
-    })
-    .populate({ 
-      path: 'artist', 
-      select: 'name email profileImage bio location website social' 
-    })
-    .populate({ 
-      path: 'exhibitions', 
-      select: 'title description startDate endDate location status'
-    });
-    
-    // Si se encontró la obra por ID, redirigir a la URL con slug
-    if (artwork && artwork.slug) {
-      return res.redirect(301, `/artworks/${artwork.slug}`);
-    }
-  } else {
-    // Buscar por slug
-    artwork = await Artwork.findOne({ 
-      slug: id, 
-      status: 'approved', 
-      deletedAt: null 
-    })
-    .populate({ 
-      path: 'artist', 
-      select: 'name email profileImage bio location website social' 
-    })
-    .populate({ 
-      path: 'exhibitions', 
-      select: 'title description startDate endDate location status'
-    });
-  }
-
-  if (!artwork) {
-    return next(new AppError('Obra no encontrada.', 404));
+  
+  // Usar utility para buscar artwork
+  const { artwork, shouldRedirect, redirectUrl } = await findArtworkByIdOrSlug(Artwork, id);
+  
+  if (shouldRedirect) {
+    return res.redirect(301, redirectUrl);
   }
 
   // Incrementar contador de vistas
-  await Artwork.findByIdAndUpdate(artwork._id, { $inc: { views: 1 } });
+  await incrementArtworkViews(Artwork, artwork._id);
 
-  // Buscar obras relacionadas del mismo artista (excluyendo la actual)
-  const relatedArtworks = await Artwork.find({
-    artist: artwork.artist._id,
-    _id: { $ne: artwork._id },
-    status: 'approved',
-    deletedAt: null
-  })
-  .populate({ path: 'artist', select: 'name' })
-  .limit(6)
-  .sort({ createdAt: -1 });
+  // Buscar obras relacionadas del mismo artista
+  const relatedArtworks = await getRelatedArtworks(Artwork, artwork.artist._id, artwork._id, 6);
 
   res.status(200).render('public/artworkDetail', {
     title: `${artwork.title} · Galería del Ox`,
@@ -478,8 +428,6 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
 
 // Vista de detalle de artista individual
 exports.getArtistDetail = catchAsync(async (req, res, next) => {
-  const AppError = require('@utils/appError');
-  const isValidObjectId = require('@utils/isValidObjectId');
   const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
   const { getPaginationParams } = require('@utils/pagination');
   const { getPriceRanges } = require('@utils/priceUtils');
@@ -487,28 +435,11 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const artistId = req.params.id;
   const q = req.query;
   
-  // Buscar artista por ID o slug
-  let artist;
-  if (isValidObjectId(artistId)) {
-    // Buscar por ID y redirigir al slug si existe
-    artist = await User.findOne({
-      _id: artistId,
-      role: 'artist'
-    }).select('name bio profileImage createdAt slug email location website social +role');
-    
-    if (artist && artist.slug) {
-      return res.redirect(301, `/artists/${artist.slug}`);
-    }
-  } else {
-    // Buscar por slug
-    artist = await User.findOne({
-      slug: artistId,
-      role: 'artist'
-    }).select('name bio profileImage createdAt slug email location website social +role');
-  }
-
-  if (!artist) {
-    return next(new AppError('Artista no encontrado', 404));
+  // Usar utility para buscar artista
+  const { artist, shouldRedirect, redirectUrl } = await findArtistByIdOrSlug(User, artistId);
+  
+  if (shouldRedirect) {
+    return res.redirect(301, redirectUrl);
   }
 
   // --- FILTROS Y PAGINACIÓN PARA OBRAS DEL ARTISTA ---
@@ -530,13 +461,13 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   // Ordenamiento
   const sort = getArtworkSort(q.sort) || { createdAt: -1 };
 
-  // Consultas paralelas para obras paginadas y estadísticas generales
+  // Consultas paralelas usando utilities optimizadas
   const [
     totalArtworks,
     artworks,
     allArtworks, // Para estadísticas generales
-    techniquesAgg,
-    boundsAgg
+    techniques,
+    bounds
   ] = await Promise.all([
     // Total con filtros aplicados
     Artwork.countDocuments(combinedFilter),
@@ -548,34 +479,17 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
       .limit(perPage),
     // Todas las obras del artista para estadísticas (sin filtros adicionales)
     Artwork.find(baseFilter).populate({ path: 'artist', select: 'name' }),
-    // Técnicas disponibles del artista
-    Artwork.aggregate([
-      { $match: baseFilter },
-      { $group: { _id: '$technique', technique: { $first: '$technique' } } },
-      { $project: { _id: 0, technique: 1 } },
-      { $sort: { technique: 1 } }
-    ]),
-    // Rangos de precio del artista
-    Artwork.aggregate([
-      { $match: baseFilter },
-      { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
-      { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
-    ])
+    // Técnicas disponibles del artista (usando utility con cache)
+    getArtistTechniques(Artwork, artist._id),
+    // Rangos de precio del artista (usando utility con cache)
+    getArtistPriceBounds(Artwork, artist._id)
   ]);
 
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
-  const techniques = techniquesAgg.map(m => m.technique).filter(Boolean);
-  const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
-  // Estadísticas del artista (solo técnicas, ya que es lo único que se muestra)
-  const stats = {
-    totalArtworks: allArtworks.length,
-    techniques: [...new Set(allArtworks.map(artwork => artwork.technique).filter(Boolean))]
-  };
-
-  // Incrementar vistas del perfil (opcional - si tienes el campo en el modelo)
-  // await User.findByIdAndUpdate(artist._id, { $inc: { profileViews: 1 } });
+  // Usar utility para construir estadísticas
+  const stats = buildArtistStats(allArtworks);
 
   res.status(200).render('public/artistDetail', {
     title: `${artist.name} · Galería del Ox`,

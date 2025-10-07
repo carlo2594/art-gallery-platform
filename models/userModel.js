@@ -40,6 +40,27 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+/* ---------- Índices optimizados para viewsController ---------- */
+// 1. Índice para búsqueda de artistas por rol y slug (getArtistDetail)
+userSchema.index({ role: 1, slug: 1 });
+
+// 2. Índice para búsqueda de artistas (getArtistsView, getSearchResults)
+userSchema.index({ 
+  role: 1, 
+  name: 1, 
+  createdAt: -1 
+});
+
+// 3. Índice para búsqueda de texto en nombre y bio
+userSchema.index({ 
+  role: 1,
+  name: 'text', 
+  bio: 'text' 
+});
+
+// 4. Índice básico para email único (ya existe implícitamente por unique: true)
+userSchema.index({ email: 1 });
+
 /* ---------- Función para generar slug ---------- */
 function generateSlug(name) {
   return name

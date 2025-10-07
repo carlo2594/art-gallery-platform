@@ -37,4 +37,32 @@ const exhibitionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+/* ---------- Índices optimizados para viewsController ---------- */
+// 1. Índice principal para consultas de exposiciones (getExhibitionsView, getSearchResults)
+exhibitionSchema.index({ 
+  status: 1, 
+  startDate: -1, 
+  endDate: -1 
+});
+
+// 2. Índice para búsqueda por slug (si se implementa)
+exhibitionSchema.index({ slug: 1 }, { unique: true, sparse: true });
+
+// 3. Índice para consultas por tipo de ubicación
+exhibitionSchema.index({ 
+  status: 1, 
+  'location.type': 1, 
+  startDate: -1 
+});
+
+// 4. Índice para búsqueda de texto
+exhibitionSchema.index({ 
+  title: 'text', 
+  description: 'text' 
+});
+
+// 5. Índice para consultas por artworks y participantes
+exhibitionSchema.index({ artworks: 1 });
+exhibitionSchema.index({ 'participants.user': 1 });
+
 module.exports = mongoose.model('Exhibition', exhibitionSchema);

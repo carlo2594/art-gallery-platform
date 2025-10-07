@@ -87,9 +87,52 @@ const artworkSchema = new mongoose.Schema(
 );
 
 /* (2) Índices adicionales */
+// Índices básicos existentes
 artworkSchema.index({ artist: 1, status: 1 });
 artworkSchema.index({ favoritesCount: -1 });
 artworkSchema.index({ exhibitions: 1 });
+
+// Nuevos índices compuestos optimizados para viewsController
+// 1. Índice principal para consultas de obras aprobadas (getArtworks, getSearchResults)
+artworkSchema.index({ status: 1, deletedAt: 1, createdAt: -1 });
+
+// 2. Índice para filtros combinados en búsquedas
+artworkSchema.index({ 
+  status: 1, 
+  deletedAt: 1, 
+  technique_norm: 1, 
+  type_norm: 1, 
+  price_cents: 1 
+});
+
+// 3. Índice crítico para getArtistDetail - consultas por artista
+artworkSchema.index({ 
+  artist: 1, 
+  status: 1, 
+  deletedAt: 1, 
+  createdAt: -1 
+});
+
+// 4. Índice para filtros de dimensiones
+artworkSchema.index({ 
+  status: 1, 
+  deletedAt: 1, 
+  width_cm: 1, 
+  height_cm: 1 
+});
+
+// 5. Índice para ordenamiento por popularidad (getHome)
+artworkSchema.index({ 
+  deletedAt: 1, 
+  views: -1 
+});
+
+// 6. Índice para agregaciones de técnicas y precios
+artworkSchema.index({ 
+  status: 1, 
+  deletedAt: 1, 
+  technique: 1 
+});
 
 /* Índices existentes */
 artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 días después de ir a la papelera

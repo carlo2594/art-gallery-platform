@@ -61,7 +61,7 @@ block content
                     .meta-item.artist-social-x
                       a.text-warning.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
                         i.fab.fa-x.me-2
-                        span X
+                     
                   
                   if artist.social && artist.social.facebook
                     .meta-item.artist-social-facebook
@@ -98,7 +98,7 @@ block content
                           .small.text-white-50.artist-no-techniques Sin técnicas
 
     // LAYOUT PARA MÓVIL/TABLET (< lg): Contenido debajo de la imagen
-    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5(style="background: #f8f9fa;")
+    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5(style="background: var(--ox-beige);")
       .container
         .row
           .col-12.text-center.mb-4
@@ -137,7 +137,7 @@ block content
                 .meta-item.artist-social-x-mobile
                   a.text-primary.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
                     i.fab.fa-x.me-2
-                    span X
+                    
               
               if artist.social && artist.social.facebook
                 .meta-item.artist-social-facebook-mobile
@@ -159,7 +159,7 @@ block content
           .col-md-8.col-lg-6
             // Técnicas para móvil
             .stat-item.artist-techniques-card-mobile.text-center.p-4.shadow-sm(style="background: white; border-radius: 1rem; border: 1px solid #e9ecef;")
-              .stat-label.artist-techniques-label-mobile.h5.mb-3.text-primary Técnicas
+              .stat-label.artist-techniques-label-mobile.h5.mb-3(style="color: var(--ox-blue);") Técnicas
               .techniques-list.artist-techniques-list-mobile
                 if stats.techniques && stats.techniques.length > 0
                   each technique in stats.techniques.slice(0, 10)
@@ -172,17 +172,18 @@ block content
 
     // Sección de obras del artista
     if artworks && artworks.length > 0
-      section.artist-artworks.artist-artworks-section.py-5(style="background: #f8f9fa;")
+      section.artist-artworks.artist-artworks-section.py-5(style="background: var(--ox-beige);")
         .container
           .row.mb-5
             .col-12.text-center
               h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
-              p.lead.text-muted.artist-artworks-subtitle= `Mostrando ${artworks.length} de ${totalArtworks} obras de este talentoso artista`
+              - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
+              p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
 
-        // Filtros solo visibles si hay obras (cantidad > 0)
-        if totalArtworks > 0
+        // Filtros solo visibles si hay obras y más de 1 obra para filtrar
+        if totalArtworks > 1
           section.filters-toolbar.artist-filters-section.py-2
-            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2(style="padding-left: 3rem; padding-right: 3rem;")
               // Set variables before including the filter fragment
               - var q = typeof q !== 'undefined' ? q : {};
               - var techniques = typeof techniques !== 'undefined' ? techniques : [];
@@ -191,7 +192,7 @@ block content
               - var actionUrl = `/artists/${artist.slug || artist._id}`;
               include _artworkFilters.pug
         
-        .container-xxl.artworks-flex.artist-artworks-grid
+        .container-xxl.artworks-flex.artist-artworks-grid(style="padding-left: 3rem; padding-right: 3rem;")
           if artworks && artworks.length
             .artworks-grid-paginate.artist-artworks-paginate
               include _artworkGrid.pug
@@ -205,10 +206,10 @@ block content
         .container
           h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
           
-          // Mostrar filtros si hay obras del artista pero están filtradas
-          if stats.totalArtworks > 0
+          // Mostrar filtros si hay más de 1 obra del artista pero están filtradas
+          if stats.totalArtworks > 1
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
-              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2(style="padding-left: 3rem; padding-right: 3rem;")
                 // Set variables before including the filter fragment
                 - var q = typeof q !== 'undefined' ? q : {};
                 - var techniques = typeof techniques !== 'undefined' ? techniques : [];
@@ -220,12 +221,15 @@ block content
           .row.justify-content-center
             .col-lg-6
               i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
-              if stats.totalArtworks > 0
+              if stats.totalArtworks > 1
                 h3.h4.mb-3.text-muted.artist-filtered-message No se encontraron obras con estos filtros
                 p.text-muted.artist-filter-help Prueba ajustar los filtros o
                   |  
                   a(href=actionUrl) limpiar todos los filtros
                   |  para ver todas las obras de #{artist.name}
+              else if stats.totalArtworks === 1
+                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
+                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
               else
                 h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
                 p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!

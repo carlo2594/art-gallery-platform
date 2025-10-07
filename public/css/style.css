@@ -731,6 +731,30 @@ section.join-artists { position: relative; margin-top: 5rem; }
   border-color: var(--ox-orange) !important;
 }
 
+/* Artist back button specific styling */
+.artist-back-btn {
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-blue) !important;
+}
+
+.artist-back-btn .fas {
+  color: var(--ox-blue) !important;
+}
+
+.artist-back-btn:hover,
+.artist-back-btn:focus,
+.artist-back-btn:active {
+  background: var(--ox-blue) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-blue) !important;
+}
+
+.artist-back-btn:hover .fas,
+.artist-back-btn:focus .fas,
+.artist-back-btn:active .fas {
+  color: var(--ox-beige) !important;
+}
+
 /* ==========================================
   10. AUTH (LOGIN/SIGNIN)
   ========================================== */
