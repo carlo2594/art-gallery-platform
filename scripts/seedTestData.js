@@ -210,6 +210,7 @@ async function seed() {
       createdBy: leonardoUser._id,
       artist: leonardoUser._id,
       status: "approved",
+      availability: "for_sale", // Agregar disponibilidad por defecto
       views: randomInt(50, 800), // Más vistas para Leonardo
       completedAt,
       width_cm: Math.round(canvas.width * scale),
@@ -290,6 +291,7 @@ async function seed() {
       createdBy: user._id,
       artist: user._id,
       status: "approved",
+      availability: randomFromArray(AVAILABILITY_STATUSES), // Agregar disponibilidad aleatoria
       views: randomInt(0, 500),
       completedAt,
       width_cm: Math.round(canvas.width * scale),
