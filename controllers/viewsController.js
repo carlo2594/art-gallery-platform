@@ -435,7 +435,7 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
 
 // Vista de detalle de artista individual
 exports.getArtistDetail = catchAsync(async (req, res, next) => {
-  const { buildArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
+  const { buildArtistArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
   const { getPaginationParams } = require('@utils/pagination');
   const { getPriceRanges } = require('@utils/priceUtils');
   
@@ -458,8 +458,8 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     deletedAt: null
   };
 
-  // Aplicar filtros adicionales (técnica, precio, etc.)
-  const artworkFilter = buildArtworkFilter(q);
+  // Aplicar filtros adicionales (técnica, precio, etc.) sin filtro de availability
+  const artworkFilter = buildArtistArtworkFilter(q);
   const combinedFilter = { ...baseFilter, ...artworkFilter };
   
   // Paginación (máximo 9 obras por página)

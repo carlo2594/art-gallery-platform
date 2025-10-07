@@ -103,51 +103,51 @@ router.patch(
 /*  Gestión de Disponibilidad y Ventas                                */
 /* ------------------------------------------------------------------ */
 
-// Marcar como vendida (admin o dueño)
+// Marcar como vendida (solo admin)
 router.patch(
   '/:id/mark-sold',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.markArtworkSold
 );
 
-// Reservar obra (admin o dueño)
+// Reservar obra (solo admin)
 router.patch(
   '/:id/reserve',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.reserveArtwork
 );
 
-// Quitar reserva (admin o dueño)
+// Quitar reserva (solo admin)
 router.patch(
   '/:id/unreserve',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.unreserveArtwork
 );
 
-// Marcar como no disponible para venta (admin o dueño)
+// Marcar como no disponible para venta (solo admin)
 router.patch(
   '/:id/not-for-sale',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.setNotForSale
 );
 
-// Marcar como en préstamo (admin o dueño)
+// Marcar como en préstamo (solo admin)
 router.patch(
   '/:id/on-loan',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.setOnLoan
 );
 
-// Volver a poner en venta (admin o dueño)
+// Volver a poner en venta (solo admin)
 router.patch(
   '/:id/for-sale',
   requireUser,
-  isOwner(Artwork, 'artist'),
+  restrictTo('admin'),
   artworkAvailabilityController.setForSale
 );
 

@@ -34,7 +34,8 @@ router.get('/exhibitions', viewsController.getExhibitionsView);
 router.get('/search', viewsController.getSearchResults);
 
 // =================== GESTIÓN DE VENTAS (Admin) =========
-router.get('/admin/sales', viewsController.getSalesManagement);
-router.get('/admin/sales/:id', viewsController.getSaleDetail);
+// TODO: Implementar estos controladores en viewsController.js
+// router.get('/admin/sales', viewsController.getSalesManagement);
+// router.get('/admin/sales/:id', viewsController.getSaleDetail);
 
 module.exports = router;

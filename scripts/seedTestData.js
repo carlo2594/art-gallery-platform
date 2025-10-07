@@ -73,6 +73,7 @@ function norm(s) {
 
 // Agrega el arreglo de statuses permitidos
 const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+const AVAILABILITY_STATUSES = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 
 /**
  * Función principal que conecta a la base de datos, elimina toda la base y agrega datos de prueba variados.
@@ -311,8 +312,31 @@ async function seed() {
   console.log(`🔗 Slug: leonardo-martinez`);
   console.log(`📍 Ubicación: ${leonardoUser.location || 'Barcelona, España'}`);
   console.log(`🌐 Sitio web: ${leonardoUser.website || 'https://leonardo-martinez-art.com'}`);
-  console.log(`� Bio: ${leonardoUser.bio}`);
+  console.log(`📝 Bio: ${leonardoUser.bio}`);
   console.log(`\n✅ Puedes encontrar a este artista en: /artists/leonardo-martinez\n`);
+
+  // Estadísticas de disponibilidad
+  const availabilityStats = {};
+  AVAILABILITY_STATUSES.forEach(status => {
+    availabilityStats[status] = artworks.filter(artwork => artwork.availability === status).length;
+  });
+  
+  const soldArtworks = artworks.filter(artwork => artwork.availability === 'sold');
+  const totalRevenue = soldArtworks.reduce((sum, artwork) => {
+    return sum + (artwork.sale?.price_cents || artwork.price_cents);
+  }, 0);
+  
+  console.log(`📊 ESTADÍSTICAS DE DISPONIBILIDAD:`);
+  console.log(`🏪 Disponibles para venta: ${availabilityStats.for_sale}`);
+  console.log(`⏰ Reservadas: ${availabilityStats.reserved}`);
+  console.log(`💰 Vendidas: ${availabilityStats.sold}`);
+  console.log(`🚫 No disponibles: ${availabilityStats.not_for_sale}`);
+  console.log(`🤝 En préstamo: ${availabilityStats.on_loan}`);
+  console.log(`💵 Ingresos totales por ventas: $${(totalRevenue / 100).toFixed(2)} USD`);
+  console.log(`\n💡 TIP: Usa las rutas de API para gestionar disponibilidad:`);
+  console.log(`   PATCH /api/v1/artworks/:id/mark-sold`);
+  console.log(`   PATCH /api/v1/artworks/:id/reserve`);
+  console.log(`   PATCH /api/v1/artworks/:id/unreserve\n`);
 
   // Crea 10 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
