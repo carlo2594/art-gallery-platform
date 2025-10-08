@@ -21,7 +21,8 @@ module.exports = app => {
   app.use('/api/v1/favorites',   favoriteRoutes);
   app.use('/api/v1/artworks',    artworkRoutes);
   app.use('/api/v1/exhibitions', exhibitionRoutes);
-  app.use('/api/v1/artwork-views', artworkViewRoutes); 
+  app.use('/api/v1/artwork-views', artworkViewRoutes);
+  app.use('/api/v1/newsletter',  require('@routes/api/newsletterRoutes')); 
 
 
   /* ---------- 404 ---------- */

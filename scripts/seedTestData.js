@@ -10,6 +10,7 @@ const Favorite = require('../models/favoriteModel');
 const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
 const Comment = require('../models/commentModel');
 const PasswordResetToken = require('../models/passwordResetTokenModel');
+const Newsletter = require('../models/newsletterModel');
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
@@ -95,6 +96,7 @@ async function seed() {
     await ArtworkView.syncIndexes();
     await Comment.syncIndexes();
     await PasswordResetToken.syncIndexes();
+    await Newsletter.syncIndexes();
     console.log('✅ Índices sincronizados');
   } catch (error) {
     console.log('⚠️  Warning sincronizando índices:', error.message);
@@ -109,7 +111,8 @@ async function seed() {
     Favorite.deleteMany({}),
     ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÍNEA
     Comment.deleteMany({}),
-    PasswordResetToken.deleteMany({})
+    PasswordResetToken.deleteMany({}),
+    Newsletter.deleteMany({})
   ]);
   console.log('✅ Datos eliminados');
 
@@ -496,6 +499,19 @@ async function seed() {
     artwork.favoritesCount = count;
     await artwork.save();
   }
+
+  // Crear suscripciones de prueba al newsletter
+  console.log('📧 Creando suscripciones de newsletter...');
+  const newsletterData = [
+    { email: 'artlover@test.com', source: 'homepage' },
+    { email: 'collector@test.com', source: 'artwork_page', preferences: { salesAlerts: true } },
+    { email: 'gallery@test.com', source: 'exhibition_page' },
+    { email: 'curator@test.com', source: 'homepage', preferences: { artistSpotlight: true, exhibitions: true } },
+    { email: 'student@test.com', source: 'homepage', preferences: { newArtworks: true, artistSpotlight: false } }
+  ];
+
+  await Newsletter.insertMany(newsletterData);
+  console.log(`✅ ${newsletterData.length} suscripciones de newsletter creadas`);
 
   await mongoose.disconnect();
 }

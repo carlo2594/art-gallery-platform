@@ -35,13 +35,25 @@ block content
           p.mb-2 No hay obras publicadas todavía.
           a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
 
-  // Sección para invitar artistas
+  // Sección Para Artistas
   section.join-artists.position-relative
-    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Join Artists Background")
-    .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg
-      // Imagen superior opcional (puedes quitar si no quieres)
-      // img.card-img-top(src="/img/join-artists-bg.jpg", alt="Card image", class="rounded-top-4")
-      .card-body.text-center.p-4
-        h5.card-title.fw-bold.mb-3 Discover Art That Speaks to You
-        p.card-text.fs-5.mb-4 Explore a curated collection of contemporary artworks from emerging and established artists worldwide.
-        a.join-artists-btn.btn.btn-primary.rounded-pill.fw-bold(href="/obras")
+    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Únete como artista")
+    .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
+      .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
+        i.fas.fa-palette.text-primary.mb-1.mb-md-3(style="font-size: clamp(1.4rem, 5vw, 4rem);")
+        h1.card-title.fw-bold.mb-1.mb-md-3(style="font-size: clamp(1rem, 4vw, 3rem);") ¿Eres artista?
+        p.card-text.mb-1.mb-md-3(style="font-size: clamp(0.7rem, 2.5vw, 1.5rem); line-height: 1.2;") Únete a nuestra plataforma y comparte tu arte con coleccionistas de todo el mundo. Sin comisiones ocultas.
+        
+        .feature-list.mb-1.mb-md-3
+          .d-flex.align-items-center.justify-content-center.mb-1
+            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
+            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Exposición global 24/7
+          .d-flex.align-items-center.justify-content-center.mb-1
+            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
+            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Comisiones transparentes
+          .d-flex.align-items-center.justify-content-center.mb-1
+            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
+            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Soporte personalizado
+          
+        a.btn.btn-primary.rounded-pill.fw-bold.d-flex.align-items-center.justify-content-center.text-center(href="/signup", style="font-size: clamp(0.75rem, 2.5vw, 1.4rem); padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem) !important;") 
+          span Comenzar ahora
