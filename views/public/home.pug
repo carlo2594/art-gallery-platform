@@ -14,10 +14,9 @@ block content
           .d-grid.gap-2.d-md-flex.justify-content-md-start.mb-4.mb-lg-3.hero-cta
             a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase(href="/artworks") Ver el arte
         .col-lg-5.d-flex.justify-content-end.align-items-center.hero-image-container
-          img.hero-image(
+          img.hero-image.collectors-hero-image(
             src="/img/Ox-hero-image-landing.jpg",
-            alt="Galería del Ox",
-            style="max-width:100%;height:auto;border-radius:1.5rem;"
+            alt="Galería del Ox"
           )
 
   // Galería (Masonry estilo Codrops, igual que artworks.pug)
@@ -40,20 +39,20 @@ block content
     img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Únete como coleccionista")
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
       .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
-        i.fas.fa-gem.text-primary.mb-1.mb-md-3(style="font-size: clamp(1.4rem, 5vw, 4rem);")
-        h1.card-title.fw-bold.mb-1.mb-md-3(style="font-size: clamp(1rem, 4vw, 3rem);") ¿Eres coleccionista?
-        p.card-text.mb-1.mb-md-3(style="font-size: clamp(0.7rem, 2.5vw, 1.5rem); line-height: 1.2;") Descubre obras únicas de artistas emergentes y establecidos. Cada pieza viene con certificado de autenticidad.
+        i.fas.fa-gem.text-primary.mb-1.mb-md-3.collectors-icon
+        h1.card-title.fw-bold.mb-1.mb-md-3.collectors-title ¿Eres coleccionista?
+        p.card-text.mb-1.mb-md-3.collectors-description Descubre obras únicas de artistas emergentes y establecidos. Cada pieza viene con certificado de autenticidad.
         
         .feature-list.mb-1.mb-md-3
           .d-flex.align-items-center.justify-content-center.mb-1
-            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
-            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Autenticidad garantizada
+            i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
+            span.fw-medium.collectors-check-text Autenticidad garantizada
           .d-flex.align-items-center.justify-content-center.mb-1
-            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
-            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Envío seguro incluido
+            i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
+            span.fw-medium.collectors-check-text Envío seguro incluido
           .d-flex.align-items-center.justify-content-center.mb-1
-            i.fas.fa-check.text-success.me-1.me-md-3(style="font-size: clamp(0.7rem, 2vw, 1.4rem);")
-            span.fw-medium(style="font-size: clamp(0.65rem, 2vw, 1.3rem);") Asesoría especializada
+            i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
+            span.fw-medium.collectors-check-text Asesoría especializada
           
-        a.btn.btn-primary.rounded-pill.fw-bold.d-flex.align-items-center.justify-content-center.text-center(href="/artworks", style="font-size: clamp(0.75rem, 2.5vw, 1.4rem); padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem) !important;") 
+        a.btn.btn-primary.rounded-pill.fw-bold.d-flex.align-items-center.justify-content-center.text-center.collectors-cta-btn(href="/artworks") 
           span Explorar obras

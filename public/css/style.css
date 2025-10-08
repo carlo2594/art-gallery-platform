@@ -354,7 +354,7 @@ section.hero .hero-description { font-family: var(--font-subtitle) !important; f
 }
 
 /* ==========================================
-  5. SECTIONS: JOIN ARTISTS
+  5. SECTIONS: JOIN ARTISTS (COLLECTORS)
   ========================================== */
 section.join-artists { position: relative; margin-top: 5rem; }
 .join-artists-bg { width: 100%; height: auto; display: block; border-radius: 2rem; object-fit: cover; }
@@ -362,6 +362,39 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .join-artists-card .card-body { padding: 2rem; }
 .join-artists-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; padding: .75rem 2.5rem !important; font-size: 1.15rem !important; border-radius: 2rem !important; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15); }
 .join-artists-btn:hover, .join-artists-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+
+/* Collectors section styling */
+.collectors-hero-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1.5rem;
+}
+
+.collectors-icon {
+  font-size: clamp(1.4rem, 5vw, 4rem);
+}
+
+.collectors-title {
+  font-size: clamp(1rem, 4vw, 3rem);
+}
+
+.collectors-description {
+  font-size: clamp(0.7rem, 2.5vw, 1.5rem);
+  line-height: 1.2;
+}
+
+.collectors-check-icon {
+  font-size: clamp(0.7rem, 2vw, 1.4rem);
+}
+
+.collectors-check-text {
+  font-size: clamp(0.65rem, 2vw, 1.3rem);
+}
+
+.collectors-cta-btn {
+  font-size: clamp(0.75rem, 2.5vw, 1.4rem);
+  padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem) !important;
+}
 
 /* ==========================================
   6. LAYOUT: ARTWORKS GRID & PAGER
@@ -935,6 +968,372 @@ section.join-artists { position: relative; margin-top: 5rem; }
     padding-top: 2rem;
     padding-bottom: 2rem;
   }
+}
+
+/* Artwork info responsive container */
+.artwork-info-container {
+  max-width: 600px;
+}
+
+/* Artist name hover effects */
+.artist-name-hover {
+  color: var(--bs-gray-600) !important;
+  transition: color 0.3s ease;
+}
+
+.artist-name-hover:hover {
+  color: var(--ox-orange) !important;
+}
+
+.artist-title-hover {
+  color: var(--ox-blue);
+  transition: color 0.3s ease;
+}
+
+.artist-title-hover:hover {
+  color: var(--ox-orange);
+}
+
+/* Button letter spacing */
+.btn-letter-spacing {
+  letter-spacing: 0.1em;
+}
+
+/* Related artworks section */
+.related-artworks {
+  margin-top: 4rem;
+}
+
+/* Back navigation section */
+.back-navigation {
+  margin-top: 3rem;
+}
+
+/* ==========================================
+  14.1. ARTIST DETAIL PAGE IMPROVEMENTS
+  ========================================== */
+/* Artist hero section */
+.artist-hero-fullscreen {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.artist-hero-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.artist-hero-placeholder {
+  background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.artist-hero-overlay {
+  background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+}
+
+.artist-hero-content {
+  z-index: 10;
+}
+
+.artist-name-desktop {
+  font-family: var(--font-title);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.artist-member-since {
+  font-family: var(--font-subtitle);
+  font-weight: 300;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.artist-bio-desktop {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  max-width: 600px;
+}
+
+.artist-action-btn {
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.1);
+}
+
+.artist-techniques-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Artist Detail - Additional Classes */
+.artist-image-cover {
+    object-fit: cover;
+    object-position: center;
+}
+
+.artist-gradient-bg {
+    background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.artist-hero-z-index {
+    z-index: 10;
+}
+
+.artist-title-font {
+    font-family: var(--font-title);
+}
+
+.artist-text-shadow {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.artist-text-shadow-light {
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.artist-subtitle-font {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.artist-bio-style {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    max-width: 600px;
+}
+
+/* Mobile Layout Styles */
+.artist-mobile-bg {
+    background: var(--ox-beige);
+}
+
+.artist-mobile-title {
+    font-family: var(--font-title);
+    color: var(--ox-blue);
+}
+
+.artist-mobile-subtitle {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.artist-mobile-bio {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.artist-mobile-action-btn {
+    border-radius: 2rem;
+}
+
+.artist-mobile-techniques-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.artist-mobile-techniques-label {
+    color: var(--ox-blue);
+}
+
+.artist-artworks-bg {
+    background: var(--ox-beige);
+}
+
+/* ========================================
+   EXHIBITION DETAIL STYLES
+======================================== */
+
+/* Exhibition Hero Section */
+.exhibition-hero-fullscreen {
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.exhibition-image-cover {
+    object-fit: cover;
+    object-position: center;
+}
+
+.exhibition-gradient-bg {
+    background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.exhibition-hero-overlay {
+    background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+}
+
+.exhibition-hero-z-index {
+    z-index: 10;
+}
+
+.exhibition-title-font {
+    font-family: var(--font-title);
+    color: white;
+}
+
+.exhibition-description-style {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.exhibition-info-flex {
+    min-width: 300px;
+    max-width: 100%;
+}
+
+.exhibition-dates-flex {
+    min-width: 260px;
+    max-width: 100%;
+}
+
+.exhibition-info-card {
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.exhibition-artist-link {
+    color: rgba(255,255,255,0.85);
+    transition: all 0.2s ease;
+}
+
+.exhibition-artist-link:hover {
+    color: var(--ox-orange);
+}
+
+/* Exhibition Mobile Section */
+.exhibition-mobile-bg {
+    background: var(--ox-beige);
+}
+
+.exhibition-mobile-title {
+    font-family: var(--font-title);
+    color: var(--ox-blue);
+}
+
+.exhibition-mobile-date {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.exhibition-mobile-description {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.exhibition-mobile-card {
+    max-width: 350px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+}
+
+.exhibition-venue-text {
+    font-family: var(--font-subtitle);
+}
+
+/* Artist Detail - Section Titles and Container Padding */
+.artist-section-title {
+    color: var(--ox-blue);
+    font-family: var(--font-title);
+}
+
+.artist-container-padding {
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+.artist-back-btn {
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+}
+
+/* Exhibition Detail - Additional Styles */
+.exhibition-guests-card {
+    max-width: 400px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+}
+
+.exhibition-guests-title {
+    font-family: var(--font-subtitle);
+    font-weight: 500;
+    color: var(--ox-blue);
+}
+
+.exhibition-artist-badge {
+    font-size: 0.85rem;
+    font-weight: 400;
+    border-radius: 2rem;
+    transition: all 0.2s ease;
+    color: var(--ox-blue) !important;
+}
+
+.exhibition-artist-badge:hover {
+    background-color: var(--ox-blue) !important;
+    color: white !important;
+}
+
+.exhibition-guest-badge {
+    font-size: 0.85rem;
+    font-weight: 400;
+    border-radius: 2rem;
+}
+
+.exhibition-artworks-bg {
+    background: var(--ox-beige);
+}
+
+.exhibition-back-btn {
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+}/* Artist mobile section */
+.artist-mobile-bg {
+  background: var(--ox-beige);
+}
+
+.artist-name-mobile {
+  font-family: var(--font-title);
+  color: var(--ox-blue);
+}
+
+.artist-member-since-mobile {
+  font-family: var(--font-subtitle);
+  font-weight: 300;
+}
+
+.artist-bio-mobile {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.artist-techniques-card-mobile {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.artist-techniques-label-mobile {
+  color: var(--ox-blue);
+}
+
+.artist-artworks-bg {
+  background: var(--ox-beige);
+}
+
+.artist-artworks-title {
+  color: var(--ox-blue);
+  font-family: var(--font-title);
 }
 
 /* ==========================================

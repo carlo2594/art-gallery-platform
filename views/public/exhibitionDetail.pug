@@ -9,36 +9,33 @@ block content
 
   main.main-content.exhibition-detail-page
     // Hero Section (similar style to artist detail)
-    section.exhibition-hero.position-relative(style="min-height: 100vh; overflow: hidden;")
+    section.exhibition-hero.position-relative.exhibition-hero-fullscreen
       // Imagen de fondo
       .hero-background.position-absolute.w-100.h-100
         if exhibition && exhibition.coverImage
-          img.hero-bg-image.w-100.h-100(
+          img.hero-bg-image.w-100.h-100.exhibition-image-cover(
             src=exhibition.coverImage,
-            alt=(exhibition.title || exhibition.name || 'Exposición'),
-            style="object-fit: cover; object-position: center;"
+            alt=(exhibition.title || exhibition.name || 'Exposición')
           )
         else
-          .hero-bg-placeholder.w-100.h-100(
-            style="background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);"
-          )
+          .hero-bg-placeholder.w-100.h-100.exhibition-gradient-bg
 
       // Overlay
-      .hero-overlay.position-absolute.w-100.h-100(style="background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);")
+      .hero-overlay.position-absolute.w-100.h-100.exhibition-hero-overlay
 
       // Contenido superpuesto
-      .hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
+      .hero-content.position-absolute.bottom-0.start-0.w-100.exhibition-hero-z-index
         .container.text-white.pb-5
           .d-none.d-lg-flex.gap-4.justify-content-center.align-items-end
             // Columna 1: Título y descripción
-            .flex-fill(style="min-width:300px; max-width:100%;")
-              h1.display-4.fw-bold.mb-3(style="font-family: var(--font-title); color: white;")= title
+            .flex-fill.exhibition-info-flex
+              h1.display-4.fw-bold.mb-3.exhibition-title-font= title
               if exhibition && exhibition.description
-                p.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5;")= exhibition.description
+                p.lead.mb-4.text-white-75.exhibition-description-style= exhibition.description
 
             // Columna 2: Fechas y lugar
-            .flex-fill(style="min-width:260px; max-width:100%;")
-              .text-center.p-4(style="height:100%; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+            .flex-fill.exhibition-dates-flex
+              .text-center.p-4.exhibition-info-card
                 .small.text-white-75.mb-2 Fechas
                 - try {
                 -   var hasStart = exhibition && exhibition.startDate;
@@ -85,79 +82,79 @@ block content
 
             // Columna 3: Artistas invitados
             if guestArtists && guestArtists.length
-              .flex-fill(style="min-width:260px; max-width:100%;")
-                .text-center.p-4(style="height:100%; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+              .flex-fill.exhibition-dates-flex
+                .text-center.p-4.exhibition-info-card
                   .small.text-white-75.mb-2 Artistas invitados
                   ul.list-unstyled.mb-0
                     each p in guestArtists
                       li.text-white-75
                         if p.user && p.user.slug
-                          a.text-decoration-none(href=`/artists/${p.user.slug}`, style="color: rgba(255,255,255,0.85); transition: all 0.2s ease;", onmouseover="this.style.color='var(--ox-orange)'", onmouseout="this.style.color='rgba(255,255,255,0.85)'")
+                          a.text-decoration-none.exhibition-artist-link(href=`/artists/${p.user.slug}`)
                             | #{p.user.name}
                         else
                           | #{p.user && p.user.name}
 
     // Contenido móvil (titulo, fechas, bio) – visible solo en < lg
-    section.exhibition-mobile.d-lg-none.py-5(style="background: var(--ox-beige);")
+    section.exhibition-mobile.d-lg-none.py-5.exhibition-mobile-bg
       .container
         .row
           .col-12.text-center.mb-4
-            h1.display-4.fw-bold.mb-2(style="font-family: var(--font-title); color: var(--ox-blue);")= title
+            h1.display-4.fw-bold.mb-2.exhibition-mobile-title= title
             if dateText
-              h2.h5.mb-3.text-muted(style="font-family: var(--font-subtitle); font-weight: 300;")= dateText
+              h2.h5.mb-3.text-muted.exhibition-mobile-date= dateText
             if exhibition && exhibition.description
-              p.lead.mb-0.text-dark(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5;")= exhibition.description
+              p.lead.mb-0.text-dark.exhibition-mobile-description= exhibition.description
 
         .row.mt-4
           .col-12.text-center
-            .card.shadow-sm.border-0.mx-auto(style="max-width: 350px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);")
+            .card.shadow-sm.border-0.mx-auto.exhibition-mobile-card
               .card-body.p-4
                 if exhibition && exhibition.location && exhibition.location.type === 'physical'
                   .d-flex.flex-column.align-items-center
                     .mb-2
                       i.fas.fa-map-marker-alt.fa-2x.text-primary
-                    .h6.mb-0.text-dark(style="font-family: var(--font-subtitle);")= exhibition.venue || exhibition.location.address || 'Por anunciar'
+                    .h6.mb-0.text-dark.exhibition-venue-text= exhibition.venue || exhibition.location.address || 'Por anunciar'
                     .small.text-muted Ubicación física
                 else if exhibition && exhibition.location && exhibition.location.type === 'virtual'
                   .d-flex.flex-column.align-items-center
                     .mb-2
                       i.fas.fa-globe.fa-2x.text-primary
-                    .h6.mb-0.text-dark(style="font-family: var(--font-subtitle);") Exposición virtual
+                    .h6.mb-0.text-dark.exhibition-venue-text Exposición virtual
                 else
                   .d-flex.flex-column.align-items-center
                     .mb-2
                       i.fas.fa-map-marker-alt.fa-2x.text-muted
-                    .h6.mb-0.text-muted(style="font-family: var(--font-subtitle);") Por anunciar
+                    .h6.mb-0.text-muted.exhibition-venue-text Por anunciar
                     .small.text-muted Ubicación pendiente
 
         // Artistas invitados (móvil)
         if guestArtists && guestArtists.length
           .row.mt-5
             .col-12.text-center
-              .card.shadow-sm.border-0.mx-auto(style="max-width: 400px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);")
+              .card.shadow-sm.border-0.mx-auto.exhibition-guests-card
                 .card-body.p-4
-                  .h6.mb-3(style="font-family: var(--font-subtitle); font-weight: 500; color: var(--ox-blue);") 
+                  .h6.mb-3.exhibition-guests-title 
                     i.fas.fa-users.me-2
                     | Artistas invitados
                   .d-flex.flex-wrap.justify-content-center.gap-2
                     each p in guestArtists
                       if p.user && p.user.slug
-                        a.badge.bg-light.text-dark.px-3.py-2.text-decoration-none(href=`/artists/${p.user.slug}`, style="font-size: 0.85rem; font-weight: 400; border-radius: 2rem; transition: all 0.2s ease; color: var(--ox-blue) !important;", onmouseover="this.style.backgroundColor='var(--ox-blue)'; this.style.color='white'", onmouseout="this.style.backgroundColor='#f8f9fa'; this.style.color='var(--ox-blue)'")
+                        a.badge.bg-light.text-dark.px-3.py-2.text-decoration-none.exhibition-artist-badge(href=`/artists/${p.user.slug}`)
                           | #{p.user.name}
                       else
-                        .badge.bg-light.text-dark.px-3.py-2(style="font-size: 0.85rem; font-weight: 400; border-radius: 2rem;")= p.user && p.user.name
+                        .badge.bg-light.text-dark.px-3.py-2.exhibition-guest-badge= p.user && p.user.name
 
     // Obras de la exposición
     if artworks && artworks.length > 0
-      section.exhibition-artworks.py-5(style="background: var(--ox-beige);")
+      section.exhibition-artworks.py-5.exhibition-artworks-bg
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);") Obras en esta exposición
+              h2.section-title.display-5.fw-bold.mb-3.artist-section-title Obras en esta exposición
               - var displayText = (typeof totalArtworks !== 'undefined' && typeof artworks !== 'undefined') ? (artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`) : `${artworks.length} obra${artworks.length === 1 ? '' : 's'}`
               p.lead.text-muted= displayText
 
-        .container-xxl.artworks-flex(style="padding-left: 3rem; padding-right: 3rem;")
+        .container-xxl.artworks-flex.artist-container-padding
           .artworks-grid-paginate
             include _artworkGrid.pug
             if typeof totalPages !== 'undefined' && totalPages > 1
@@ -174,6 +171,6 @@ block content
       .container
         .row
           .col-12.text-center
-            a.btn.btn-outline-primary.btn-lg(href="/exhibitions", style="border-radius: 2rem; padding: 0.75rem 2rem;")
+            a.btn.btn-outline-primary.btn-lg.exhibition-back-btn(href="/exhibitions")
               i.fas.fa-arrow-left.me-2
               | Volver a Exposiciones

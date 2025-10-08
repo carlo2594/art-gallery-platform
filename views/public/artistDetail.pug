@@ -3,39 +3,34 @@ extends ../layouts/public
 block content
   main.main-content.artist-detail-page
     // Hero Section - Estilo Google Arts & Culture
-    section.artist-profile-hero.artist-hero-section.position-relative(style="min-height: 100vh; overflow: hidden;")
+    section.artist-profile-hero.artist-hero-section.position-relative.artist-hero-fullscreen
       // Imagen de fondo
       .hero-background.artist-hero-bg.position-absolute.w-100.h-100
         if artist.profileImage
-          img.hero-bg-image.artist-bg-image.w-100.h-100(
+          img.hero-bg-image.artist-bg-image.w-100.h-100.artist-image-cover(
             src=artist.profileImage, 
-            alt=artist.name,
-            style="object-fit: cover; object-position: center;"
+            alt=artist.name
           )
         else
-          .hero-bg-placeholder.artist-bg-placeholder.w-100.h-100(
-            style="background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);"
-          )
+          .hero-bg-placeholder.artist-bg-placeholder.w-100.h-100.artist-gradient-bg
       
       // Overlay oscuro
-      .hero-overlay.artist-hero-overlay.position-absolute.w-100.h-100(
-        style="background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);"
-      )
+      .hero-overlay.artist-hero-overlay.position-absolute.w-100.h-100.exhibition-hero-overlay
       
       // Contenido superpuesto
-      .hero-content.artist-hero-content.position-absolute.bottom-0.start-0.w-100(style="z-index: 10;")
+      .hero-content.artist-hero-content.position-absolute.bottom-0.start-0.w-100.artist-hero-z-index
         .container
           .row
             // LAYOUT PARA DESKTOP (lg+): Contenido superpuesto
             .col-lg-8.d-none.d-lg-block
               .artist-hero-info.artist-info-desktop.text-white.pb-5
-                h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3(style="font-family: var(--font-title); text-shadow: 0 2px 8px rgba(0,0,0,0.5);")= artist.name
+                h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
                 
                 if artist.createdAt
-                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50(style="font-family: var(--font-subtitle); font-weight: 300; text-shadow: 0 1px 4px rgba(0,0,0,0.5);")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
                 
                 if artist.bio
-                  p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5; text-shadow: 0 1px 4px rgba(0,0,0,0.5); max-width: 600px;")= artist.bio
+                  p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75.artist-bio-style= artist.bio
                 
                 // Información adicional compacta
                 .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
@@ -71,11 +66,11 @@ block content
                 
                 // Acciones del usuario
                 .hero-actions.artist-actions-desktop.d-flex.gap-3
-                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn
                     i.fas.fa-heart.me-2
                     | Seguir
                   
-                  button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn(style="border-radius: 2rem; backdrop-filter: blur(10px); background: rgba(255,255,255,0.1);")
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
                     i.fas.fa-share.me-2
                     | Compartir
             
@@ -85,7 +80,7 @@ block content
               .stats-floating.artist-stats-desktop.text-white.pb-5
                 .row.g-3.justify-content-center
                   .col-10
-                    .stat-item.artist-techniques-card.text-center.p-4(style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.1); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.2);")
+                    .stat-item.artist-techniques-card.text-center.p-4.artist-techniques-card
                       .stat-label.artist-techniques-label.small.text-white-75.mb-3 Técnicas
                       .techniques-list.artist-techniques-list
                         if stats.techniques && stats.techniques.length > 0
@@ -98,18 +93,18 @@ block content
                           .small.text-white-50.artist-no-techniques Sin técnicas
 
     // LAYOUT PARA MÓVIL/TABLET (< lg): Contenido debajo de la imagen
-    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5(style="background: var(--ox-beige);")
+    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5.artist-mobile-bg
       .container
         .row
           .col-12.text-center.mb-4
             // Información del artista para móvil
-            h1.hero-title.artist-name-mobile.display-4.fw-bold.mb-3(style="font-family: var(--font-title); color: var(--ox-blue);")= artist.name
+            h1.hero-title.artist-name-mobile.display-4.fw-bold.mb-3.artist-mobile-title= artist.name
             
             if artist.createdAt
-              h2.hero-subtitle.artist-member-since-mobile.h5.mb-4.text-muted(style="font-family: var(--font-subtitle); font-weight: 300;")= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+              h2.hero-subtitle.artist-member-since-mobile.h5.mb-4.text-muted.artist-mobile-subtitle= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
             
             if artist.bio
-              p.hero-bio.artist-bio-mobile.lead.mb-4.text-dark(style="font-family: var(--font-subtitle); font-style: italic; line-height: 1.5;")= artist.bio
+              p.hero-bio.artist-bio-mobile.lead.mb-4.text-dark.artist-mobile-bio= artist.bio
         
         .row.mb-4
           .col-12
@@ -147,19 +142,19 @@ block content
             
             // Acciones del usuario para móvil
             .hero-actions.artist-actions-mobile.d-flex.justify-content-center.gap-3.mb-4
-              button.btn.btn-primary.btn-lg.px-4.artist-follow-btn-mobile(style="border-radius: 2rem;")
+              button.btn.btn-primary.btn-lg.px-4.artist-follow-btn-mobile.artist-mobile-action-btn
                 i.fas.fa-heart.me-2
                 | Seguir
               
-              button.btn.btn-outline-primary.btn-lg.px-4.artist-share-btn-mobile(style="border-radius: 2rem;")
+              button.btn.btn-outline-primary.btn-lg.px-4.artist-share-btn-mobile.artist-mobile-action-btn
                 i.fas.fa-share.me-2
                 | Compartir
         
         .row.justify-content-center
           .col-md-8.col-lg-6
             // Técnicas para móvil
-            .stat-item.artist-techniques-card-mobile.text-center.p-4.shadow-sm(style="background: white; border-radius: 1rem; border: 1px solid #e9ecef;")
-              .stat-label.artist-techniques-label-mobile.h5.mb-3(style="color: var(--ox-blue);") Técnicas
+            .stat-item.artist-techniques-card-mobile.text-center.p-4.shadow-sm.artist-mobile-techniques-card
+              .stat-label.artist-techniques-label-mobile.h5.mb-3.artist-mobile-techniques-label Técnicas
               .techniques-list.artist-techniques-list-mobile
                 if stats.techniques && stats.techniques.length > 0
                   each technique in stats.techniques.slice(0, 10)
@@ -172,18 +167,18 @@ block content
 
     // Sección de obras del artista
     if artworks && artworks.length > 0
-      section.artist-artworks.artist-artworks-section.py-5(style="background: var(--ox-beige);")
+      section.artist-artworks.artist-artworks-section.py-5.artist-artworks-bg
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
               - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
               p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
 
         // Filtros solo visibles si hay obras y más de 1 obra para filtrar
         if totalArtworks > 1
           section.filters-toolbar.artist-filters-section.py-2
-            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2(style="padding-left: 3rem; padding-right: 3rem;")
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
               // Set variables before including the filter fragment
               - var q = typeof q !== 'undefined' ? q : {};
               - var techniques = typeof techniques !== 'undefined' ? techniques : [];
@@ -192,7 +187,7 @@ block content
               - var actionUrl = `/artists/${artist.slug || artist._id}`;
               include _artworkFilters.pug
         
-        .container-xxl.artworks-flex.artist-artworks-grid(style="padding-left: 3rem; padding-right: 3rem;")
+        .container-xxl.artworks-flex.artist-artworks-grid.artist-container-padding
           if artworks && artworks.length
             .artworks-grid-paginate.artist-artworks-paginate
               include _artworkGrid.pug
@@ -204,12 +199,12 @@ block content
       // No hay obras (puede ser por filtros o porque realmente no tiene obras)
       section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
-          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3(style="color: var(--ox-blue); font-family: var(--font-title);")= `Obras de ${artist.name}`
+          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
           
           // Mostrar filtros si hay más de 1 obra del artista pero están filtradas
           if stats.totalArtworks > 1
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
-              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2(style="padding-left: 3rem; padding-right: 3rem;")
+              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
                 // Set variables before including the filter fragment
                 - var q = typeof q !== 'undefined' ? q : {};
                 - var techniques = typeof techniques !== 'undefined' ? techniques : [];
@@ -239,6 +234,6 @@ block content
       .container
         .row
           .col-12.text-center
-            a.btn.btn-outline-primary.btn-lg.artist-back-btn(href="/artists", style="border-radius: 2rem; padding: 0.75rem 2rem;")
+            a.btn.btn-outline-primary.btn-lg.artist-back-btn.artist-back-btn(href="/artists")
               i.fas.fa-arrow-left.me-2
               | Volver a Artistas

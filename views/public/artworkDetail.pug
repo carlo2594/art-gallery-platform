@@ -15,14 +15,14 @@ block content
       
       // Información de la obra
       .col-xl-4
-        .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto(style="max-width: 600px;")
+        .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto.artwork-info-container
           h1.display-4.fw-bold.mb-3= artwork.title
           
           // Información del artista
           if artwork.artist
             .mb-3
               h6.text-uppercase.fw-bold.mb-1.text-muted
-                a.text-decoration-none(href=`/artists/${artwork.artist.slug || artwork.artist._id}`, style="color: var(--bs-gray-600) !important; transition: color 0.3s ease;", onmouseover="this.style.color='var(--ox-orange)'; this.style.setProperty('color', 'var(--ox-orange)', 'important')", onmouseout="this.style.setProperty('color', 'var(--bs-gray-600)', 'important')")= artwork.artist.name
+                a.text-decoration-none.artist-name-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
               if artwork.artist.location
                 small.text-muted= artwork.artist.location
           
@@ -55,16 +55,14 @@ block content
             // Botón de acción
             .action-buttons.mb-3
               if user
-                button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase(
+                button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing(
                   type="button"
                   onclick=`toggleFavorite('${artwork._id}')`
-                  style="letter-spacing: 0.1em;"
                 )
                   span CONSULTAR COMPRA
               else
-                a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase(
+                a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing(
                   href="/login"
-                  style="letter-spacing: 0.1em;"
                 )
                   span CONSULTAR COMPRA
             
@@ -108,11 +106,11 @@ block content
 
     // Obras relacionadas del mismo artista
     if relatedArtworks && relatedArtworks.length > 0
-      section.related-artworks.py-5(style="margin-top: 4rem;")
+      section.related-artworks.py-5
         .row
           .col-12
             h3.mb-4 Más obras de 
-              a.text-decoration-none(href=`/artists/${artwork.artist.slug || artwork.artist._id}`, style="color: var(--ox-blue); transition: color 0.3s ease;", onmouseover="this.style.color='var(--ox-orange)'", onmouseout="this.style.color='var(--ox-blue)'")= artwork.artist.name
+              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
           
           // Grid usando el estilo de _artworkGrid.pug
           ul.grid.effect-2#related-grid.mb-5
@@ -160,7 +158,7 @@ block content
                           .grid-card-stat-item #{relatedArtwork.favoritesCount.toLocaleString()} favoritos
 
     // Botón volver
-    section.back-navigation.py-4(style="margin-top: 3rem;")
+    section.back-navigation.py-4
       .row
         .col-12.text-center
           a.btn.btn-secondary.btn-lg(href="/artworks")
