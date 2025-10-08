@@ -2,7 +2,7 @@ extends ../layouts/public
 
 block content
   .container-xxl.mt-5
-    .row.artwork-detail-main
+    .row.artwork-detail-main.mb-5
       // Imagen de la obra con lightbox
       .col-xl-8
         .artwork-image-container.mb-4
@@ -15,14 +15,14 @@ block content
       
       // Información de la obra
       .col-xl-4
-        .artwork-info.ps-xl-4.px-4
+        .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto(style="max-width: 600px;")
           h1.display-4.fw-bold.mb-3= artwork.title
           
           // Información del artista
           if artwork.artist
             .mb-3
               h6.text-uppercase.fw-bold.mb-1.text-muted
-                a.text-decoration-none.text-muted(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+                a.text-decoration-none(href=`/artists/${artwork.artist.slug || artwork.artist._id}`, style="color: var(--bs-gray-600) !important; transition: color 0.3s ease;", onmouseover="this.style.color='var(--ox-orange)'; this.style.setProperty('color', 'var(--ox-orange)', 'important')", onmouseout="this.style.setProperty('color', 'var(--bs-gray-600)', 'important')")= artwork.artist.name
               if artwork.artist.location
                 small.text-muted= artwork.artist.location
           
@@ -108,9 +108,11 @@ block content
 
     // Obras relacionadas del mismo artista
     if relatedArtworks && relatedArtworks.length > 0
-      .row.mt-5
-        .col-12
-          h3.mb-4 Más obras de #{artwork.artist.name}
+      section.related-artworks.py-5(style="margin-top: 4rem;")
+        .row
+          .col-12
+            h3.mb-4 Más obras de 
+              a.text-decoration-none(href=`/artists/${artwork.artist.slug || artwork.artist._id}`, style="color: var(--ox-blue); transition: color 0.3s ease;", onmouseover="this.style.color='var(--ox-orange)'", onmouseout="this.style.color='var(--ox-blue)'")= artwork.artist.name
           
           // Grid usando el estilo de _artworkGrid.pug
           ul.grid.effect-2#related-grid.mb-5
@@ -158,11 +160,12 @@ block content
                           .grid-card-stat-item #{relatedArtwork.favoritesCount.toLocaleString()} favoritos
 
     // Botón volver
-    .row.mt-5
-      .col-12.text-center
-        a.btn.btn-secondary.btn-lg(href="/artworks")
-          i.fas.fa-arrow-left.me-2
-          span Volver a obras
+    section.back-navigation.py-4(style="margin-top: 3rem;")
+      .row
+        .col-12.text-center
+          a.btn.btn-secondary.btn-lg(href="/artworks")
+            i.fas.fa-arrow-left.me-2
+            span Volver a obras
 
   // Lightbox overlay
   #lightbox.lightbox(
