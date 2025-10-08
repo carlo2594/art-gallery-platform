@@ -15,8 +15,8 @@ const userSchema = new mongoose.Schema({
 },
   slug: {
     type: String,
-    unique: true,
     trim: true
+    // unique se define con índice explícito abajo
   },
   password: { type: String, required: true, select: false },   // hash no se envía
   role: {
@@ -41,8 +41,8 @@ const userSchema = new mongoose.Schema({
 });
 
 /* ---------- Índices optimizados para viewsController ---------- */
-// 1. Índice para búsqueda de artistas por rol y slug (getArtistDetail)
-userSchema.index({ role: 1, slug: 1 });
+// 1. Índice único para slug solo (para garantizar unicidad global)
+userSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
 // 2. Índice para búsqueda de artistas (getArtistsView, getSearchResults)
 userSchema.index({ 
@@ -58,8 +58,7 @@ userSchema.index({
   bio: 'text' 
 });
 
-// 4. Índice básico para email único (ya existe implícitamente por unique: true)
-userSchema.index({ email: 1 });
+// Nota: El índice para email único ya existe implícitamente por unique: true en la definición del campo
 
 /* ---------- Función para generar slug ---------- */
 function generateSlug(name) {

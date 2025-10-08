@@ -16,7 +16,7 @@ const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
     title: { type: String, required: true, trim: true },
-    slug: { type: String, unique: true, index: true }, // URL-friendly version of title
+    slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
     description: { type: String, trim: true },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
@@ -101,6 +101,9 @@ const artworkSchema = new mongoose.Schema(
 );
 
 /* (2) Índices adicionales */
+// Índice único para slug (para SEO y URLs amigables)
+artworkSchema.index({ slug: 1 }, { unique: true, sparse: true });
+
 // Índices básicos existentes
 artworkSchema.index({ artist: 1, status: 1 });
 artworkSchema.index({ favoritesCount: -1 });

@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "dev": "node --watch server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:clean": "node scripts/cleanDatabase.js",
+    "db:seed": "node scripts/seedTestData.js",
+    "db:reset": "npm run db:clean && npm run db:seed"
   },
   "keywords": [
     "galeria",

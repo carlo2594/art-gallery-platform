@@ -4,7 +4,7 @@ const { norm } = require('@utils/normalizer');
 
 const exhibitionSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  slug:  { type: String, index: true, unique: true, sparse: true },
+  slug:  { type: String }, // índice único definido explícitamente abajo
   description: String,
   coverImage: String,
   images: [String], // Imágenes adicionales

@@ -83,7 +83,24 @@ const AVAILABILITY_STATUSES = ['for_sale', 'reserved', 'sold', 'not_for_sale', '
  */
 async function seed() {
   await mongoose.connect(DB);
+  
+  console.log('🔄 Sincronizando índices...');
+  
+  // Sincronizar índices para evitar warnings de duplicados
+  try {
+    await User.syncIndexes();
+    await Artwork.syncIndexes(); 
+    await Exhibition.syncIndexes();
+    await Favorite.syncIndexes();
+    await ArtworkView.syncIndexes();
+    await Comment.syncIndexes();
+    await PasswordResetToken.syncIndexes();
+    console.log('✅ Índices sincronizados');
+  } catch (error) {
+    console.log('⚠️  Warning sincronizando índices:', error.message);
+  }
 
+  console.log('🗑️  Limpiando datos existentes...');
   // Elimina todos los documentos de cada colección (incluyendo artwork views)
   await Promise.all([
     User.deleteMany({}),
@@ -94,6 +111,7 @@ async function seed() {
     Comment.deleteMany({}),
     PasswordResetToken.deleteMany({})
   ]);
+  console.log('✅ Datos eliminados');
 
 
   // Crea 20 artistas de prueba y 2 admins
