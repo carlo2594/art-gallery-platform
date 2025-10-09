@@ -17,8 +17,12 @@ router.get('/reset-link-invalid', viewsController.getResetLinkInvalid);
 router.get('/forgot-password', viewsController.getForgotPassword);
 router.get('/welcome', viewsController.getWelcome);
 
+
 // =================== QUIÉNES SOMOS =====================
 router.get('/about', viewsController.getAbout);
+
+// =================== CONTACT (ENGLISH) =================
+router.get('/contact', viewsController.getContact);
 
 // =================== ARTISTAS ==========================
 router.get('/artists', viewsController.getArtistsView);

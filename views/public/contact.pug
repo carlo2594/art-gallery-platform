@@ -1,0 +1,35 @@
+extends ../layouts/public
+
+block content
+  section.contact-section.py-5
+    .container
+      .row.justify-content-center
+        .col-lg-8
+          h1.display-4.fw-bold.mb-4 Contact Us
+          p.lead.mb-4 If you have any questions, inquiries, or would like to get in touch with Galería del Ox, please use the information below or fill out our contact form.
+
+          ul.list-unstyled.mb-4
+            li.mb-2
+              strong Email: 
+              a(href="mailto:info@galeriadelox.com") info@galeriadelox.com
+            li.mb-2
+              strong Phone: 
+              a(href="tel:+521234567890") +52 123 456 7890
+            li.mb-2
+              strong Address: 
+              | Calle Ficticia 123, Ciudad de México, México
+
+          h2.h5.mt-5.mb-3 Send us a message
+          form(action="/api/v1/contact" method="POST")
+            .mb-3
+              label.form-label(for="name") Name
+              input#name.form-control(type="text" name="name" required)
+            .mb-3
+              label.form-label(for="email") Email
+              input#email.form-control(type="email" name="email" required)
+            .mb-3
+              label.form-label(for="message") Message
+              textarea#message.form-control(name="message" rows="5" required)
+            button.btn.btn-primary(type="submit") Send Message
+
+  // Optionally, add a map or social links here

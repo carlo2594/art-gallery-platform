@@ -1,3 +1,9 @@
+// Vista de contacto (inglés)
+exports.getContact = (req, res) => {
+  res.status(200).render('public/contact', {
+    title: 'Contact · Galería del Ox'
+  });
+};
 
 const catchAsync = require('@utils/catchAsync');
 const crypto = require('crypto');
