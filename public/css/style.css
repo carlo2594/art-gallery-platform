@@ -1,3 +1,7 @@
+/* Hero section: background color for text column */
+.hero-col-text {
+  background-color: var(--ox-beige) !important;
+}
 /* ==========================================
    EXHIBITION HERO CUSTOM CLASSES
    ========================================== */

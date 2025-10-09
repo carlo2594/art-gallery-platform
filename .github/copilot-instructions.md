@@ -7,24 +7,24 @@ This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB),
 - **Entry point:** `server.js` connects to MongoDB (with retry logic), then starts Express via `app.js`.
 - **API prefix:** All JSON APIs are under `/api/v1/`. HTML views are served at `/` and `/admin`.
 - **Key folders:**
-	- `controllers/` (business logic)
-	- `models/` (Mongoose schemas)
-	- `routes/` (API and view routers)
-	- `middlewares/` (Express middleware)
-	- `services/` (external integrations)
-	- `utils/` (helpers, error handling, normalization)
-	- `views/` (Pug templates)
-	- `public/` (static assets)
+  - `controllers/` (business logic)
+  - `models/` (Mongoose schemas)
+  - `routes/` (API and view routers)
+  - `middlewares/` (Express middleware)
+  - `services/` (external integrations)
+  - `utils/` (helpers, error handling, normalization)
+  - `views/` (Pug templates)
+  - `public/` (static assets)
 - **Module aliases:** Use `@models`, `@controllers`, etc. (see `_moduleAliases` in `package.json`).
 
 ## Developer Workflows
 - **Start (dev):** `npm run dev` (uses nodemon)
 - **Start (prod):** `npm start`
-- **Database scripts:** See `scripts/` for seeding, cleaning, and slug generation.
+- **Database scripts:** See `scripts/` for seeding, cleaning, and slug generation (e.g., `seedTestData.js`, `cleanDatabase.js`).
 - **No built-in test suite** (as of this writing).
 
 ## Conventions & Patterns
-- **Async controllers:** Always wrap with `utils/catchAsync`.
+- **Async controllers:** Always wrap with `utils/catchAsync` for error propagation.
 - **Error handling:** Throw with `utils/appError`. Use `utils/sendResponse` for all JSON responses: `{ status, message, data }`.
 - **Auth:** Cookie-based JWT only. Use `middlewares/requireUser` for protected routes. Check `req.cookies.jwt`.
 - **HTML vs JSON:** Use `utils/http.wantsHTML(req)` to branch between redirect and JSON response.
@@ -32,6 +32,8 @@ This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB),
 - **Normalization:** Query on normalized fields (e.g., `type_norm`) for accent-insensitive search.
 - **Pricing:** Store as `price_cents` (int). Accept either `amount` (USD string) or `price_cents` in requests; convert with `utils/priceInput.toCentsOrThrow`.
 - **Image upload:** Use `utils/cloudinaryImage.upload`. Aspect ratio checks via `utils/aspectUtils.verifyAspect`. Behavior controlled by `getAspectPolicy()` and env vars (`ASPECT_TOLERANCE`, `CLOUDINARY_PAD`).
+- **Pagination:** Use helpers in `utils/pagination.js` for consistent API pagination.
+- **Slug generation:** Use scripts in `scripts/` (e.g., `generateSlugs.js`) to update slugs for models.
 
 ## Auth Flow
 - **Signup:** Creates user with temp password, emails create-password link (`/reset-password?uid=...&token=...&type=new`).
@@ -42,10 +44,12 @@ This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB),
 ## Artworks Domain
 - **Status workflow:** `draft → submitted → under_review → approved/rejected`. Admin transitions via `/start-review`, `/approve`, `/reject` (see `controllers/artworkController.js`).
 - **Email notifications:** Use `services/emailTemplates` and `services/mailer`.
+- **Availability:** Managed via `controllers/artworkAvailabilityController.js` and related utils.
 
 ## Views & Forms
 - **Login/Signup:** `views/public/loginSignUp.pug` posts to `/api/v1/auth/signup` or `/api/v1/auth/login`. Remember-me checkbox: `remember`.
 - **Reset password:** `views/public/resetPassword.pug` posts to `/api/v1/auth/password/reset` with hidden `uid` and `token`.
+- **Admin views:** Under `views/admin/` and routed via `routes/views/`.
 
 ## Integrations & Env
 - **Cloudinary:** `services/cloudinary.js`, helpers in `utils/cloudinaryImage.js`.
