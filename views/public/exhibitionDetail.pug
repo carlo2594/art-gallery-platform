@@ -9,11 +9,12 @@ block content
 
   main.main-content.exhibition-detail-page
     // Hero Section (similar style to artist detail)
+
     section.exhibition-hero.position-relative.exhibition-hero-fullscreen
       // Imagen de fondo
-      .hero-background.position-absolute.w-100.h-100
+      .exhibition-hero-bg-custom
         if exhibition && exhibition.coverImage
-          img.hero-bg-image.w-100.h-100.exhibition-image-cover(
+          img.exhibition-hero-bg-custom(
             src=exhibition.coverImage,
             alt=(exhibition.title || exhibition.name || 'Exposición')
           )
@@ -21,7 +22,7 @@ block content
           .hero-bg-placeholder.w-100.h-100.exhibition-gradient-bg
 
       // Overlay
-      .hero-overlay.position-absolute.w-100.h-100.exhibition-hero-overlay
+      .exhibition-hero-overlay-custom
 
       // Contenido superpuesto
       .hero-content.position-absolute.bottom-0.start-0.w-100.exhibition-hero-z-index

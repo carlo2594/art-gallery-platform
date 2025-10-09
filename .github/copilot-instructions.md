@@ -1,45 +1,59 @@
 # Copilot Instructions for Galeria-del-Ox-Node
 
-## What this is
-- Node.js backend for an art gallery. Stack: Express, Mongoose (MongoDB), Pug views, Cloudinary (media), Nodemailer (email).
-- Entry: `server.js` connects to MongoDB with retry, then boots Express (`app.js`). Dev: `npm run dev`; Prod: `npm start`.
-- API prefix: `/api/v1/`. Dual routing: HTML views (`/`, `/admin`) and JSON API (see `routes/index.js`).
+## Overview
+This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB), Pug for server-rendered views, Cloudinary for media, and Nodemailer for email. The codebase is structured for both API and HTML view delivery, with clear separation of concerns and robust error handling.
 
-## Architecture and routing
-- Folders: `controllers/`, `models/`, `routes/`, `middlewares/`, `services/`, `utils/`, `views/`, `public/`.
-- Module aliases: `@models`, `@controllers`, `@routes`, `@utils`, `@middlewares`, `@services` (see `_moduleAliases` in `package.json`).
-- `app.js` middleware: helmet, cookie-parser, `attachUserToViews`, `xss-clean`, custom `sanitize`, and `ensureDbReady` (blocks requests until Mongo is connected). Static files in `public/`; Pug views in `views/`.
-- `server.js` uses `connectWithRetry()` and reconnects on `disconnected`.
+## Architecture
+- **Entry point:** `server.js` connects to MongoDB (with retry logic), then starts Express via `app.js`.
+- **API prefix:** All JSON APIs are under `/api/v1/`. HTML views are served at `/` and `/admin`.
+- **Key folders:**
+	- `controllers/` (business logic)
+	- `models/` (Mongoose schemas)
+	- `routes/` (API and view routers)
+	- `middlewares/` (Express middleware)
+	- `services/` (external integrations)
+	- `utils/` (helpers, error handling, normalization)
+	- `views/` (Pug templates)
+	- `public/` (static assets)
+- **Module aliases:** Use `@models`, `@controllers`, etc. (see `_moduleAliases` in `package.json`).
 
-## Conventions to follow
-- Wrap async controllers with `utils/catchAsync`; throw `utils/appError` for HTTP errors.
-- Send JSON via `utils/sendResponse(res, data, message?, statusCode?, extra?)` → standardized `{ status, message, data }`.
-- Auth uses cookie-based JWT only. Protect endpoints with `middlewares/requireUser` (reads `req.cookies.jwt`).
-- HTML vs JSON: use `utils/http.wantsHTML(req)` to decide redirect vs JSON body.
+## Developer Workflows
+- **Start (dev):** `npm run dev` (uses nodemon)
+- **Start (prod):** `npm start`
+- **Database scripts:** See `scripts/` for seeding, cleaning, and slug generation.
+- **No built-in test suite** (as of this writing).
 
-## Auth flow (controllers/authController.js)
-- Signup: creates user with temp password and emails a create-password link to `/reset-password?uid=...&token=...&type=new`.
-- Login: sets `jwt` cookie; supports remember-me via `utils/authUtils.parseRememberMe` + `getJwtCookieOptions`.
-- Forgot/reset: issues token (15 min for reset, 24h for first password). `POST /api/v1/auth/password/reset` expects `{ uid, token, newPassword, remember? }` and logs the user in.
-- Rate limiting on `/signup` and `/login` via `middlewares/rateLimiter`.
+## Conventions & Patterns
+- **Async controllers:** Always wrap with `utils/catchAsync`.
+- **Error handling:** Throw with `utils/appError`. Use `utils/sendResponse` for all JSON responses: `{ status, message, data }`.
+- **Auth:** Cookie-based JWT only. Use `middlewares/requireUser` for protected routes. Check `req.cookies.jwt`.
+- **HTML vs JSON:** Use `utils/http.wantsHTML(req)` to branch between redirect and JSON response.
+- **Soft delete:** Models use `deletedAt` for trash/restore. See helpers like `moveToTrash`.
+- **Normalization:** Query on normalized fields (e.g., `type_norm`) for accent-insensitive search.
+- **Pricing:** Store as `price_cents` (int). Accept either `amount` (USD string) or `price_cents` in requests; convert with `utils/priceInput.toCentsOrThrow`.
+- **Image upload:** Use `utils/cloudinaryImage.upload`. Aspect ratio checks via `utils/aspectUtils.verifyAspect`. Behavior controlled by `getAspectPolicy()` and env vars (`ASPECT_TOLERANCE`, `CLOUDINARY_PAD`).
 
-## Artworks domain (controllers/artworkController.js)
-- Status workflow: `draft → submitted → under_review → approved/rejected`; admin transitions via `/start-review`, `/approve`, `/reject`. Email via `services/emailTemplates` + `services/mailer`.
-- Soft delete: models use `deletedAt`; lifecycle helpers like `moveToTrash` and `restoreArtwork`.
-- Pricing: persist as `price_cents`. Accept request `amount` (USD string) or `price_cents` (int); convert with `utils/priceInput.toCentsOrThrow`.
-- Images: upload using `utils/cloudinaryImage.upload`; aspect check via `utils/aspectUtils.verifyAspect`. Behavior controlled by `getAspectPolicy()`; may pad/fill via Cloudinary. Env: `ASPECT_TOLERANCE`, `CLOUDINARY_PAD`.
-- Normalized filters: controllers query on normalized fields (e.g., `type_norm`, `technique_norm`) for accent-insensitive search.
+## Auth Flow
+- **Signup:** Creates user with temp password, emails create-password link (`/reset-password?uid=...&token=...&type=new`).
+- **Login:** Sets `jwt` cookie. Remember-me via `utils/authUtils.parseRememberMe` and `getJwtCookieOptions`.
+- **Password reset:** Token (15 min for reset, 24h for first password). `POST /api/v1/auth/password/reset` expects `{ uid, token, newPassword, remember? }`.
+- **Rate limiting:** On `/signup` and `/login` via `middlewares/rateLimiter`.
 
-## Views and forms
-- Login/Signup page: `views/public/loginSignUp.pug` posts to `/api/v1/auth/signup` or `/api/v1/auth/login`. Remember-me checkbox name: `remember`.
-- Reset password page: `views/public/resetPassword.pug` posts to `/api/v1/auth/password/reset` with hidden `uid` and `token`.
+## Artworks Domain
+- **Status workflow:** `draft → submitted → under_review → approved/rejected`. Admin transitions via `/start-review`, `/approve`, `/reject` (see `controllers/artworkController.js`).
+- **Email notifications:** Use `services/emailTemplates` and `services/mailer`.
 
-## Integrations and env
-- Cloudinary: `services/cloudinary.js`, helpers in `utils/cloudinaryImage.js`. Email: `services/mailer.js`.
-- Required env (non-exhaustive): `DATABASE`, `DATABASE_PASSWORD`, `JWT_SECRET`, `FRONTEND_URL`, Cloudinary creds, mailer creds. Uses `dotenv`.
+## Views & Forms
+- **Login/Signup:** `views/public/loginSignUp.pug` posts to `/api/v1/auth/signup` or `/api/v1/auth/login`. Remember-me checkbox: `remember`.
+- **Reset password:** `views/public/resetPassword.pug` posts to `/api/v1/auth/password/reset` with hidden `uid` and `token`.
 
-## Add something new
-- New API: create controller in `controllers/` (use `catchAsync`, `sendResponse`), add route in `routes/api/*.js`, mount in `routes/index.js` under `/api/v1/...`.
-- New view: add Pug in `views/`, add route in `routes/views/*`, mount in `routes/index.js` under `/` or `/admin`.
+## Integrations & Env
+- **Cloudinary:** `services/cloudinary.js`, helpers in `utils/cloudinaryImage.js`.
+- **Email:** `services/mailer.js`.
+- **Env vars:** `DATABASE`, `DATABASE_PASSWORD`, `JWT_SECRET`, `FRONTEND_URL`, Cloudinary and mailer creds. Uses `dotenv`.
 
-If you spot divergences (pagination behavior, normalization helpers, etc.), call them out so we can update this guide.
+## Adding Features
+- **New API:** Create controller in `controllers/` (wrap with `catchAsync`, use `sendResponse`), add route in `routes/api/*.js`, mount in `routes/index.js` under `/api/v1/...`.
+- **New view:** Add Pug file in `views/`, add route in `routes/views/*`, mount in `routes/index.js` under `/` or `/admin`.
+
+If you spot divergences (e.g., pagination, normalization), update this guide.
