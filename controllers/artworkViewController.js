@@ -1,32 +1,33 @@
 const ArtworkView = require('@models/artworkViewModel');
-
 const { getClientIp } = require('@utils/request');
+const isValidObjectId = require('@utils/isValidObjectId');
+const AppError = require('@utils/appError');
+const catchAsync = require('@utils/catchAsync');
+const sendResponse = require('@utils/sendResponse');
 
 // Create a new artwork view
-exports.createView = async (req, res) => {
-  try {
-    const { artwork } = req.body;
-    const ip = getClientIp(req);
-    const viewDoc = { artwork, ip };
-    // Adjuntar usuario si está autenticado
-    if (req.user && (req.user._id || req.user.id)) {
-      viewDoc.user = req.user._id || req.user.id;
-    }
-    const view = new ArtworkView(viewDoc);
-    await view.save();
-    res.status(201).json(view);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+exports.createView = catchAsync(async (req, res, next) => {
+  const { artwork } = req.body || {};
+  if (!artwork || !isValidObjectId(artwork)) {
+    return next(new AppError('ID de obra inválido.', 400));
   }
-};
+
+  const ip = getClientIp(req);
+  const viewDoc = { artwork, ip };
+  if (req.user && (req.user._id || req.user.id)) {
+    viewDoc.user = req.user._id || req.user.id;
+  }
+
+  const view = await ArtworkView.create(viewDoc);
+  return sendResponse(res, view, 'Vista registrada.', 201);
+});
 
 // Get all views for an artwork
-exports.getViewsByArtwork = async (req, res) => {
-  try {
-    const { artworkId } = req.params;
-    const views = await ArtworkView.find({ artwork: artworkId });
-    res.json(views);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+exports.getViewsByArtwork = catchAsync(async (req, res, next) => {
+  const { artworkId } = req.params;
+  if (!isValidObjectId(artworkId)) {
+    return next(new AppError('ID de obra inválido.', 400));
   }
-};
+  const views = await ArtworkView.find({ artwork: artworkId }).sort({ createdAt: -1 }).lean();
+  return sendResponse(res, views, 'Vistas obtenidas.');
+});
