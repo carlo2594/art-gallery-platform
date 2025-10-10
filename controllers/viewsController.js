@@ -247,7 +247,9 @@ exports.getResetPassword = catchAsync(async (req, res) => {
       uid,
       token,
       isNewPassword: type === 'new',
-      error: 'El enlace no es válido o ya venció. Solicita uno nuevo.'
+      error: 'El enlace no es válido o ya venció. Solicita uno nuevo.',
+      hideNavbar: true,
+      hideFooter: true
     });
   }
 
@@ -268,7 +270,9 @@ exports.getResetPassword = catchAsync(async (req, res) => {
   return res.render('public/resetPassword', {
     uid,
     token,
-    isNewPassword: type === 'new'
+    isNewPassword: type === 'new',
+    hideNavbar: true,
+    hideFooter: true
   });
 });
 

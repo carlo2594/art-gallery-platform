@@ -906,6 +906,8 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .login-signin-form .navbar-logo-link { justify-content: center; }
 /* Center forgot password logo + title */
 #forgotForm .navbar-logo-link { justify-content: center; margin-bottom: 2rem !important; }
+/* Center reset password logo + title */
+.reset-password-form .navbar-logo-link { justify-content: center; }
 
 /* ==========================================
   14. ARTWORK DETAIL PAGE
