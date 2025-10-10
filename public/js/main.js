@@ -475,3 +475,74 @@ function initRelatedGrid() {
     }
   });
 }
+
+// ===== Artist Grid Reveal =====
+function initArtistReveal(){
+  const cards = Array.from(document.querySelectorAll('.artist-card.reveal-item'));
+  if (!cards.length || !('IntersectionObserver' in window)) return;
+  let counter = 0;
+
+  const revealWhenReady = (card, img) => {
+    const delay = Math.min(counter++ * 120, 1200);
+    card.style.transitionDelay = delay + 'ms';
+    if (img) img.classList.add('loaded');
+    const container = card.querySelector('.artist-image-container');
+    if (container) container.classList.remove('img-loading');
+    card.classList.add('reveal-in');
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries
+      .filter(e => e.isIntersecting)
+      .sort((a,b) => cards.indexOf(a.target) - cards.indexOf(b.target))
+      .forEach(entry => {
+        const card = entry.target;
+        const img = card.querySelector('.artist-image');
+        const container = card.querySelector('.artist-image-container');
+        const proceed = () => { revealWhenReady(card, img); io.unobserve(card); };
+
+        if (img && !(img.complete && img.naturalWidth > 0)) {
+          if (container) container.classList.add('img-loading');
+          img.addEventListener('load', proceed, { once: true });
+          img.addEventListener('error', proceed, { once: true });
+        } else {
+          proceed();
+        }
+      });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+  cards.forEach(el => io.observe(el));
+
+  // Kick an initial pass for cards already in view (e.g., cache/instant paint)
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  requestAnimationFrame(() => {
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      if (rect.top < vh && rect.bottom > 0 && !card.classList.contains('reveal-in')) {
+        const img = card.querySelector('.artist-image');
+        const container = card.querySelector('.artist-image-container');
+        const proceed = () => { revealWhenReady(card, img); io.unobserve(card); };
+        if (img && !(img.complete && img.naturalWidth > 0)) {
+          if (container) container.classList.add('img-loading');
+          img.addEventListener('load', proceed, { once: true });
+          img.addEventListener('error', proceed, { once: true });
+        } else {
+          proceed();
+        }
+      }
+    });
+  });
+}
+
+// Ensure initialization across different navigation/reload paths
+(function ensureArtistRevealInit(){
+  let done = false;
+  const run = () => { if (done) return; done = true; initArtistReveal(); };
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    run();
+  } else {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  }
+  window.addEventListener('load', run, { once: true });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) run(); }); // bfcache
+})();

@@ -909,6 +909,31 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Center reset password logo + title */
 .reset-password-form .navbar-logo-link { justify-content: center; }
 
+/* Artist card reveal animation */
+.reveal-item { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; will-change: opacity, transform; }
+.reveal-item.reveal-in { opacity: 1; transform: translateY(0); }
+/* Artist image fade-in when loaded */
+.artist-image { opacity: 0; transition: opacity .4s ease; }
+.artist-image.loaded { opacity: 1; }
+
+/* Skeleton shimmer while image loads */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.artist-image-container.img-loading {
+  position: relative;
+  overflow: hidden;
+}
+.artist-image-container.img-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
 /* ==========================================
   14. ARTWORK DETAIL PAGE
   ========================================== */

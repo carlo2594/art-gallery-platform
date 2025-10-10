@@ -4,12 +4,12 @@
   .row.row-cols-1.row-cols-sm-2.row-cols-md-3.g-3
     each artist in artists
       .col
-        .card.shadow-sm.h-100.position-relative.artist-card
+        .card.shadow-sm.h-100.position-relative.artist-card.reveal-item
           // Full-card click target (place first for reliability)
           a.stretched-link(href=`/artists/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
           .artist-image-container.position-relative
             if artist.profileImage
-              img.artist-image(src=artist.profileImage, alt=artist.name, style="height: 300px; width: 100%; object-fit: cover;")
+              img.artist-image(src=artist.profileImage, alt=artist.name, loading='lazy', decoding='async', style="height: 300px; width: 100%; object-fit: cover;")
             else
               .artist-placeholder.d-flex.align-items-center.justify-content-center(style="height: 300px; background: linear-gradient(135deg, #55595c 0%, #6c757d 100%);")
                 .text-center
