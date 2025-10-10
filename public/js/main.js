@@ -581,6 +581,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Configurar back en login/signup para respetar returnTo o referrer
   initLoginBackLink();
+
+  // Añadir returnTo a los links de Login/Signup del navbar
+  initNavbarAuthReturnTo();
 });
 
 // ------ Related Artworks Grid (Masonry) ------
@@ -813,6 +816,30 @@ function initLoginBackLink(){
         link.addEventListener('click', function(e){ if (history.length > 1) { e.preventDefault(); history.back(); } });
       }
     }
+  } catch (e) {}
+}
+
+// Agrega ?returnTo=<current> a los links de Login/Signup del navbar
+function initNavbarAuthReturnTo(){
+  try {
+    const here = window.location.pathname + window.location.search;
+    // No reescribir si estamos ya en login/signup
+    if (/^\/(login|signup|signUp)\b/i.test(window.location.pathname)) return;
+
+    const addRt = (a) => {
+      if (!a) return;
+      try {
+        const url = new URL(a.getAttribute('href'), window.location.origin);
+        // Si ya tiene returnTo, no tocar
+        if (url.searchParams.has('returnTo')) return;
+        // Solo aplicar a rutas exactas /login o /signup
+        if (!/^\/(login|signup|signUp)$/.test(url.pathname)) return;
+        url.searchParams.set('returnTo', here);
+        a.setAttribute('href', url.pathname + url.search);
+      } catch(_){}
+    };
+
+    document.querySelectorAll('a.nav-link[href="/login"], a.nav-link[href="/signup"], a.nav-link[href="/signUp"]').forEach(addRt);
   } catch (e) {}
 }
 
