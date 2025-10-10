@@ -11,6 +11,11 @@ block content
               src=artwork.imageUrl
               alt=artwork.title
               data-full=artwork.imageUrl
+              loading='eager'
+              fetchpriority='high'
+              decoding='async'
+              width=artwork.imageWidth_px
+              height=artwork.imageHeight_px
             )
 
       // Información de la obra
@@ -54,15 +59,30 @@ block content
           .artwork-action-section.mb-3.artwork-cta-section
             // Botón de acción
             .action-buttons.mb-3.artwork-action-buttons
-              if user
-                button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(
-                  type="button"
-                  onclick=`toggleFavorite('${artwork._id}')`
-                )
-                  span CONSULTAR COMPRA
+              - const av = artwork.availability || 'not_for_sale'
+              if av === 'for_sale'
+                if user
+                  button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(
+                    type="button"
+                    onclick=`toggleFavorite('${artwork._id}')`
+                    aria-label="Consultar compra"
+                  )
+                    span CONSULTAR COMPRA
+                else
+                  a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link(href="/login" aria-label="Inicia sesión para consultar compra")
+                    span CONSULTAR COMPRA
+              else if av === 'reserved'
+                button.btn.btn-warning.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(disabled aria-disabled="true" type="button")
+                  span RESERVADA
+              else if av === 'sold'
+                button.btn.btn-secondary.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(disabled aria-disabled="true" type="button")
+                  span VENDIDA
+              else if av === 'on_loan'
+                button.btn.btn-info.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(disabled aria-disabled="true" type="button")
+                  span EN PRÉSTAMO
               else
-                a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link(href="/login")
-                  span CONSULTAR COMPRA
+                button.btn.btn-secondary.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn(disabled aria-disabled="true" type="button")
+                  span NO DISPONIBLE
 
             // Estadísticas (solo mostrar si hay valores > 0)
             .artwork-stats.artwork-stats-list
@@ -85,10 +105,19 @@ block content
           .col-12
             h3.mb-4.related-exhibitions-title Exposiciones donde aparece esta obra
             .row.related-exhibitions-grid
-              each exhibition in exs
-                - const bg = exhibition.coverImage ? `background-image: url('${exhibition.coverImage}')` : ''
+              each exhibition, rIdx in exs
+                - const eager = rIdx === 0
                 .col-md-6.col-lg-4.mb-3.related-exhibition-col
-                  .card.h-100.shadow-sm.related-exhibition-card(style=`${bg}; background-size: cover; background-position: center;`)
+                  .card.h-100.shadow-sm.related-exhibition-card
+                    if exhibition.coverImage
+                      img.related-exhibition-bg(
+                        src=exhibition.coverImage,
+                        alt='',
+                        aria-hidden='true',
+                        loading=eager ? 'eager' : 'lazy',
+                        fetchpriority=eager ? 'high' : 'auto',
+                        decoding='async'
+                      )
                     a.stretched-link(href=`/exhibitions/${exhibition.slug || exhibition._id}` aria-label=`Ver exposición: ${exhibition.title}`)
                     // Overlay handled via CSS ::before
                     .card-body.related-exhibition-body.text-white

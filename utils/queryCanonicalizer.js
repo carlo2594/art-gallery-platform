@@ -4,6 +4,16 @@
  */
 // utils/queryCanonicalizer.js
 function canonicalizeQuery(req, appliedPrice, priceBounds) {
+  // Normalize avail to one of: '', 'available', 'unavailable'
+  function readAvailParam(val) {
+    if (val == null) return '';
+    try {
+      const s = String(val).toLowerCase();
+      if (s.includes('unavailable')) return 'unavailable';
+      if (s.includes('available')) return 'available';
+      return '';
+    } catch { return ''; }
+  }
   // Helper to get sorted array values for a key
   function getSortedArray(obj, key) {
     const arr = Array.isArray(obj[key]) ? obj[key] : (obj[key] ? [obj[key]] : []);
@@ -26,6 +36,11 @@ function canonicalizeQuery(req, appliedPrice, priceBounds) {
   });
   // Only add sort if not empty string
   if (req.query.sort && req.query.sort !== '') canonical.set('sort', req.query.sort);
+  // Preserve avail when valid
+  {
+    const avail = readAvailParam(req.query.avail);
+    if (avail) canonical.set('avail', avail);
+  }
   // Only add minPrice/maxPrice if not empty string and not default
   if (appliedPrice.minUSD != null && priceBounds.minUSD != null && appliedPrice.minUSD !== priceBounds.minUSD && appliedPrice.minUSD !== '' && String(appliedPrice.minUSD) !== '') {
     canonical.set('minPrice', appliedPrice.minUSD.toFixed(2));
@@ -50,6 +65,11 @@ function canonicalizeQuery(req, appliedPrice, priceBounds) {
   });
   // Only add sort if not empty string
   if (req.query.sort && req.query.sort !== '') original.set('sort', req.query.sort);
+  // Preserve avail when valid
+  {
+    const avail = readAvailParam(req.query.avail);
+    if (avail) original.set('avail', avail);
+  }
   // Only add minPrice/maxPrice if not empty string
   if (req.query.minPrice && req.query.minPrice !== '') original.set('minPrice', req.query.minPrice);
   if (req.query.maxPrice && req.query.maxPrice !== '') original.set('maxPrice', req.query.maxPrice);

@@ -1,24 +1,24 @@
-ul.grid.effect-2#grid.mb-5
+﻿ul.grid.effect-2#grid.mb-5
   each a in artworks
     li
        .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
          a(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
            img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
-         // Full-card stretched link so the info area is clickable too
+         // Ocultar badge overlay en la imagen (solo mostrar en card stats)
          a.stretched-link(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
          .card-body.grid-card-body
            .grid-card-flex
-             // --- Columna izquierda: Información de la obra ---
+             // --- Columna izquierda: InformaciÃ³n de la obra ---
              .grid-card-info
-               // Título principal de la obra
+               // TÃ­tulo principal de la obra
                if a.title
                  h4.grid-card-title= a.title
                
-               // Información del artista
+               // InformaciÃ³n del artista
                if a.artist
                  h6.grid-card-artist= a.artist.name
                
-               // Detalles técnicos
+               // Detalles tÃ©cnicos
                .grid-card-details
                  if a.technique
                    - var techCap = a.technique.charAt(0).toUpperCase() + a.technique.slice(1)
@@ -27,17 +27,19 @@ ul.grid.effect-2#grid.mb-5
                  if a.completedAt
                    .grid-card-detail-item= new Date(a.completedAt).getFullYear()
                
-               // Precio
-               if typeof a.price_cents === 'number'
-                 h5.grid-card-price $#{(a.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
-             
-             // --- Columna derecha: Estadísticas ---
              .grid-card-stats.d-flex.flex-column.justify-content-end
-               if a.createdAt
-                 .grid-card-stat-item Publicado el #{new Date(a.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                // Estado de disponibilidad
+                if a.availability
+                  - const av3 = a.availability
+                  - const avLabel3 = av3 === 'reserved' ? 'Reservada' : (av3 === 'sold' ? 'Vendida' : (av3 === 'on_loan' ? 'En préstamo' : (av3 === 'for_sale' ? 'En venta' : 'No en venta')))
+                  - const avClass3 = av3 === 'reserved' ? 'text-bg-warning' : ((av3 === 'sold' || av3 === 'not_for_sale') ? 'text-bg-secondary' : (av3 === 'on_loan' ? 'text-bg-info' : 'text-bg-success'))
+                  .grid-card-stat-item
+                    span.badge.rounded-pill(class=avClass3)= avLabel3
+                if a.createdAt
+                  .grid-card-stat-item Publicado el #{new Date(a.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                
+                if typeof a.views === 'number' && a.views > 0
+                  .grid-card-stat-item #{a.views.toLocaleString()} visualizaciones
                
-               if typeof a.views === 'number' && a.views > 0
-                 .grid-card-stat-item #{a.views.toLocaleString()} visualizaciones
-               
-               if typeof a.favoritesCount === 'number' && a.favoritesCount > 0
-                 .grid-card-stat-item #{a.favoritesCount.toLocaleString()} favoritos
+                if typeof a.favoritesCount === 'number' && a.favoritesCount > 0
+                  .grid-card-stat-item #{a.favoritesCount.toLocaleString()} favoritos

@@ -24,6 +24,68 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
       )
     )= opt.label
 
+  // Mantener filtros adicionales cuando se usan chips rápidos
+  if q && q.type
+    each t in (Array.isArray(q.type)? q.type : [q.type])
+      input(type='hidden' name='type' value=t)
+  if q && q.technique
+    each t in (Array.isArray(q.technique)? q.technique : [q.technique])
+      input(type='hidden' name='technique' value=t)
+  if q && (q.minw || q.maxw || q.minh || q.maxh)
+    if q.minw
+      input(type='hidden' name='minw' value=q.minw)
+    if q.maxw
+      input(type='hidden' name='maxw' value=q.maxw)
+    if q.minh
+      input(type='hidden' name='minh' value=q.minh)
+    if q.maxh
+      input(type='hidden' name='maxh' value=q.maxh)
+
+  // Mantener disponibilidad actual si existe (para chips de orden)
+  if q && q.avail
+    input(type='hidden' name='avail' value=q.avail)
+
+// Grupo derecho: chips de disponibilidad + botón de filtros
+.ms-auto.d-flex.align-items-center.flex-wrap.gap-2
+  // Form separado para alternar disponibilidad sin duplicar el parámetro
+  form#availChips(method='GET' action=actionUrl class='d-none')
+    // Mantener búsqueda
+    if typeof search !== 'undefined' && search
+      input(type='hidden' name='q' value=search)
+    else if q && q.q
+      input(type='hidden' name='q' value=q.q)
+  // Mantener sort
+  if q && q.sort
+    input(type='hidden' name='sort' value=q.sort)
+  // Mantener filtros activos
+  if q && q.type
+    each t in (Array.isArray(q.type)? q.type : [q.type])
+      input(type='hidden' name='type' value=t)
+  if q && q.technique
+    each t in (Array.isArray(q.technique)? q.technique : [q.technique])
+      input(type='hidden' name='technique' value=t)
+  if q && (q.minw || q.maxw || q.minh || q.maxh)
+    if q.minw
+      input(type='hidden' name='minw' value=q.minw)
+    if q.maxw
+      input(type='hidden' name='maxw' value=q.maxw)
+    if q.minh
+      input(type='hidden' name='minh' value=q.minh)
+    if q.maxh
+      input(type='hidden' name='maxh' value=q.maxh)
+  if q && (q.minPrice || q.maxPrice || q.minPriceCents || q.maxPriceCents)
+    if q.minPrice
+      input(type='hidden' name='minPrice' value=q.minPrice)
+    if q.maxPrice
+      input(type='hidden' name='maxPrice' value=q.maxPrice)
+    if q.minPriceCents
+      input(type='hidden' name='minPriceCents' value=q.minPriceCents)
+    if q.maxPriceCents
+      input(type='hidden' name='maxPriceCents' value=q.maxPriceCents)
+
+    // Chips rápidos: Disponibilidad (solo 1 seleccionado)
+    // Chips de venta removidos aquí; usar panel
+
   // Mantener rango de precio si el usuario ya filtró
   if q && (q.minPrice || q.maxPrice || q.minPriceCents || q.maxPriceCents)
     if q.minPrice
@@ -37,10 +99,10 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
 
   // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
 
-// Offcanvas con filtros avanzados
-button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
-  i.fa-solid.fa-filter.me-1
-  | Filtros
+  // Offcanvas con filtros avanzados
+  button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
+    i.fa-solid.fa-filter.me-1
+    | Filtros
 
 div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
   .offcanvas-header
@@ -68,6 +130,19 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
             label.chip
               input(type='checkbox' name='technique' value=t checked=(Array.isArray(q && q.technique) ? q.technique.includes(t) : (q && q.technique) === t))
               span= techCap
+    // Disponibilidad
+    .filter-block
+      label.form-label.mb-2 Disponibilidad para venta
+      .d-flex.flex-wrap.gap-2
+        label.chip
+          input(type='radio' name='avail' value='' checked=(!q || !q.avail))
+          span Todas las obras
+        label.chip
+          input(type='radio' name='avail' value='available' checked=(q && q.avail==='available'))
+          span En venta
+        label.chip
+          input(type='radio' name='avail' value='unavailable' checked=(q && q.avail==='unavailable'))
+          span No en venta
     // Tamaño en cm (rango)
     .filter-block
       label.form-label.mb-2 Tamaño (ancho x alto)

@@ -12,10 +12,10 @@ function getAvailabilityBadge(availability, reservedUntil = null) {
   const badges = {
     for_sale: {
       class: 'badge-success',
-      text: 'Disponible',
+      text: 'En venta',
       color: 'success',
       icon: 'fas fa-check-circle',
-      description: 'Esta obra está disponible para compra'
+      description: 'Esta obra está en venta'
     },
     reserved: {
       class: 'badge-warning',
@@ -35,10 +35,10 @@ function getAvailabilityBadge(availability, reservedUntil = null) {
     },
     not_for_sale: {
       class: 'badge-secondary',
-      text: 'No disponible',
+      text: 'No en venta',
       color: 'secondary',
       icon: 'fas fa-ban',
-      description: 'Esta obra no está disponible para venta'
+      description: 'Esta obra no está a la venta'
     },
     on_loan: {
       class: 'badge-info',

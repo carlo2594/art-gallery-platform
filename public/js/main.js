@@ -63,15 +63,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // Limpia inputs vacíos en formularios de filtros antes de enviar
-  document.querySelectorAll('form.offcanvas-body, form#quickChips').forEach(form => {
+  document.querySelectorAll('form.offcanvas-body, form#quickChips, form#availChips').forEach(form => {
     form.addEventListener('submit', function(e) {
       // Elimina inputs y selects con value vacío
       Array.from(form.elements).forEach(el => {
         if (!el.name) return;
         // Para checkboxes y radios, solo si no están checked
         if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
-        // Para otros, si el valor es vacío
-        if ((el.tagName === 'INPUT' || el.tagName === 'SELECT') && el.value === '') {
+        // Para inputs/selects/botones con valor vacío, no enviarlos
+        const tag = el.tagName;
+        if ((tag === 'INPUT' || tag === 'SELECT' || tag === 'BUTTON') && el.value === '') {
           el.name = '';
         }
       });

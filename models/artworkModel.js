@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+﻿const mongoose = require('mongoose');
 
-// Helper de normalización (quita tildes, pasa a minúsculas, recorta)
+// Helper de normalizaciÃ³n (quita tildes, pasa a minÃºsculas, recorta)
 const norm = (s) =>
   (s || '')
     .normalize('NFD')
@@ -16,16 +16,16 @@ const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
     title: { type: String, required: true, trim: true },
-    slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
+    slug: { type: String }, // URL-friendly version of title (Ã­ndice Ãºnico definido explÃ­citamente abajo)
     description: { type: String, trim: true },
-    completedAt: { type: Date }, // Fecha en que el artista terminó la obra
+    completedAt: { type: Date }, // Fecha en que el artista terminÃ³ la obra
 
     /* ------ Relations ------ */
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true // (2) Indexación para búsquedas por artista
+      index: true // (2) IndexaciÃ³n para bÃºsquedas por artista
     },
     exhibitions: [
       {
@@ -36,12 +36,12 @@ const artworkSchema = new mongoose.Schema(
 
     /* ------ Media & meta ------ */
     // Campos para imagen en Cloudinary
-    imageUrl: { type: String, required: true },      // URL pública
+    imageUrl: { type: String, required: true },      // URL pÃºblica
     imagePublicId: { type: String, required: true }, // ID de Cloudinary
     imageWidth_px: { type: Number }, // opcional
     imageHeight_px: { type: Number }, // opcional
 
-    // (3) Galería de imágenes adicional
+    // (3) GalerÃ­a de imÃ¡genes adicional
     images: [{ type: String }], // Opcional: URLs adicionales
 
     type: { type: String },
@@ -68,7 +68,7 @@ const artworkSchema = new mongoose.Schema(
       orderId: { type: String, trim: true },
     },
 
-    // Campos normalizados para búsquedas/indexación
+    // Campos normalizados para bÃºsquedas/indexaciÃ³n
     type_norm: { type: String, index: true },
     technique_norm: { type: String, index: true },
 
@@ -76,7 +76,7 @@ const artworkSchema = new mongoose.Schema(
     views: { type: Number, default: 0 },
     favoritesCount: { type: Number, default: 0 },
 
-    // Fecha de creación en inglés (formato largo)
+    // Fecha de creaciÃ³n en inglÃ©s (formato largo)
     createdAt_en: { type: String },
 
     /* ------ Workflow ----- */
@@ -100,20 +100,20 @@ const artworkSchema = new mongoose.Schema(
   }
 );
 
-/* (2) Índices adicionales */
-// Índice único para slug (para SEO y URLs amigables)
+/* (2) Ãndices adicionales */
+// Ãndice Ãºnico para slug (para SEO y URLs amigables)
 artworkSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
-// Índices básicos existentes
+// Ãndices bÃ¡sicos existentes
 artworkSchema.index({ artist: 1, status: 1 });
 artworkSchema.index({ favoritesCount: -1 });
 artworkSchema.index({ exhibitions: 1 });
 
-// Nuevos índices compuestos optimizados para viewsController
-// 1. Índice principal para consultas de obras aprobadas (getArtworks, getSearchResults)
+// Nuevos Ã­ndices compuestos optimizados para viewsController
+// 1. Ãndice principal para consultas de obras aprobadas (getArtworks, getSearchResults)
 artworkSchema.index({ status: 1, deletedAt: 1, createdAt: -1 });
 
-// 2. Índice para filtros combinados en búsquedas
+// 2. Ãndice para filtros combinados en bÃºsquedas
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
@@ -122,7 +122,7 @@ artworkSchema.index({
   price_cents: 1 
 });
 
-// 3. Índice crítico para getArtistDetail - consultas por artista
+// 3. Ãndice crÃ­tico para getArtistDetail - consultas por artista
 artworkSchema.index({ 
   artist: 1, 
   status: 1, 
@@ -130,7 +130,7 @@ artworkSchema.index({
   createdAt: -1 
 });
 
-// 4. Índice para filtros de dimensiones
+// 4. Ãndice para filtros de dimensiones
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
@@ -138,29 +138,29 @@ artworkSchema.index({
   height_cm: 1 
 });
 
-// 5. Índice para ordenamiento por popularidad (getHome)
+// 5. Ãndice para ordenamiento por popularidad (getHome)
 artworkSchema.index({ 
   deletedAt: 1, 
   views: -1 
 });
 
-// 6. Índice para agregaciones de técnicas y precios
+// 6. Ãndice para agregaciones de tÃ©cnicas y precios
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
   technique: 1 
 });
 
-// 7. Índices para disponibilidad y ventas
+// 7. Ãndices para disponibilidad y ventas
 artworkSchema.index({ availability: 1, status: 1, deletedAt: 1, createdAt: -1 });
 artworkSchema.index({ availability: 1, price_cents: 1 });
 
-/* Índices existentes */
-artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 días después de ir a la papelera
+/* Ãndices existentes */
+artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 dÃ­as despuÃ©s de ir a la papelera
 artworkSchema.index({ type_norm: 1, technique_norm: 1 });
 
 /* ====== Virtuals ====== */
-// Lectura conveniente del precio en dólares (USD)
+// Lectura conveniente del precio en dÃ³lares (USD)
 artworkSchema.virtual('price').get(function () {
   if (typeof this.price_cents !== 'number') return null;
   return this.price_cents / 100;
@@ -174,7 +174,7 @@ artworkSchema.virtual('aspectRatio').get(function () {
   return null;
 });
 
-/* (6) Virtual para nombre del artista si está populado */
+/* (6) Virtual para nombre del artista si estÃ¡ populado */
 artworkSchema.virtual('artistName').get(function () {
   if (this.populated('artist') && this.artist && this.artist.name) {
     return this.artist.name;
@@ -182,16 +182,16 @@ artworkSchema.virtual('artistName').get(function () {
   return undefined;
 });
 
-/* ====== Métodos de Workflow ====== */
+/* ====== MÃ©todos de Workflow ====== */
 
-// artist: draft → submitted
+// artist: draft â†’ submitted
 artworkSchema.methods.submit = function () {
   if (this.status !== 'draft') return this;
   this.status = 'submitted';
   return this.save();
 };
 
-// admin: submitted → under_review
+// admin: submitted â†’ under_review
 artworkSchema.methods.startReview = function (adminId) {
   if (this.status !== 'submitted') return this;
   this.status = 'under_review';
@@ -199,7 +199,7 @@ artworkSchema.methods.startReview = function (adminId) {
   return this.save();
 };
 
-// admin: under_review → approved
+// admin: under_review â†’ approved
 artworkSchema.methods.approve = function (adminId) {
   if (this.status !== 'under_review') return this;
   this.status = 'approved';
@@ -207,7 +207,7 @@ artworkSchema.methods.approve = function (adminId) {
   return this.save();
 };
 
-// admin: under_review → rejected
+// admin: under_review â†’ rejected
 artworkSchema.methods.reject = function (adminId, reason = '') {
   if (this.status !== 'under_review') return this;
   this.status = 'rejected';
@@ -215,7 +215,7 @@ artworkSchema.methods.reject = function (adminId, reason = '') {
   return this.save();
 };
 
-/* ====== Métodos de Trash ====== */
+/* ====== MÃ©todos de Trash ====== */
 
 // mover a papelera (soft delete)
 artworkSchema.methods.moveToTrash = function (userId) {
@@ -235,14 +235,14 @@ artworkSchema.methods.restore = function () {
   return this.save();
 };
 
-// forzar draft (excepto si está en papelera)
+// forzar draft (excepto si estÃ¡ en papelera)
 artworkSchema.methods.setDraft = function () {
   if (this.status === 'trashed') return this;
   this.status = 'draft';
   return this.save();
 };
 
-/* ====== Métodos de Disponibilidad ====== */
+/* ====== MÃ©todos de Disponibilidad ====== */
 
 artworkSchema.methods.markSold = function (opts = {}) {
   this.availability = 'sold';
@@ -280,14 +280,14 @@ artworkSchema.methods.setOnLoan = function () {
   return this.save();
 };
 
-/* ====== Estáticos ====== */
+/* ====== EstÃ¡ticos ====== */
 
-// Catálogo público: aprobados y no en papelera
+// CatÃ¡logo pÃºblico: aprobados y no en papelera
 artworkSchema.statics.findApproved = function (filter = {}) {
   return this.find({ status: 'approved', deletedAt: null, ...filter });
 };
 
-// Buscar por rango de precio en USD (min/max en dólares)
+// Buscar por rango de precio en USD (min/max en dÃ³lares)
 artworkSchema.statics.findByPriceRange = function ({ min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
   const centsMin = Math.round(min * 100);
   const centsMax = Math.round(max * 100);
@@ -304,7 +304,7 @@ artworkSchema.statics.recalculateFavoritesCount = async function (artworkId) {
 
 /* ====== Hooks ====== */
 
-// Función para generar slug único
+// FunciÃ³n para generar slug Ãºnico
 function generateSlug(title) {
   return title
     .toString()
@@ -314,12 +314,12 @@ function generateSlug(title) {
     .trim()
     .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
     .replace(/\s+/g, '-') // espacios a guiones
-    .replace(/-+/g, '-') // múltiples guiones a uno
+    .replace(/-+/g, '-') // mÃºltiples guiones a uno
     .replace(/^-|-$/g, ''); // remover guiones al inicio y final
 }
 
 artworkSchema.pre('save', async function (next) {
-  // Generar slug si es nuevo documento o cambió el título
+  // Generar slug si es nuevo documento o cambiÃ³ el tÃ­tulo
   if (this.isNew || this.isModified('title')) {
     let baseSlug = generateSlug(this.title);
     let slug = baseSlug;
@@ -338,8 +338,7 @@ artworkSchema.pre('save', async function (next) {
   if (typeof this.width_cm === 'number' && typeof this.height_cm === 'number') {
     this.size = `${this.width_cm} x ${this.height_cm} cm`;
   }
-  // Normalizar facetas
-  this.type_norm = norm(this.type);
+  // Normalizar facetas\n  this.title_norm = norm(this.title);\n  this.type_norm = norm(this.type);
   this.technique_norm = norm(this.technique);
 
   // Asegurar entero y no-negativo para el precio
@@ -347,7 +346,7 @@ artworkSchema.pre('save', async function (next) {
     this.price_cents = Math.max(0, Math.round(this.price_cents));
   }
 
-  // Calcular fecha de creación en inglés (ej: September 25, 2025)
+  // Calcular fecha de creaciÃ³n en inglÃ©s (ej: September 25, 2025)
   if (this.createdAt) {
     const date = new Date(this.createdAt);
     this.createdAt_en = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -357,3 +356,5 @@ artworkSchema.pre('save', async function (next) {
 });
 
 module.exports = mongoose.model('Artwork', artworkSchema);
+
+

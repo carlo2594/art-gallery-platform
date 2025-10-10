@@ -352,6 +352,24 @@ exports.getArtworks = catchAsync(async (req, res) => {
   const q = req.query;
   const filter = {};
 
+  // Availability filter (default to available/reserved)
+  (function applyAvailability() {
+    const raw = (q.avail ?? '').toString().toLowerCase();
+    let mode = '';
+    if (raw.includes('unavailable')) mode = 'unavailable';
+    else if (raw.includes('available')) mode = 'available';
+    if (mode === 'unavailable') {
+      // No en venta: incluye reservadas, vendidas, en préstamo o no a la venta
+      filter.availability = { $in: ['reserved', 'sold', 'not_for_sale', 'on_loan'] };
+    } else if (mode === 'available') {
+      // En venta (no incluye reservadas)
+      filter.availability = { $in: ['for_sale'] };
+    } else {
+      // Default: en venta o reservadas
+      filter.availability = { $in: ['for_sale', 'reserved'] };
+    }
+  })();
+
   // Facetas básicas (normalizadas)
   const typesN = normArr(q.type);
   const techsN  = normArr(q.technique);
@@ -373,11 +391,11 @@ exports.getArtworks = catchAsync(async (req, res) => {
     if (ors.length) filter.$or = ors;
   }
 
-  // Base: aprobadas, no borradas y disponibles para venta
+  // Base: aprobadas, no borradas y disponibilidad según filtro
   const baseMatch = { 
     status: 'approved', 
     deletedAt: null, 
-    availability: { $in: ['for_sale', 'reserved'] }, // Solo obras disponibles o reservadas
+    availability: filter.availability?.$in ? { $in: filter.availability.$in } : { $in: ['for_sale', 'reserved'] },
     ...filter 
   };
 
