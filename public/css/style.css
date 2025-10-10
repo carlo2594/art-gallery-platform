@@ -1559,3 +1559,109 @@ body.noscroll {
 .availability-not_for_sale { background: #6c757d; }
 .availability-on_loan { background: #17a2b8; }
 .artwork-badge{pointer-events:none;}
+/* --- Favoritos: feedback visual --- */
+.artwork-fav-btn {
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .1s ease;
+  /* Color base usando la marca */
+  color: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+  /* Forzar variables de Bootstrap para evitar rojos en cualquier estado */
+  --bs-btn-color: var(--ox-yellow);
+  --bs-btn-border-color: var(--ox-yellow);
+  --bs-btn-hover-color: #111;
+  --bs-btn-hover-bg: var(--ox-yellow);
+  --bs-btn-hover-border-color: var(--ox-yellow);
+  --bs-btn-focus-shadow-rgb: 255, 205, 0; /* aproximación del amarillo */
+  --bs-btn-active-color: #111;
+  --bs-btn-active-bg: var(--ox-yellow);
+  --bs-btn-active-border-color: var(--ox-yellow);
+  --bs-btn-disabled-color: var(--ox-yellow);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--ox-yellow);
+}
+.artwork-fav-btn.btn-outline-danger,
+.artwork-fav-btn.btn-danger {
+  /* Reafirmar variables incluso si Bootstrap aplica variantes danger */
+  --bs-btn-color: var(--ox-yellow);
+  --bs-btn-border-color: var(--ox-yellow);
+  --bs-btn-hover-color: #111;
+  --bs-btn-hover-bg: var(--ox-yellow);
+  --bs-btn-hover-border-color: var(--ox-yellow);
+  --bs-btn-focus-shadow-rgb: 255, 205, 0;
+  --bs-btn-active-color: #111;
+  --bs-btn-active-bg: var(--ox-yellow);
+  --bs-btn-active-border-color: var(--ox-yellow);
+}
+.artwork-fav-btn:hover,
+.artwork-fav-btn:focus {
+  color: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+}
+.artwork-fav-btn.favorited,
+.artwork-fav-btn.btn-danger {
+  /* Forzar el color de marca cuando está activo */
+  background-color: var(--ox-yellow) !important;
+  border-color: var(--ox-yellow) !important;
+  color: #111 !important;
+  --bs-btn-bg: var(--ox-yellow);
+  --bs-btn-color: #111;
+}
+.artwork-fav-btn.favorited .fa-heart { color: #111 !important; }
+.artwork-fav-btn:not(.favorited) .fa-heart { color: var(--ox-yellow) !important; }
+.artwork-fav-btn.btn-outline-danger {
+  /* Asegurar que el outline use el amarillo de marca */
+  color: var(--ox-yellow) !important;
+  border-color: var(--ox-yellow) !important;
+}
+.artwork-fav-btn.favorited:hover {
+  filter: brightness(0.97);
+}
+.artwork-fav-btn:focus,
+.artwork-fav-btn:focus-visible {
+  box-shadow: 0 0 0 .25rem rgba(255, 205, 0, .35) !important;
+}
+.artwork-fav-btn .fa-heart.pop {
+  animation: heart-pop 260ms ease-in-out;
+}
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* --- Separador para sección de exposiciones relacionadas --- */
+.related-exhibitions-section {
+  /* Empuje claro desde la sección anterior */
+  margin-top: 4rem; /* más aire que mt-5 */
+}
+
+/* --- Artwork detail: stats spacing --- */
+.artwork-stats {
+  margin-top: 0.75rem;
+  margin-bottom: 2rem; /* asegura espacio antes de la siguiente sección */
+  position: relative;
+  z-index: 1; /* evita que elementos posteriores se dibujen encima por accidente */
+}
+.artwork-stats.centered-to-button {
+  /* actualmente no usamos posicionamiento absoluto; mantenemos en flujo */
+}
+.related-exhibitions-section {
+  clear: both; /* asegura separación si algún elemento previo flotara */
+}
+
+/* --- Back button: ocultar hasta que el layout esté listo --- */
+.artwork-back-section {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.artwork-back-section.is-visible {
+  opacity: 1;
+  transform: none;
+}
+.related-exhibitions-section > .col-12 {
+  padding-top: 1.25rem; /* pt-4 */
+  border-top: 1px solid rgba(0,0,0,.08); /* separador sutil alineado al contenido */
+  /* Si prefieres toque de marca: */
+  /* border-top-color: color-mix(in srgb, var(--ox-yellow) 25%, transparent); */
+}

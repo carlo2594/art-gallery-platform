@@ -21,7 +21,27 @@ block content
       // Información de la obra
       .col-xl-4.artwork-detail-sidebar
         .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto.artwork-info-container
-          h1.display-4.fw-bold.mb-3.artwork-title= artwork.title
+          // Título de la obra con botón de favorito
+          .d-flex.align-items-center.justify-content-center.justify-content-xl-start.gap-3.mb-3.artwork-title-wrap
+            h1.display-4.fw-bold.mb-0.artwork-title= artwork.title
+            if currentUser
+              // Botón favorito (usuario autenticado)
+              button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn(
+                type='button'
+                aria-label='Agregar a favoritos'
+                data-artwork-id=artwork._id
+                data-favorited='false'
+              )
+                i.far.fa-heart
+            else
+              // Botón que abre modal de autenticación (usuario no autenticado)
+              button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn(
+                type='button'
+                aria-label='Inicia sesión para agregar a favoritos'
+                data-bs-toggle='modal'
+                data-bs-target='#favAuthModal'
+              )
+                i.far.fa-heart
 
           // Información del artista
           if artwork.artist
@@ -56,7 +76,7 @@ block content
               h5.fw-bold.text-dark.artwork-price $#{(artwork.price_cents / 100).toLocaleString('en-US')} USD
 
           // Sección de acción y estadísticas
-          .artwork-action-section.mb-3.artwork-cta-section
+          .artwork-action-section.pb-4.mb-5.border-bottom.artwork-cta-section
             // Botón de acción
             .action-buttons.mb-3.artwork-action-buttons
               - const av = artwork.availability || 'not_for_sale'
@@ -85,7 +105,7 @@ block content
                   span NO DISPONIBLE
 
             // Estadísticas (solo mostrar si hay valores > 0)
-            .artwork-stats.artwork-stats-list
+            .artwork-stats.artwork-stats-list.mb-0
               if artwork.createdAt
                 .stat-item.mb-2.artwork-stat-published
                   small.text-muted.fw-bold.artwork-published-text Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
@@ -101,53 +121,54 @@ block content
     if artwork.exhibitions && artwork.exhibitions.length > 0
       - const exs = (artwork.exhibitions || []).slice().sort((a,b)=> new Date(b.startDate || b.createdAt || 0) - new Date(a.startDate || a.createdAt || 0)).slice(0,3)
       if exs.length
-        .row.mt-5.related-exhibitions-section
+        .row.mt-5.pt-4.border-top.related-exhibitions-section
           .col-12
-            h3.mb-4.related-exhibitions-title Exposiciones donde aparece esta obra
-            .row.related-exhibitions-grid
-              each exhibition, rIdx in exs
-                - const eager = rIdx === 0
-                .col-md-6.col-lg-4.mb-3.related-exhibition-col
-                  .card.h-100.shadow-sm.related-exhibition-card
-                    if exhibition.coverImage
-                      img.related-exhibition-bg(
-                        src=exhibition.coverImage,
-                        alt='',
-                        aria-hidden='true',
-                        loading=eager ? 'eager' : 'lazy',
-                        fetchpriority=eager ? 'high' : 'auto',
-                        decoding='async'
-                      )
-                    a.stretched-link(href=`/exhibitions/${exhibition.slug || exhibition._id}` aria-label=`Ver exposición: ${exhibition.title}`)
-                    // Overlay handled via CSS ::before
-                    .card-body.related-exhibition-body.text-white
-                      h5.card-title.related-exhibition-title= exhibition.title
-                      if exhibition.description
-                        p.card-text.related-exhibition-desc= (exhibition.description || '').substring(0, 120) + (exhibition.description && exhibition.description.length > 120 ? '…' : '')
-                      if exhibition.location
-                        p.card-text.related-exhibition-loc
-                          small.related-exhibition-loc-text
-                            if exhibition.location.type === 'physical' && exhibition.location.address
-                              i.fas.fa-map-marker-alt.me-1
-                              = exhibition.location.address
-                            else if exhibition.location.type === 'virtual'
-                              i.fas.fa-globe.me-1
-                              | Exposición virtual
-                      if exhibition.startDate
-                        p.card-text.related-exhibition-date
-                          small.related-exhibition-date-text
-                            i.fas.fa-calendar.me-1
-                            = new Date(exhibition.startDate).toLocaleDateString()
+            .container.px-3.px-md-4.px-lg-5
+              h3.mb-4.related-exhibitions-title Exposiciones donde aparece esta obra
+              .row.gx-4.gx-lg-5.related-exhibitions-grid
+                each exhibition, rIdx in exs
+                  - const eager = rIdx === 0
+                  .col-md-6.col-lg-4.mb-3.related-exhibition-col
+                    .card.h-100.shadow-sm.related-exhibition-card
+                      if exhibition.coverImage
+                        img.related-exhibition-bg(
+                          src=exhibition.coverImage,
+                          alt='',
+                          aria-hidden='true',
+                          loading=eager ? 'eager' : 'lazy',
+                          fetchpriority=eager ? 'high' : 'auto',
+                          decoding='async'
+                        )
+                      a.stretched-link(href=`/exhibitions/${exhibition.slug || exhibition._id}` aria-label=`Ver exposición: ${exhibition.title}`)
+                      // Overlay handled via CSS ::before
+                      .card-body.related-exhibition-body.text-white
+                        h5.card-title.related-exhibition-title= exhibition.title
+                        if exhibition.description
+                          p.card-text.related-exhibition-desc= (exhibition.description || '').substring(0, 120) + (exhibition.description && exhibition.description.length > 120 ? '…' : '')
+                        if exhibition.location
+                          p.card-text.related-exhibition-loc
+                            small.related-exhibition-loc-text
+                              if exhibition.location.type === 'physical' && exhibition.location.address
+                                i.fas.fa-map-marker-alt.me-1
+                                = exhibition.location.address
+                              else if exhibition.location.type === 'virtual'
+                                i.fas.fa-globe.me-1
+                                | Exposición virtual
+                        if exhibition.startDate
+                          p.card-text.related-exhibition-date
+                            small.related-exhibition-date-text
+                              i.fas.fa-calendar.me-1
+                              = new Date(exhibition.startDate).toLocaleDateString()
 
     // Obras relacionadas del mismo artista
     if relatedArtworks && relatedArtworks.length > 0
-      section.related-artworks.py-5.related-artworks-section
+      section.related-artworks.py-5.px-3.px-md-4.px-lg-5.related-artworks-section
         .row
           .col-12
             h3.mb-4.related-artworks-title Más obras de 
               a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
-          // Grid usando el estilo de _artworkGrid.pug
-          ul.grid.effect-2#related-grid.mb-5
+        // Grid usando el estilo de _artworkGrid.pug
+        ul.grid.effect-2#related-grid.mb-5
             each relatedArtwork in relatedArtworks
               li
                 .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
@@ -185,6 +206,8 @@ block content
             i.fas.fa-arrow-left.me-2
             span Volver a obras
 
+  //- (Modal de autenticación se incluye más abajo con margen)
+
   // Lightbox overlay
   #lightbox.lightbox.artwork-lightbox(
     role="dialog"
@@ -198,3 +221,11 @@ block content
       span.sr-only Cerrar
     .lightbox__inner.artwork-lightbox-inner
       img#lightboxImg.lightbox__img.artwork-lightbox-img(alt="")
+
+  // Modal de autenticación requerido para favoritos (colocado más abajo con margen)
+  .mt-5
+    - var modalId = 'favAuthModal'
+    - var title = 'Necesitas iniciar sesión'
+    - var message = 'Para agregar esta obra a tus favoritos, inicia sesión o regístrate.'
+    - var returnTo = `/artworks/${artwork.slug || artwork._id}`
+    include ./_authRequiredModal.pug

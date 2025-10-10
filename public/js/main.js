@@ -307,28 +307,192 @@ function centerStatsToButton() {
   stats.classList.add('centered-to-button');
 }
 
-// Función para toggle de favoritos (implementar según tu lógica existente)
-function toggleFavorite(artworkId) {
-  // Aquí implementarías la lógica para agregar/quitar de favoritos
-  console.log('Toggle favorite for artwork:', artworkId);
-  // Ejemplo de implementación con fetch:
-  /*
-  fetch(`/api/v1/favorites`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ artworkId: artworkId })
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Actualizar UI según respuesta
-  })
-  .catch(error => console.error('Error:', error));
-  */
+// Toggle de favoritos con Axios/Fetch
+async function toggleFavorite(artworkId, desiredState) {
+  try {
+    // Preferir axios si está disponible globalmente
+    const hasAxios = typeof window !== 'undefined' && typeof window.axios !== 'undefined';
+
+    if (desiredState === true) {
+      if (hasAxios) {
+        try {
+          await axios.post('/api/v1/favorites', { artworkId });
+        } catch (err) {
+          if (err?.response?.status !== 400) throw err; // 400 = ya existía
+        }
+      } else {
+        const res = await fetch('/api/v1/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ artworkId })
+        });
+        if (!res.ok && res.status !== 400) throw new Error('POST /favorites failed');
+      }
+      return { ok: true, favorited: true };
+    } else if (desiredState === false) {
+      if (hasAxios) {
+        try {
+          await axios.delete(`/api/v1/favorites/${artworkId}`);
+        } catch (err) {
+          const s = err?.response?.status;
+          if (s && s !== 404 && s !== 204) throw err; // 404 = no existía
+        }
+      } else {
+        const res = await fetch(`/api/v1/favorites/${artworkId}`, {
+          method: 'DELETE',
+          credentials: 'same-origin'
+        });
+        if (!res.ok && res.status !== 404 && res.status !== 204) throw new Error('DELETE /favorites failed');
+      }
+      return { ok: true, favorited: false };
+    } else {
+      // Si no se especifica desiredState, intentar agregar primero (UX simple)
+      if (hasAxios) {
+        await axios.post('/api/v1/favorites', { artworkId }).catch(async (err) => {
+          if (err?.response?.status === 400) {
+            // Ya estaba: intentar remover
+            await axios.delete(`/api/v1/favorites/${artworkId}`);
+          } else if (err?.response?.status === 401) {
+            throw err; // manejar más abajo
+          } else {
+            throw err;
+          }
+        });
+      } else {
+        const res = await fetch('/api/v1/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ artworkId })
+        });
+        if (!res.ok) {
+          if (res.status === 400) {
+            await fetch(`/api/v1/favorites/${artworkId}`, { method: 'DELETE', credentials: 'same-origin' });
+          } else if (res.status === 401) {
+            const e = new Error('Unauthorized'); e.status = 401; throw e;
+          } else {
+            throw new Error('Favorites toggle failed');
+          }
+        }
+      }
+    }
+    // Si llegamos aquí, el modo auto alternó: asumir que quedó como agregado
+    return { ok: true, favorited: true };
+  } catch (err) {
+    return { ok: false, error: err };
+  }
 }
 
-// Make toggleFavorite available globally
+// Vincular botón de favorito en detalle de obra
+function setupArtworkFavoriteButton() {
+  const btn = document.querySelector('.artwork-fav-btn');
+  if (!btn) return;
+
+  // Si el botón abre modal (usuario no autenticado), no interceptar
+  if (btn.hasAttribute('data-bs-toggle')) return;
+
+  const icon = btn.querySelector('i');
+  const artworkId = btn.getAttribute('data-artwork-id');
+  if (!artworkId) return;
+
+  const getState = () => (btn.getAttribute('data-favorited') === 'true');
+  const setState = (fav, opts) => {
+    opts = opts || {};
+    btn.setAttribute('data-favorited', fav ? 'true' : 'false');
+    btn.setAttribute('aria-pressed', fav ? 'true' : 'false');
+    btn.classList.toggle('favorited', !!fav);
+    // Alterna estilos Bootstrap para feedback visual
+    btn.classList.toggle('btn-danger', !!fav);
+    btn.classList.toggle('btn-outline-danger', !fav);
+    if (icon) {
+      icon.classList.toggle('far', !fav);
+      icon.classList.toggle('fas', fav);
+      // Pequeña animación de "pop"
+      icon.classList.add('pop');
+      icon.addEventListener('animationend', () => icon.classList.remove('pop'), { once: true });
+    }
+    if (!opts.silent) {
+      // Actualiza contador si existe
+      const el = document.querySelector('.artwork-favorites-text');
+      if (el) {
+        const m = el.textContent.match(/(\d+[\d.,]*)/);
+        if (m) {
+          const num = Number(m[1].replace(/[.,]/g, (c) => (c === '.' ? '' : '')));
+          const next = Math.max(0, (fav ? num + 1 : num - 1));
+          el.textContent = `${next.toLocaleString()} favoritos`;
+        }
+      }
+    }
+    // Feedback accesible
+    try {
+      const live = document.getElementById('sr-live');
+      if (live) live.textContent = fav ? 'Agregada a favoritos' : 'Quitada de favoritos';
+    } catch (e) {}
+  };
+
+  // Inicializar estado desde API si el usuario está autenticado
+  (async function initFavoriteState(){
+    try {
+      // Si ya está marcado en el markup, respetarlo
+      if (getState()) return;
+      const hasAxios = typeof window !== 'undefined' && typeof window.axios !== 'undefined';
+      if (hasAxios) {
+        const res = await axios.get('/api/v1/favorites');
+        const list = res?.data?.data?.favorites || res?.data?.favorites || [];
+        if (Array.isArray(list) && list.some(f => (f.artwork && (f.artwork._id === artworkId || f.artwork === artworkId)))) {
+          setState(true, { silent: true });
+        }
+      } else {
+        const res = await fetch('/api/v1/favorites', { credentials: 'same-origin' });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data?.data?.favorites || data?.favorites || [];
+          if (Array.isArray(list) && list.some(f => (f.artwork && (f.artwork._id === artworkId || f.artwork === artworkId)))) {
+            setState(true, { silent: true });
+          }
+        }
+      }
+    } catch (e) {
+      // 401/403: usuario no logueado o sin acceso; ignorar
+    }
+  })();
+
+  btn.addEventListener('click', async () => {
+    if (btn.disabled) return;
+    const current = getState();
+    btn.disabled = true;
+    btn.classList.add('disabled');
+    const res = await toggleFavorite(artworkId, !current);
+    btn.disabled = false;
+    btn.classList.remove('disabled');
+
+    if (res.ok) {
+      const finalState = typeof res.favorited === 'boolean' ? res.favorited : !current;
+      setState(finalState);
+    } else {
+      const status = res.error?.response?.status || res.error?.status;
+      if (status === 401 || status === 403) {
+        // Intentar abrir el modal si existe
+        const modalEl = document.getElementById('favAuthModal');
+        if (modalEl && window.bootstrap && typeof window.bootstrap.Modal === 'function') {
+          const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+          modal.show();
+          return;
+        }
+        // Fallback: redirigir a login con returnTo
+        const returnTo = window.location.pathname + window.location.search;
+        window.location.assign(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+      } else {
+        console.error('No se pudo actualizar favoritos', res.error);
+      }
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', setupArtworkFavoriteButton);
+
+// Make toggleFavorite available global (legacy handlers)
 window.toggleFavorite = toggleFavorite;
 
 // ------ Lightbox Functions ------
@@ -408,6 +572,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Inicializar Masonry para grids relacionados
   initRelatedGrid();
+
+  // Revelar botón "Volver a obras" cuando el layout esté listo
+  initBackButtonReveal();
 });
 
 // ------ Related Artworks Grid (Masonry) ------
@@ -468,6 +635,8 @@ function initRelatedGrid() {
             msnry.layout();
           }
         }, 50);
+        // Una vez listo el grid, mostramos el botón de regreso
+        revealBackButton();
       });
 
     } catch (e) {
@@ -533,6 +702,32 @@ function initArtistReveal(){
       }
     });
   });
+}
+
+// Mostrar el botón back tras el layout del grid o inmediatamente si no hay grid
+function initBackButtonReveal(){
+  const section = document.querySelector('.artwork-back-section');
+  if (!section) return;
+
+  const grid = document.getElementById('related-grid');
+  const reveal = () => revealBackButton();
+
+  if (grid && typeof window.imagesLoaded === 'function') {
+    // Fallback por si algo falla: mostrar después de 1500ms
+    const t = setTimeout(reveal, 1500);
+    window.imagesLoaded(grid, function(){
+      clearTimeout(t);
+      reveal();
+    });
+  } else {
+    // Sin grid o sin librería, mostrar de inmediato tras el primer frame
+    requestAnimationFrame(reveal);
+  }
+}
+
+function revealBackButton(){
+  const section = document.querySelector('.artwork-back-section');
+  if (section) section.classList.add('is-visible');
 }
 
 // Ensure initialization across different navigation/reload paths

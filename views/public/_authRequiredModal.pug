@@ -1,0 +1,48 @@
+//- views/public/_authRequiredModal.pug
+//- Modal reutilizable para exigir autenticación en acciones (e.g., favoritos)
+//- Parámetros esperados (opcionales):
+//-   modalId    : id del modal (por defecto: 'authRequiredModal')
+//-   title      : título del modal
+//-   message    : mensaje dentro del cuerpo
+//-   returnTo   : URL a donde redirigir luego de login/signup (por defecto: '/')
+//-   loginHref  : ruta custom de login (por defecto: '/login')
+//-   signupHref : ruta custom de registro (por defecto: '/signup')
+
+- const _id        = typeof modalId !== 'undefined' ? modalId : 'authRequiredModal'
+- const _title     = typeof title !== 'undefined' ? title : 'Necesitas iniciar sesión'
+- const _message   = typeof message !== 'undefined' ? message : 'Para continuar, inicia sesión o regístrate.'
+- const _returnTo  = typeof returnTo !== 'undefined' ? returnTo : '/'
+- const _loginHref = typeof loginHref !== 'undefined' ? loginHref : '/login'
+- const _signupHref= typeof signupHref !== 'undefined' ? signupHref : '/signup'
+
+//- Modal Bootstrap 5
+.modal.fade(id=_id tabindex='-1' aria-labelledby=`${_id}Label` aria-hidden='true' data-bs-backdrop='static' data-bs-keyboard='false')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h1.modal-title.fs-5(id=`${_id}Label`)= _title
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+      .modal-body
+        p.mb-0= _message
+      .modal-footer
+        a.btn.btn-outline-secondary(href=`${_signupHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+          i.fas.fa-user-plus.me-2
+          | Registrarme
+        a.btn.btn-primary(href=`${_loginHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+          i.fas.fa-right-to-bracket.me-2
+          | Iniciar sesión
+        button.btn.btn-light(type='button' data-bs-dismiss='modal')
+          | Cancelar
+
+//- Ejemplo de uso (en una vista):
+//-
+//-   include ./_authRequiredModal.pug
+//-   +
+//-   //- Botón que dispara el modal cuando el usuario no está logueado
+//-   button.btn.btn-primary(type='button' data-bs-toggle='modal' data-bs-target='#authRequiredModal')
+//-     | Agregar a favoritos
+//-
+//-   //- O pasar parámetros personalizados
+//-   include ./_authRequiredModal.pug
+//-     - var modalId = 'favAuthModal'
+//-     - var returnTo = `/artworks/${artwork.slug}`

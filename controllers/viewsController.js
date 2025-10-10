@@ -11,6 +11,7 @@ const PasswordResetToken = require('@models/passwordResetTokenModel');
 const Artwork = require('@models/artworkModel');
 const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
+const Favorite = require('@models/favoriteModel');
 
 // Utilities optimizadas
 const { viewsCache } = require('@utils/cache');
