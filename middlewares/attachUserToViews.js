@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('@models/userModel');
 
 module.exports = async (req, res, next) => {
+  // Ruta actual disponible en Pug (para returnTo)
+  try { res.locals.currentPath = req.originalUrl || req.url || '/'; } catch (_) {}
   try {
     const token = req.cookies?.jwt;
     if (!token) return next();

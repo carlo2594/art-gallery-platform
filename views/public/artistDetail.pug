@@ -190,6 +190,7 @@ block content
         .container-xxl.artworks-flex.artist-artworks-grid.artist-container-padding
           if artworks && artworks.length
             .artworks-grid-paginate.artist-artworks-paginate
+              - var backTo = typeof currentPath !== 'undefined' ? currentPath : ''
               include _artworkGrid.pug
               include _artworkPagination.pug
           else

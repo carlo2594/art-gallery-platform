@@ -1,11 +1,13 @@
 ﻿ul.grid.effect-2#grid.mb-5
   each a in artworks
+    - var __href = `/artworks/${a.slug || a._id}`
+    - if (typeof backTo !== 'undefined' && backTo) { __href = `${__href}?returnTo=${encodeURIComponent(backTo)}` }
     li
        .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
-         a(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
+         a(href=__href aria-label=`Ver obra: ${a.title || ''}`)
            img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
          // Ocultar badge overlay en la imagen (solo mostrar en card stats)
-         a.stretched-link(href=`/artworks/${a.slug || a._id}` aria-label=`Ver obra: ${a.title || ''}`)
+         a.stretched-link(href=__href aria-label=`Ver obra: ${a.title || ''}`)
          .card-body.grid-card-body
            .grid-card-flex
              // --- Columna izquierda: InformaciÃ³n de la obra ---

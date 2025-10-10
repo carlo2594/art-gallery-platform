@@ -575,6 +575,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Revelar botón "Volver a obras" cuando el layout esté listo
   initBackButtonReveal();
+
+  // Configurar botón Volver para regresar al origen si es posible
+  initSmartBackLink();
 });
 
 // ------ Related Artworks Grid (Masonry) ------
@@ -728,6 +731,51 @@ function initBackButtonReveal(){
 function revealBackButton(){
   const section = document.querySelector('.artwork-back-section');
   if (section) section.classList.add('is-visible');
+}
+
+// Enlaza el botón de volver para regresar a la página de origen (same-origin) si existe
+function initSmartBackLink(){
+  try {
+    const link = document.querySelector('.artwork-back-btn');
+    if (!link) return;
+    const fallback = link.getAttribute('href') || '/artworks';
+
+    // 1) Priorizar returnTo=? en la URL
+    const sp = new URLSearchParams(window.location.search);
+    const rt = sp.get('returnTo');
+    if (rt) {
+      try {
+        const rtUrl = new URL(rt, window.location.origin);
+        if (rtUrl.origin === window.location.origin) {
+          link.setAttribute('href', rtUrl.href);
+          link.dataset.smartBack = 'returnTo';
+          link.addEventListener('click', function(e){
+            e.preventDefault();
+            window.location.assign(rtUrl.href);
+          });
+          return;
+        }
+      } catch(_){}
+    }
+
+    // 2) Usar referrer same-origin si existe
+    const ref = document.referrer;
+    if (ref) {
+      const refUrl = new URL(ref, window.location.origin);
+      const sameOrigin = refUrl.origin === window.location.origin;
+      const samePage = (refUrl.pathname === window.location.pathname) && (refUrl.search === window.location.search);
+      if (sameOrigin && !samePage) {
+        link.setAttribute('href', refUrl.href);
+        link.dataset.smartBack = 'referrer';
+        link.addEventListener('click', function(e){
+          if (history.length > 1) {
+            e.preventDefault();
+            history.back();
+          }
+        });
+      }
+    }
+  } catch (e) {}
 }
 
 // Ensure initialization across different navigation/reload paths
