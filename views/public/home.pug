@@ -16,25 +16,43 @@ block content
         .col-lg-5.d-flex.justify-content-end.align-items-center.hero-image-container.hero-col-image
           img.hero-image.collectors-hero-image.hero-img-main(
             src="/img/Ox-hero-image-landing.jpg",
-            alt="Galería del Ox"
+            alt="Galería del Ox",
+            loading="eager",
+            fetchpriority="high",
+            decoding="async"
           )
 
-  // Galería (Masonry estilo Codrops, igual que artworks.pug)
+  // GalerA-a (Masonry estilo Codrops, igual que artworks.pug)
   section.my-5
     .container-xxl
       h2.h4.mb-4.text-center Muro de Galería
       if artworks && artworks.length
         ul.grid.effect-2#grid
           each a in artworks
+            - const _url = a.imageUrl || ''
+            - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
+            - const src480 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_480/') : _url
+            - const src768 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_768/') : _url
+            - const src1200 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/') : _url
+            - const srcset = isCld ? `${src480} 480w, ${src768} 768w, ${src1200} 1200w` : undefined
             li
               a(href=`/artworks/${a.slug || a._id}`)
-                img(src=a.imageUrl, alt=a.title, loading='lazy', decoding='async')
+                img(
+                  src=src480,
+                  srcset=srcset,
+                  sizes='(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
+                  alt=a.title,
+                  loading='lazy',
+                  decoding='async',
+                  width=a.imageWidth_px,
+                  height=a.imageHeight_px
+                )
       else
         .text-center.py-5
           p.mb-2 No hay obras publicadas todavía.
           a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
 
-  // Sección Para Coleccionistas
+  // SecciA3n Para Coleccionistas
   section.join-artists.position-relative
     img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Únete como coleccionista")
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
