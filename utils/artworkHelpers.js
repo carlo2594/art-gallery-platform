@@ -57,13 +57,6 @@ const findArtworkByIdOrSlug = async (ArtworkModel, artworkId) => {
 };
 
 /**
- * Incrementa vistas de una obra
- */
-const incrementArtworkViews = async (ArtworkModel, artworkId) => {
-  return ArtworkModel.findByIdAndUpdate(artworkId, { $inc: { views: 1 } });
-};
-
-/**
  * Obtiene obras populares para la página de inicio
  */
 const getPopularArtworks = async (ArtworkModel, limit = 20) => {
@@ -79,6 +72,5 @@ const getPopularArtworks = async (ArtworkModel, limit = 20) => {
 
 module.exports = {
   findArtworkByIdOrSlug,
-  incrementArtworkViews,
   getPopularArtworks
 };

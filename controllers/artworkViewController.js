@@ -7,7 +7,12 @@ exports.createView = async (req, res) => {
   try {
     const { artwork } = req.body;
     const ip = getClientIp(req);
-    const view = new ArtworkView({ artwork, ip });
+    const viewDoc = { artwork, ip };
+    // Adjuntar usuario si está autenticado
+    if (req.user && (req.user._id || req.user.id)) {
+      viewDoc.user = req.user._id || req.user.id;
+    }
+    const view = new ArtworkView(viewDoc);
     await view.save();
     res.status(201).json(view);
   } catch (err) {

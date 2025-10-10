@@ -1,4 +1,4 @@
-// Script para actualizar el campo "views" de cada artwork con vistas únicas (por user o IP) en las últimas 24 horas
+// Script para actualizar el campo "views" de cada artwork con vistas únicas por IP en las últimas 24 horas
 
 require('dotenv').config();
 const mongoose = require('mongoose');
@@ -13,23 +13,11 @@ async function updateArtworkViews() {
   // Fecha límite: últimas 24 horas
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
-  // Agregación: cuenta vistas únicas por artwork (por user si existe, si no por IP)
+  // Agregación: cuenta vistas únicas por artwork en base a timestamps (createdAt) y usuario/IP
   const uniqueViews = await ArtworkView.aggregate([
     { $match: { createdAt: { $gte: since } } },
-    {
-      $group: {
-        _id: {
-          artwork: '$artwork',
-          unique: { $ifNull: ['$user', '$ip'] }
-        }
-      }
-    },
-    {
-      $group: {
-        _id: '$_id.artwork',
-        views: { $sum: 1 }
-      }
-    }
+    { $group: { _id: { artwork: '$artwork', unique: { $ifNull: ['$user', '$ip'] } } } },
+    { $group: { _id: '$_id.artwork', views: { $sum: 1 } } }
   ]);
 
   // Actualiza el campo views de cada artwork

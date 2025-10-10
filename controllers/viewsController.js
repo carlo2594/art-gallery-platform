@@ -16,7 +16,7 @@ const Exhibition = require('@models/exhibitionModel');
 const { viewsCache } = require('@utils/cache');
 const { getAllTechniques, getGlobalPriceBounds, getArtistTechniques, getArtistPriceBounds } = require('@utils/aggregationHelpers');
 const { findArtistByIdOrSlug, getRelatedArtworks, buildArtistStats } = require('@utils/artistHelpers');
-const { findArtworkByIdOrSlug, incrementArtworkViews, getPopularArtworks } = require('@utils/artworkHelpers');
+const { findArtworkByIdOrSlug, getPopularArtworks } = require('@utils/artworkHelpers');
 
 // Vista de todos los artistas
 exports.getArtistsView = catchAsync(async (req, res) => {
@@ -475,8 +475,7 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
     return res.redirect(301, redirectUrl);
   }
 
-  // Incrementar contador de vistas
-  await incrementArtworkViews(Artwork, artwork._id);
+  // Contador de vistas se actualiza solo vía script diario
 
   // Buscar obras relacionadas del mismo artista
   const relatedArtworks = await getRelatedArtworks(Artwork, artwork.artist._id, artwork._id, 6);
