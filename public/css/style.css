@@ -902,6 +902,11 @@ section.join-artists { position: relative; margin-top: 5rem; }
 @media (min-width: 1456px) { .footer .container-xxl, .footer .container { max-width: 1600px; } }
 @media (max-width: 1455px) { .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; justify-content: center !important; gap: .8rem 1.2rem !important; } .footer .nav li { margin: 0; } }
 
+/* Center login/signup logo + title */
+.login-signin-form .navbar-logo-link { justify-content: center; }
+/* Center forgot password logo + title */
+#forgotForm .navbar-logo-link { justify-content: center; margin-bottom: 2rem !important; }
+
 /* ==========================================
   14. ARTWORK DETAIL PAGE
   ========================================== */
