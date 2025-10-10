@@ -45,6 +45,8 @@ app.locals.basedir = path.join(__dirname, 'views'); // ← añadimos esto
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+// Servir Bootstrap desde node_modules para CSS/JS locales
+app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
 
 // Parsers
 app.use(express.json({ limit: '10kb' }));
