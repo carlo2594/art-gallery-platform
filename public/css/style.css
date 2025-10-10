@@ -915,6 +915,19 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Artist image fade-in when loaded */
 .artist-image { opacity: 0; transition: opacity .4s ease; }
 .artist-image.loaded { opacity: 1; }
+/* Exhibition image fade-in */
+.exhibition-hero-image { opacity: 0; transition: opacity .4s ease; }
+.exhibition-hero-image.loaded { opacity: 1; }
+/* Ajuste rápido: alturas más compactas para heroes de exposiciones */
+@media (max-width: 991.98px) { .exhibition-section { min-height: 50vh; } }
+@media (min-width: 992px) and (max-width: 1199.98px) { .exhibition-section { min-height: 60vh; } }
+@media (min-width: 1200px) { .exhibition-section { min-height: 70vh; } }
+/* Split exhibitions layout */
+.exhibitions-split-list .exhibition-split { margin-bottom: 2.5rem; }
+.exhibition-media { border-radius: .5rem; overflow: hidden; box-shadow: 0 6px 18px -6px rgba(0,0,0,.2); }
+.exhibition-info-block { max-width: 56rem; }
+@media (max-width: 991.98px) { .exhibition-media img { height: 260px !important; } }
+@media (min-width: 992px) { .exhibition-media img { height: 360px !important; } }
 
 /* Skeleton shimmer while image loads */
 @keyframes shimmer {
@@ -933,6 +946,12 @@ section.join-artists { position: relative; margin-top: 5rem; }
   background-size: 200% 100%;
   animation: shimmer 1.2s infinite;
 }
+/* Apply shimmer to exhibitions container as well */
+.exhibition-hero-container.img-loading { position: relative; overflow: hidden; }
+.exhibition-hero-container.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }
+/* Shimmer for split media */
+.exhibition-media.img-loading { position: relative; overflow: hidden; }
+.exhibition-media.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }
 
 /* ==========================================
   14. ARTWORK DETAIL PAGE

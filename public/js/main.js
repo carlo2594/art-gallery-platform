@@ -546,3 +546,69 @@ function initArtistReveal(){
   window.addEventListener('load', run, { once: true });
   window.addEventListener('pageshow', (e) => { if (e.persisted) run(); }); // bfcache
 })();
+
+// ===== Exhibitions Reveal (full-screen sections) =====
+function initExhibitionsReveal(){
+  const cards = Array.from(document.querySelectorAll('.exhibition-hero-container.reveal-item, .exhibition-split.reveal-item'));
+  if (!cards.length || !('IntersectionObserver' in window)) return;
+  let counter = 0;
+
+  const revealWhenReady = (card, img) => {
+    const delay = Math.min(counter++ * 120, 1200);
+    card.style.transitionDelay = delay + 'ms';
+    if (img) img.classList.add('loaded');
+    card.classList.add('reveal-in');
+    card.classList.remove('img-loading');
+  };
+
+  const io = new IntersectionObserver((entries) => {
+    entries
+      .filter(e => e.isIntersecting)
+      .sort((a,b) => cards.indexOf(a.target) - cards.indexOf(b.target))
+      .forEach(entry => {
+        const card = entry.target;
+        const img = card.querySelector('.exhibition-hero-image');
+        const proceed = () => { revealWhenReady(card, img); io.unobserve(card); };
+        if (img && !(img.complete && img.naturalWidth > 0)) {
+          (card.classList.contains('exhibition-split') ? card.querySelector('.exhibition-media') : card).classList.add('img-loading');
+          img.addEventListener('load', proceed, { once: true });
+          img.addEventListener('error', proceed, { once: true });
+        } else {
+          proceed();
+        }
+      });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.1 });
+
+  cards.forEach(el => io.observe(el));
+
+  // Initial pass for already visible cards
+  const vh = window.innerHeight || document.documentElement.clientHeight;
+  requestAnimationFrame(() => {
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      if (rect.top < vh && rect.bottom > 0 && !card.classList.contains('reveal-in')) {
+        const img = card.querySelector('.exhibition-hero-image');
+        const proceed = () => { revealWhenReady(card, img); io.unobserve(card); };
+        if (img && !(img.complete && img.naturalWidth > 0)) {
+          (card.classList.contains('exhibition-split') ? card.querySelector('.exhibition-media') : card).classList.add('img-loading');
+          img.addEventListener('load', proceed, { once: true });
+          img.addEventListener('error', proceed, { once: true });
+        } else {
+          proceed();
+        }
+      }
+    });
+  });
+}
+
+(function ensureExhibitionsRevealInit(){
+  let done = false;
+  const run = () => { if (done) return; done = true; initExhibitionsReveal(); };
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    run();
+  } else {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  }
+  window.addEventListener('load', run, { once: true });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
+})();

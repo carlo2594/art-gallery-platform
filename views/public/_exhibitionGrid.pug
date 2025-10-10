@@ -1,51 +1,59 @@
 //- Grid de exposiciones estilo card-overlay Bootstrap
 
 //- Eliminado espacio en blanco inicial
-//- Si exhibitions es un array, mostrar cada una en su propia sección tipo hero
+//- Si exhibitions es un array, mostrar cada una como hero más compacto (ajuste rápido)
 if Array.isArray(exhibitions)
   if exhibitions.length
-    each expo in exhibitions
-      section.article-template.exhibition-section(style="min-height:100vh;")
+    each expo, idx in exhibitions
+      - const eager = idx < 2
+      section.article-template.exhibition-section
         // Cover Image with Overlay
-        .article-template__hero-container.exhibition-hero-container.position-relative
+        .article-template__hero-container.exhibition-hero-container.position-relative.reveal-item
           .article-template__hero-adapt.media.exhibition-hero-adapt
             if expo.coverImage
               // Image-only click target
               a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
-                img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(src=expo.coverImage, alt=expo.title, style="height: 100vh; width: 100%; object-fit: cover;")
+                img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(
+                  src=expo.coverImage,
+                  alt=expo.title,
+                  loading=eager ? 'eager' : 'lazy',
+                  fetchpriority=eager ? 'high' : 'low',
+                  decoding='async',
+                  style="width: 100%; height: 100%; object-fit: cover;"
+                )
             else
               // Placeholder with click link
               a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
-                .exhibition-placeholder.d-flex.align-items-center.justify-content-center(style="height: 100vh; background: linear-gradient(135deg, #343a40 0%, #495057 100%);")
+                .exhibition-placeholder.d-flex.align-items-center.justify-content-center(style="height: 50vh; background: linear-gradient(135deg, #343a40 0%, #495057 100%);")
                   .text-center
                     i.fas.fa-image.fa-4x.text-white.mb-3
                     .text-white.h5 Sin imagen
             
-            // Overlay con información de la exposición
-            .exhibition-overlay.position-absolute.bottom-0.start-0.end-0.p-4
+            // Overlay con información de la exposición (compacto)
+            .exhibition-overlay.position-absolute.bottom-0.start-0.end-0.p-3
               .exhibition-info.text-white
-                h2.exhibition-title.fw-bold.mb-3(style="font-size:2.8rem; text-shadow: 0 2px 8px rgba(0,0,0,0.7);")= expo.title
+                h2.exhibition-title.fw-bold.mb-2(style="font-size:2.4rem; text-shadow: 0 2px 6px rgba(0,0,0,0.6);")= expo.title
                 
                 // Dates
                 if expo.startDate && expo.endDate
-                  .d-flex.align-items-center.mb-2
-                    i.fas.fa-calendar-alt.me-3.text-warning(style="font-size: 1.2rem;")
-                    span.h6.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
+                  .d-flex.align-items-center.mb-1
+                    i.fas.fa-calendar-alt.me-2.text-warning(style="font-size: 1.1rem;")
+                    span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
                 
                 // Location
                 if expo.location && expo.location.type
-                  .d-flex.align-items-center.mb-2
+                  .d-flex.align-items-center.mb-1
                     if expo.location.type === 'physical' && expo.location.address
-                      i.fas.fa-map-marker-alt.me-3.text-danger(style="font-size: 1.2rem;")
-                      span.h6.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= expo.location.address
+                      i.fas.fa-map-marker-alt.me-2.text-danger(style="font-size: 1.1rem;")
+                      span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= expo.location.address
                     else if expo.location.type === 'virtual' && expo.location.url
-                      i.fas.fa-globe.me-3.text-info(style="font-size: 1.2rem;")
-                      span.h6.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);") Exposición Virtual
+                      i.fas.fa-globe.me-2.text-info(style="font-size: 1.1rem;")
+                      span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);") Exposición Virtual
                 
                 // Description (truncated)
                 if expo.description
-                  - const desc = expo.description.length > 180 ? expo.description.slice(0, 180) + '…' : expo.description;
-                  p.exhibition-description.mb-0(style="font-size:1.2rem; font-style:italic; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4;")= desc
+                  - const desc = expo.description.length > 160 ? expo.description.slice(0, 160) + '…' : expo.description;
+                  p.exhibition-description.mb-0(style="font-size:1.1rem; font-style:italic; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4;")= desc
   else
     .container-xxl.py-5
       .row.justify-content-center
@@ -54,27 +62,11 @@ if Array.isArray(exhibitions)
           p.text-muted.mb-4 Prueba ajustar el rango de fechas, el tipo o
             |  
             a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions') limpiar los filtros
-          //- Skeleton placeholders (no usan scroll-snap)
+          //- Skeleton placeholders
           .d-grid.gap-3
             .skeleton.skeleton-hero
             .skeleton.skeleton-hero
             .skeleton.skeleton-hero
-  //- Lenis smooth scroll (only for exhibitions listing)
-  script(src="https://unpkg.com/@studio-freight/lenis@1.0.39/bundled/lenis.min.js")
-  script.
-    (function(){
-      try {
-        var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        if (prefersReduced || !window.Lenis) return;
-        var lenis = new Lenis({
-          autoRaf: true,
-          duration: 1.3,
-          easing: function(t){ return Math.sin((t * Math.PI) / 2); } // easeOutSine
-        });
-        // Ensure body gets the snap class (CSS uses proximity)
-        document.body.classList.add('exhibitions-scroll-snap');
-      } catch(e) { /* noop */ }
-    })();
 //- Si exhibition es un objeto individual, mostrar detalle
 else if exhibition
   .article-template
