@@ -227,7 +227,8 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
 
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  const artworks = await getPopularArtworks(Artwork, 20);
+  // Top 10 obras más relevantes (aprobadas), ordenadas por views desc
+  const artworks = await getPopularArtworks(Artwork, 10);
 
   res.status(200).render('public/home', {
     title: 'Inicio · Galería del Ox',
