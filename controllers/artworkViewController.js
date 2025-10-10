@@ -18,6 +18,23 @@ exports.createView = catchAsync(async (req, res, next) => {
     viewDoc.user = req.user._id || req.user.id;
   }
 
+  // Idempotencia diaria por usuario/IP: una vista por día (UTC)
+  const now = new Date();
+  const startOfUtcDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  const dedupeQuery = { artwork, createdAt: { $gte: startOfUtcDay } };
+  if (viewDoc.user) {
+    dedupeQuery.user = viewDoc.user;
+  } else {
+    dedupeQuery.user = { $exists: false };
+    dedupeQuery.ip = ip || '';
+  }
+
+  const existing = await ArtworkView.findOne(dedupeQuery).lean();
+  if (existing) {
+    return sendResponse(res, existing, 'Vista ya registrada hoy.', 200);
+  }
+
   const view = await ArtworkView.create(viewDoc);
   return sendResponse(res, view, 'Vista registrada.', 201);
 });

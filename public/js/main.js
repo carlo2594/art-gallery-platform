@@ -612,3 +612,46 @@ function initExhibitionsReveal(){
   window.addEventListener('load', run, { once: true });
   window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
 })();
+
+// ===== Artwork View Beacon =====
+function initArtworkViewBeacon(){
+  try {
+    var thumb = document.getElementById('artwork-thumb');
+    if (!thumb) return;
+    var artworkId = thumb.dataset && thumb.dataset.artworkId;
+    if (!artworkId) return;
+    var fired = false;
+    function send(){
+      if (fired) return; fired = true;
+      var payload = JSON.stringify({ artwork: artworkId });
+      if (navigator.sendBeacon) {
+        var blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon('/api/v1/artwork-views', blob);
+      } else {
+        try { fetch('/api/v1/artwork-views', { method:'POST', headers:{'Content-Type':'application/json'}, body: payload, keepalive: true }); } catch(e) {}
+      }
+    }
+    function schedule(){ setTimeout(send, 2000); }
+    var heroImg = thumb.querySelector('img');
+    if (heroImg && !(heroImg.complete && heroImg.naturalWidth > 0)){
+      heroImg.addEventListener('load', schedule, { once: true });
+      heroImg.addEventListener('error', schedule, { once: true });
+    } else {
+      schedule();
+    }
+    document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') send(); }, { once: true });
+    window.addEventListener('pagehide', send, { once: true });
+  } catch(e) {}
+}
+
+(function ensureArtworkViewBeacon(){
+  let done = false;
+  const run = () => { if (done) return; done = true; initArtworkViewBeacon(); };
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    run();
+  } else {
+    document.addEventListener('DOMContentLoaded', run, { once: true });
+  }
+  window.addEventListener('load', run, { once: true });
+  window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
+})();

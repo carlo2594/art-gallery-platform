@@ -6,7 +6,7 @@ block content
       // Imagen de la obra con lightbox
       .col-xl-8
         .artwork-image-container.mb-4
-          figure.art-thumb#artwork-thumb
+          figure.art-thumb#artwork-thumb(data-artwork-id=artwork._id)
             img(
               src=artwork.imageUrl
               alt=artwork.title
