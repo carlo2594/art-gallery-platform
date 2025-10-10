@@ -21,7 +21,7 @@ const findArtworkByIdOrSlug = async (ArtworkModel, artworkId) => {
     })
     .populate({ 
       path: 'exhibitions', 
-      select: 'title description startDate endDate location status'
+      select: 'title description startDate endDate location status coverImage slug'
     });
     
     // Si se encontró por ID y tiene slug, retornar redirección
@@ -45,7 +45,7 @@ const findArtworkByIdOrSlug = async (ArtworkModel, artworkId) => {
     })
     .populate({ 
       path: 'exhibitions', 
-      select: 'title description startDate endDate location status'
+      select: 'title description startDate endDate location status coverImage slug'
     });
   }
 

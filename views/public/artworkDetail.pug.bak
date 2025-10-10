@@ -1,0 +1,181 @@
+extends ../layouts/public
+
+block content
+  .container-xxl.mt-5
+    .row.artwork-detail-main.mb-5
+      // Imagen de la obra con lightbox
+      .col-xl-8
+        .artwork-image-container.mb-4
+          figure.art-thumb#artwork-thumb(dat�artwork-id=artwork._id)
+            img(
+              src=artwork.imageUrl
+              alt=artwork.title
+              dat�full=artwork.imageUrl
+            )
+      
+      // Información de la obra
+      .col-xl-4
+        .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto.artwork-info-container
+          h1.display-4.fw-bold.mb-3= artwork.title
+          
+          // Información del artista
+          if artwork.artist
+            .mb-3
+              h6.text-uppercase.fw-bold.mb-1.text-muted
+                a.text-decoration-none.artist-name-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+              if artwork.artist.location
+                small.text-muted= artwork.artist.location
+          
+          // Detalles técnicos
+          .artwork-details.mb-3
+            if artwork.description
+              .mb-1
+                p.fs-5.text-muted.lh-base.mb-0= artwork.description
+            
+            .details-list.mt-0
+              if artwork.technique
+                .detail-item.mb-1
+                  span.text-muted= artwork.technique
+              
+              if artwork.completedAt
+                .detail-item.mb-1
+                  span.text-muted= new Date(artwork.completedAt).getFullYear()
+              
+              if artwork.width_cm && artwork.height_cm
+                .detail-item.mb-1
+                  span.text-muted #{artwork.width_cm} × #{artwork.height_cm} cm / #{Math.round(artwork.width_cm / 2.54)} × #{Math.round(artwork.height_cm / 2.54)} in
+          
+          // Precio
+          if artwork.price_cents && artwork.price_cents > 0
+            .mb-3
+              h5.fw-bold.text-dark $#{(artwork.price_cents / 100).toLocaleString('en-US')} USD
+          
+          // Sección de acción y estadísticas
+          .artwork-action-section.mb-3
+            // Botón de acción
+            .action-buttons.mb-3
+              if user
+                button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing(
+                  type="button"
+                  onclick=`toggleFavorite('${artwork._id}')`
+                )
+                  span CONSULTAR COMPRA
+              else
+                a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing(
+                  href="/login"
+                )
+                  span CONSULTAR COMPRA
+            
+            // Estadísticas (solo mostrar si hay valores > 0)
+            .artwork-stats
+              // Fecha de publicación en la página
+              if artwork.createdAt
+                .stat-item.mb-2
+                  small.text-muted.fw-bold Publicado el #{new Date(artwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+              
+              if artwork.views && artwork.views > 0
+                .stat-item.mb-1
+                  small.text-muted #{artwork.views.toLocaleString()} visualizaciones
+              if artwork.favoritesCount && artwork.favoritesCount > 0
+                .stat-item
+                  small.text-muted #{artwork.favoritesCount.toLocaleString()} favoritos
+
+    // Exposiciones relacionadas
+    if artwork.exhibitions && artwork.exhibitions.length > 0
+      .row.mt-5
+        .col-12
+          h3.mb-4 Exposiciones donde aparece esta obra
+          .row
+            each exhibition in artwork.exhibitions
+              .col-md-6.col-lg-4.mb-3
+                .card.h-100.shadow-sm
+                  .card-body
+                    h5.card-title= exhibition.title
+                    if exhibition.description
+                      p.card-text.text-muted= exhibition.description.substring(0, 100) + '...'
+                    if exhibition.location
+                      p.card-text
+                        small.text-muted
+                          i.fas.f�map-marker-alt.me-1
+                          = exhibition.location
+                    if exhibition.startDate
+                      p.card-text
+                        small.text-muted
+                          i.fas.f�calendar.me-1
+                          = new Date(exhibition.startDate).toLocaleDateString()
+
+    // Obras relacionadas del mismo artista
+    if relatedArtworks && relatedArtworks.length > 0
+      section.related-artworks.py-5
+        .row
+          .col-12
+            h3.mb-4 Más obras de 
+              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+          
+          // Grid usando el estilo de _artworkGrid.pug
+          ul.grid.effect-2#related-grid.mb-5
+            each relatedArtwork in relatedArtworks
+              li
+                .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
+                  a(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` ari�label=`Ver obra: ${relatedArtwork.title || ''}`)
+                    img.card-img-top.art-card-shadow(src=relatedArtwork.imageUrl, alt=relatedArtwork.title)
+                  // Full-card stretched link so the info area is clickable too
+                  a.stretched-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` ari�label=`Ver obra: ${relatedArtwork.title || ''}`)
+                  .card-body.grid-card-body
+                    .grid-card-flex
+                      // --- Columna izquierda: Información de la obra ---
+                      .grid-card-info
+                        // Título principal de la obra
+                        if relatedArtwork.title
+                          h4.grid-card-title= relatedArtwork.title
+                        
+                        // Información del artista
+                        if relatedArtwork.artist
+                          h6.grid-card-artist= relatedArtwork.artist.name
+                        
+                        // Detalles técnicos
+                        .grid-card-details
+                          if relatedArtwork.technique
+                            - var techCap = relatedArtwork.technique.charAt(0).toUpperCase() + relatedArtwork.technique.slice(1)
+                            .grid-card-detail-item= techCap
+                          
+                          if relatedArtwork.completedAt
+                            .grid-card-detail-item= new Date(relatedArtwork.completedAt).getFullYear()
+                        
+                        // Precio
+                        if typeof relatedArtwork.price_cents === 'number'
+                          h5.grid-card-price $#{(relatedArtwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
+                      
+                      // --- Columna derecha: Estadísticas ---
+                      .grid-card-stats.d-flex.flex-column.justify-content-end
+                        if relatedArtwork.createdAt
+                          .grid-card-stat-item Publicado el #{new Date(relatedArtwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
+                        
+                        if typeof relatedArtwork.views === 'number' && relatedArtwork.views > 0
+                          .grid-card-stat-item #{relatedArtwork.views.toLocaleString()} visualizaciones
+                        
+                        if typeof relatedArtwork.favoritesCount === 'number' && relatedArtwork.favoritesCount > 0
+                          .grid-card-stat-item #{relatedArtwork.favoritesCount.toLocaleString()} favoritos
+
+    // Botón volver
+    section.back-navigation.py-4
+      .row
+        .col-12.text-center
+          a.btn.btn-secondary.btn-lg(href="/artworks")
+            i.fas.f�arrow-left.me-2
+            span Volver a obras
+
+  // Lightbox overlay
+  #lightbox.lightbox(
+    role="dialog"
+    ari�modal="true"
+    ari�label="Vista ampliada de la obra"
+  )
+    button.lightbox__close(type="button" ari�label="Cerrar (Esc)")
+      // Ícono X
+      svg(viewBox="0 0 24 24" fill="none" ari�hidden="true")
+        path(d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z" fill="currentColor")
+      span.sr-only Cerrar
+    .lightbox__inner
+      img#lightboxImg.lightbox__img(alt="")
+

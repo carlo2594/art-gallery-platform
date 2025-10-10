@@ -949,6 +949,15 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Apply shimmer to exhibitions container as well */
 .exhibition-hero-container.img-loading { position: relative; overflow: hidden; }
 .exhibition-hero-container.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }
+/* Related exhibitions styling */
+.related-exhibition-card { position: relative; border: none; border-radius: .75rem; overflow: hidden; min-height: 240px; }
+/* Ensure overlay does not block clicks */
+.related-exhibition-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.55) 100%); pointer-events: none; z-index: 0; }
+.related-exhibition-card .stretched-link { position: absolute; inset: 0; z-index: 2; }
+.related-exhibition-body { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end; min-height: 240px; }
+.related-exhibition-title { color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+.related-exhibition-desc, .related-exhibition-loc-text, .related-exhibition-date-text { color: rgba(255,255,255,0.9) !important; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.related-exhibitions-grid { row-gap: 1rem; }
 /* Shimmer for split media */
 .exhibition-media.img-loading { position: relative; overflow: hidden; }
 .exhibition-media.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }

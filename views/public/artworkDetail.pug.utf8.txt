@@ -79,36 +79,27 @@ block content
 
     // Exposiciones relacionadas
     if artwork.exhibitions && artwork.exhibitions.length > 0
-      - const exs = (artwork.exhibitions || []).slice().sort((a,b)=> new Date(b.startDate || b.createdAt || 0) - new Date(a.startDate || a.createdAt || 0)).slice(0,3)
-      if exs.length
-        .row.mt-5.related-exhibitions-section
-          .col-12
-            h3.mb-4.related-exhibitions-title Exposiciones donde aparece esta obra
-            .row.related-exhibitions-grid
-              each exhibition in exs
-                - const bg = exhibition.coverImage ? `background-image: url('${exhibition.coverImage}')` : ''
-                .col-md-6.col-lg-4.mb-3.related-exhibition-col
-                  .card.h-100.shadow-sm.related-exhibition-card(style=`${bg}; background-size: cover; background-position: center;`)
-                    a.stretched-link(href=`/exhibitions/${exhibition.slug || exhibition._id}` aria-label=`Ver exposición: ${exhibition.title}`)
-                    // Overlay handled via CSS ::before
-                    .card-body.related-exhibition-body.text-white
-                      h5.card-title.related-exhibition-title= exhibition.title
-                      if exhibition.description
-                        p.card-text.related-exhibition-desc= (exhibition.description || '').substring(0, 120) + (exhibition.description && exhibition.description.length > 120 ? '…' : '')
-                      if exhibition.location
-                        p.card-text.related-exhibition-loc
-                          small.related-exhibition-loc-text
-                            if exhibition.location.type === 'physical' && exhibition.location.address
-                              i.fas.fa-map-marker-alt.me-1
-                              = exhibition.location.address
-                            else if exhibition.location.type === 'virtual'
-                              i.fas.fa-globe.me-1
-                              | Exposición virtual
-                      if exhibition.startDate
-                        p.card-text.related-exhibition-date
-                          small.related-exhibition-date-text
-                            i.fas.fa-calendar.me-1
-                            = new Date(exhibition.startDate).toLocaleDateString()
+      .row.mt-5.related-exhibitions-section
+        .col-12
+          h3.mb-4.related-exhibitions-title Exposiciones donde aparece esta obra
+          .row.related-exhibitions-grid
+            each exhibition in artwork.exhibitions
+              .col-md-6.col-lg-4.mb-3.related-exhibition-col
+                .card.h-100.shadow-sm.related-exhibition-card
+                  .card-body.related-exhibition-body
+                    h5.card-title.related-exhibition-title= exhibition.title
+                    if exhibition.description
+                      p.card-text.text-muted.related-exhibition-desc= exhibition.description.substring(0, 100) + '...'
+                    if exhibition.location
+                      p.card-text.related-exhibition-loc
+                        small.text-muted.related-exhibition-loc-text
+                          i.fas.fa-map-marker-alt.me-1
+                          = exhibition.location
+                    if exhibition.startDate
+                      p.card-text.related-exhibition-date
+                        small.text-muted.related-exhibition-date-text
+                          i.fas.fa-calendar.me-1
+                          = new Date(exhibition.startDate).toLocaleDateString()
 
     // Obras relacionadas del mismo artista
     if relatedArtworks && relatedArtworks.length > 0
@@ -156,16 +147,17 @@ block content
             i.fas.fa-arrow-left.me-2
             span Volver a obras
 
-  // Lightbox overlay
-  #lightbox.lightbox.artwork-lightbox(
-    role="dialog"
-    aria-modal="true"
-    aria-label="Vista ampliada de la obra"
-  )
-    button.lightbox__close.artwork-lightbox-close(type="button" aria-label="Cerrar (Esc)")
-      // Ícono X
-      svg(viewBox="0 0 24 24" fill="none" aria-hidden="true")
-        path(d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z" fill="currentColor")
-      span.sr-only Cerrar
-    .lightbox__inner.artwork-lightbox-inner
-      img#lightboxImg.lightbox__img.artwork-lightbox-img(alt="")
+// Lightbox overlay
+#lightbox.lightbox.artwork-lightbox(
+  role="dialog"
+  aria-modal="true"
+  aria-label="Vista ampliada de la obra"
+)
+  button.lightbox__close.artwork-lightbox-close(type="button" aria-label="Cerrar (Esc)")
+    // Ícono X
+    svg(viewBox="0 0 24 24" fill="none" aria-hidden="true")
+      path(d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z" fill="currentColor")
+    span.sr-only Cerrar
+  .lightbox__inner.artwork-lightbox-inner
+    img#lightboxImg.lightbox__img.artwork-lightbox-img(alt="")
+
