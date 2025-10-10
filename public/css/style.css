@@ -861,7 +861,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .footer .nav::-webkit-scrollbar { height: 6px; }
 .footer .container-xxl, .footer .container { max-width: 1440px; padding-left: 2rem; padding-right: 2rem; }
 .logo-footer { max-height: 8rem; width: auto; display: block; }
-.footer-title { font-family: var(--font-title); font-weight: 700; font-size: 1.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ox-beige) !important; margin-left: 1rem; display: inline-block; }
+.footer-title { font-family: var(--font-title); font-weight: 700; font-size: 1.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ox-beige) !important; margin-left: -1rem; display: inline-block; }
 .footer-quote { margin-bottom: 1rem; }
 .footer .container-xxl > * + * { margin-top: 1.2rem; }
 
