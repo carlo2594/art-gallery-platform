@@ -578,6 +578,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Configurar botón Volver para regresar al origen si es posible
   initSmartBackLink();
+
+  // Configurar back en login/signup para respetar returnTo o referrer
+  initLoginBackLink();
 });
 
 // ------ Related Artworks Grid (Masonry) ------
@@ -773,6 +776,41 @@ function initSmartBackLink(){
             history.back();
           }
         });
+      }
+    }
+  } catch (e) {}
+}
+
+// Back en páginas de login/signup: prioriza ?returnTo= y luego referrer same-origin
+function initLoginBackLink(){
+  try {
+    const link = document.querySelector('.login-signin-back-link');
+    if (!link) return;
+    const fallback = link.getAttribute('href') || '/';
+
+    const sp = new URLSearchParams(window.location.search);
+    const rt = sp.get('returnTo');
+    if (rt) {
+      try {
+        const rtUrl = new URL(rt, window.location.origin);
+        if (rtUrl.origin === window.location.origin) {
+          link.setAttribute('href', rtUrl.href);
+          link.dataset.smartBack = 'returnTo';
+          link.addEventListener('click', function(e){ e.preventDefault(); window.location.assign(rtUrl.href); });
+          return;
+        }
+      } catch(_){}
+    }
+
+    const ref = document.referrer;
+    if (ref) {
+      const refUrl = new URL(ref, window.location.origin);
+      const sameOrigin = refUrl.origin === window.location.origin;
+      const samePage = (refUrl.pathname === window.location.pathname) && (refUrl.search === window.location.search);
+      if (sameOrigin && !samePage) {
+        link.setAttribute('href', refUrl.href);
+        link.dataset.smartBack = 'referrer';
+        link.addEventListener('click', function(e){ if (history.length > 1) { e.preventDefault(); history.back(); } });
       }
     }
   } catch (e) {}
