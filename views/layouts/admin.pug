@@ -49,3 +49,47 @@ html(lang='es')
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/main.js')
+    // Reset password trigger for admin tables
+    script.
+      (function(){
+        function onClick(e){
+          var btn = e.target.closest && e.target.closest('.admin-reset-pass');
+          if(!btn) return;
+          e.preventDefault();
+          var id = btn.getAttribute('data-user-id');
+          if(!id) return;
+          if(!confirm('¿Resetear contraseña para este usuario?')) return;
+          var old = btn.textContent;
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Reseteando...';
+          var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
+          var url = '/api/v1/users/' + encodeURIComponent(id) + '/reset-password';
+          if (window.axios) {
+            axios.patch(url).then(function(){ alert('Contraseña reseteada.'); }).catch(function(err){ console.error(err); alert('No se pudo resetear.'); }).finally(done);
+          } else {
+            fetch(url, { method: 'PATCH' }).then(function(res){ if(!res.ok) throw new Error('Failed'); alert('Contraseña reseteada.'); }).catch(function(err){ console.error(err); alert('No se pudo resetear.'); }).finally(done);
+          }
+        }
+        function onPromote(e){
+          var btn = e.target.closest && e.target.closest('.admin-promote');
+          if(!btn) return;
+          e.preventDefault();
+          var id = btn.getAttribute('data-user-id');
+          var role = btn.getAttribute('data-role');
+          if(!id || !role) return;
+          if(!confirm('¿Promover a "' + role + '"?')) return;
+          var old = btn.textContent;
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
+          var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
+          var url = '/api/v1/users/' + encodeURIComponent(id) + '/role';
+          if (window.axios) {
+            axios.patch(url, { role: role }).then(function(){ alert('Rol actualizado a ' + role); location.reload(); }).catch(function(err){ console.error(err); alert('No se pudo actualizar el rol'); }).finally(done);
+          } else {
+            fetch(url, { method: 'PATCH', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ role: role }) })
+              .then(function(res){ if(!res.ok) throw new Error('Failed'); alert('Rol actualizado a ' + role); location.reload(); })
+              .catch(function(err){ console.error(err); alert('No se pudo actualizar el rol'); })
+              .finally(done);
+          }
+        }
+        document.addEventListener('click', onClick);
+        document.addEventListener('click', onPromote);
+      })();
