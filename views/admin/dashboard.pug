@@ -1,5 +1,30 @@
-extends ../layouts/admin
+extends ../layouts/public
 
 block content
-  h2 Dashboard
-  p Aquí va el resumen de métricas.
+  .container.py-5
+    h1.h3.mb-4 Panel de administrador
+    if totals
+      .row.mb-4
+        .col-md-4
+          .card.shadow-sm
+            .card-body
+              h6.mb-1.text-muted Obras
+              .display-6= totals.artworks || 0
+        .col-md-4
+          .card.shadow-sm
+            .card-body
+              h6.mb-1.text-muted Exposiciones
+              .display-6= totals.exhibitions || 0
+        .col-md-4
+          .card.shadow-sm
+            .card-body
+              h6.mb-1.text-muted Usuarios
+              .display-6= totals.users || 0
+
+    .row.g-3
+      .col-auto
+        a.btn.btn-primary(href='/admin/artworks') Gestionar obras
+      .col-auto
+        a.btn.btn-primary(href='/admin/exhibitions') Gestionar exposiciones
+      .col-auto
+        a.btn.btn-primary(href='/admin/users') Gestionar usuarios

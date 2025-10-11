@@ -52,3 +52,14 @@ exports.getRecentExhibitions = async (limit = 3) => {
     .limit(limit)
     .populate('createdBy');
 };
+
+
+// Totales para el dashboard de admin
+exports.getAdminTotals = async () => {
+  const [artworks, exhibitions, users] = await Promise.all([
+    Artwork.countDocuments({}),
+    Exhibition.countDocuments({}),
+    User.countDocuments({})
+  ]);
+  return { artworks, exhibitions, users };
+};

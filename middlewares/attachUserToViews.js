@@ -10,8 +10,8 @@ module.exports = async (req, res, next) => {
     if (!token) return next();
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('name email');
-    if (user) res.locals.currentUser = { id: user.id, name: user.name };
+    const user = await User.findById(decoded.id).select('name +role');
+    if (user) res.locals.currentUser = { id: user.id, name: user.name, role: user.role };
   } catch (e) {
     // token inválido/expirado: continuar sin usuario
   }
