@@ -1,12 +1,51 @@
+//- views/layouts/admin.pug
 doctype html
 html(lang='es')
   head
-    title Admin · #{title || 'Galería del Ox'}
-    link(rel='stylesheet' href='/bootstrap/css/bootstrap.min.css')
-    link(rel='stylesheet' href='/css/admin.css')
-  body(class='d-flex flex-column vh-100')
-    nav.navbar.navbar-dark.bg-dark.px-3
-      span.navbar-brand.mb-0.h1 Admin Panel
-    main.container-fluid.mt-4
-      block content
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    title #{title ? title + ' · Admin · Galería del Ox' : 'Admin · Galería del Ox'}
+    link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
+    link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
+    link(rel='stylesheet', href='/css/style.css')
+  body
+    .d-flex.min-vh-100
+      //- Sidebar
+      aside.admin-sidebar.d-flex.flex-column.flex-shrink-0.p-3
+        a.d-flex.align-items-center.mb-3.mb-md-0.me-md-auto.text-decoration-none(href='/')
+          img.logo-navbar.me-2(src='/Logos/GOX_LOGO_06.png', alt='Galería del Ox', width='32', height='32')
+          span.fs-5.fw-bold.text-uppercase Galería del Ox
+        hr
+        ul.nav.nav-pills.flex-column.mb-auto
+          li.nav-item.mb-2
+            a.nav-link.admin-nav-link(href='/admin' aria-current='page')
+              i.fas.fa-house.me-2
+              | Inicio
+          li.mb-2
+            a.nav-link.admin-nav-link(href='/admin/users?role=artist')
+              i.fas.fa-user.me-2
+              | Artistas
+          li.mb-2
+            a.nav-link.admin-nav-link(href='/admin/collectors')
+              i.fas.fa-users.me-2
+              | Coleccionistas
+          li.mb-2
+            a.nav-link.admin-nav-link(href='/admin/artworks')
+              i.fas.fa-image.me-2
+              | Obras
+          li.mb-2
+            a.nav-link.admin-nav-link(href='/admin/exhibitions')
+              i.fas.fa-landmark.me-2
+              | Exposiciones
+        hr
+        a.btn.btn-outline-secondary.w-100.mt-auto(href='/' aria-label='Volver a la vista pública')
+          i.fas.fa-arrow-left.me-2
+          | Volver
+
+      //- Main content
+      main.admin-main.flex-grow-1.p-4
+        block content
+
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
+    script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
+    script(src='/js/main.js')

@@ -1,0 +1,46 @@
+extends ../layouts/admin
+
+block content
+  .container.py-5
+    h1.h3.mb-4 Obras
+    if artworks && artworks.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Título
+              th Artista
+              th Estado
+              th Disponibilidad
+              th Precio
+              th Favoritos
+              th Creada
+              th Acciones
+          tbody
+            each a in artworks
+              - const status = a.status || a.moderationStatus
+              tr
+                td= a.title
+                td= a.artist && a.artist.name || '—'
+                td
+                  span.badge(class=status === 'approved' ? 'text-bg-success' : (status === 'under_review' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary')))= status || 'draft'
+                td
+                  span.badge.text-capitalize(class=a.availability === 'for_sale' ? 'text-bg-success' : (a.availability === 'reserved' ? 'text-bg-warning' : (a.availability === 'sold' ? 'text-bg-secondary' : 'text-bg-info')))= a.availability || '—'
+                td= typeof a.price_cents === 'number' ? `$${(a.price_cents/100).toLocaleString('en-US')}` : '—'
+                td= typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString() : '0'
+                td= new Date(a.createdAt).toLocaleDateString('es-ES')
+                td
+                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/artworks/${a._id}`) Ver
+    else
+      .alert.alert-info No hay obras
+    if typeof totalPages !== 'undefined' && totalPages > 1
+      nav.mt-4(aria-label='Paginación de obras')
+        ul.pagination.justify-content-center
+          - const prevDisabled = page <= 1
+          - const nextDisabled = page >= totalPages
+          li.page-item(class=prevDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') «
+          li.page-item.disabled
+            span.page-link= `Página ${page} de ${totalPages}`
+          li.page-item(class=nextDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') »

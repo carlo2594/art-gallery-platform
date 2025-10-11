@@ -22,12 +22,39 @@ exports.getDashboard = catchAsync(async (req, res) => {
   });
 });
 
+/* Helpers de paginación (admin) */
+function getPageParams(q, defaultPerPage = 15, maxPerPage = 50) {
+  let page = Number(q.page) || 1;
+  if (page < 1) page = 1;
+  let perPage = Math.min(defaultPerPage, maxPerPage);
+  const skip = (page - 1) * perPage;
+  return { page, perPage, skip };
+}
+function buildQsPrefix(q) {
+  const params = new URLSearchParams();
+  Object.keys(q || {}).forEach(k => {
+    if (k === 'page') return;
+    const v = q[k];
+    if (v !== undefined && v !== '') params.append(k, v);
+  });
+  const s = params.toString();
+  return s ? `&${s}` : '';
+}
+
 /* Exhibiciones */
 exports.getExhibitions = catchAsync(async (req, res) => {
-  const exhibitions = await Exhibition.find().populate('createdBy').lean();
-  res.status(200).render('admin/exhibitions/index', {
+  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const [total, exhibitions] = await Promise.all([
+    Exhibition.countDocuments({}),
+    Exhibition.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('createdBy').lean()
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  res.status(200).render('admin/exhibitionAdmin', {
     title: 'Exhibiciones',
-    exhibitions
+    exhibitions,
+    page,
+    totalPages,
+    qsPrefix: buildQsPrefix(req.query)
   });
 });
 exports.getExhibition = catchAsync(async (req, res, next) => {
@@ -43,10 +70,18 @@ exports.getExhibition = catchAsync(async (req, res, next) => {
 
 /* Obras */
 exports.getArtworks = catchAsync(async (req, res) => {
-  const artworks = await Artwork.find().populate('artist').lean();
-  res.status(200).render('admin/artworks/index', {
+  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const [total, artworks] = await Promise.all([
+    Artwork.countDocuments({}),
+    Artwork.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('artist').lean()
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  res.status(200).render('admin/artworkAdmin', {
     title: 'Obras de arte',
-    artworks
+    artworks,
+    page,
+    totalPages,
+    qsPrefix: buildQsPrefix(req.query)
   });
 });
 exports.getArtwork = catchAsync(async (req, res, next) => {
@@ -62,10 +97,39 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 
 /* Usuarios */
 exports.getUsers = catchAsync(async (req, res) => {
-  const users = await User.find().lean();
-  res.status(200).render('admin/users/index', {
-    title: 'Usuarios',
-    users
+  const filter = {};
+  // Por defecto, artistas
+  const role = (req.query.role || 'artist').trim();
+  if (role) filter.role = role;
+  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const [total, users] = await Promise.all([
+    User.countDocuments(filter),
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role').lean()
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  res.status(200).render('admin/artistAdmin', {
+    title: 'Artistas',
+    users,
+    page,
+    totalPages,
+    qsPrefix: buildQsPrefix(req.query)
+  });
+});
+
+exports.getCollectors = catchAsync(async (req, res) => {
+  const filter = { role: 'collector' };
+  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const [total, users] = await Promise.all([
+    User.countDocuments(filter),
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role').lean()
+  ]);
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  res.status(200).render('admin/collectorAdmin', {
+    title: 'Coleccionistas',
+    users,
+    page,
+    totalPages,
+    qsPrefix: buildQsPrefix(req.query)
   });
 });
 exports.getUser = catchAsync(async (req, res, next) => {

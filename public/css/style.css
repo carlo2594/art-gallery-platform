@@ -1659,6 +1659,33 @@ body.noscroll {
   opacity: 1;
   transform: none;
 }
+
+/* ================= Admin Layout ================= */
+.admin-sidebar {
+  /* Ancho fijo del sidebar */
+  width: 280px;
+  flex: 0 0 280px;
+  /* Colores marca */
+  background: var(--ox-beige);
+  color: var(--ox-blue);
+  /* Altura independiente del contenido (máximo viewport) */
+  position: sticky; /* se mantiene visible al hacer scroll */
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto; /* scroll interno si excede */
+}
+.admin-sidebar .nav-link,
+.admin-sidebar .fs-5,
+.admin-sidebar a { color: var(--ox-blue); }
+.admin-sidebar .nav-link.active,
+.admin-sidebar .nav-link:hover {
+  background-color: rgba(0,0,0,.06);
+  color: var(--ox-blue);
+}
+.admin-main {
+  background: #fff;
+}
 .related-exhibitions-section > .col-12 {
   padding-top: 1.25rem; /* pt-4 */
   border-top: 1px solid rgba(0,0,0,.08); /* separador sutil alineado al contenido */

@@ -1,0 +1,19 @@
+extends ../layouts/public
+
+block content
+  .container.py-5
+    .row.justify-content-center
+      .col-md-8.col-lg-6
+        .card.border-0.shadow-sm
+          .card-body.p-5.text-center
+            i.fas.fa-lock.fa-3x.text-warning.mb-3
+            h1.h4.fw-bold.mb-2 Acceso no autorizado
+            if message
+              p.text-muted.mb-4= message
+            else
+              p.text-muted.mb-4 No tienes permiso para ver esta página.
+            .d-flex.justify-content-center.gap-2
+              a.btn.btn-primary(href='/' aria-label='Volver al inicio') Volver
+              if !currentUser
+                a.btn.btn-outline-secondary(href='/login' aria-label='Iniciar sesión') Iniciar sesión
+

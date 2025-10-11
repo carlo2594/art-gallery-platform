@@ -1,0 +1,40 @@
+extends ../layouts/admin
+
+block content
+  .container.py-5
+    h1.h3.mb-4 Coleccionistas
+    if users && users.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Nombre
+              th Rol
+              th Estado
+              th Creado
+              th Acciones
+          tbody
+            each u in users
+              tr
+                td= u.name
+                td
+                  span.badge(class=u.role === 'collector' ? 'text-bg-secondary' : (u.role === 'artist' ? 'text-bg-primary' : 'text-bg-danger'))= u.role || '—'
+                td
+                  span.badge(class=u.active === false ? 'text-bg-secondary' : 'text-bg-success')= (u.active === false ? 'Inactivo' : 'Activo')
+                td= new Date(u.createdAt).toLocaleDateString('es-ES')
+                td
+                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/users/${u._id}`) Ver
+    else
+      .alert.alert-info No hay coleccionistas
+    if typeof totalPages !== 'undefined' && totalPages > 1
+      nav.mt-4(aria-label='Paginación de coleccionistas')
+        ul.pagination.justify-content-center
+          - const prevDisabled = page <= 1
+          - const nextDisabled = page >= totalPages
+          li.page-item(class=prevDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') «
+          li.page-item.disabled
+            span.page-link= `Página ${page} de ${totalPages}`
+          li.page-item(class=nextDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') »
+

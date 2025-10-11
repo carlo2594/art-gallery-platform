@@ -1,0 +1,39 @@
+extends ../layouts/admin
+
+block content
+  .container.py-5
+    h1.h3.mb-4 Exposiciones
+    if exhibitions && exhibitions.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Título
+              th Creada por
+              th Obras
+              th Inicio
+              th Fin
+              th Acciones
+          tbody
+            each e in exhibitions
+              tr
+                td= e.name || e.title
+                td= e.createdBy && (e.createdBy.name || e.createdBy.email) || '—'
+                td= e.artworks ? e.artworks.length : (e.artworksCount || '—')
+                td= e.startDate ? new Date(e.startDate).toLocaleDateString('es-ES') : '—'
+                td= e.endDate ? new Date(e.endDate).toLocaleDateString('es-ES') : '—'
+                td
+                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}`) Ver
+    else
+      .alert.alert-info No hay exposiciones
+    if typeof totalPages !== 'undefined' && totalPages > 1
+      nav.mt-4(aria-label='Paginación de exposiciones')
+        ul.pagination.justify-content-center
+          - const prevDisabled = page <= 1
+          - const nextDisabled = page >= totalPages
+          li.page-item(class=prevDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') «
+          li.page-item.disabled
+            span.page-link= `Página ${page} de ${totalPages}`
+          li.page-item(class=nextDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') »

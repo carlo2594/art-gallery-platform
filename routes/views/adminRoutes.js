@@ -22,6 +22,7 @@ router.get('/artworks/:id',       viewsAdminController.getArtwork);
 
 // Usuarios
 router.get('/users',              viewsAdminController.getUsers);
+router.get('/collectors',         viewsAdminController.getCollectors);
 router.get('/users/:id',          viewsAdminController.getUser);
 
 module.exports = router;
