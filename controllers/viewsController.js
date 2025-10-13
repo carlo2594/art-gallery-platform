@@ -347,7 +347,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
   const DEFAULT_PER_PAGE = 24;
   const MAX_PER_PAGE = 100;
   const page = Math.max(1, parseInt(req.query.page || '1', 10));
-  const perPage = Math.max(1, Math.min(DEFAULT_PER_PAGE, parseInt(req.query.perPage || DEFAULT_PER_PAGE, 10)));
+  const perPage = Math.max(1, Math.min(MAX_PER_PAGE, parseInt(req.query.perPage || DEFAULT_PER_PAGE, 10)));
   const skip = (page - 1) * perPage;
 
   const q = req.query;
@@ -388,7 +388,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
     const ors = [];
     if (orientations.includes('horizontal')) ors.push({ $expr: { $gt: ['$width_cm', '$height_cm'] } });
     if (orientations.includes('vertical'))   ors.push({ $expr: { $gt: ['$height_cm', '$width_cm'] } });
-    if (orientations.includes('cuadrado'))   ors.push({ $eq: ['$width_cm', '$height_cm'] });
+    if (orientations.includes('cuadrado'))   ors.push({ $expr: { $eq: ['$width_cm', '$height_cm'] } });
     if (ors.length) filter.$or = ors;
   }
 
