@@ -7,57 +7,45 @@ form#artistChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
     input(type='hidden' name='q' value=search)
   else if q && q.q
     input(type='hidden' name='q' value=q.q)
-  // Chips de orden
-  // Solo mostrar el chip opuesto al sort actual
-  if q && q.sort === 'name_asc'
-    button.chip.btn(
-      type='submit'
-      name='sort'
-      value='name_desc'
-      aria-label='Nombre Z-A'
-    )
-      i.fa.fa-arrow-down-z-a.me-1(title='Z-A')
-      | Nombre Z-A
-  else if q && q.sort === 'name_desc'
-    button.chip.btn(
-      type='submit'
-      name='sort'
-      value='name_asc'
-      aria-label='Nombre A-Z'
-    )
-      i.fa.fa-arrow-down-a-z.me-1(title='A-Z')
-      | Nombre A-Z
-  else
-    button.chip.btn(
-      type='submit'
-      name='sort'
-      value='name_asc'
-      aria-label='Nombre A-Z'
-    )
-      i.fa.fa-arrow-down-a-z.me-1(title='A-Z')
-      | Nombre A-Z
-    button.chip.btn(
-      type='submit'
-      name='sort'
-      value='name_desc'
-      aria-label='Nombre Z-A'
-    )
-      i.fa.fa-arrow-down-z-a.me-1(title='Z-A')
-      | Nombre Z-A
-  // Chips para fecha
+  // Chips de orden (siempre visibles, marcar activo el seleccionado)
+  // Si no hay sort en la URL, usar 'name_asc' como preseleccionado
+  - var currentSort = (q && q.sort) ? q.sort : 'name_asc'
+  button.chip.btn(
+    type='submit'
+    name='sort'
+    value='name_asc'
+    class=(currentSort === 'name_asc' ? 'active' : '')
+    aria-label='Nombre A-Z'
+    aria-pressed=(currentSort === 'name_asc' ? 'true' : 'false')
+  )
+    i.fa.fa-arrow-down-a-z.me-1(title='A-Z')
+    | Nombre A-Z
+  button.chip.btn(
+    type='submit'
+    name='sort'
+    value='name_desc'
+    class=(currentSort === 'name_desc' ? 'active' : '')
+    aria-label='Nombre Z-A'
+    aria-pressed=(currentSort === 'name_desc' ? 'true' : 'false')
+  )
+    i.fa.fa-arrow-down-z-a.me-1(title='Z-A')
+    | Nombre Z-A
+  // Chips para fecha (siempre visibles)
   button.chip.btn(
     type='submit'
     name='sort'
     value='recent'
-    class=(q && q.sort === 'recent' ? 'active' : '')
+    class=(currentSort === 'recent' ? 'active' : '')
     aria-label='Nuevos primero'
+    aria-pressed=(currentSort === 'recent' ? 'true' : 'false')
   ) Recientes
   button.chip.btn(
     type='submit'
     name='sort'
     value='oldest'
-    class=(q && q.sort === 'oldest' ? 'active' : '')
+    class=(currentSort === 'oldest' ? 'active' : '')
     aria-label='Antiguos primero'
+    aria-pressed=(currentSort === 'oldest' ? 'true' : 'false')
   ) Antiguos primero
   // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
 

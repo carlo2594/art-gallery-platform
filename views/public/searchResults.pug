@@ -16,7 +16,7 @@ block content
     - const artistsCount = typeof totalArtists !== 'undefined' ? totalArtists : (artists ? artists.length : 0);
     - const exhibitionsCount = typeof totalExhibitions !== 'undefined' ? totalExhibitions : (exhibitions ? exhibitions.length : 0);
     - const totalCount = artworksCount + artistsCount + exhibitionsCount;
-    ul.nav.nav-tabs.mb-4#searchTabs(role="tablist")
+    ul.nav.nav-tabs.mb-4.search-tabs#searchTabs(role="tablist")
       li.nav-item.flex-fill.text-center
         a.nav-link.active.w-100(href="#tab-obras", data-bs-toggle="tab", data-ox-tab="obras", role="tab", data-bs-target="#tab-obras") Obras (#{artworksCount})
       li.nav-item.flex-fill.text-center

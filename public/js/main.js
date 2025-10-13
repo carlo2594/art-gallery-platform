@@ -102,6 +102,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Artist filters: show immediate pressed/active state on chip click
+  (function setupArtistChips() {
+    const form = document.getElementById('artistChips');
+    if (!form) return;
+    const chipButtons = form.querySelectorAll('button.chip[name="sort"]');
+    chipButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Visual feedback before navigation
+        chipButtons.forEach(b => {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+        // Allow form submit to proceed normally
+      });
+    });
+  })();
+
   // Al hacer click en un tab, NO recargamos la página: actualizamos la URL y mantenemos la paginación existente
   tabs.forEach(tabBtn => {
     tabBtn.addEventListener('click', () => {

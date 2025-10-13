@@ -709,6 +709,39 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .chip input { display: none; }
 .chip input:checked + span { font-weight: 700; }
 .chip:has(input:checked) { background: var(--ox-yellow); }
+/* Active state for button-based chips */
+.chip.active { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; font-weight: 700; }
+/* Icons inside chips should follow ox-blue, overriding global icon color */
+.chip i, .chip .fa, .chip .fas, .chip .fab { color: var(--ox-blue) !important; }
+
+/* COMPONENTS: SEARCH TABS (scoped) */
+.search-tabs { border-bottom: 0 !important; gap: .75rem; }
+.search-tabs .nav-item { margin-bottom: 0 !important; }
+.search-tabs .nav-link {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+  border: 2px solid var(--ox-yellow);
+  border-radius: 999px;
+  background: #fff;
+  padding: .6rem 1.1rem;
+  font-weight: 600;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .12s ease;
+}
+.search-tabs .nav-link:hover { background: color-mix(in srgb, var(--ox-yellow) 18%, #fff); color: var(--ox-blue); }
+.search-tabs .nav-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--ox-orange) 45%, transparent); outline-offset: 2px; }
+.search-tabs .nav-link.active,
+.search-tabs .nav-link[aria-current="page"],
+.search-tabs .nav-link[aria-selected="true"] {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  box-shadow: 0 6px 16px rgba(16,46,80,0.12);
+}
+.search-tabs .nav-link:active { transform: translateY(1px); }
+
+@media (max-width: 575.98px) {
+  .search-tabs { gap: .5rem; }
+  .search-tabs .nav-link { padding: .5rem .9rem; font-size: 1.2rem; }
+}
 .btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
 .btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
 
