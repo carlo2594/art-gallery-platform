@@ -1,4 +1,4 @@
-﻿ul.grid.effect-2#grid.mb-5
+ul.grid.effect-2#grid.mb-5
   each a in artworks
     - var __href = `/artworks/${a.slug || a._id}`
     - if (typeof backTo !== 'undefined' && backTo) { __href = `${__href}?returnTo=${encodeURIComponent(backTo)}` }
@@ -10,38 +10,72 @@
          a.stretched-link(href=__href aria-label=`Ver obra: ${a.title || ''}`)
          .card-body.grid-card-body
            .grid-card-flex
-             // --- Columna izquierda: InformaciÃ³n de la obra ---
+             // --- Columna izquierda: Información de la obra ---
              .grid-card-info
-               // TÃ­tulo principal de la obra
+               // Título principal de la obra
                if a.title
                  h4.grid-card-title= a.title
-               
-               // InformaciÃ³n del artista
+
+               // Precio (USD)
+               if typeof a.price_cents === 'number' && a.price_cents >= 0
+                 - var __priceUSD = (typeof a.price === 'number' ? a.price : (a.price_cents / 100));
+                 if __priceUSD != null
+                   .grid-card-price
+                     span.fw-bold.text-success
+                       | $
+                       = __priceUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+
+               // Información del artista
                if a.artist
                  h6.grid-card-artist= a.artist.name
-               
-               // Detalles tÃ©cnicos
+
+               // Detalles técnicos
                .grid-card-details
                  if a.technique
                    - var techCap = a.technique.charAt(0).toUpperCase() + a.technique.slice(1)
                    .grid-card-detail-item= techCap
-                 
+
                  if a.completedAt
                    .grid-card-detail-item= new Date(a.completedAt).getFullYear()
-               
+
+             // --- Columna derecha: Estado e indicadores ---
              .grid-card-stats.d-flex.flex-column.justify-content-end
-                // Estado de disponibilidad
-                if a.availability
-                  - const av3 = a.availability
-                  - const avLabel3 = av3 === 'reserved' ? 'Reservada' : (av3 === 'sold' ? 'Vendida' : (av3 === 'on_loan' ? 'En préstamo' : (av3 === 'for_sale' ? 'En venta' : 'No en venta')))
-                  - const avClass3 = av3 === 'reserved' ? 'text-bg-warning' : ((av3 === 'sold' || av3 === 'not_for_sale') ? 'text-bg-secondary' : (av3 === 'on_loan' ? 'text-bg-info' : 'text-bg-success'))
-                  .grid-card-stat-item
-                    span.badge.rounded-pill(class=avClass3)= avLabel3
-                if a.createdAt
-                  .grid-card-stat-item Publicado el #{new Date(a.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                
-                if typeof a.views === 'number' && a.views > 0
-                  .grid-card-stat-item #{a.views.toLocaleString()} visualizaciones
-               
-                if typeof a.favoritesCount === 'number' && a.favoritesCount > 0
-                  .grid-card-stat-item #{a.favoritesCount.toLocaleString()} favoritos
+               // Estado de disponibilidad
+               if a.availability
+                 - const av3 = a.availability
+                 - const avLabel3 = av3 === 'reserved' ? 'Reservada' : (av3 === 'sold' ? 'Vendida' : (av3 === 'on_loan' ? 'En préstamo' : (av3 === 'for_sale' ? 'En venta' : 'No en venta')))
+                 - const avClass3 = av3 === 'reserved' ? 'text-bg-warning' : ((av3 === 'sold' || av3 === 'not_for_sale') ? 'text-bg-secondary' : (av3 === 'on_loan' ? 'text-bg-info' : 'text-bg-success'))
+                 .grid-card-stat-item
+                   span.badge.rounded-pill(class=avClass3)= avLabel3
+
+               // Publicado hace X tiempo (redondeado)
+               if a.createdAt
+                 - var __now = new Date();
+                 - var __then = new Date(a.createdAt);
+                 - var __diffMs = Math.max(0, __now - __then);
+                 - var __sec = Math.floor(__diffMs / 1000);
+                 - var __min = Math.floor(__sec / 60);
+                 - var __hr  = Math.floor(__min / 60);
+                 - var __day = Math.floor(__hr / 24);
+                 - var __mon = Math.floor(__day / 30);
+                 - var __yr  = Math.floor(__day / 365);
+                 - var __relTxt = '';
+                 - if (__yr >= 1) __relTxt = `hace ${__yr} año${__yr===1?'':'s'}`;
+                 - else if (__mon >= 1) __relTxt = `hace ${__mon} mes${__mon===1?'':'es'}`;
+                 - else if (__day >= 1) __relTxt = `hace ${__day} día${__day===1?'':'s'}`;
+                 - else if (__hr >= 1) __relTxt = `hace ${__hr} hora${__hr===1?'':'s'}`;
+                 - else if (__min >= 1) __relTxt = `hace ${__min} minuto${__min===1?'':'s'}`;
+                 - else __relTxt = 'hace unos segundos';
+                 .grid-card-stat-item= __relTxt
+
+               // Visualizaciones (icono ojo)
+               if typeof a.views === 'number' && a.views >= 0
+                 .grid-card-stat-item
+                   i.fa-solid.fa-eye.me-1
+                   = (a.views || 0).toLocaleString()
+
+               // Favoritos (icono corazón)
+               if typeof a.favoritesCount === 'number' && a.favoritesCount >= 0
+                 .grid-card-stat-item
+                   i.fa-solid.fa-heart.me-1
+                   = (a.favoritesCount || 0).toLocaleString()
