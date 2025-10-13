@@ -148,7 +148,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   }, 10, 50);
 
   // Bounds de fechas disponibles (basado en filtros base, sin rango aplicado)
-  const baseExhFilterForBounds = buildExhibitionFilter({ type: q.type }, search);
+  const baseExhFilterForBounds = buildExhibitionFilter({ ex_type: q.ex_type || q.type }, search);
   const exhibitionDateBounds = await getExhibitionDateBounds(Exhibition, baseExhFilterForBounds);
 
   const totalExhibitions = await Exhibition.countDocuments(exhibitionFilter);

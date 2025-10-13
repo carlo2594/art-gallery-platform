@@ -14,20 +14,21 @@ section.filters-toolbar.py-2
       else if q && q.q
         input(type='hidden' name='q' value=q.q)
       // Preservar rango de fechas si existe al usar chips
-      if q && q.minDate
-        input(type='hidden' name='minDate' value=q.minDate)
-      if q && q.maxDate
-        input(type='hidden' name='maxDate' value=q.maxDate)
-      if q && q.minYear && !q.minDate
+      if q && q.ex_minDate
+        input(type='hidden' name='ex_minDate' value=q.ex_minDate)
+      if q && q.ex_maxDate
+        input(type='hidden' name='ex_maxDate' value=q.ex_maxDate)
+      if q && q.minYear && !q.ex_minDate
         - var _minDateFromYear = `${q.minYear}-01-01`
-        input(type='hidden' name='minDate' value=_minDateFromYear)
-      if q && q.maxYear && !q.maxDate
+        input(type='hidden' name='ex_minDate' value=_minDateFromYear)
+      if q && q.maxYear && !q.ex_maxDate
         - var _maxDateFromYear = `${q.maxYear}-12-31`
-        input(type='hidden' name='maxDate' value=_maxDateFromYear)
+        input(type='hidden' name='ex_maxDate' value=_maxDateFromYear)
       // Chips de tipo de exposición (solo Física y Virtual)
       - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
       each opt in typeOpts
-        button.chip.btn(type='submit', name='type', value=opt.value, class=((!q || !q.type) && opt.value === '' ? 'active' : (q && q.type === opt.value ? 'active' : '')))= opt.label
+        - var _isActive = ((!q || (!q.ex_type && !q.type)) && opt.value === '') || (q && (q.ex_type === opt.value || (!q.ex_type && q.type === opt.value)))
+        button.chip.btn(type='submit', name='ex_type', value=opt.value, class=(_isActive ? 'active' : ''))= opt.label
       // No mostrar botones Limpiar/Ver resultados aquí (solo en offcanvas)
     // Botón Filtros fuera del form para evitar submit accidental y asegurar funcionalidad
     button.btn.btn-outline-secondary.ms-auto(
@@ -60,11 +61,11 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
           - var _minPlaceholder = _minBound ? `Desde (${new Date(_minBound).toLocaleDateString('es-ES')})` : 'Desde'
           input.form-control(
             type='date' 
-            name='minDate' 
+            name='ex_minDate' 
             placeholder=_minPlaceholder
             min=_minBound
             max=_maxBound
-            value=(q && q.minDate ? q.minDate : (q && q.minYear ? `${q.minYear}-01-01` : ''))
+            value=(q && q.ex_minDate ? q.ex_minDate : (q && q.minYear ? `${q.minYear}-01-01` : ''))
             title=_minBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
           )
         .col-6
@@ -73,11 +74,11 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
           - var _maxPlaceholder = _maxBound ? `Hasta (${new Date(_maxBound).toLocaleDateString('es-ES')})` : 'Hasta'
           input.form-control(
             type='date' 
-            name='maxDate' 
+            name='ex_maxDate' 
             placeholder=_maxPlaceholder
             min=_minBound
             max=_maxBound
-            value=(q && q.maxDate ? q.maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : ''))
+            value=(q && q.ex_maxDate ? q.ex_maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : ''))
             title=_maxBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
           )
       if _minBound && _maxBound

@@ -6,13 +6,15 @@ function buildExhibitionFilter(q = {}, search = '') {
   if (s) {
     filter.title = { $regex: s, $options: 'i' };
   }
-  if (q.type) {
-    const types = Array.isArray(q.type) ? q.type : [q.type];
+  // Support namespaced params to avoid colliding with artwork filters
+  const exType = q.ex_type || q.type;
+  if (exType) {
+    const types = Array.isArray(exType) ? exType : [exType];
     filter['location.type'] = { $in: types };
   }
   // Date range with backward compatibility
-  const minDateStr = q.minDate || (q.minYear ? `${q.minYear}-01-01` : null);
-  const maxDateStr = q.maxDate || (q.maxYear ? `${q.maxYear}-12-31` : null);
+  const minDateStr = q.ex_minDate || q.minDate || (q.minYear ? `${q.minYear}-01-01` : null);
+  const maxDateStr = q.ex_maxDate || q.maxDate || (q.maxYear ? `${q.maxYear}-12-31` : null);
   if (minDateStr || maxDateStr) {
     filter.startDate = {};
     if (minDateStr) {
