@@ -1692,3 +1692,57 @@ body.noscroll {
   /* Si prefieres toque de marca: */
   /* border-top-color: color-mix(in srgb, var(--ox-yellow) 25%, transparent); */
 }
+
+/* ==========================================
+  9. ARTWORK GRID CARD TYPOGRAPHY
+  ========================================== */
+/* Make all card text Montserrat, same size and color.
+   Only the artwork title is bold and slightly larger. */
+.grid-card-body {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+}
+
+/* Unify font sizing for all text elements inside the card body */
+.grid-card-body,
+.grid-card-body .grid-card-info,
+.grid-card-body .grid-card-details,
+.grid-card-body .grid-card-stats,
+.grid-card-body .grid-card-artist,
+.grid-card-body .grid-card-price,
+.grid-card-body .grid-card-detail-item,
+.grid-card-body .grid-card-stat-item {
+  font-size: 1.4rem;
+  line-height: 1.4;
+}
+
+/* Ensure descendant elements inherit Montserrat */
+.grid-card-body * { font-family: inherit; }
+
+/* Only the title is bold and a bit larger */
+.grid-card-title {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem; /* a bit larger than body */
+}
+
+/* Normalize headings and other bolds so only title stands out */
+.grid-card-body h1,
+.grid-card-body h2,
+.grid-card-body h3,
+.grid-card-body h4:not(.grid-card-title),
+.grid-card-body h5,
+.grid-card-body h6 { font-weight: 400; font-size: 1.4rem; }
+
+.grid-card-body .grid-card-price .fw-bold { font-weight: 400 !important; }
+
+/* Neutralize special text colors inside the card (keep badges as-is) */
+.grid-card-body .text-success { color: inherit !important; }
+
+/* Position availability badge at top-right of stats column */
+.grid-card-stats { position: relative; }
+.grid-card-stats .grid-card-stat-item:first-child {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
