@@ -1252,6 +1252,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   list-style: none;
   margin: 30px auto;
   padding: 0;
+  position: relative;
 }
 .artwork-grid li,
 .artwork-grid .artwork-grid__item {
@@ -1260,12 +1261,23 @@ section.join-artists { position: relative; margin-top: 5rem; }
   padding: 7px;
   width: 33%;
   opacity: 0;
+  box-sizing: border-box;
 }
 .artwork-grid li.shown,
 .no-js .artwork-grid li,
 .no-cssanimations .artwork-grid li { opacity: 1; }
 .artwork-grid li a,
 .artwork-grid li img { outline: none; border: none; display: block; max-width: 100%; }
+
+/* Responsive columns for artwork grid */
+@media (max-width: 991.98px) {
+  .artwork-grid li,
+  .artwork-grid .artwork-grid__item { width: 50%; }
+}
+@media (max-width: 575.98px) {
+  .artwork-grid li,
+  .artwork-grid .artwork-grid__item { width: 100%; }
+}
 
 .artwork-grid__body {
   padding: 0.5rem;
@@ -1339,6 +1351,16 @@ section.join-artists { position: relative; margin-top: 5rem; }
   .artist-detail-page .artist-hero-card .hero-title { font-size: clamp(1.8rem, 8vw, 2.4rem); }
   .artist-detail-page .stats-floating .col-10 { width: 100%; max-width: 100%; }
   .artist-detail-page .artist-techniques-card { padding: 12px !important; }
+}
+
+/* Artwork grid final responsive overrides to win cascade order */
+@media (max-width: 991.98px) {
+  .artwork-grid > li,
+  .artwork-grid .artwork-grid__item { width: 50% !important; }
+}
+@media (max-width: 575.98px) {
+  .artwork-grid > li,
+  .artwork-grid .artwork-grid__item { width: 100% !important; }
 }
 
 /* Transparent card style for left hero content
