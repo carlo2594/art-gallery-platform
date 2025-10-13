@@ -742,6 +742,88 @@ section.join-artists { position: relative; margin-top: 5rem; }
   .search-tabs { gap: .5rem; }
   .search-tabs .nav-link { padding: .5rem .9rem; font-size: 1.2rem; }
 }
+
+/* ==========================================
+  EXHIBITION DETAIL: Hero (mirror of artist/artwork)
+  ========================================== */
+.exhibition-hero-fullscreen { min-height: 100vh; min-height: 100svh; min-height: 100dvh; height: 100dvh; overflow: hidden; }
+.exhibition-detail-page .exhibition-hero-content { position: absolute; inset: 0; display: flex; align-items: center; }
+.exhibition-detail-page .exhibition-hero-content .container { width: 100%; }
+.exhibition-detail-page .exhibition-hero-content .row { align-items: center; justify-content: center; }
+.exhibition-detail-page .exhibition-hero-card { margin-left: auto; margin-right: auto; }
+.exhibition-detail-page .hero-background { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+.exhibition-detail-page .hero-bg-image,
+.exhibition-detail-page .exhibition-bg-image,
+.exhibition-detail-page .exhibition-detail__hero-img { width: 100vw; height: 100dvh; object-fit: cover; object-position: center; will-change: transform; animation: hero-kenburns 28s ease-in-out infinite alternate; }
+
+/* Do NOT add dark background/blur to hero content (override global mobile rule) */
+.exhibition-detail-page .hero-content,
+.exhibition-detail-page .exhibition-hero-content { background: transparent !important; backdrop-filter: none !important; }
+@media (max-width: 991.98px) {
+  .exhibition-detail-page .hero-content,
+  .exhibition-detail-page .exhibition-hero-content { position: absolute !important; }
+}
+/* Neutralize overlay tint on exhibition hero */
+.exhibition-detail-page .hero-overlay,
+.exhibition-detail-page .exhibition-hero-overlay { background: none !important; background-color: transparent !important; background-image: none !important; }
+
+/* Translucent info card */
+.exhibition-hero-card {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.exhibition-hero-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.exhibition-hero-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+.exhibition-hero-card .hero-title { text-shadow: 0 2px 8px rgba(0,0,0,0.45), 0 0 1px rgba(0,0,0,0.35); }
+
+/* Right column stats card */
+.exhibition-stats-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  margin-bottom: 1rem;
+}
+
+/* Unify surface style for all exhibition cards (desktop + mobile) */
+.exhibition-hero-card,
+.exhibition-stats-card,
+.exhibition-detail__guests-card,
+.exhibition-detail__mobile-card,
+.exhibition-detail__mobile-guests-card {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  margin-bottom: 1rem;
+}
+
+/* Strengthen secondary whites inside exhibition cards for contrast */
+.exhibition-hero-card .text-white-50,
+.exhibition-stats-card .text-white-50,
+.exhibition-detail__guests-card .text-white-50,
+.exhibition-detail__mobile-card .text-white-50,
+.exhibition-detail__mobile-guests-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.exhibition-hero-card .text-white-75,
+.exhibition-stats-card .text-white-75,
+.exhibition-detail__guests-card .text-white-75,
+.exhibition-detail__mobile-card .text-white-75,
+.exhibition-detail__mobile-guests-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+
+/* Add vertical gap between columns/cards in hero row */
+.exhibition-detail-page .exhibition-hero-content .row { row-gap: 1rem; }
 .btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
 .btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
 

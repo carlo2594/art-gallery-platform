@@ -167,36 +167,10 @@ block content
           .col-12
             h3.mb-4.related-artworks-title Más obras de 
               a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
-        // Grid usando el estilo de _artworkGrid.pug
-        ul.grid.effect-2#related-grid.mb-5.artwork-grid
-            each relatedArtwork in relatedArtworks
-              li.artwork-grid__item
-                .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative.artwork-grid__card
-                  a.artwork-grid__image-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` aria-label=`Ver obra: ${relatedArtwork.title || ''}`)
-                    img.card-img-top.art-card-shadow.artwork-grid__image(src=relatedArtwork.imageUrl, alt=relatedArtwork.title)
-                  a.stretched-link.artwork-grid__stretched-link(href=`/artworks/${relatedArtwork.slug || relatedArtwork._id}` aria-label=`Ver obra: ${relatedArtwork.title || ''}`)
-                  .card-body.grid-card-body.artwork-grid__body
-                    .grid-card-flex.artwork-grid__content
-                      .grid-card-info.artwork-grid__info
-                        if relatedArtwork.title
-                          h4.grid-card-title.artwork-grid__title= relatedArtwork.title
-                        if relatedArtwork.artist
-                          h6.grid-card-artist.artwork-grid__artist= relatedArtwork.artist.name
-                        .grid-card-details.artwork-grid__details
-                          if relatedArtwork.technique
-                            - var techCap = relatedArtwork.technique.charAt(0).toUpperCase() + relatedArtwork.technique.slice(1)
-                            .grid-card-detail-item.artwork-grid__detail-item= techCap
-                          if relatedArtwork.completedAt
-                            .grid-card-detail-item.artwork-grid__detail-item= new Date(relatedArtwork.completedAt).getFullYear()
-                        if typeof relatedArtwork.price_cents === 'number'
-                          h5.grid-card-price.artwork-grid__price $#{(relatedArtwork.price_cents/100).toLocaleString('en-US', {minimumFractionDigits:0})} USD
-                      .grid-card-stats.d-flex.flex-column.justify-content-end.artwork-grid__stats
-                        if relatedArtwork.createdAt
-                          .grid-card-stat-item.artwork-grid__stat-item Publicado el #{new Date(relatedArtwork.createdAt).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
-                        if typeof relatedArtwork.views === 'number' && relatedArtwork.views > 0
-                          .grid-card-stat-item.artwork-grid__stat-item #{relatedArtwork.views.toLocaleString()} visualizaciones
-                        if typeof relatedArtwork.favoritesCount === 'number' && relatedArtwork.favoritesCount > 0
-                          .grid-card-stat-item.artwork-grid__stat-item #{relatedArtwork.favoritesCount.toLocaleString()} favoritos
+        // Grid usando el fragmento _artworkGrid.pug
+        - var artworks = relatedArtworks
+        - var backTo = `/artworks/${artwork.slug || artwork._id}`
+        include ./_artworkGrid.pug
 
     // Botón volver
     section.back-navigation.py-4.artwork-back-section.artwork-detail__back-section
