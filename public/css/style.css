@@ -1101,7 +1101,11 @@ section.join-artists { position: relative; margin-top: 5rem; }
   ========================================== */
 /* Artist hero section */
 .artist-hero-fullscreen {
+  /* Fill the viewport height robustly across browsers */
   min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100dvh;
   overflow: hidden;
 }
 
@@ -1306,7 +1310,22 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .artist-detail-page .artist-hero-card { margin-left: auto; margin-right: auto; }
 @media (max-width: 991.98px) { .artist-detail-page .hero-content { position: absolute !important; } }
 .artist-detail-page .hero-bg-image,
-.artist-detail-page .artist-bg-image { filter: none !important; }
+.artist-detail-page .artist-bg-image {
+  /* Ensure the image always fills the viewport and covers */
+  width: 100vw;
+  height: 100dvh;
+  object-fit: cover;
+  object-position: center;
+  filter: none !important;
+  will-change: transform;
+  animation: hero-kenburns 28s ease-in-out infinite alternate;
+}
+
+@keyframes hero-kenburns {
+  0%   { transform: scale(1.06) translate3d(0%, 0%, 0); }
+  50%  { transform: scale(1.10) translate3d(1.5%, -1.5%, 0); }
+  100% { transform: scale(1.06) translate3d(-1.5%, 1.5%, 0); }
+}
 
 /* Transparent card style for left hero content
    tuned for readability over any background image */
