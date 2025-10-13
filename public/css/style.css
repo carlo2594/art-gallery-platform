@@ -1761,3 +1761,71 @@ body.noscroll {
   top: 0;
   right: 0;
 }
+
+/* ==========================================
+  Artwork Grid (scoped to new class names)
+  Use the new BEM classes to avoid touching Bootstrap globals
+  ========================================== */
+/* Base list/grid behavior scoped */
+.artwork-grid {
+  max-width: none;
+  width: 100%;
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
+}
+.artwork-grid li,
+.artwork-grid .artwork-grid__item {
+  display: block;
+  float: left;
+  padding: 7px;
+  width: 33%;
+  opacity: 0;
+}
+.artwork-grid li.shown,
+.no-js .artwork-grid li,
+.no-cssanimations .artwork-grid li { opacity: 1; }
+.artwork-grid li a,
+.artwork-grid li img { outline: none; border: none; display: block; max-width: 100%; }
+
+/* Card body container */
+.artwork-grid__body {
+  padding: 0.5rem;
+  font-family: var(--font-subtitle);
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  color: var(--ox-blue);
+}
+
+/* Main flex container - two columns */
+.artwork-grid__content { display: flex; flex-direction: row; gap: 0.75rem; align-items: stretch; }
+
+/* Left column - artwork info */
+.artwork-grid__info { flex: 1; display: flex; flex-direction: column; }
+
+/* Right column - stats */
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; }
+
+/* Typography with minimal spacing */
+.artwork-grid__title { font-weight: 700; font-size: 1.6rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); font-family: 'Montserrat', var(--font-title), Arial, sans-serif; }
+.artwork-grid__artist { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.3rem; text-transform: uppercase; color: #666; letter-spacing: 0.02em; }
+.artwork-grid__details { margin-bottom: 0.3rem; }
+.artwork-grid__detail-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.15rem; color: #888; font-variant-caps: small-caps; letter-spacing: 0.02em; }
+.artwork-grid__detail-item:last-child { margin-bottom: 0; }
+
+/* Price */
+.artwork-grid__price { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0; color: var(--ox-blue); font-variant-numeric: lining-nums; }
+.artwork-grid__price-value { font-weight: 400 !important; color: inherit !important; }
+
+/* Stat items */
+.artwork-grid__stat-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.2rem; color: #999; font-weight: 400; }
+.artwork-grid__stat-item:last-child { margin-bottom: 0; }
+
+/* Availability badge placement (avoid :first-child hacks) */
+.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+
+/* Image/link helpers */
+.artwork-grid__image { display: block; width: 100%; height: auto; }
+.artwork-grid__stretched-link { position: absolute; inset: 0; }

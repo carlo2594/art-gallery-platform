@@ -1,52 +1,52 @@
-ul.grid.effect-2#grid.mb-5
+ul.grid.effect-2#grid.mb-5.artwork-grid
   each a in artworks
     - var __href = `/artworks/${a.slug || a._id}`
     - if (typeof backTo !== 'undefined' && backTo) { __href = `${__href}?returnTo=${encodeURIComponent(backTo)}` }
-    li
-       .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative
-         a(href=__href aria-label=`Ver obra: ${a.title || ''}`)
-           img.card-img-top.art-card-shadow(src=a.imageUrl, alt=a.title)
+    li.artwork-grid__item
+       .card.h-100.bg-white.border-0.shadow-none.art-card-shadow.position-relative.artwork-grid__card
+         a.artwork-grid__image-link(href=__href aria-label=`Ver obra: ${a.title || ''}`)
+           img.card-img-top.art-card-shadow.artwork-grid__image(src=a.imageUrl, alt=a.title)
          // Ocultar badge overlay en la imagen (solo mostrar en card stats)
-         a.stretched-link(href=__href aria-label=`Ver obra: ${a.title || ''}`)
-         .card-body.grid-card-body
-           .grid-card-flex
+         a.stretched-link.artwork-grid__stretched-link(href=__href aria-label=`Ver obra: ${a.title || ''}`)
+         .card-body.grid-card-body.artwork-grid__body
+           .grid-card-flex.artwork-grid__content
              // --- Columna izquierda: Información de la obra ---
-             .grid-card-info
+             .grid-card-info.artwork-grid__info
                // Título principal de la obra
                if a.title
-                 h4.grid-card-title= a.title
+                 h4.grid-card-title.artwork-grid__title= a.title
 
                // Precio (USD)
                if typeof a.price_cents === 'number' && a.price_cents >= 0
                  - var __priceUSD = (typeof a.price === 'number' ? a.price : (a.price_cents / 100));
                  if __priceUSD != null
-                   .grid-card-price
-                     span.fw-bold.text-success
+                   .grid-card-price.artwork-grid__price
+                     span.artwork-grid__price-value
                        | $
                        = __priceUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 
                // Información del artista
                if a.artist
-                 h6.grid-card-artist= a.artist.name
+                 h6.grid-card-artist.artwork-grid__artist= a.artist.name
 
                // Detalles técnicos
-               .grid-card-details
+               .grid-card-details.artwork-grid__details
                  if a.technique
                    - var techCap = a.technique.charAt(0).toUpperCase() + a.technique.slice(1)
-                   .grid-card-detail-item= techCap
+                   .grid-card-detail-item.artwork-grid__detail-item= techCap
 
                  if a.completedAt
-                   .grid-card-detail-item= new Date(a.completedAt).getFullYear()
+                   .grid-card-detail-item.artwork-grid__detail-item= new Date(a.completedAt).getFullYear()
 
              // --- Columna derecha: Estado e indicadores ---
-             .grid-card-stats.d-flex.flex-column.justify-content-end
+             .grid-card-stats.d-flex.flex-column.justify-content-end.artwork-grid__stats
                // Estado de disponibilidad
                if a.availability
                  - const av3 = a.availability
                  - const avLabel3 = av3 === 'reserved' ? 'Reservada' : (av3 === 'sold' ? 'Vendida' : (av3 === 'on_loan' ? 'En préstamo' : (av3 === 'for_sale' ? 'En venta' : 'No en venta')))
                  - const avClass3 = av3 === 'reserved' ? 'text-bg-warning' : ((av3 === 'sold' || av3 === 'not_for_sale') ? 'text-bg-secondary' : (av3 === 'on_loan' ? 'text-bg-info' : 'text-bg-success'))
-                 .grid-card-stat-item
-                   span.badge.rounded-pill(class=avClass3)= avLabel3
+                 .grid-card-stat-item.artwork-grid__stat-item.artwork-grid__availability
+                   span.badge.rounded-pill.artwork-grid__availability-badge(class=avClass3)= avLabel3
 
                // Publicado hace X tiempo (redondeado)
                if a.createdAt
@@ -66,16 +66,16 @@ ul.grid.effect-2#grid.mb-5
                  - else if (__hr >= 1) __relTxt = `hace ${__hr} hora${__hr===1?'':'s'}`;
                  - else if (__min >= 1) __relTxt = `hace ${__min} minuto${__min===1?'':'s'}`;
                  - else __relTxt = 'hace unos segundos';
-                 .grid-card-stat-item= __relTxt
+                 .grid-card-stat-item.artwork-grid__stat-item.artwork-grid__published= __relTxt
 
                // Visualizaciones (icono ojo)
                if typeof a.views === 'number' && a.views >= 0
-                 .grid-card-stat-item
-                   i.fa-solid.fa-eye.me-1
+                 .grid-card-stat-item.artwork-grid__stat-item.artwork-grid__views
+                   i.fa-solid.fa-eye.me-1.artwork-grid__views-icon
                    = (a.views || 0).toLocaleString()
 
                // Favoritos (icono corazón)
                if typeof a.favoritesCount === 'number' && a.favoritesCount >= 0
-                 .grid-card-stat-item
-                   i.fa-solid.fa-heart.me-1
+                 .grid-card-stat-item.artwork-grid__stat-item.artwork-grid__favorites
+                   i.fa-solid.fa-heart.me-1.artwork-grid__favorites-icon
                    = (a.favoritesCount || 0).toLocaleString()
