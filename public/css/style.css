@@ -1299,17 +1299,50 @@ section.join-artists { position: relative; margin-top: 5rem; }
   background-image: none !important;
 }
 .artist-detail-page .hero-content { background: transparent !important; backdrop-filter: none !important; }
+/* Center the hero content vertically and horizontally over the image */
+.artist-detail-page .artist-hero-content { position: absolute !important; inset: 0 !important; display: flex !important; align-items: center !important; }
+.artist-detail-page .artist-hero-content .container { width: 100%; }
+.artist-detail-page .artist-hero-content .row { align-items: center; justify-content: center; }
+.artist-detail-page .artist-hero-card { margin-left: auto; margin-right: auto; }
 @media (max-width: 991.98px) { .artist-detail-page .hero-content { position: absolute !important; } }
 .artist-detail-page .hero-bg-image,
 .artist-detail-page .artist-bg-image { filter: none !important; }
 
-/* Transparent card style for left hero content */
+/* Transparent card style for left hero content
+   tuned for readability over any background image */
 .artist-hero-card {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.10);
+  position: relative;
+  /* subtle brand-tinted translucent layer + light vertical scrim */
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
   border-radius: 1rem;
-  border: 1px solid rgba(255,255,255,0.20);
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+/* Make secondary whites a bit stronger for contrast on mixed backgrounds */
+.artist-hero-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.artist-hero-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+/* Strengthen big title legibility slightly */
+.artist-hero-card .hero-title { text-shadow: 0 2px 8px rgba(0,0,0,0.45), 0 0 1px rgba(0,0,0,0.35); }
+
+/* Techniques card: match the translucent readable style */
+.artist-techniques-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.artist-techniques-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.artist-techniques-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+/* Keep gradient on hover, overriding generic stat-item hover */
+.stats-floating .artist-techniques-card:hover {
+  background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.22) 100%), rgba(16,46,80,0.24) !important;
 }
 .exhibition-hero-fullscreen {
     min-height: 100vh;
