@@ -21,9 +21,9 @@ block content
       .hero-content.artist-hero-content.position-absolute.bottom-0.start-0.w-100.artist-hero-z-index
         .container
           .row
-            // LAYOUT PARA DESKTOP (lg+): Contenido superpuesto
-            .col-lg-8.d-none.d-lg-block
-              .artist-hero-info.artist-info-desktop.text-white.pb-5
+            // LAYOUT PRINCIPAL (antes solo desktop): mostrar en todos los tamaños
+            .col-12.col-lg-8
+              .artist-hero-info.artist-info-desktop.text-white.pb-5.artist-hero-card.p-4.p-lg-5
                 h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
                 
                 if artist.createdAt
@@ -74,8 +74,8 @@ block content
                     i.fas.fa-share.me-2
                     | Compartir
             
-            // ESTADÍSTICAS PARA DESKTOP (lg+)
-            .col-lg-4.d-none.d-lg-block
+            // ESTADÍSTICAS (antes solo desktop): mostrar en todos los tamaños
+            .col-12.col-lg-4
               // Técnicas del artista
               .stats-floating.artist-stats-desktop.text-white.pb-5
                 .row.g-3.justify-content-center
@@ -92,78 +92,7 @@ block content
                         else
                           .small.text-white-50.artist-no-techniques Sin técnicas
 
-    // LAYOUT PARA MÓVIL/TABLET (< lg): Contenido debajo de la imagen
-    section.artist-profile-mobile.artist-mobile-section.d-lg-none.py-5.artist-mobile-bg
-      .container
-        .row
-          .col-12.text-center.mb-4
-            // Información del artista para móvil
-            h1.hero-title.artist-name-mobile.display-4.fw-bold.mb-3.artist-mobile-title= artist.name
-            
-            if artist.createdAt
-              h2.hero-subtitle.artist-member-since-mobile.h5.mb-4.text-muted.artist-mobile-subtitle= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
-            
-            if artist.bio
-              p.hero-bio.artist-bio-mobile.lead.mb-4.text-dark.artist-mobile-bio= artist.bio
-        
-        .row.mb-4
-          .col-12
-            // Información adicional para móvil
-            .hero-meta.artist-meta-mobile.d-flex.flex-wrap.justify-content-center.gap-4.mb-4
-              if artist.location
-                .meta-item.artist-location-mobile.d-flex.align-items-center
-                  i.fas.fa-map-marker-alt.me-2.text-primary
-                  span.text-muted= artist.location
-              
-              if artist.website
-                .meta-item.artist-website-mobile
-                  a.text-primary.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
-                    i.fas.fa-globe.me-2
-                    span Sitio web
-              
-              // Redes sociales para móvil
-              if artist.social && artist.social.instagram
-                .meta-item.artist-social-instagram-mobile
-                  a.text-primary.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
-                    i.fab.fa-instagram.me-2
-                    span Instagram
-              
-              if artist.social && artist.social.x
-                .meta-item.artist-social-x-mobile
-                  a.text-primary.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
-                    i.fab.fa-x.me-2
-                    
-              
-              if artist.social && artist.social.facebook
-                .meta-item.artist-social-facebook-mobile
-                  a.text-primary.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
-                    i.fab.fa-facebook.me-2
-                    span Facebook
-            
-            // Acciones del usuario para móvil
-            .hero-actions.artist-actions-mobile.d-flex.justify-content-center.gap-3.mb-4
-              button.btn.btn-primary.btn-lg.px-4.artist-follow-btn-mobile.artist-mobile-action-btn
-                i.fas.fa-heart.me-2
-                | Seguir
-              
-              button.btn.btn-outline-primary.btn-lg.px-4.artist-share-btn-mobile.artist-mobile-action-btn
-                i.fas.fa-share.me-2
-                | Compartir
-        
-        .row.justify-content-center
-          .col-md-8.col-lg-6
-            // Técnicas para móvil
-            .stat-item.artist-techniques-card-mobile.text-center.p-4.shadow-sm.artist-mobile-techniques-card
-              .stat-label.artist-techniques-label-mobile.h5.mb-3.artist-mobile-techniques-label Técnicas
-              .techniques-list.artist-techniques-list-mobile
-                if stats.techniques && stats.techniques.length > 0
-                  each technique in stats.techniques.slice(0, 10)
-                    - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
-                    .technique-item.artist-technique-badge.badge.bg-primary.me-2.mb-2= capitalizedTechnique
-                  if stats.techniques.length > 10
-                    .small.text-muted.artist-techniques-more-mobile +#{stats.techniques.length - 10} más
-                else
-                  .small.text-muted.artist-no-techniques-mobile Sin técnicas
+    // Se eliminó el layout móvil para dejar una sola versión (la del héroe superpuesto)
 
     // Sección de obras del artista
     if artworks && artworks.length > 0

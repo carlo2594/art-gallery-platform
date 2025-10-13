@@ -1,4 +1,4 @@
-/* Hero section: background color for text column */
+﻿/* Hero section: background color for text column */
 .hero-col-text {
   background-color: var(--ox-beige) !important;
 }
@@ -754,7 +754,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   color: var(--ox-yellow) !important;
 }
 
-/* Desktop social media links (≥992px) - text should be ox-beige */
+/* Desktop social media links (ΓëÑ992px) - text should be ox-beige */
 @media (min-width: 992px) {
   .artist-meta-desktop a {
     color: var(--ox-beige) !important;
@@ -918,7 +918,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Exhibition image fade-in */
 .exhibition-hero-image { opacity: 0; transition: opacity .4s ease; }
 .exhibition-hero-image.loaded { opacity: 1; }
-/* Ajuste rápido: alturas más compactas para heroes de exposiciones */
+/* Ajuste r├ípido: alturas m├ís compactas para heroes de exposiciones */
 @media (max-width: 991.98px) { .exhibition-section { min-height: 50vh; } }
 @media (min-width: 992px) and (max-width: 1199.98px) { .exhibition-section { min-height: 60vh; } }
 @media (min-width: 1200px) { .exhibition-section { min-height: 70vh; } }
@@ -1021,7 +1021,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .artwork-stats.centered-to-button {
-  /* El JavaScript establecerá estas custom properties */
+  /* El JavaScript establecer├í estas custom properties */
   --button-width: 200px;
   --button-left: 0px;
   
@@ -1039,7 +1039,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
 }
 
 .artwork-stats .stat-item:not(:last-child)::after {
-  content: '•';
+  content: 'ΓÇó';
   margin-left: 1rem;
   color: #ddd;
 }
@@ -1237,6 +1237,80 @@ section.join-artists { position: relative; margin-top: 5rem; }
 ======================================== */
 
 /* Exhibition Hero Section */
+
+/* ==========================================
+  Artwork Grid (scoped to new class names)
+  Use the new BEM classes to avoid touching Bootstrap globals
+  ========================================== */
+.artwork-grid {
+  max-width: none;
+  width: 100%;
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
+}
+.artwork-grid li,
+.artwork-grid .artwork-grid__item {
+  display: block;
+  float: left;
+  padding: 7px;
+  width: 33%;
+  opacity: 0;
+}
+.artwork-grid li.shown,
+.no-js .artwork-grid li,
+.no-cssanimations .artwork-grid li { opacity: 1; }
+.artwork-grid li a,
+.artwork-grid li img { outline: none; border: none; display: block; max-width: 100%; }
+
+.artwork-grid__body {
+  padding: 0.5rem;
+  font-family: var(--font-subtitle);
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  color: var(--ox-blue);
+}
+.artwork-grid__content { display: flex; flex-direction: row; gap: 0.75rem; align-items: stretch; }
+.artwork-grid__info { flex: 1; display: flex; flex-direction: column; }
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; }
+.artwork-grid__title { font-weight: 700; font-size: 1.6rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); font-family: 'Montserrat', var(--font-title), Arial, sans-serif; }
+.artwork-grid__artist { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.3rem; text-transform: uppercase; color: #666; letter-spacing: 0.02em; }
+.artwork-grid__details { margin-bottom: 0.3rem; }
+.artwork-grid__detail-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.15rem; color: #888; font-variant-caps: small-caps; letter-spacing: 0.02em; }
+.artwork-grid__detail-item:last-child { margin-bottom: 0; }
+.artwork-grid__price { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0; color: var(--ox-blue); font-variant-numeric: lining-nums; }
+.artwork-grid__price-value { font-weight: 400 !important; color: inherit !important; }
+.artwork-grid__stat-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.2rem; color: #999; font-weight: 400; }
+.artwork-grid__stat-item:last-child { margin-bottom: 0; }
+.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+.artwork-grid__image { display: block; width: 100%; height: auto; }
+.artwork-grid__stretched-link { position: absolute; inset: 0; }
+
+/* ==========================================
+  Artist Detail: Hero overlay/filters neutralized so image/background are not tinted
+  ========================================== */
+.artist-detail-page .artist-hero-overlay,
+.artist-detail-page .exhibition-hero-overlay,
+.artist-detail-page .hero-overlay {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.artist-detail-page .hero-content { background: transparent !important; backdrop-filter: none !important; }
+@media (max-width: 991.98px) { .artist-detail-page .hero-content { position: absolute !important; } }
+.artist-detail-page .hero-bg-image,
+.artist-detail-page .artist-bg-image { filter: none !important; }
+
+/* Transparent card style for left hero content */
+.artist-hero-card {
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.10);
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.20);
+}
 .exhibition-hero-fullscreen {
     min-height: 100vh;
     overflow: hidden;
@@ -1501,7 +1575,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   box-shadow: 0 2rem 4rem rgba(0,0,0,.15), 0 0.8rem 1.6rem rgba(0,0,0,.1);
 }
 
-/* Botón cerrar (X) */
+/* Bot├│n cerrar (X) */
 .lightbox__close {
   position: absolute;
   top: 1.6rem;
@@ -1571,7 +1645,7 @@ body.noscroll {
   --bs-btn-hover-color: #111;
   --bs-btn-hover-bg: var(--ox-yellow);
   --bs-btn-hover-border-color: var(--ox-yellow);
-  --bs-btn-focus-shadow-rgb: 255, 205, 0; /* aproximación del amarillo */
+  --bs-btn-focus-shadow-rgb: 255, 205, 0; /* aproximaci├│n del amarillo */
   --bs-btn-active-color: #111;
   --bs-btn-active-bg: var(--ox-yellow);
   --bs-btn-active-border-color: var(--ox-yellow);
@@ -1599,7 +1673,7 @@ body.noscroll {
 }
 .artwork-fav-btn.favorited,
 .artwork-fav-btn.btn-danger {
-  /* Forzar el color de marca cuando está activo */
+  /* Forzar el color de marca cuando est├í activo */
   background-color: var(--ox-yellow) !important;
   border-color: var(--ox-yellow) !important;
   color: #111 !important;
@@ -1629,16 +1703,16 @@ body.noscroll {
   100% { transform: scale(1); }
 }
 
-/* --- Separador para sección de exposiciones relacionadas --- */
+/* --- Separador para secci├│n de exposiciones relacionadas --- */
 .related-exhibitions-section {
-  /* Empuje claro desde la sección anterior */
-  margin-top: 4rem; /* más aire que mt-5 */
+  /* Empuje claro desde la secci├│n anterior */
+  margin-top: 4rem; /* m├ís aire que mt-5 */
 }
 
 /* --- Artwork detail: stats spacing --- */
 .artwork-stats {
   margin-top: 0.75rem;
-  margin-bottom: 2rem; /* asegura espacio antes de la siguiente sección */
+  margin-bottom: 2rem; /* asegura espacio antes de la siguiente secci├│n */
   position: relative;
   z-index: 1; /* evita que elementos posteriores se dibujen encima por accidente */
 }
@@ -1646,10 +1720,10 @@ body.noscroll {
   /* actualmente no usamos posicionamiento absoluto; mantenemos en flujo */
 }
 .related-exhibitions-section {
-  clear: both; /* asegura separación si algún elemento previo flotara */
+  clear: both; /* asegura separaci├│n si alg├║n elemento previo flotara */
 }
 
-/* --- Back button: ocultar hasta que el layout esté listo --- */
+/* --- Back button: ocultar hasta que el layout est├⌐ listo --- */
 .artwork-back-section {
   opacity: 0;
   transform: translateY(6px);
@@ -1668,7 +1742,7 @@ body.noscroll {
   /* Colores marca */
   background: var(--ox-beige);
   color: var(--ox-blue);
-  /* Altura independiente del contenido (máximo viewport) */
+  /* Altura independiente del contenido (m├íximo viewport) */
   position: sticky; /* se mantiene visible al hacer scroll */
   top: 0;
   height: 100vh;
