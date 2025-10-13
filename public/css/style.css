@@ -1718,6 +1718,21 @@ body.noscroll {
 
 /* Ensure descendant elements inherit Montserrat */
 .grid-card-body * { font-family: inherit; }
+/* Restore Font Awesome font for icons inside the card */
+.grid-card-body .fa,
+.grid-card-body .fa-solid,
+.grid-card-body .fa-regular,
+.grid-card-body .fa-light,
+.grid-card-body .fa-thin,
+.grid-card-body .fa-duotone {
+  font-family: "Font Awesome 6 Free" !important;
+}
+.grid-card-body .fa-brands { font-family: "Font Awesome 6 Brands" !important; }
+/* Preserve appropriate weights */
+.grid-card-body .fa-solid { font-weight: 900 !important; }
+.grid-card-body .fa-regular { font-weight: 400 !important; }
+.grid-card-body .fa-light { font-weight: 300 !important; }
+.grid-card-body .fa-thin { font-weight: 100 !important; }
 
 /* Only the title is bold and a bit larger */
 .grid-card-title {
