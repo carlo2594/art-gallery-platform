@@ -797,15 +797,16 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Unify surface style for all exhibition cards (desktop + mobile) */
 .exhibition-hero-card,
 .exhibition-stats-card,
+.exhibition-info-card,
 .exhibition-detail__guests-card,
 .exhibition-detail__mobile-card,
 .exhibition-detail__mobile-guests-card {
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20) !important;
   color: #fff;
   border-radius: 1rem;
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 1px solid rgba(255,255,255,0.22) !important;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   margin-bottom: 1rem;
 }
@@ -824,6 +825,34 @@ section.join-artists { position: relative; margin-top: 5rem; }
 
 /* Add vertical gap between columns/cards in hero row */
 .exhibition-detail-page .exhibition-hero-content .row { row-gap: 1rem; }
+
+/* Ensure children headings and paragraphs in cards use readable colors */
+.exhibition-hero-card h1, .exhibition-hero-card h2, .exhibition-hero-card h3,
+.exhibition-stats-card h1, .exhibition-stats-card h2, .exhibition-stats-card h3,
+.exhibition-info-card h1, .exhibition-info-card h2, .exhibition-info-card h3,
+.exhibition-detail__guests-card h1, .exhibition-detail__guests-card h2, .exhibition-detail__guests-card h3 { color: #fff; }
+
+/* ==========================================
+  Exhibition guests list: first 5 full width, rest 2 columns
+  ========================================== */
+.exhibition-detail__guests-list { display: flex; flex-wrap: wrap; row-gap: .5rem; column-gap: 1rem; }
+.exhibition-detail__guests-list .exhibition-detail__guest-item { width: 100%; box-sizing: border-box; }
+/* On md+ turn the list into a 2-col grid when flagged */
+@media (min-width: 768px) {
+  .exhibition-detail__guests-list.two-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1rem; row-gap: .5rem; }
+  .exhibition-detail__guests-list.two-cols .exhibition-detail__guest-item { width: auto; }
+}
+/* Apply same behavior to mobile guests list if present */
+.exhibition-detail__mobile-guests-list { display: flex; flex-wrap: wrap; row-gap: .5rem; column-gap: .75rem; }
+.exhibition-detail__mobile-guests-list > * { width: 100%; }
+@media (min-width: 576px) {
+  .exhibition-detail__mobile-guests-list.two-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: .75rem; row-gap: .5rem; }
+.exhibition-detail__mobile-guests-list.two-cols > * { width: auto; }
+}
+
+/* Constrain guests card width and center it */
+.exhibition-detail__guests-col { display: flex; justify-content: center; }
+.exhibition-detail__guests-card { max-width: 720px; width: 100%; margin-left: auto; margin-right: auto; }
 .btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
 .btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
 
@@ -1660,7 +1689,63 @@ section.join-artists { position: relative; margin-top: 5rem; }
 .exhibition-back-btn {
     border-radius: 2rem;
     padding: 0.75rem 2rem;
-}/* Artist mobile section */
+}
+/* Make the back button use ox-blue instead of the global yellow outline */
+a.btn.btn-outline-primary.exhibition-back-btn {
+    color: var(--ox-blue) !important;
+    border-color: var(--ox-blue) !important;
+}
+a.btn.btn-outline-primary.exhibition-back-btn:hover,
+a.btn.btn-outline-primary.exhibition-back-btn:focus,
+a.btn.btn-outline-primary.exhibition-back-btn:active {
+    background: var(--ox-blue) !important;
+    color: #fff !important;
+    border-color: var(--ox-blue) !important;
+}
+/* Ensure the arrow icon follows the button color */
+.exhibition-back-btn .fa,
+.exhibition-back-btn .fas,
+.exhibition-back-btn .fab {
+    color: var(--ox-blue) !important;
+}
+.exhibition-back-btn:hover .fa,
+.exhibition-back-btn:hover .fas,
+.exhibition-back-btn:hover .fab,
+.exhibition-back-btn:focus .fa,
+.exhibition-back-btn:focus .fas,
+.exhibition-back-btn:focus .fab {
+    color: #fff !important;
+}
+
+/* Generic back button style (apply to all back buttons) */
+.btn.ox-back-btn {
+    color: var(--ox-blue) !important;
+    border-color: var(--ox-blue) !important;
+    background: transparent !important;
+    border-radius: 2rem !important;
+    padding: 0.75rem 2rem !important;
+}
+.btn.ox-back-btn:hover,
+.btn.ox-back-btn:focus,
+.btn.ox-back-btn:active {
+    background: var(--ox-blue) !important;
+    color: #fff !important;
+    border-color: var(--ox-blue) !important;
+}
+.ox-back-btn .fa,
+.ox-back-btn .fas,
+.ox-back-btn .fab {
+    color: var(--ox-blue) !important;
+}
+.ox-back-btn:hover .fa,
+.ox-back-btn:hover .fas,
+.ox-back-btn:hover .fab,
+.ox-back-btn:focus .fa,
+.ox-back-btn:focus .fas,
+.ox-back-btn:focus .fab {
+    color: #fff !important;
+}
+/* Artist mobile section */
 .artist-mobile-bg {
   background: var(--ox-beige);
 }

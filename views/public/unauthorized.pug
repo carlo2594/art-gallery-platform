@@ -13,7 +13,7 @@ block content
             else
               p.text-muted.mb-4 No tienes permiso para ver esta página.
             .d-flex.justify-content-center.gap-2
-              a.btn.btn-primary(href='/' aria-label='Volver al inicio') Volver
+              a.btn.btn-outline-primary.ox-back-btn(href='/' aria-label='Volver') Volver
               if !currentUser
                 a.btn.btn-outline-secondary(href='/login' aria-label='Iniciar sesión') Iniciar sesión
 

@@ -500,6 +500,99 @@ async function seed() {
     await artwork.save();
   }
 
+  // Showcase: crea un artista, una obra y una exposición realistas
+  console.log('\n[SHOWCASE] Creando datos realistas para simular PROD...');
+  const showcaseArtist = await User.create({
+    name: 'María Fernández',
+    email: 'maria.fernandez@example.com',
+    password: '123456',
+    role: 'artist',
+    profileImage: randomFromArray(randomImages),
+    bio: `Artista contemporánea argentina. Su práctica se centra en la pintura y el dibujo expandido,
+    con un fuerte énfasis en la relación entre color, luz y materia. Explora series de procesos largos en
+    las que alterna capas de veladuras con zonas de alto empaste, permitiendo que la huella del gesto y
+    el tiempo de secado de los óleos dialoguen con la geometría de la composición.
+
+    Estudió Artes Visuales en la UNA (Buenos Aires) y realizó clínicas de obra con referentes locales e
+    internacionales. Participó en residencias en Madrid y Ciudad de México, y fue seleccionada en salones
+    y premios de pintura. Su obra integra colecciones privadas en Argentina, España y México.
+
+    En los últimos años ha desarrollado la serie “Luz y Materia”, en la que indaga la vibración entre planos
+    cromáticos y el espesor del material, buscando un equilibrio entre paisaje, abstracción y memoria.`,
+    website: 'https://maria-fernandez.art',
+    location: 'Buenos Aires, Argentina',
+    social: { instagram: 'maria_fernandez_art' }
+  });
+
+  const awTitle = 'Horizonte en Ocre';
+  const awSlug = generateSlug(awTitle);
+  const awType = 'pintura';
+  const awTechnique = 'Óleo sobre lienzo';
+  const showcaseArtwork = await Artwork.create({
+    title: awTitle,
+    slug: awSlug,
+    description: `Óleo sobre lienzo de trazo gestual y paleta cálida. La superficie alterna zonas de
+    veladura con sectores de alto empaste para construir un horizonte vibrante que parece avanzar y
+    retroceder con la luz. La pieza forma parte de la serie “Luz y Materia”, en la que la artista trabaja
+    sobre la transición entre planos cromáticos y la percepción del relieve.
+
+    Obra original firmada al dorso. Incluye certificado de autenticidad. Se recomienda luz indirecta y
+    limpieza en seco con paño suave.`,
+    imageUrl: randomFromArray(randomImages),
+    imagePublicId: 'showcase-obra-horizonte-ocre',
+    type: awType,
+    technique: awTechnique,
+    type_norm: norm(awType),
+    technique_norm: norm(awTechnique),
+    createdBy: showcaseArtist._id,
+    artist: showcaseArtist._id,
+    status: 'approved',
+    availability: 'for_sale',
+    views: randomInt(80, 450),
+    favoritesCount: randomInt(5, 24),
+    completedAt: new Date(2024, 6, 15), // 15 Jul 2024
+    width_cm: 120,
+    height_cm: 90,
+    price_cents: 320000, // 3,200 USD
+    size: '120 x 90 cm'
+  });
+
+  const exTitle = 'Luz y Materia';
+  const exSlug = generateSlug(exTitle);
+  const coverImage = randomFromArray(randomImages);
+  const images = [coverImage, randomFromArray(randomImages), randomFromArray(randomImages)].filter((v, i, a) => a.indexOf(v) === i);
+  const showcaseExhibition = await Exhibition.create({
+    title: exTitle,
+    slug: exSlug,
+    description: `Selección de obras recientes que indagan en el cruce entre luz, textura y color.
+    La muestra propone un recorrido en tres núcleos: Materia, Horizonte y Vibración. Cada sección articula
+    obras que dialogan por capas, donde el espesor del óleo y las transparencias construyen atmósferas
+    que invitan a detenerse en el detalle. La curaduría de Estudio Ox pone el foco en el proceso y en
+    la relación entre obra y espectador, proponiendo una lectura sensible y a la vez rigurosa.
+
+    Actividades: visita guiada con la artista, conversación abierta con curaduría y edición de un pequeño
+    folleto-catálogo digital descargable mediante QR.`,
+    startDate: new Date(new Date().getFullYear(), 9, 1), // 1 Oct del año actual
+    endDate: new Date(new Date().getFullYear(), 9, 15), // 15 Oct del año actual
+    artworks: [showcaseArtwork._id],
+    createdBy: showcaseArtist._id,
+    participants: [{ user: showcaseArtist._id, role: 'artista' }],
+    coverImage,
+    images,
+    location: { type: 'physical', address: 'Av. Callao 1234, Recoleta, CABA' },
+    status: 'published'
+  });
+
+  // Vincular exposición en la obra
+  await Artwork.updateOne({ _id: showcaseArtwork._id }, { $addToSet: { exhibitions: showcaseExhibition._id } });
+  console.log('[SHOWCASE] Artista:', showcaseArtist.name, '\n          Slug:', showcaseArtist.slug || '(sin slug)');
+  console.log('[SHOWCASE] Obra:', showcaseArtwork.title, '\n          Slug:', showcaseArtwork.slug);
+  console.log('[SHOWCASE] Exposición:', showcaseExhibition.title, '\n          Slug:', showcaseExhibition.slug);
+  console.log(`\nRutas útiles:
+  /artists/${showcaseArtist.slug || showcaseArtist._id}
+  /artworks/${showcaseArtwork.slug || showcaseArtwork._id}
+  /exhibitions/${showcaseExhibition.slug || showcaseExhibition._id}\n`);
+
   // Crear suscripciones de prueba al newsletter
   console.log('📧 Creando suscripciones de newsletter...');
   const newsletterData = [
