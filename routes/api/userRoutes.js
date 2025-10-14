@@ -20,6 +20,7 @@ router.get('/my-favorites', requireUser, favoriteController.getFavoritesByUser);
 
 /* ---- Admin ---- */
 router.get('/',          requireUser, restrictTo('admin'), userController.getAllUsers);
+router.post('/',         requireUser, restrictTo('admin'), userController.adminCreateUser);
 router.get('/:id',       requireUser, restrictTo('admin'), userController.getUser);
 router.patch('/:id',     requireUser, restrictTo('admin'), userController.updateUser);
 router.delete('/:id',    requireUser, restrictTo('admin'), userController.deleteUser);

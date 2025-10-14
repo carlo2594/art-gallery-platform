@@ -1,4 +1,4 @@
-//- views/layouts/admin.pug
+﻿//- views/layouts/admin.pug
 doctype html
 html(lang='es')
   head
@@ -46,9 +46,38 @@ html(lang='es')
       main.admin-main.flex-grow-1.p-4
         block content
 
+    // Toast container (Bootstrap)
+    .toast-container.position-fixed.top-0.end-0.p-3#admin-toast-container
+
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/main.js')
+    // Toast helper
+    script.
+      (function(){
+        window.showAdminToast = function(message, type){
+          try {
+            var container = document.getElementById('admin-toast-container');
+            if (!container) return alert(message);
+            var toastEl = document.createElement('div');
+            var level = type === 'danger' ? 'text-bg-danger' : (type === 'warning' ? 'text-bg-warning' : 'text-bg-success');
+            toastEl.className = 'toast align-items-center ' + level + ' border-0';
+            toastEl.setAttribute('role','alert');
+            toastEl.setAttribute('aria-live','assertive');
+            toastEl.setAttribute('aria-atomic','true');
+            toastEl.innerHTML = "<div class='d-flex'><div class='toast-body'></div><button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast' aria-label='Close'></button></div>";
+            toastEl.querySelector('.toast-body').textContent = message;
+            container.appendChild(toastEl);
+            if (window.bootstrap && bootstrap.Toast) {
+              var t = new bootstrap.Toast(toastEl, { delay: 2500 });
+              t.show();
+            } else {
+              toastEl.style.display = 'block';
+              setTimeout(function(){ toastEl.remove(); }, 2500);
+            }
+          } catch (e) { try { alert(message); } catch(_){} }
+        };
+      })();
     // Reset password trigger for admin tables
     script.
       (function(){
@@ -58,15 +87,21 @@ html(lang='es')
           e.preventDefault();
           var id = btn.getAttribute('data-user-id');
           if(!id) return;
-          if(!confirm('¿Resetear contraseña para este usuario?')) return;
+          if(!confirm('�Resetear contrase�a para este usuario?')) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Reseteando...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/reset-password';
+          var success = function(){
+            if (window.showAdminToast) showAdminToast('Contrase�a reseteada.','success');
+            var modalEl = btn.closest && btn.closest('.modal');
+            if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+          };
+          var failure = function(){ if (window.showAdminToast) showAdminToast('No se pudo resetear.','danger'); };
           if (window.axios) {
-            axios.patch(url).then(function(){ alert('Contraseña reseteada.'); }).catch(function(err){ console.error(err); alert('No se pudo resetear.'); }).finally(done);
+            axios.patch(url).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           } else {
-            fetch(url, { method: 'PATCH' }).then(function(res){ if(!res.ok) throw new Error('Failed'); alert('Contraseña reseteada.'); }).catch(function(err){ console.error(err); alert('No se pudo resetear.'); }).finally(done);
+            fetch(url, { method: 'PATCH' }).then(function(res){ if(!res.ok) throw new Error('Failed'); success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           }
         }
         function onPromote(e){
@@ -76,20 +111,75 @@ html(lang='es')
           var id = btn.getAttribute('data-user-id');
           var role = btn.getAttribute('data-role');
           if(!id || !role) return;
-          if(!confirm('¿Promover a "' + role + '"?')) return;
+          if(!confirm('�Promover a "' + role + '"?')) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/role';
+          var success = function(){
+            if (window.showAdminToast) showAdminToast('Rol actualizado a ' + role, 'success');
+            var modalEl = btn.closest && btn.closest('.modal');
+            if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+          };
+          var failure = function(){ if (window.showAdminToast) showAdminToast('No se pudo actualizar el rol','danger'); };
           if (window.axios) {
-            axios.patch(url, { role: role }).then(function(){ alert('Rol actualizado a ' + role); location.reload(); }).catch(function(err){ console.error(err); alert('No se pudo actualizar el rol'); }).finally(done);
+            axios.patch(url, { role: role }).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           } else {
             fetch(url, { method: 'PATCH', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ role: role }) })
-              .then(function(res){ if(!res.ok) throw new Error('Failed'); alert('Rol actualizado a ' + role); location.reload(); })
-              .catch(function(err){ console.error(err); alert('No se pudo actualizar el rol'); })
+              .then(function(res){ if(!res.ok) throw new Error('Failed'); success(); })
+              .catch(function(err){ console.error(err); failure(); })
               .finally(done);
           }
         }
         document.addEventListener('click', onClick);
         document.addEventListener('click', onPromote);
+      })();
+    // Toggle active/inactive user (admin)
+    script.
+      (function(){
+        function onToggle(e){
+          var btn = e.target.closest && e.target.closest('.admin-toggle-active');
+          if(!btn) return;
+          e.preventDefault();
+          var id = btn.getAttribute('data-user-id');
+          var action = btn.getAttribute('data-action'); // 'deactivate' | 'reactivate'
+          if(!id || !action) return;
+          var confirmMsg = action === 'deactivate' ? '�Desactivar esta cuenta?' : '�Reactivar esta cuenta?';
+          if(!confirm(confirmMsg)) return;
+          var old = btn.textContent;
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
+          var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
+          var url = '/api/v1/users/' + encodeURIComponent(id) + '/' + (action === 'deactivate' ? 'deactivate' : 'reactivate');
+          var success = function(){
+            if (window.showAdminToast) showAdminToast('Estado actualizado','success');
+            var modalEl = btn.closest && btn.closest('.modal');
+            if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+            var row = btn.closest && btn.closest('tr');
+            var badge = row && row.querySelector && row.querySelector('td:nth-child(3) .badge');
+            var isDeactivate = action === 'deactivate';
+            if (badge) {
+              badge.classList.remove('text-bg-success','text-bg-secondary');
+              badge.classList.add(isDeactivate ? 'text-bg-secondary' : 'text-bg-success');
+              badge.textContent = isDeactivate ? 'Inactivo' : 'Activo';
+            }
+            if (isDeactivate) {
+              btn.setAttribute('data-action','reactivate');
+              btn.classList.remove('btn-outline-secondary');
+              btn.classList.add('btn-success');
+              btn.innerText = 'Reactivar cuenta';
+            } else {
+              btn.setAttribute('data-action','deactivate');
+              btn.classList.remove('btn-success');
+              btn.classList.add('btn-outline-secondary');
+              btn.innerText = 'Desactivar cuenta';
+            }
+          };
+          var failure = function(){ if (window.showAdminToast) showAdminToast('No se pudo actualizar el estado','danger'); };
+          if (window.axios) {
+            axios.patch(url).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
+          } else {
+            fetch(url, { method: 'PATCH' }).then(function(res){ if(!res.ok) throw new Error('Failed'); success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
+          }
+        }
+        document.addEventListener('click', onToggle);
       })();

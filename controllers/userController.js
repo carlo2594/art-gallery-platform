@@ -6,6 +6,10 @@ const filterObject = require('@utils/filterObject');
 const AppError = require('@utils/appError');
 const Artwork = require('@models/artworkModel');
 const Exhibition = require('@models/exhibitionModel');
+const crypto = require('crypto');
+const PasswordResetToken = require('@models/passwordResetTokenModel');
+const { normalizeEmail } = require('@utils/emailUtils');
+const { sendMail } = require('@services/mailer');
 
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
@@ -248,4 +252,40 @@ exports.deactivateUser = catchAsync(async (req, res, next) => {
   await user.save();
 
   sendResponse(res, user, 'Usuario desactivado');
+});
+
+// ADMIN: Crear usuario (similar a signup) y enviar correo para definir contraseña
+exports.adminCreateUser = catchAsync(async (req, res, next) => {
+  const { email, name, role } = req.body || {};
+  if (!email) {
+    return next(new AppError('El email es requerido', 400));
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+  const existingUser = await User.findOne({ email: normalizedEmail });
+  if (existingUser) {
+    return next(new AppError('El correo ya está registrado.', 400));
+  }
+
+  const tempPassword = crypto.randomBytes(16).toString('hex');
+  const payload = { name: name || normalizedEmail.split('@')[0], email: normalizedEmail, password: tempPassword };
+  if (role && ['collector','artist','admin'].includes(role)) payload.role = role;
+
+  const newUser = await User.create(payload);
+
+  // Generar token para que el usuario cree su contraseña
+  const token = crypto.randomBytes(32).toString('hex');
+  const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24h
+  await PasswordResetToken.create({ userId: newUser._id, tokenHash, expiresAt, used: false });
+
+  const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
+
+  await sendMail({
+    to: newUser.email,
+    subject: 'Crea tu contraseña',
+    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+  });
+
+  return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se envió un correo para crear la contraseña.', 201);
 });

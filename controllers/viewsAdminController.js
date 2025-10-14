@@ -101,35 +101,51 @@ exports.getUsers = catchAsync(async (req, res) => {
   // Por defecto, artistas
   const role = (req.query.role || 'artist').trim();
   if (role) filter.role = role;
+  // Búsqueda por nombre o email
+  const q = (req.query.q || '').trim();
+  if (q) {
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    filter.$or = [ { name: rx }, { email: rx } ];
+  }
   const { page, perPage, skip } = getPageParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role').lean()
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role +email').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/artistAdmin', {
+  res.status(200).render('admin/users/userList', {
     title: 'Artistas',
     users,
     page,
     totalPages,
-    qsPrefix: buildQsPrefix(req.query)
+    qsPrefix: buildQsPrefix(req.query),
+    q,
+    role
   });
 });
 
 exports.getCollectors = catchAsync(async (req, res) => {
   const filter = { role: 'collector' };
+  // Búsqueda por nombre o email
+  const q = (req.query.q || '').trim();
+  if (q) {
+    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    filter.$or = [ { name: rx }, { email: rx } ];
+  }
   const { page, perPage, skip } = getPageParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role').lean()
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role +email').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/collectorAdmin', {
+  res.status(200).render('admin/users/userList', {
     title: 'Coleccionistas',
     users,
     page,
     totalPages,
-    qsPrefix: buildQsPrefix(req.query)
+    qsPrefix: buildQsPrefix(req.query),
+    q,
+    role: 'collector'
   });
 });
 exports.getUser = catchAsync(async (req, res, next) => {
@@ -142,3 +158,5 @@ exports.getUser = catchAsync(async (req, res, next) => {
     user
   });
 });
+
+

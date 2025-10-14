@@ -1,0 +1,165 @@
+extends ../../layouts/admin
+
+block content
+  .container.py-5
+    h1.h3.mb-4.d-flex.justify-content-between.align-items-center
+      span= title || 'Usuarios'
+      // Botón para abrir modal de nuevo usuario
+      button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateUser')
+        i.fas.fa-user-plus.me-1
+        | Agregar usuario
+    // Barra de búsqueda
+    form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
+      .col-sm-8.col-md-6
+        input.form-control(type='text', name='q', placeholder='Buscar por nombre o correo', value=q || '')
+      if typeof role !== 'undefined' && role
+        input(type='hidden', name='role', value=role)
+      .col-auto
+        button.btn.btn-primary(type='submit') Buscar
+      if q
+        .col-auto
+          a.btn.btn-outline-secondary(href='?') Limpiar
+    if users && users.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Nombre
+              th Correo
+              th Estado
+              th Creado
+              th Acciones
+          tbody
+            each u in users
+              tr
+                td= u.name
+                td= u.email
+                td
+                  span.badge(class=u.active === false ? 'text-bg-secondary' : 'text-bg-success')= (u.active === false ? 'Inactivo' : 'Activo')
+                td= new Date(u.createdAt).toLocaleDateString('es-ES')
+                td
+                  // Botón que abre el modal de acciones
+                  button.btn.btn-sm.btn-outline-secondary(type='button', data-bs-toggle='modal', data-bs-target=`#userActions-${u._id}`) Ver
+                  // Modal de acciones por usuario
+                  .modal.fade(id=`userActions-${u._id}` tabindex='-1' aria-labelledby=`userActionsLabel-${u._id}` aria-hidden='true')
+                    .modal-dialog
+                      .modal-content
+                        .modal-header
+                          h5.modal-title(id=`userActionsLabel-${u._id}`) Acciones - #{u.name}
+                          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+                        .modal-body
+                          h2.fs-5 Acciones de seguridad
+                          p
+                            button.btn.btn-warning.admin-reset-pass(type='button' data-user-id=u._id aria-label='Resetear contraseña')
+                              i.fas.fa-key.me-1
+                              | Resetear contraseña
+                          hr
+                          h2.fs-5 Cambiar rol
+                          .d-flex.gap-2.flex-wrap
+                            if u.role !== 'collector'
+                              button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Cambiar a collector')
+                                i.fas.fa-arrow-down-long.me-1
+                                | Demote to collector
+                            if u.role !== 'artist'
+                              button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Promover a artista')
+                                i.fas.fa-arrow-up-right-dots.me-1
+                                | Promote to artist
+                            if u.role !== 'admin'
+                              button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Promover a admin')
+                                i.fas.fa-user-shield.me-1
+                                | Promote to admin
+                          hr
+                          h2.fs-5 Estado de la cuenta
+                          p
+                            if u.active === false
+                              button.btn.btn-success.admin-toggle-active(type='button' data-user-id=u._id data-action='reactivate' aria-label='Reactivar usuario')
+                                i.fas.fa-user-check.me-1
+                                | Reactivar cuenta
+                            else
+                              button.btn.btn-outline-secondary.admin-toggle-active(type='button' data-user-id=u._id data-action='deactivate' aria-label='Desactivar usuario')
+                                i.fas.fa-user-slash.me-1
+                                | Desactivar cuenta
+                        .modal-footer
+                          a.btn.btn-outline-primary(href=`/admin/users/${u._id}`)
+                            i.fas.fa-eye.me-1
+                            | Ver perfil completo
+                          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
+    else
+      .alert.alert-info No hay usuarios
+    if typeof totalPages !== 'undefined' && totalPages > 1
+      nav.mt-4(aria-label=`Paginación de ${title || 'usuarios'}`)
+        ul.pagination.justify-content-center
+          - const prevDisabled = page <= 1
+          - const nextDisabled = page >= totalPages
+          li.page-item(class=prevDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
+          li.page-item.disabled
+            span.page-link= `Página ${page} de ${totalPages}`
+          li.page-item(class=nextDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+
+    // Modal: Crear nuevo usuario
+    .modal.fade#adminCreateUser(tabindex='-1' aria-labelledby='adminCreateUserLabel' aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#adminCreateUserLabel Crear nuevo usuario
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+          .modal-body
+            form#adminCreateUserForm
+              .mb-3
+                label.form-label(for='newUserName') Nombre
+                input.form-control#newUserName(type='text' name='name' placeholder='Nombre (opcional)')
+              .mb-3
+                label.form-label(for='newUserEmail') Correo
+                input.form-control#newUserEmail(type='email' name='email' placeholder='correo@dominio.com' required)
+              .mb-3
+                label.form-label(for='newUserRole') Rol
+                select.form-select#newUserRole(name='role')
+                  option(value='collector') Collector
+                  option(value='artist' selected=role === 'artist') Artist
+                  option(value='admin') Admin
+              .form-text
+                | Se generará una contraseña segura y se enviará un correo para que el usuario la establezca.
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+            button.btn.btn-primary#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Crear
+
+  // Handler de creación (solo en esta vista)
+  script.
+    (function(){
+      var form = document.getElementById('adminCreateUserForm');
+      if (!form) return;
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        var nameEl = document.getElementById('newUserName');
+        var emailEl = document.getElementById('newUserEmail');
+        var roleEl = document.getElementById('newUserRole');
+        var email = (emailEl && emailEl.value || '').trim();
+        var name = (nameEl && nameEl.value || '').trim();
+        var role = roleEl && roleEl.value;
+        if (!email) { if (window.showAdminToast) showAdminToast('Correo requerido','danger'); return; }
+        var btn = document.getElementById('adminCreateUserSubmit');
+        var old = btn && btn.textContent;
+        if (btn) { btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Creando...'; }
+        var done = function(){ if(btn){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; } };
+        var payload = { email: email };
+        if (name) payload.name = name;
+        if (role) payload.role = role;
+        var success = function(){
+          if (window.showAdminToast) showAdminToast('Usuario creado y correo enviado','success');
+          var modalEl = document.getElementById('adminCreateUser');
+          if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+          form.reset();
+        };
+        var failure = function(msg){ if (window.showAdminToast) showAdminToast(msg || 'No se pudo crear el usuario','danger'); };
+        if (window.axios) {
+          axios.post('/api/v1/users', payload).then(function(){ success(); }).catch(function(err){ console.error(err); var m=(err && err.response && err.response.data && err.response.data.message)||null; failure(m); }).finally(done);
+        } else {
+          fetch('/api/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+            .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error(d && d.message || 'Failed') }); success(); })
+            .catch(function(err){ console.error(err); failure(err && err.message); })
+            .finally(done);
+        }
+      });
+    })();
