@@ -210,6 +210,38 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Back buttons: go to previous page if possible
+  (function setupBackButtons(){
+    const backLinks = document.querySelectorAll('a.ox-back-btn');
+    if (!backLinks.length) return;
+    const canGoBack = () => {
+      // Prefer native history when available; fallback to referrer
+      if (window.history && history.length > 1) return true;
+      return !!document.referrer;
+    };
+    const goBackOrFallback = (a) => {
+      if (window.history && history.length > 1) {
+        history.back();
+        return;
+      }
+      if (document.referrer) {
+        // Navigate to referrer (may be external)
+        location.href = document.referrer;
+        return;
+      }
+      if (a && a.href) {
+        location.href = a.href;
+      }
+    };
+    backLinks.forEach(a => {
+      a.addEventListener('click', (ev) => {
+        if (!canGoBack()) return; // default navigation to href
+        ev.preventDefault();
+        goBackOrFallback(a);
+      }, { capture: true });
+    });
+  })();
+
   // Evita submit doble
   document.querySelectorAll('form').forEach(form => {
     form.addEventListener('submit', () => {
