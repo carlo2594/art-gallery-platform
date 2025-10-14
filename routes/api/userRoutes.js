@@ -7,6 +7,9 @@ const favoriteController = require('@controllers/favoriteController');
 const authController    = require('@controllers/authController');
 
 const router = express.Router();
+const multer = require('multer');
+// Usar memoria para evitar problemas de filesystem en Windows
+const upload = multer({ storage: multer.memoryStorage() });
 
 /* ---- Perfil propio ---- */
 router.get('/me',           requireUser, userController.getMe);
@@ -28,6 +31,22 @@ router.patch('/:id/role',          requireUser, restrictTo('admin'), userControl
 router.patch('/:id/reset-password', requireUser, restrictTo('admin'), userController.resetUserPassword);
 router.patch('/:id/reactivate',     requireUser, restrictTo('admin'), userController.reactivateUser);
 router.patch('/:id/deactivate',     requireUser, restrictTo('admin'), userController.deactivateUser);
+// Admin: subir/actualizar o eliminar imagen de perfil (multipart/form-data con campo 'profileImage')
+router.patch(
+  '/:id/profile-image',
+  requireUser,
+  restrictTo('admin'),
+  upload.single('profileImage'),
+  userController.updateUserProfileImage
+);
+
+// Admin: lookup por email para prevalidación en UI
+router.get(
+  '/lookup',
+  requireUser,
+  restrictTo('admin'),
+  userController.lookupByEmail
+);
 
 /* ---- (Opcional) favoritos de un usuario concreto ---- */
 router.get('/:id/favorites', requireUser, restrictTo('admin'), favoriteController.getFavoritesByUser);

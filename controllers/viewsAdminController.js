@@ -110,7 +110,7 @@ exports.getUsers = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPageParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role +email').lean()
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name slug createdAt active +role +email').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/userList', {
@@ -135,7 +135,7 @@ exports.getCollectors = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPageParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name createdAt active +role +email').lean()
+    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name slug createdAt active +role +email').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/userList', {

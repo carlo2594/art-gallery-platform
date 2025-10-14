@@ -7,7 +7,7 @@
       .col
         .card.shadow-sm.h-100.position-relative.artist-card.reveal-item
           // Full-card click target (place first for reliability)
-          a.stretched-link(href=`/artists/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
+          a.stretched-link(href=`/artists/${artist.slug || artist._id}` aria-label=`Ver perfil de ${artist.name}`)
           .artist-image-container.position-relative
             if artist.profileImage
               img.artist-image(

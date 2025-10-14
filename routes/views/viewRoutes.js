@@ -27,6 +27,10 @@ router.get('/contact', viewsController.getContact);
 // =================== ARTISTAS ==========================
 router.get('/artists', viewsController.getArtistsView);
 router.get('/artists/:id', viewsController.getArtistDetail);
+// Alias canónico: redirige de singular a plural (previene 404 por enlaces viejos)
+router.get('/artist/:id', (req, res) => {
+  res.redirect(301, `/artists/${req.params.id}`);
+});
 
 // =================== OBRAS =============================
 router.get('/artworks', viewsController.getArtworks);

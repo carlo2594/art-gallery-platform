@@ -492,7 +492,8 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
   const { artwork, shouldRedirect, redirectUrl } = await findArtworkByIdOrSlug(Artwork, id);
   
   if (shouldRedirect) {
-    return res.redirect(301, redirectUrl);
+    // Usa 302 para evitar cache permanente del navegador al cambiar slug
+    return res.redirect(302, redirectUrl);
   }
 
   // Contador de vistas se actualiza solo vía script diario

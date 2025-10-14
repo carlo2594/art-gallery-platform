@@ -1015,3 +1015,240 @@ function initArtworkViewBeacon(){
   window.addEventListener('load', run, { once: true });
   window.addEventListener('pageshow', (e) => { if (e.persisted) run(); });
 })();
+
+// ---- Admin Users: create + edit handlers moved from Pug ----
+document.addEventListener('DOMContentLoaded', function(){
+  // Create User (adminCreateUserForm)
+  (function setupAdminCreateUser(){
+    var form = document.querySelector('.admin-users-create-form');
+    if (!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var nameEl = document.getElementById('newUserName');
+      var emailEl = document.getElementById('newUserEmail');
+      var roleEl = document.getElementById('newUserRole');
+      var email = (emailEl && emailEl.value || '').trim();
+      var name = (nameEl && nameEl.value || '').trim();
+      var role = roleEl && roleEl.value;
+      if (!email) { if (window.showAdminToast) showAdminToast('Correo requerido','danger'); return; }
+      var btn = form && form.querySelector('.admin-users-create-submit');
+      var old = btn && btn.textContent;
+      if (btn) { btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Creando...'; }
+      var done = function(){ if(btn){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; } };
+      var payload = { email: email };
+      if (name) payload.name = name;
+      if (role) payload.role = role;
+      var success = function(){
+        if (window.showAdminToast) showAdminToast('Usuario creado y correo enviado','success');
+        var modalEl = (form && form.closest('.admin-users-create-modal'));
+        if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        form.reset();
+      };
+      var failure = function(msg){ if (window.showAdminToast) showAdminToast(msg || 'No se pudo crear el usuario','danger'); };
+      if (window.axios) {
+        axios.post('/api/v1/users', payload).then(function(){ success(); }).catch(function(err){ console.error(err); var m=(err && err.response && err.response.data && err.response.data.message)||null; failure(m); }).finally(done);
+      } else {
+        fetch('/api/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+          .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error(d && d.message || 'Failed') }); success(); })
+          .catch(function(err){ console.error(err); failure(err && err.message); })
+          .finally(done);
+      }
+    });
+  })();
+
+  // Edit User modals
+  (function setupAdminEditUsers(){
+    function setAvatarPreview(modalEl, url){
+      try {
+        var img = modalEl.querySelector('.admin-users-avatar-preview');
+        if (!img) return;
+        if (url) {
+          img.src = url;
+          img.style.display = '';
+        } else {
+          img.removeAttribute('src');
+          img.style.display = 'none';
+        }
+      } catch(_){}
+    }
+    function fillFormFromData(form, data){
+      if (!form || !data) return;
+      var q = function(s){ return form.querySelector(s); };
+      var setVal = function(sel, val){ var el = q(sel); if (el && val != null) el.value = val; };
+      setVal('[name="name"]', data.name || '');
+      if (data.email) setVal('[name="email"]', data.email);
+      setVal('[name="bio"]', data.bio || '');
+      setVal('[name="location"]', data.location || '');
+      setVal('[name="website"]', data.website || '');
+      var social = data.social || {};
+      setVal('[name="social.instagram"]', social.instagram || '');
+      setVal('[name="social.x"]', social.x || '');
+      setVal('[name="social.facebook"]', social.facebook || '');
+    }
+
+    var modals = document.querySelectorAll('.admin-users-edit-modal, .admin-edit-user-modal');
+    if (!modals.length) return;
+
+    modals.forEach(function(modalEl){
+      modalEl.addEventListener('show.bs.modal', function(ev){
+        var id = modalEl.getAttribute('data-user-id');
+        var form = modalEl.querySelector('.admin-users-edit-form, .admin-edit-user-form');
+        if (!id || !form) return;
+        try {
+          var trigger = ev.relatedTarget;
+          if (trigger) {
+            var name = trigger.getAttribute('data-user-name');
+            var email = trigger.getAttribute('data-user-email');
+            fillFormFromData(form, { name: name, email: email });
+          }
+        } catch(_){}
+        var url = '/api/v1/users/' + encodeURIComponent(id);
+        var handle = function(payload){
+          try {
+            var data = (payload && payload.data) || payload;
+            var user = data && (data.data || data.user || data);
+            if (user) { fillFormFromData(form, user); setAvatarPreview(modalEl, user.profileImage || ''); try { var link=modalEl && modalEl.querySelector('.admin-users-public-link'); if (link) link.href = '/artists/' + (user.slug || user._id || user.id); } catch(_){} }
+          } catch (e) { console.warn('No se pudo parsear detalle de usuario', e); }
+        };
+        if (window.axios) {
+          axios.get(url).then(function(resp){ handle(resp); }).catch(function(err){ console.error(err); });
+        } else {
+          fetch(url).then(function(res){ return res.json(); }).then(handle).catch(function(err){ console.error(err); });
+        }
+      });
+    });
+
+    // Subir imagen de perfil (delegado)
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.admin-users-avatar-upload-btn');
+      if (!btn) return;
+      var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!modalEl) return;
+      var id = modalEl.getAttribute('data-user-id');
+      var fileInput = modalEl.querySelector('.admin-users-avatar-input');
+      if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
+      var file = fileInput.files[0];
+      var old = btn.textContent; btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Subiendo...';
+      var done = function(){ btn.disabled = false; btn.classList.remove('disabled'); btn.textContent = old; };
+      var url = '/api/v1/users/' + encodeURIComponent(id) + '/profile-image';
+      var formData = new FormData();
+      formData.append('profileImage', file);
+      var onSuccess = function(resp){
+        try {
+          var data = (resp && resp.data) || resp; var user = data && (data.data || data.user || data);
+          var newUrl = user && user.profileImage; setAvatarPreview(modalEl, newUrl || '');
+          fileInput.value = '';
+        } catch(_){}
+        if (window.showAdminToast) showAdminToast('Imagen actualizada','success');
+      };
+      var onError = function(err){
+        console.error(err);
+        var msg = (err && err.response && err.response.data && (err.response.data.message || err.response.data.error || err.response.data.err)) || err && err.message || 'No se pudo subir la imagen';
+        if (window.showAdminToast) showAdminToast(msg,'danger');
+      };
+      if (window.axios) {
+        // No establezcas Content-Type manualmente; el navegador agrega el boundary correcto
+        axios.patch(url, formData)
+          .then(function(resp){ onSuccess(resp); }).catch(onError).finally(done);
+      } else {
+        fetch(url, { method: 'PATCH', body: formData })
+          .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d && d.message) || 'Failed'); }); return res.json(); })
+          .then(onSuccess).catch(onError).finally(done);
+      }
+    });
+
+    // Quitar imagen de perfil (delegado)
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.admin-users-avatar-remove-btn');
+      if (!btn) return;
+      var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!modalEl) return;
+      var id = modalEl.getAttribute('data-user-id');
+      if (!id) return;
+      if (!confirm('Â¿Quitar imagen de perfil?')) return;
+      var old = btn.textContent; btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Quitando...';
+      var done = function(){ btn.disabled = false; btn.classList.remove('disabled'); btn.textContent = old; };
+      var url = '/api/v1/users/' + encodeURIComponent(id) + '/profile-image';
+      var onSuccess = function(resp){ setAvatarPreview(modalEl, ''); if (window.showAdminToast) showAdminToast('Imagen eliminada','success'); };
+      var onError = function(err){
+        console.error(err);
+        var msg = (err && err.response && err.response.data && (err.response.data.message || err.response.data.error || err.response.data.err)) || err && err.message || 'No se pudo eliminar la imagen';
+        if (window.showAdminToast) showAdminToast(msg,'danger');
+      };
+      if (window.axios) {
+        axios.patch(url, { profileImage: '' })
+          .then(function(resp){ onSuccess(resp); }).catch(onError).finally(done);
+      } else {
+        fetch(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ profileImage: '' }) })
+          .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d && d.message) || 'Failed'); }); return res.json(); })
+          .then(onSuccess).catch(onError).finally(done);
+      }
+    });
+
+    document.addEventListener('submit', function(e){
+      var form = e.target.closest && e.target.closest('.admin-users-edit-form, .admin-edit-user-form');
+      if (!form) return;
+      e.preventDefault();
+      var modalEl = form.closest && form.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      var id = form.getAttribute('data-user-id') || (modalEl && modalEl.getAttribute('data-user-id'));
+      if (!id) return;
+      var read = function(name){ var el = form.querySelector('[name="'+name+'"]'); return el ? el.value.trim() : ''; };
+      var payload = {
+        name: read('name') || undefined,
+        email: read('email') || undefined,
+        bio: read('bio') || undefined,
+        location: read('location') || undefined,
+        website: read('website') || undefined,
+        social: {
+          instagram: read('social.instagram') || undefined,
+          x: read('social.x') || undefined,
+          facebook: read('social.facebook') || undefined
+        }
+      };
+      Object.keys(payload).forEach(function(k){ if (payload[k] === undefined) delete payload[k]; });
+      if (payload.social) {
+        Object.keys(payload.social).forEach(function(k){ if (payload.social[k] === undefined || payload.social[k] === '') delete payload.social[k]; });
+        if (Object.keys(payload.social).length === 0) delete payload.social;
+      }
+      var submitBtn = modalEl && modalEl.querySelector('.admin-users-edit-submit, .admin-edit-user-submit');
+      var oldText = submitBtn && submitBtn.textContent;
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('disabled'); submitBtn.textContent = 'Guardando...'; }
+      var done = function(){ if (submitBtn) { submitBtn.disabled = false; submitBtn.classList.remove('disabled'); submitBtn.textContent = oldText; } };
+      var url = '/api/v1/users/' + encodeURIComponent(id);
+      var success = function(updated){
+        if (window.showAdminToast) showAdminToast('Usuario actualizado','success');
+        if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+        try {
+          var row = modalEl.closest('tr');
+          if (row) {
+            var newName = payload.name || (updated && updated.data && updated.data.name);
+            var newEmail = payload.email || (updated && updated.data && (updated.data.email || (updated.data._doc && updated.data._doc.email)));
+            if (newName) { var nameCell = row.querySelector('td:nth-child(1)'); if (nameCell) nameCell.textContent = newName; }
+            if (newEmail) { var emailCell = row.querySelector('td:nth-child(2)'); if (emailCell) emailCell.textContent = newEmail; }
+          }
+        } catch(_){ }
+        // Actualiza link público con el slug más reciente (si existe)
+        try {
+          var user = updated && updated.data;
+          var slug = user && user.slug;
+          var id2 = user && (user._id || user.id);
+          var publicLink = modalEl && modalEl.querySelector('.admin-users-public-link');
+          if (publicLink && (slug || id2)) publicLink.href = '/artists/' + (slug || id2);
+        } catch(_){ }
+      };
+      var failure = function(errMsg){ if (window.showAdminToast) showAdminToast(errMsg || 'No se pudo actualizar','danger'); };
+      if (window.axios) {
+        axios.patch(url, payload)
+          .then(function(resp){ success(resp && resp.data); })
+          .catch(function(err){ console.error(err); var m=(err && err.response && err.response.data && err.response.data.message)||null; failure(m); })
+          .finally(done);
+      } else {
+        fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+          .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error(d && d.message || 'Failed') }); return res.json(); })
+          .then(function(data){ success(data); })
+          .catch(function(err){ console.error(err); failure(err && err.message); })
+          .finally(done);
+      }
+    });
+  })();
+});

@@ -192,7 +192,17 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   }
 
   // Solo permite actualizar estos campos
-  const filteredBody = filterObject(req.body, 'name', 'email', 'profileImage', 'bio', 'active');
+  const filteredBody = filterObject(
+    req.body,
+    'name',
+    'email',
+    'profileImage',
+    'bio',
+    'location',
+    'website',
+    'social',
+    'active'
+  );
 
   const user = await User.findById(req.params.id);
   if (!user) {
@@ -288,4 +298,57 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
   });
 
   return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se envió un correo para crear la contraseña.', 201);
+});
+
+// ADMIN: Subir/actualizar o eliminar imagen de perfil del usuario
+// Acepta multipart/form-data con campo 'profileImage'. Si se envía profileImage vacío en body, elimina la imagen.
+exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError('Usuario no encontrado', 404));
+  }
+
+  const filteredBody = {};
+  // Permitir eliminación explícita si llega un campo profileImage vacío
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'profileImage')) {
+    filteredBody.profileImage = req.body.profileImage;
+  }
+
+  try {
+    await handleProfileImage(user, req, filteredBody);
+  } catch (e) {
+    return next(new AppError('No se pudo procesar la imagen de perfil. ' + (e && e.message ? e.message : ''), 500));
+  }
+
+  Object.assign(user, filteredBody);
+  try {
+    await user.save();
+  } catch (err) {
+    return handleDuplicateKeyError(err, res, next);
+  }
+
+  sendResponse(res, user, 'Imagen de perfil actualizada');
+});
+
+// ADMIN: Lookup de usuario por email (para validación en UI)
+exports.lookupByEmail = catchAsync(async (req, res, next) => {
+  const { normalizeEmail } = require('@utils/emailUtils');
+  const raw = (req.query && req.query.email) || '';
+  if (!raw) {
+    return res.status(400).json({ status: 'fail', message: 'Email requerido' });
+  }
+  const email = normalizeEmail(raw);
+  const user = await User.findOne({ email }).select('+email +role name _id');
+  if (!user) {
+    return sendResponse(res, { exists: false }, 'OK');
+  }
+  return sendResponse(res, {
+    exists: true,
+    user: {
+      _id: user._id,
+      name: user.name,
+      role: user.role,
+      email: user.email
+    }
+  }, 'OK');
 });
