@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 document.addEventListener('DOMContentLoaded', function(){
   // --- Create modal email uniqueness ---
@@ -58,6 +58,19 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   })();
 
+  // --- Normalize website on submit (edit forms) ---
+  document.addEventListener('submit', function(e){
+    var form = e.target && e.target.closest && e.target.closest('.admin-users-edit-form, .admin-edit-user-form');
+    if (!form) return;
+    var w = form.querySelector('input[name="website"]');
+    if (w && w.value) {
+      var s = String(w.value).trim();
+      if (!/^https?:\/\//i.test(s)) {
+        w.value = 'https://' + s;
+      }
+    }
+  }, true);
+
   // --- Edit modals email uniqueness ---
   (function(){
     function ensureAlert(input){
@@ -112,5 +125,89 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   })();
+
+  // --- Normalize website so bare domains like 'portfolio.art' pass type=url ---
+  function normalizeWebsiteValue(input){
+    if (!input) return;
+    var v = (input.value || '').trim();
+    if (!v) return;
+    if (!/^https?:\/\//i.test(v)) {
+      input.value = 'https://' + v;
+    }
+  }
+  // On blur of website input in edit modal, prefix https:// if missing
+  document.addEventListener('blur', function(e){
+    var t = e.target;
+    if (t && t.matches && t.matches('.admin-users-edit-form input[name="website"], .admin-edit-user-form input[name="website"]')){
+      normalizeWebsiteValue(t);
+    }
+  }, true);
+  // Before clicking Save in edit modal, ensure normalization
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.admin-users-edit-submit, .admin-edit-user-submit');
+    if (!btn) return;
+    var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+    if (!modalEl) return;
+    var w = modalEl.querySelector('input[name="website"]');
+    normalizeWebsiteValue(w);
+  });
+
+  // --- Normalize social handles: accept @user or full URL, store handle/route part ---
+  function extractHandleFromUrl(platform, urlStr){
+    try {
+      var u = new URL(urlStr);
+      var host = (u.hostname || '').toLowerCase();
+      var path = (u.pathname || '').replace(/\/+$/, '');
+      var segs = path.split('/').filter(Boolean);
+      if (platform === 'instagram') {
+        if (host.includes('instagram.com') && segs[0]) return segs[0];
+      } else if (platform === 'x') {
+        if ((host.includes('x.com') || host.includes('twitter.com')) && segs[0]) return segs[0];
+      } else if (platform === 'facebook') {
+        if (host.includes('facebook.com')) {
+          if (segs[0] === 'profile.php') {
+            return 'profile.php' + (u.search || '');
+          }
+          if (segs[0]) return segs[0];
+        }
+      }
+    } catch(_) {}
+    return null;
+  }
+  function normalizeSocialInput(platform, input){
+    if (!input) return;
+    var v = (input.value || '').trim();
+    if (!v) return;
+    if (v[0] === '@') v = v.slice(1);
+    if (/^https?:\/\//i.test(v) || /^(?:www\.)?(instagram|twitter|x|facebook)\.com\//i.test(v)) {
+      var handle = extractHandleFromUrl(platform, /^https?:/i.test(v) ? v : ('https://' + v));
+      if (handle) v = handle;
+    }
+    input.value = v;
+  }
+  // Blur normalization for social inputs in edit modal
+  document.addEventListener('blur', function(e){
+    var t = e.target;
+    if (!t || !t.matches) return;
+    if (t.matches('.admin-users-edit-form input[name="social.instagram"], .admin-edit-user-form input[name="social.instagram"]')){
+      normalizeSocialInput('instagram', t);
+    }
+    if (t.matches('.admin-users-edit-form input[name="social.x"], .admin-edit-user-form input[name="social.x"]')){
+      normalizeSocialInput('x', t);
+    }
+    if (t.matches('.admin-users-edit-form input[name="social.facebook"], .admin-edit-user-form input[name="social.facebook"]')){
+      normalizeSocialInput('facebook', t);
+    }
+  }, true);
+  // Before save, normalize all three if present
+  document.addEventListener('click', function(e){
+    var btn = e.target && e.target.closest && e.target.closest('.admin-users-edit-submit, .admin-edit-user-submit');
+    if (!btn) return;
+    var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+    if (!modalEl) return;
+    normalizeSocialInput('instagram', modalEl.querySelector('input[name="social.instagram"]'));
+    normalizeSocialInput('x', modalEl.querySelector('input[name="social.x"]'));
+    normalizeSocialInput('facebook', modalEl.querySelector('input[name="social.facebook"]'));
+  });
 });
 

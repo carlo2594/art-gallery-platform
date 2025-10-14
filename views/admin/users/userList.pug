@@ -1,24 +1,42 @@
-extends ../../layouts/admin
+﻿extends ../../layouts/admin
 
 block content
   .container.py-5
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
       span= title || 'Usuarios'
-      // Botón para abrir modal de nuevo usuario
+      // BotÃ³n para abrir modal de nuevo usuario
       button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateUser')
         i.fas.fa-user-plus.me-1
         | Agregar usuario
-    // Barra de búsqueda
+    // Barra de bÃºsqueda
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
         input.form-control(type='text', name='q', placeholder='Buscar por nombre o correo', value=q || '')
       if typeof role !== 'undefined' && role
         input(type='hidden', name='role', value=role)
+      .col-sm-6.col-md-3
+        select.form-select(name='active')
+          option(value='') Estado: Todos
+          option(value='active' selected=active === 'active') Activos
+          option(value='inactive' selected=active === 'inactive') Inactivos
+      .col-sm-6.col-md-3
+        select.form-select(name='img')
+          option(value='') Imagen: Todas
+          option(value='with' selected=img === 'with') Con imagen
+          option(value='without' selected=img === 'without') Sin imagen
+      .col-sm-6.col-md-3
+        select.form-select(name='sort')
+          option(value='recent' selected=sort === 'recent') Recientes primero
+          option(value='oldest' selected=sort === 'oldest') Antiguos primero
+          option(value='name_asc' selected=sort === 'name_asc') Nombre A-Z
+          option(value='name_desc' selected=sort === 'name_desc') Nombre Z-A
+          option(value='last_login' selected=sort === 'last_login') Último acceso
       .col-auto
         button.btn.btn-primary(type='submit') Buscar
       if q
         .col-auto
           a.btn.btn-outline-secondary(href='?') Limpiar
+    
     if users && users.length
       .table-responsive
         table.table.table-striped.table-hover.align-middle.admin-users-table
@@ -43,7 +61,7 @@ block content
                   button.btn.btn-sm.btn-outline-primary.admin-users-edit-trigger(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditUser-${u._id}`, data-user-name=u.name, data-user-email=u.email)
                     i.fas.fa-pen-to-square.me-1
                     | Editar
-                  // Modal de edición por usuario
+                  // Modal de ediciÃ³n por usuario
                   .modal.fade.admin-edit-user-modal.admin-users-edit-modal(id=`adminEditUser-${u._id}` tabindex='-1' aria-labelledby=`adminEditUserLabel-${u._id}` aria-hidden='true' data-user-id=u._id)
                     .modal-dialog
                       .modal-content
@@ -93,7 +111,7 @@ block content
                           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
                           button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Guardar cambios
                 td
-                  // Botón que abre el modal de acciones
+                  // BotÃ³n que abre el modal de acciones
                   button.btn.btn-sm.btn-outline-secondary(type='button', data-bs-toggle='modal', data-bs-target=`#userActions-${u._id}`) Ver
                   // Modal de acciones por usuario
                   .modal.fade(id=`userActions-${u._id}` tabindex='-1' aria-labelledby=`userActionsLabel-${u._id}` aria-hidden='true')
@@ -112,17 +130,17 @@ block content
                           h2.fs-5 Cambiar rol
                           .d-flex.gap-2.flex-wrap
                             if u.role !== 'collector'
-                              button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Cambiar a collector')
+                              button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Cambiar a coleccionista')
                                 i.fas.fa-arrow-down-long.me-1
-                                | Demote to collector
+                                | Cambiar a Coleccionista
                             if u.role !== 'artist'
-                              button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Promover a artista')
+                              button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Cambiar a artista')
                                 i.fas.fa-arrow-up-right-dots.me-1
-                                | Promote to artist
+                                | Cambiar a Artista
                             if u.role !== 'admin'
-                              button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Promover a admin')
+                              button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Cambiar a administrador')
                                 i.fas.fa-user-shield.me-1
-                                | Promote to admin
+                                | Cambiar a Administrador
                           hr
                           h2.fs-5 Estado de la cuenta
                           p
@@ -138,21 +156,18 @@ block content
                           a.btn.btn-outline-secondary.admin-users-public-link(target='_blank' href=`/artists/${u.slug || u._id}`)
                             i.fas.fa-user.me-1
                             | Ver público
-                          a.btn.btn-outline-primary(href=`/admin/users/${u._id}`)
-                            i.fas.fa-eye.me-1
-                            | Ver perfil completo
                           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
     else
       .alert.alert-info No hay usuarios
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label=`Paginación de ${title || 'usuarios'}`)
+      nav.mt-4(aria-label=`PaginaciÃ³n de ${title || 'usuarios'}`)
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `PÃ¡gina ${page} de ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
 
@@ -182,4 +197,8 @@ block content
           .modal-footer
             button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
             button.btn.btn-primary.admin-users-create-submit#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Crear
+
+
+
+
 

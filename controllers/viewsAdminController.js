@@ -1,10 +1,12 @@
-// controllers/viewsAdminController.js
+﻿// controllers/viewsAdminController.js
 const catchAsync   = require('@utils/catchAsync');
 const AppError     = require('@utils/appError');
 const statsService = require('@services/statsService');
 const Exhibition   = require('@models/exhibitionModel');
 const Artwork      = require('@models/artworkModel');
 const User         = require('@models/userModel');
+const { getPaginationParams } = require('@utils/pagination');
+const { buildUserAdminFilter, getUserAdminSort } = require('@utils/userAdminSearch');
 
 /* Dashboard */
 exports.getDashboard = catchAsync(async (req, res) => {
@@ -13,7 +15,6 @@ exports.getDashboard = catchAsync(async (req, res) => {
     statsService.getRecentExhibitions(5),
     statsService.getRecentArtworks(5)
   ]);
-
   res.status(200).render('admin/dashboard', {
     title: 'Dashboard',
     totals,
@@ -23,13 +24,6 @@ exports.getDashboard = catchAsync(async (req, res) => {
 });
 
 /* Helpers de paginación (admin) */
-function getPageParams(q, defaultPerPage = 15, maxPerPage = 50) {
-  let page = Number(q.page) || 1;
-  if (page < 1) page = 1;
-  let perPage = Math.min(defaultPerPage, maxPerPage);
-  const skip = (page - 1) * perPage;
-  return { page, perPage, skip };
-}
 function buildQsPrefix(q) {
   const params = new URLSearchParams();
   Object.keys(q || {}).forEach(k => {
@@ -43,7 +37,7 @@ function buildQsPrefix(q) {
 
 /* Exhibiciones */
 exports.getExhibitions = catchAsync(async (req, res) => {
-  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, exhibitions] = await Promise.all([
     Exhibition.countDocuments({}),
     Exhibition.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('createdBy').lean()
@@ -70,7 +64,7 @@ exports.getExhibition = catchAsync(async (req, res, next) => {
 
 /* Obras */
 exports.getArtworks = catchAsync(async (req, res) => {
-  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, artworks] = await Promise.all([
     Artwork.countDocuments({}),
     Artwork.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('artist').lean()
@@ -97,20 +91,14 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 
 /* Usuarios */
 exports.getUsers = catchAsync(async (req, res) => {
-  const filter = {};
-  // Por defecto, artistas
   const role = (req.query.role || 'artist').trim();
-  if (role) filter.role = role;
-  // Búsqueda por nombre o email
-  const q = (req.query.q || '').trim();
-  if (q) {
-    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    filter.$or = [ { name: rx }, { email: rx } ];
-  }
-  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const filter = buildUserAdminFilter(req.query, role ? { role } : {});
+  const sortParam = (req.query.sort || 'recent').trim();
+  const sort = getUserAdminSort(sortParam);
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name slug createdAt active +role +email').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/userList', {
@@ -119,23 +107,22 @@ exports.getUsers = catchAsync(async (req, res) => {
     page,
     totalPages,
     qsPrefix: buildQsPrefix(req.query),
-    q,
-    role
+    q: (req.query.q || '').trim(),
+    role,
+    sort: sortParam,
+    active: (req.query.active || '').trim(),
+    img: (req.query.img || '').trim()
   });
 });
 
 exports.getCollectors = catchAsync(async (req, res) => {
-  const filter = { role: 'collector' };
-  // Búsqueda por nombre o email
-  const q = (req.query.q || '').trim();
-  if (q) {
-    const rx = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-    filter.$or = [ { name: rx }, { email: rx } ];
-  }
-  const { page, perPage, skip } = getPageParams(req.query, 15, 50);
+  const filter = buildUserAdminFilter(req.query, { role: 'collector' });
+  const sortParam = (req.query.sort || 'recent').trim();
+  const sort = getUserAdminSort(sortParam);
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort({ createdAt: -1 }).skip(skip).limit(perPage).select('name slug createdAt active +role +email').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/userList', {
@@ -144,8 +131,11 @@ exports.getCollectors = catchAsync(async (req, res) => {
     page,
     totalPages,
     qsPrefix: buildQsPrefix(req.query),
-    q,
-    role: 'collector'
+    q: (req.query.q || '').trim(),
+    role: 'collector',
+    sort: sortParam,
+    active: (req.query.active || '').trim(),
+    img: (req.query.img || '').trim()
   });
 });
 exports.getUser = catchAsync(async (req, res, next) => {
@@ -158,5 +148,3 @@ exports.getUser = catchAsync(async (req, res, next) => {
     user
   });
 });
-
-

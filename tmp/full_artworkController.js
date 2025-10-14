@@ -12,12 +12,12 @@ const isValidObjectId = require('@utils/isValidObjectId');
 const catchAsync = require('@utils/catchAsync');
 const { toCentsOrThrow } = require('@utils/priceInput');
 const { getInvalidFields, isEmptyBody } = require('@utils/validation');
-// Reglas de proporción deshabilitadas: utilidades no-op para compatibilidad
-const verifyAspect = () => ({ ok: true });
-const buildTransformedUrl = (secureUrl) => secureUrl;
-const getAspectPolicy = () => 'none';
-const buildAspectErrorPayload = () => ({ code: 'ASPECT_VALIDATION_DISABLED' });
-
+const {
+  verifyAspect,
+  buildTransformedUrl,
+  getAspectPolicy,
+  buildAspectErrorPayload
+} = require('@utils/aspectUtils');
 const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
 
 
@@ -290,7 +290,23 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   let imageWidth_px = imgW;
   let imageHeight_px = imgH;
 
-  // Sin validación de aspecto: usamos secure_url tal cual
+  if (imageResult) {
+    const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+    const padBg = process.env.CLOUDINARY_PAD || 'white';
+    const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+    const aspectPolicy = getAspectPolicy();
+    if (!aspect.ok) {
+      const payload = buildAspectErrorPayload({
+        widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg
+      });
+      if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
+        return res.status(400).json({ status: 'fail', error: payload });
+      }
+      imageUrlToSave = buildTransformedUrl(imageResult.secure_url, {
+        policy: aspectPolicy, widthCm, heightCm, bg: padBg
+      });
+    }
+  }
 
   const data = filterObject(req.body, ...allowed);
   data.artist = req.user.id;
@@ -349,14 +365,34 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     delete dataToUpdate.price_cents;
   }
 
-  // Si viene una nueva imagen, reemplaza la anterior sin validar aspecto
+  const aspectPolicy = getAspectPolicy();
+
+  // Si viene una nueva imagen, sube primero y valida aspecto
   if (req.file) {
     const imageResult = await upload(req.file.path);
-    try { if (art.imagePublicId) await deleteImage(art.imagePublicId); } catch {}
-    art.imageUrl = imageResult.secure_url;
+    const widthCm = Number(dataToUpdate.width_cm ?? art.width_cm);
+    const heightCm = Number(dataToUpdate.height_cm ?? art.height_cm);
+    const imgW = imageResult.width;
+    const imgH = imageResult.height;
+    const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
+    const padBg = process.env.CLOUDINARY_PAD || 'white';
+    const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
+
+    if (!aspect.ok) {
+      const payload = buildAspectErrorPayload({
+        widthCm, heightCm, imgW, imgH, secureUrl: imageResult.secure_url, tolerance, padBg
+      });
+      if (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy)) {
+        return res.status(400).json({ status: 'fail', error: payload });
+      }
+      art.imageUrl = buildTransformedUrl(imageResult.secure_url, { policy: aspectPolicy, widthCm, heightCm, bg: padBg });
+    } else {
+      await deleteImage(art.imagePublicId);
+      art.imageUrl = imageResult.secure_url;
+    }
     art.imagePublicId = imageResult.public_id;
-    art.imageWidth_px = imageResult.width;
-    art.imageHeight_px = imageResult.height;
+    art.imageWidth_px = imgW;
+    art.imageHeight_px = imgH;
     // (3) Si hay un array de images, actualiza también la galería
     if (Array.isArray(art.images)) {
       if (!art.images.includes(art.imageUrl)) {
@@ -375,7 +411,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     const tolerance = Number(process.env.ASPECT_TOLERANCE) || 0.03;
     const padBg = process.env.CLOUDINARY_PAD || 'white';
     const aspect = verifyAspect({ widthCm, heightCm, imgW, imgH, tolerance });
-    if (false) {
+    if (!aspect.ok && (aspectPolicy === 'strict' || !['pad','fill'].includes(aspectPolicy))) {
       const payload = buildAspectErrorPayload({ widthCm, heightCm, imgW, imgH, secureUrl: art.imageUrl, tolerance, padBg });
       return res.status(400).json({ status: 'fail', error: payload });
     }
