@@ -1,0 +1,23 @@
+extends /layouts/admin
+
+block content
+  .container.py-5
+    if user
+      h1.h3.mb-4= user.name
+      .row
+        .col-md-6
+          dl
+            dt Correo
+            dd= user.email
+            dt Rol
+            dd= user.role
+            dt Activo
+            dd= (user.active === false ? 'No' : 'Sí')
+            dt Creado
+            dd= new Date(user.createdAt).toLocaleDateString('es-ES')
+        .col-md-6
+          if user.profileImage
+            img.img-fluid.rounded(src=user.profileImage alt='Foto de perfil')
+    else
+      .alert.alert-warning Usuario no encontrado
+

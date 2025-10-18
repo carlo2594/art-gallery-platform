@@ -72,7 +72,7 @@ exports.unsubscribe = catchAsync(async (req, res) => {
   await subscription.unsubscribe();
   
   if (wantsHTML(req)) {
-    return res.render('public/unsubscribed', {
+    return res.render('public/newsletter/unsubscribed', {
       title: 'Te has dado de baja',
       message: 'Has sido removido exitosamente de nuestro newsletter'
     });

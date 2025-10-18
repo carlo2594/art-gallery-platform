@@ -1,0 +1,36 @@
+extends /layouts/public
+
+block content
+  // Página de bienvenida (primer login)
+  section.py-5
+    .container
+      .row.justify-content-center
+        .col-lg-8
+          .card.shadow-sm.rounded-4.border-0
+            .card-body.p-4.p-md-5
+              h1.h3.mb-3.text-ox-blue.font-title
+                | ¡Bienvenido
+                if currentUser && currentUser.name
+                  | , #{currentUser.name}
+                | !
+
+              p.mb-4
+                | Tu cuenta ya está lista. ¿Qué te gustaría hacer ahora?
+
+              .d-flex.flex-wrap.gap-3
+                a.btn.btn-primary.text-uppercase.fw-bold(href='/obras')
+                  i.fas.fa-images.me-2
+                  | Ver el arte
+                a.btn.btn-outline-secondary.text-uppercase.fw-bold(href='/mi-cuenta')
+                  i.fas.fa-user-circle.me-2
+                  | Mi cuenta
+
+              .mt-4
+                h2.h6.text-muted.mb-2 Sugerencias
+                ul.mb-0
+                  li Completa tu perfil (nombre público, foto, biografía).
+                  li Explora artistas y sigue tus favoritos.
+                  li Activa notificaciones por correo para novedades.
+
+  .my-4
+

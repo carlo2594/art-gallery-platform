@@ -1,6 +1,6 @@
 // Vista de contacto (inglés)
 exports.getContact = (req, res) => {
-  res.status(200).render('public/contact', {
+  res.status(200).render('public/static/contact', {
     title: 'Contact · Galería del Ox'
   });
 };
@@ -49,7 +49,7 @@ exports.getArtistsView = catchAsync(async (req, res) => {
   
   const totalPages = Math.max(1, Math.ceil(totalArtists / perPage));
   
-  res.status(200).render('public/artists', {
+  res.status(200).render('public/artists/index', {
     title: 'Artistas',
     artists,
     totalArtists,
@@ -158,7 +158,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
     .limit(exhibitionPerPage);
   const exhibitionTotalPages = Math.max(1, Math.ceil(totalExhibitions / exhibitionPerPage));
 
-  res.status(200).render('public/searchResults', {
+  res.status(200).render('public/search/index', {
     title: search ? `Buscar: ${search}` : 'Buscar',
     artworks,
     artists: matchingArtists,
@@ -214,7 +214,7 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
     .limit(exhibitionPerPage);
   const exhibitionTotalPages = Math.max(1, Math.ceil(totalExhibitions / exhibitionPerPage));
 
-  res.status(200).render('public/exhibitions', {
+  res.status(200).render('public/exhibitions/index', {
     title: 'Exposiciones · Galería del Ox',
     exhibitions,
     totalExhibitions,
@@ -231,7 +231,7 @@ exports.getHome = catchAsync(async (req, res) => {
   // Top 10 obras más relevantes (aprobadas), ordenadas por views desc
   const artworks = await getPopularArtworks(Artwork, 10);
 
-  res.status(200).render('public/home', {
+  res.status(200).render('public/home/index', {
     title: 'Inicio · Galería del Ox',
     artworks
   });
@@ -245,7 +245,7 @@ exports.getResetPassword = catchAsync(async (req, res) => {
 
   // Si faltan datos mínimos, muestra la página con error genérico
   if (!uid || !token) {
-    return res.render('public/resetPassword', {
+    return res.render('public/auth/resetPassword', {
       uid,
       token,
       isNewPassword: type === 'new',
@@ -269,7 +269,7 @@ exports.getResetPassword = catchAsync(async (req, res) => {
     return res.redirect(303, '/reset-link-invalid');
   }
 
-  return res.render('public/resetPassword', {
+  return res.render('public/auth/resetPassword', {
     uid,
     token,
     isNewPassword: type === 'new',
@@ -280,7 +280,7 @@ exports.getResetPassword = catchAsync(async (req, res) => {
 
 // Página dedicada: enlace de restablecimiento inválido/expirado/ya usado
 exports.getResetLinkInvalid = (req, res) => {
-  res.status(410).render('public/resetLinkInvalid', {
+  res.status(410).render('public/auth/resetLinkInvalid', {
     title: 'Enlace no válido · Galería del Ox'
   });
 };
@@ -288,7 +288,7 @@ exports.getResetLinkInvalid = (req, res) => {
 // Vista para sign in
 
 exports.getSignUp = (req, res) => {
-  res.render('public/loginSignUp', {
+  res.render('public/auth/loginSignUp', {
     title: 'Registrarse · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
@@ -301,7 +301,7 @@ exports.getSignUp = (req, res) => {
 
 // Vista para login
 exports.getLogin = (req, res) => {
-  res.render('public/loginSignUp', {
+  res.render('public/auth/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
@@ -313,7 +313,7 @@ exports.getLogin = (req, res) => {
 
 // Vista para "Olvidé mi contraseña"
 exports.getForgotPassword = (req, res) => {
-  res.render('public/forgotPassword', {
+  res.render('public/auth/forgotPassword', {
     title: 'Recuperar contraseña · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
@@ -325,7 +325,7 @@ exports.getForgotPassword = (req, res) => {
 
 // Vista de bienvenida (primera vez)
 exports.getWelcome = (req, res) => {
-  res.status(200).render('public/welcome', {
+  res.status(200).render('public/auth/welcome', {
     title: 'Bienvenido · Galería del Ox',
   });
 };
@@ -462,7 +462,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
   }
 
   // Render si ya es canónica
-  res.status(200).render('public/artworks', {
+  res.status(200).render('public/artworks/index', {
     title: 'Obras',
     artworks,
     q,
@@ -479,7 +479,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
 
 // Vista ¿Quiénes somos?
 exports.getAbout = (req, res) => {
-  res.status(200).render('public/about', {
+  res.status(200).render('public/static/about', {
     title: '¿Quiénes somos? · Galería del Ox'
   });
 };
@@ -501,7 +501,7 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
   // Buscar obras relacionadas del mismo artista
   const relatedArtworks = await getRelatedArtworks(Artwork, artwork.artist._id, artwork._id, 6);
 
-  res.status(200).render('public/artworkDetail', {
+  res.status(200).render('public/artworks/detail', {
     title: `${artwork.title} · Galería del Ox`,
     artwork,
     relatedArtworks
@@ -573,7 +573,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   // Usar utility para construir estadísticas
   const stats = buildArtistStats(allArtworks);
 
-  res.status(200).render('public/artistDetail', {
+  res.status(200).render('public/artists/detail', {
     title: `${artist.name} · Galería del Ox`,
     artist,
     artworks, // Obras paginadas y filtradas
@@ -613,7 +613,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   }
 
   if (!exhibition) {
-    return res.status(404).render('public/error', {
+    return res.status(404).render('public/error/index', {
       title: 'Exposición no encontrada',
       msg: 'No pudimos encontrar esta exposición.'
     });
@@ -638,7 +638,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
 
   const totalArtworks = artworks.length;
 
-  return res.status(200).render('public/exhibitionDetail', {
+  return res.status(200).render('public/exhibitions/detail', {
     title: `${exhibition.title} · Galería del Ox`,
     exhibition,
     artworks,

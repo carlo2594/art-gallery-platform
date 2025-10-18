@@ -1,0 +1,127 @@
+extends /layouts/public
+
+block content
+  main.main-content.artist-detail-page
+    // Hero Section
+    section.artist-profile-hero.artist-hero-section.position-relative.artist-hero-fullscreen
+      .hero-background.artist-hero-bg.position-absolute.w-100.h-100
+        if artist.profileImage
+          img.hero-bg-image.artist-bg-image.w-100.h-100.artist-image-cover(
+            src=artist.profileImage, 
+            alt=artist.name
+          )
+        else
+          .hero-bg-placeholder.artist-bg-placeholder.w-100.h-100.artist-gradient-bg
+      .hero-overlay.artist-hero-overlay.position-absolute.w-100.h-100.exhibition-hero-overlay
+      .hero-content.artist-hero-content.position-absolute.bottom-0.start-0.w-100.artist-hero-z-index
+        .container
+          .row
+            .col-12.col-lg-8
+              .artist-hero-info.artist-info-desktop.text-white.pb-5.artist-hero-card.p-4.p-lg-5
+                h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
+                if artist.createdAt
+                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                if artist.bio
+                  p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75.artist-bio-style= artist.bio
+                .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
+                  if artist.location
+                    .meta-item.artist-location-item.d-flex.align-items-center
+                      i.fas.fa-map-marker-alt.me-2.text-warning
+                      span.text-white-75= artist.location
+                  if artist.website
+                    .meta-item.artist-website-item
+                      a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
+                        i.fas.fa-globe.me-2
+                        span Sitio web
+                  if artist.social && artist.social.instagram
+                    .meta-item.artist-social-instagram
+                      a.text-warning.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
+                        i.fab.fa-instagram.me-2
+                        span Instagram
+                  if artist.social && artist.social.x
+                    .meta-item.artist-social-x
+                      a.text-warning.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
+                        i.fab.fa-x.me-2
+                  if artist.social && artist.social.facebook
+                    .meta-item.artist-social-facebook
+                      a.text-warning.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
+                        i.fab.fa-facebook.me-2
+                        span Facebook
+                .hero-actions.artist-actions-desktop.d-flex.gap-3
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn
+                    i.fas.fa-heart.me-2
+                    | Seguir
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
+                    i.fas.fa-share.me-2
+                    | Compartir
+            .col-12.col-lg-4
+              .stats-floating.artist-stats-desktop.text-white.pb-5
+                .row.g-3.justify-content-center
+                  .col-10
+                    .stat-item.artist-techniques-card.text-center.p-4.artist-techniques-card
+                      .stat-label.artist-techniques-label.small.text-white-75.mb-3 Técnicas
+                      .techniques-list.artist-techniques-list
+                        if stats.techniques && stats.techniques.length > 0
+                          each technique in stats.techniques.slice(0, 10)
+                            - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
+                            .technique-item.artist-technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
+                          if stats.techniques.length > 10
+                            .small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} más
+                        else
+                          .small.text-white-50.artist-no-techniques Sin técnicas
+
+    // Obras del artista
+    if artworks && artworks.length > 0
+      section.artist-artworks.artist-artworks-section.py-5.artist-artworks-bg
+        .container
+          .row.mb-5
+            .col-12.text-center
+              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+              - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
+              p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
+        if totalArtworks > 1
+          section.filters-toolbar.artist-filters-section.py-2
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
+              - var q = typeof q !== 'undefined' ? q : {};
+              - var techniques = typeof techniques !== 'undefined' ? techniques : [];
+              - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+              - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+              - var actionUrl = `/artists/${artist.slug || artist._id}`;
+              include /public/artworks/_artworkFilters.pug
+        .container-xxl.artworks-flex.artist-artworks-grid.artist-container-padding
+          if artworks && artworks.length
+            .artworks-grid-paginate.artist-artworks-paginate
+              - var backTo = typeof currentPath !== 'undefined' ? currentPath : ''
+              include /public/artworks/_artworkGrid.pug
+              include /public/artworks/_artworkPagination.pug
+          else
+            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No se encontraron obras con estos filtros.
+    else
+      section.no-artworks.artist-no-artworks-section.py-5.text-center
+        .container
+          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+          if stats.totalArtworks > 1
+            section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
+              .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
+                - var q = typeof q !== 'undefined' ? q : {};
+                - var techniques = typeof techniques !== 'undefined' ? techniques : [];
+                - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+                - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+                - var actionUrl = `/artists/${artist.slug || artist._id}`;
+                include /public/artworks/_artworkFilters.pug
+          .row.justify-content-center
+            .col-lg-6
+              i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
+              if stats.totalArtworks > 1
+                h3.h4.mb-3.text-muted.artist-filtered-message No se encontraron obras con estos filtros
+                p.text-muted.artist-filter-help Prueba ajustar los filtros o
+                  |  
+                  a(href=actionUrl) limpiar todos los filtros
+                  |  para ver todas las obras de #{artist.name}
+              else if stats.totalArtworks === 1
+                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
+                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
+              else
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
+                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+

@@ -1,0 +1,57 @@
+//- Grid de exposiciones estilo card-overlay Bootstrap
+
+//- Si exhibitions es un array, mostrar cada una como hero compacto
+if Array.isArray(exhibitions)
+  if exhibitions.length
+    each expo, idx in exhibitions
+      - const eager = idx < 2
+      section.article-template.exhibition-section
+        .article-template__hero-container.exhibition-hero-container.position-relative.reveal-item
+          .article-template__hero-adapt.media.exhibition-hero-adapt
+            if expo.coverImage
+              a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
+                img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(
+                  src=expo.coverImage,
+                  alt=expo.title,
+                  loading=eager ? 'eager' : 'lazy',
+                  fetchpriority=eager ? 'high' : 'low',
+                  decoding='async',
+                  style="width: 100%; height: 100%; object-fit: cover;"
+                )
+            else
+              a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
+                .exhibition-placeholder.d-flex.align-items-center.justify-content-center(style="height: 50vh; background: linear-gradient(135deg, #343a40 0%, #495057 100%);")
+                  .text-center
+                    i.fas.fa-image.fa-4x.text-white.mb-3
+                    .text-white.h5 Sin imagen
+            .exhibition-overlay.position-absolute.bottom-0.start-0.end-0.p-3
+              .exhibition-info.text-white
+                h2.exhibition-title.fw-bold.mb-2(style="font-size:2.4rem; text-shadow: 0 2px 6px rgba(0,0,0,0.6);")= expo.title
+                if expo.startDate && expo.endDate
+                  .d-flex.align-items-center.mb-1
+                    i.fas.fa-calendar-alt.me-2.text-warning(style="font-size: 1.1rem;")
+                    span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
+                if expo.location && expo.location.type
+                  .d-flex.align-items-center.mb-1
+                    if expo.location.type === 'physical' && expo.location.address
+                      i.fas.fa-map-marker-alt.me-2.text-danger(style="font-size: 1.1rem;")
+                      span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);")= expo.location.address
+                    else if expo.location.type === 'virtual' && expo.location.url
+                      i.fas.fa-globe.me-2.text-info(style="font-size: 1.1rem;")
+                      span.small.mb-0(style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);") Exposición Virtual
+                if expo.description
+                  - const desc = expo.description.length > 160 ? expo.description.slice(0, 160) + '…' : expo.description;
+                  p.exhibition-description.mb-0(style="font-size:1.1rem; font-style:italic; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.4;")= desc
+  else
+    .container-xxl.py-5
+      .row.justify-content-center
+        .col-lg-8.text-center
+          h3.h4.mb-2 No hay exposiciones que coincidan con tus filtros
+          p.text-muted.mb-4 Prueba ajustar el rango de fechas, el tipo o
+            |  
+            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions') limpiar los filtros
+          .d-grid.gap-3
+            .skeleton.skeleton-hero
+            .skeleton.skeleton-hero
+            .skeleton.skeleton-hero
+

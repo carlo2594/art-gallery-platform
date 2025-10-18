@@ -1,0 +1,18 @@
+//- views/public/exhibitions/index.pug
+extends /layouts/public
+
+block content
+  - var actionUrl = '/exhibitions'
+
+  .container-xxl.py-4
+    header.d-flex.align-items-baseline-justify-content-between.mb-3
+      h1.h3.mb-0 Exposiciones
+
+  include /public/exhibitions/_exhibitionFilters.pug
+
+  .container-xxl.artworks-flex
+    .artworks-grid-paginate
+      include /public/exhibitions/_exhibitionGrid.pug
+      if typeof exhibitionTotalPages !== 'undefined' && exhibitionTotalPages > 1
+        include /public/exhibitions/_exhibitionPagination.pug
+

@@ -45,7 +45,7 @@ const sendErrorDev = (err, req, res) => {
       stack:   err.stack
     });
   }
-  return res.status(err.statusCode).render('public/error', {
+  return res.status(err.statusCode).render('public/error/index', {
     title: 'Algo salió mal',
     msg:   err.message
   });
@@ -69,13 +69,13 @@ const sendErrorProd = (err, req, res) => {
 
   // Vistas
   if (err.isOperational) {
-    return res.status(err.statusCode).render('public/error', {
+    return res.status(err.statusCode).render('public/error/index', {
       title: 'Algo salió mal',
       msg:   err.message
     });
   }
   // Bug inesperado en producción
-  return res.status(500).render('public/error', {
+  return res.status(500).render('public/error/index', {
     title: 'Algo salió mal',
     msg:   'Por favor inténtalo más tarde.'
   });

@@ -1,0 +1,24 @@
+extends /layouts/admin
+
+block content
+  .container.py-5
+    h1.h3.mb-4 Gestión de ventas
+    if sales && sales.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Obra
+              th Artista
+              th Estado
+              th Vendida en
+          tbody
+            each s in sales
+              tr
+                td= s.title
+                td= s.artist && s.artist.name
+                td= s.availability
+                td= s.soldAt ? new Date(s.soldAt).toLocaleDateString('es-ES') : '—'
+    else
+      .alert.alert-info No hay ventas
+

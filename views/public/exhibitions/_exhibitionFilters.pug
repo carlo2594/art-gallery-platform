@@ -1,0 +1,95 @@
+
+// Filtros de exposiciones reutilizables
+- var q = typeof q !== 'undefined' ? q : {}
+- var actionUrl = typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions'
+
+section.filters-toolbar.py-2
+  div.container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+    form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
+      input(type='hidden' name='tab' value='exposiciones')
+      // Mantener el término de búsqueda si existe
+      if typeof search !== 'undefined' && search
+        input(type='hidden' name='q' value=search)
+      else if q && q.q
+        input(type='hidden' name='q' value=q.q)
+      // Preservar rango de fechas si existe al usar chips
+      if q && q.ex_minDate
+        input(type='hidden' name='ex_minDate' value=q.ex_minDate)
+      if q && q.ex_maxDate
+        input(type='hidden' name='ex_maxDate' value=q.ex_maxDate)
+      if q && q.minYear && !q.ex_minDate
+        - var _minDateFromYear = `${q.minYear}-01-01`
+        input(type='hidden' name='ex_minDate' value=_minDateFromYear)
+      if q && q.maxYear && !q.ex_maxDate
+        - var _maxDateFromYear = `${q.maxYear}-12-31`
+        input(type='hidden' name='ex_maxDate' value=_maxDateFromYear)
+      // Chips de tipo de exposición (solo Física y Virtual)
+      - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
+      each opt in typeOpts
+        - var _isActive = ((!q || (!q.ex_type && !q.type)) && opt.value === '') || (q && (q.ex_type === opt.value || (!q.ex_type && q.type === opt.value)))
+        button.chip.btn(type='submit', name='ex_type', value=opt.value, class=(_isActive ? 'active' : ''))= opt.label
+    button.btn.btn-outline-secondary.ms-auto(
+      type='button'
+      data-bs-toggle='offcanvas'
+      data-bs-target='#exhibitionFiltersDrawer'
+      aria-controls='exhibitionFiltersDrawer'
+    )
+      i.fa-solid.fa-filter.me-1
+      | Filtros
+
+div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
+  .offcanvas-header
+    h5#filtersTitle Filtros
+    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
+  form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
+    input(type='hidden' name='tab' value='exposiciones')
+    // Mantener el término de búsqueda si existe
+    if typeof search !== 'undefined' && search
+      input(type='hidden' name='q' value=search)
+    else if q && q.q
+      input(type='hidden' name='q' value=q.q)
+    // Filtro: rango de fechas de la exposición
+    .filter-block
+      label.form-label.mb-2 Rango de fechas
+      .row.g-2
+        .col-6
+          - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
+          - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
+          - var _minPlaceholder = _minBound ? `Desde (${new Date(_minBound).toLocaleDateString('es-ES')})` : 'Desde'
+          input.form-control(
+            type='date' 
+            name='ex_minDate' 
+            placeholder=_minPlaceholder
+            min=_minBound
+            max=_maxBound
+            value=(q && q.ex_minDate ? q.ex_minDate : (q && q.minYear ? `${q.minYear}-01-01` : ''))
+            title=_minBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+          )
+        .col-6
+          - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
+          - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
+          - var _maxPlaceholder = _maxBound ? `Hasta (${new Date(_maxBound).toLocaleDateString('es-ES')})` : 'Hasta'
+          input.form-control(
+            type='date' 
+            name='ex_maxDate' 
+            placeholder=_maxPlaceholder
+            min=_minBound
+            max=_maxBound
+            value=(q && q.ex_maxDate ? q.ex_maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : ''))
+            title=_maxBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+          )
+      if _minBound && _maxBound
+        .col-12
+          small.text-muted.mt-1 
+            | Rango disponible: #{new Date(_minBound).toLocaleDateString('es-ES')} - #{new Date(_maxBound).toLocaleDateString('es-ES')}
+    // Ordenar por fecha de inicio
+    .filter-block
+      label.form-label.mb-2 Ordenar por fecha
+      select.form-select(name='sort')
+        option(value='') Selecciona
+        option(value='recent' selected=(q && q.sort==='recent')) Más futuras
+        option(value='oldest' selected=(q && q.sort==='oldest')) Más antiguas
+    .mt-auto.d-flex.gap-2.sticky-apply
+      a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
+      button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+

@@ -1,0 +1,32 @@
+extends /layouts/admin
+
+block content
+  .container.py-5
+    if exhibition
+      h1.h3.mb-4= exhibition.title || exhibition.name
+      .mb-3
+        if exhibition.createdBy
+          p.mb-1
+            b Creada por:
+            |  #{exhibition.createdBy.name || exhibition.createdBy.email}
+        if exhibition.startDate
+          p.mb-1
+            b Inicio:
+            |  #{new Date(exhibition.startDate).toLocaleDateString('es-ES')}
+        if exhibition.endDate
+          p.mb-1
+            b Fin:
+            |  #{new Date(exhibition.endDate).toLocaleDateString('es-ES')}
+        if exhibition.description
+          p.mt-3= exhibition.description
+      if exhibition.artworks && exhibition.artworks.length
+        h2.h5.mt-4.mb-3 Obras
+        ul.list-group
+          each art in exhibition.artworks
+            li.list-group-item
+              a(href=`/admin/artworks/${art._id || art}`)= art.title || art
+      else
+        .alert.alert-info No hay obras asociadas
+    else
+      .alert.alert-warning Exposición no encontrada
+

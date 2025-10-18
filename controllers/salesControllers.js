@@ -60,7 +60,7 @@ exports.getSalesManagement = catchAsync(async (req, res) => {
 
   const totalPages = Math.max(1, Math.ceil(totalSales / perPage));
 
-  res.status(200).render('admin/salesManagement', {
+  res.status(200).render('admin/sales/index', {
     title: 'Gestión de Ventas · Admin',
     sales,
     artists,
@@ -100,7 +100,7 @@ exports.getSaleDetail = catchAsync(async (req, res, next) => {
   const badge = getAvailabilityBadge(artwork.availability, artwork.reservedUntil);
   const saleInfo = formatSaleInfo(artwork.sale);
 
-  res.status(200).render('admin/saleDetail', {
+  res.status(200).render('admin/sales/detail', {
     title: `Venta: ${artwork.title} · Admin`,
     artwork,
     badge,

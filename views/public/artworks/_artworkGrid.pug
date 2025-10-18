@@ -1,0 +1,22 @@
+//- Grid de obras (reutilizable)
+ul.grid.effect-2#grid
+  each a in artworks
+    - const _url = a.imageUrl || ''
+    - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
+    - const src480 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_480/') : _url
+    - const src768 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_768/') : _url
+    - const src1200 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/') : _url
+    - const srcset = isCld ? `${src480} 480w, ${src768} 768w, ${src1200} 1200w` : undefined
+    li
+      a(href=`/artworks/${a.slug || a._id}`)
+        img(
+          src=src480,
+          srcset=srcset,
+          sizes='(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
+          alt=a.title,
+          loading='lazy',
+          decoding='async',
+          width=a.imageWidth_px,
+          height=a.imageHeight_px
+        )
+

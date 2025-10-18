@@ -1,0 +1,24 @@
+extends /layouts/admin
+
+block content
+  .container.py-5
+    if artwork
+      h1.h3.mb-4= `Venta: ${artwork.title}`
+      p
+        b Artista:
+        |  #{artwork.artist && artwork.artist.name}
+      p
+        b Estado:
+        |  #{artwork.availability}
+      if saleInfo
+        h2.h5.mt-4 Detalle de venta
+        ul
+          if saleInfo.price
+            li Precio: $#{saleInfo.price}
+          if saleInfo.date
+            li Fecha: #{saleInfo.date}
+          if saleInfo.buyer
+            li Comprador: #{saleInfo.buyer}
+    else
+      .alert.alert-warning Venta no encontrada
+

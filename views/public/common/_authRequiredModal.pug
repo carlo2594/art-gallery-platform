@@ -1,0 +1,29 @@
+//- views/public/common/_authRequiredModal.pug
+//- Modal reutilizable para exigir autenticación en acciones (e.g., favoritos)
+//- Parámetros opcionales: modalId, title, message, returnTo, loginHref, signupHref
+
+- const _id        = typeof modalId !== 'undefined' ? modalId : 'authRequiredModal'
+- const _title     = typeof title !== 'undefined' ? title : 'Necesitas iniciar sesión'
+- const _message   = typeof message !== 'undefined' ? message : 'Para continuar, inicia sesión o regístrate.'
+- const _returnTo  = typeof returnTo !== 'undefined' ? returnTo : '/'
+- const _loginHref = typeof loginHref !== 'undefined' ? loginHref : '/login'
+- const _signupHref= typeof signupHref !== 'undefined' ? signupHref : '/signup'
+
+.modal.fade(id=_id tabindex='-1' aria-labelledby=`${_id}Label` aria-hidden='true' data-bs-backdrop='static' data-bs-keyboard='false')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h1.modal-title.fs-5(id=`${_id}Label`)= _title
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+      .modal-body
+        p.mb-0= _message
+      .modal-footer
+        a.btn.btn-outline-secondary(href=`${_signupHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+          i.fas.fa-user-plus.me-2
+          | Registrarme
+        a.btn.btn-primary(href=`${_loginHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+          i.fas.fa-right-to-bracket.me-2
+          | Iniciar sesión
+        button.btn.btn-light(type='button' data-bs-dismiss='modal')
+          | Cancelar
+

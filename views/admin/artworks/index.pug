@@ -1,0 +1,119 @@
+extends /layouts/admin
+
+block content
+  .container.py-5
+    - const isAdmin = currentUser && currentUser.role === 'admin'
+    h1.h3.mb-4.d-flex.justify-content-between.align-items-center
+      span Obras
+      if isAdmin
+        button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateArtwork')
+          i.fas.fa-plus.me-1
+          | Agregar obra
+    // Barra de búsqueda y filtros (inspirada en userList.pug)
+    form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
+      .col-sm-8.col-md-6
+        input.form-control(type='text', name='q', placeholder='Buscar por título o slug', value=q || '')
+      .col-sm-6.col-md-3
+        select.form-select(name='avail')
+          option(value='') Disponibilidad: Todas
+          // Agrupaciones convenientes
+          option(value='available' selected=!avail || avail === 'available') Disponibles (en venta o reservadas)
+          option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en préstamo)
+          // Estados específicos
+          option(value='for_sale' selected=avail === 'for_sale') En venta
+          option(value='reserved' selected=avail === 'reserved') Reservada
+          option(value='sold' selected=avail === 'sold') Vendida
+          option(value='not_for_sale' selected=avail === 'not_for_sale') No en venta
+          option(value='on_loan' selected=avail === 'on_loan') En préstamo
+      .col-sm-6.col-md-3
+        select.form-select(name='status')
+          option(value='') Estado: Todos
+          option(value='draft' selected=statusFilter === 'draft') Borrador
+          option(value='submitted' selected=statusFilter === 'submitted') Enviado
+          option(value='under_review' selected=statusFilter === 'under_review') En revisión
+          option(value='approved' selected=statusFilter === 'approved') Aprobado
+          option(value='rejected' selected=statusFilter === 'rejected') Rechazado
+          option(value='trashed' selected=statusFilter === 'trashed') Papelera
+      .col-sm-6.col-md-3
+        select.form-select(name='sort')
+          option(value='recent' selected=!sort || sort === 'recent') Recientes primero
+          option(value='popular' selected=sort === 'popular') Más vistas
+          option(value='most_favorited' selected=sort === 'most_favorited') Más favoritas
+          option(value='price_asc' selected=sort === 'price_asc') Precio: menor a mayor
+          option(value='price_desc' selected=sort === 'price_desc') Precio: mayor a menor
+      .col-auto
+        button.btn.btn-primary(type='submit') Buscar
+      if q || avail || sort
+        .col-auto
+          a.btn.btn-outline-secondary(href='?') Limpiar
+
+    if artworks && artworks.length
+      .table-responsive
+        table.table.table-striped.table-hover.align-middle
+          thead
+            tr
+              th Título
+              th Artista
+              th Estado
+              th Disponibilidad
+              th Precio
+              th Favoritos
+              th Creada
+              th Vista previa
+              th Editar
+          tbody
+            each a in artworks
+              - const status = a.status || a.moderationStatus
+              tr
+                td= a.title
+                td= (a.artist && a.artist.name) || '—'
+                td
+                  span.badge(class=status === 'approved' ? 'text-bg-success' : (status === 'under_review' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary')))= status || 'draft'
+                td
+                  span.badge.text-capitalize(class=a.availability === 'for_sale' ? 'text-bg-success' : (a.availability === 'reserved' ? 'text-bg-warning' : (a.availability === 'sold' ? 'text-bg-secondary' : 'text-bg-info')))= a.availability || '—'
+                td= typeof a.price_cents === 'number' ? `$${(a.price_cents/100).toLocaleString('en-US')}` : '—'
+                td= typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString() : '0'
+                td= new Date(a.createdAt).toLocaleDateString('es-ES')
+                // Columna Vista previa
+                td
+                  a.btn.btn-sm.btn-outline-secondary(target='_blank' href=`/admin/artworks/${a._id}`)
+                    i.fas.fa-eye.me-1
+                    | Vista previa
+                // Columna Editar (modal por fila)
+                td
+                  button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditArtwork-${a._id}`)
+                    i.fas.fa-pen-to-square.me-1
+                    | Editar
+                  // Modal de edición de obra (extraído)
+                  include ../modals/_artworkEditModal.pug
+                  if isAdmin
+                    button.btn.btn-sm.btn-outline-danger.ms-2(type='button', data-bs-toggle='modal', data-bs-target=`#confirmDeleteArtwork-${a._id}`)
+                      i.fas.fa-trash-can.me-1
+                      | Eliminar
+                    - const modalId = `confirmDeleteArtwork-${a._id}`
+                    - const modalTitle = `Eliminar obra - ${a.title}`
+                    - const modalMessage = 'Esta acción enviará la obra a la papelera. Escribe "ELIMINAR" para confirmar.'
+                    - const actionUrl = `/api/v1/artworks/${a._id}/trash`
+                    - const httpMethod = 'PATCH'
+                    - const confirmText = 'ELIMINAR'
+                    - const confirmBtnLabel = 'Eliminar'
+                    - const removeSelector = `#artRow-${a._id}`
+                    include ../modals/_confirmDeleteModal.pug
+    else
+      .alert.alert-info No hay obras
+
+    if typeof totalPages !== 'undefined' && totalPages > 1
+      nav.mt-4(aria-label='Paginación de obras')
+        ul.pagination.justify-content-center
+          - const prevDisabled = page <= 1
+          - const nextDisabled = page >= totalPages
+          li.page-item(class=prevDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
+          li.page-item.disabled
+            span.page-link= `Página ${page} de ${totalPages}`
+          li.page-item(class=nextDisabled ? 'disabled' : '')
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+    // Modal: Crear nueva obra
+    if isAdmin
+      include ../modals/_artworkCreateModal.pug
+

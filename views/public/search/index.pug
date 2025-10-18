@@ -1,0 +1,72 @@
+extends /layouts/public
+
+block content
+  section.page-header.py-4
+    .container
+      h2.h3.mb-1 Resultados de búsqueda
+      if search
+        p.text-muted.mb-0 Buscando: "#{search}"
+      else
+        p.text-muted.mb-0 Ingresa un término para buscar obras, artistas o exposiciones.
+
+  .container-xxl.my-4
+    - const artworksCount = typeof totalArtworks !== 'undefined' ? totalArtworks : (artworks ? artworks.length : 0);
+    - const artistsCount = typeof totalArtists !== 'undefined' ? totalArtists : (artists ? artists.length : 0);
+    - const exhibitionsCount = typeof totalExhibitions !== 'undefined' ? totalExhibitions : (exhibitions ? exhibitions.length : 0);
+    ul.nav.nav-tabs.mb-4.search-tabs#searchTabs(role="tablist")
+      li.nav-item.flex-fill.text-center
+        a.nav-link.active.w-100(href="#tab-obras", data-bs-toggle="tab", data-ox-tab="obras", role="tab", data-bs-target="#tab-obras") Obras (#{artworksCount})
+      li.nav-item.flex-fill.text-center
+        a.nav-link.w-100(href="#tab-artistas", data-bs-toggle="tab", data-ox-tab="artistas", role="tab", data-bs-target="#tab-artistas") Artistas (#{artistsCount})
+      li.nav-item.flex-fill.text-center
+        a.nav-link.w-100(href="#tab-exposiciones", data-bs-toggle="tab", data-ox-tab="exposiciones", role="tab", data-bs-target="#tab-exposiciones") Exposiciones (#{exhibitionsCount})
+
+    .tab-content
+      .tab-pane.active#tab-obras
+        section.filters-toolbar.py-2
+          .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+            - var q = typeof q !== 'undefined' ? q : {};
+            - var techniques = typeof techniques !== 'undefined' ? techniques : [];
+            - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
+            - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
+            - var actionUrl = '/search';
+            include /public/artworks/_artworkFilters.pug
+        .container-xxl.artworks-flex
+          if artworks && artworks.length
+            .artworks-grid-paginate
+              include /public/artworks/_artworkGrid.pug
+              include /public/artworks/_artworkPagination.pug
+          else
+            h3.h5.mt-4.text-muted No se encontraron obras.
+
+      .tab-pane#tab-artistas
+        if artistsCount > 0
+          section.filters-toolbar.py-2
+            .container-xxl.d-flex.align-items-center.flex-wrap.gap-2
+              - var q = typeof q !== 'undefined' ? q : {};
+              - var actionUrl = '/search';
+              include /public/artists/_artistFilters.pug
+        .container-xxl.artworks-flex
+          if artists && artists.length
+            .artworks-grid-paginate
+              include /public/artists/_artistGrid.pug
+              - var page = typeof artistPage !== 'undefined' ? artistPage : 1;
+              - var totalPages = typeof artistTotalPages !== 'undefined' ? artistTotalPages : 1;
+              - var tab = 'artistas';
+              include /public/artists/_artistPagination.pug
+          else
+            h3.h5.mt-4.text-muted No se encontraron artistas.
+
+      .tab-pane#tab-exposiciones
+        if exhibitionsCount > 0
+          - var actionUrl = '/search';
+          include /public/exhibitions/_exhibitionFilters.pug
+        .container-xxl.artworks-flex
+          if exhibitions && exhibitions.length
+            include /public/exhibitions/_exhibitionGrid.pug
+            - var tab = 'exposiciones';
+            if typeof exhibitionTotalPages !== 'undefined' && exhibitionTotalPages > 1
+              include /public/exhibitions/_exhibitionPagination.pug
+          else
+            h3.h5.mt-4.text-muted No se encontraron exposiciones.
+

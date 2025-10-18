@@ -70,7 +70,7 @@ exports.getExhibitions = catchAsync(async (req, res) => {
     Exhibition.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('createdBy').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/exhibitionAdmin', {
+  res.status(200).render('admin/exhibitions/index', {
     title: 'Exhibiciones',
     exhibitions,
     page,
@@ -155,7 +155,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/artworkAdmin', {
+  res.status(200).render('admin/artworks/index', {
     title: 'Obras de arte',
     artworks,
     page,
@@ -173,7 +173,7 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
     .populate('artist exhibitions')
     .lean();
   if (!artwork) return next(new AppError('Obra no encontrada', 404));
-  res.status(200).render('admin/artworks/artworkDetailAdmin', {
+  res.status(200).render('admin/artworks/detail', {
     title: artwork.title,
     artwork
   });
@@ -191,7 +191,7 @@ exports.getUsers = catchAsync(async (req, res) => {
     User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/users/userList', {
+  res.status(200).render('admin/users/index', {
     title: 'Artistas',
     users,
     page,
@@ -215,7 +215,7 @@ exports.getCollectors = catchAsync(async (req, res) => {
     User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
-  res.status(200).render('admin/users/userList', {
+  res.status(200).render('admin/users/index', {
     title: 'Coleccionistas',
     users,
     page,
