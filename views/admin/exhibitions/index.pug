@@ -74,7 +74,7 @@ block content
                 td= e.endDate ? new Date(e.endDate).toLocaleDateString('es-ES') : '""'
                 // Columna Vista previa
                 td
-                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}`)
+                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}` target='_blank')
                     i.fas.fa-eye.me-1
                     | Ver
                 // Columna Editar (modal por fila) + eliminar
@@ -113,4 +113,3 @@ block content
 
     if isAdmin
       include ../modals/_exhibitionCreateModal.pug
-

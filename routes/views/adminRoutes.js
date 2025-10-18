@@ -14,7 +14,7 @@ router.get('/', viewsAdminController.getDashboard);
 
 // Exhibiciones
 router.get('/exhibitions',        viewsAdminController.getExhibitions);
-router.get('/exhibitions/:id',    viewsAdminController.getExhibition);
+router.get('/exhibitions/:id',    viewsAdminController.getExhibitionPreview);
 
 // Obras
 router.get('/artworks',           viewsAdminController.getArtworks);

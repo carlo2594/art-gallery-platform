@@ -312,3 +312,29 @@ exports.getUser = catchAsync(async (req, res, next) => {
     user
   });
 });
+
+// Vista de previa completa de la exposición (sin filtrar por estado de obra)
+exports.getExhibitionPreview = catchAsync(async (req, res, next) => {
+  const exhibition = await Exhibition.findById(req.params.id)
+    .populate('createdBy participants')
+    .lean();
+  if (!exhibition) return next(new AppError('Exhibición no encontrada', 404));
+
+  let artworks = [];
+  if (Array.isArray(exhibition.artworks) && exhibition.artworks.length) {
+    artworks = await Artwork.find({
+      _id: { $in: exhibition.artworks },
+      deletedAt: null
+    })
+      .populate({ path: 'artist', select: 'name' })
+      .lean();
+  }
+  const totalArtworks = Array.isArray(exhibition.artworks) ? exhibition.artworks.length : artworks.length;
+
+  return res.status(200).render('admin/exhibitions/detail', {
+    title: exhibition.title || exhibition.name,
+    exhibition,
+    artworks,
+    totalArtworks
+  });
+});
