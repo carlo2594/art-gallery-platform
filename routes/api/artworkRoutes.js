@@ -1,7 +1,6 @@
 // routes/artworkRoutes.js
 const express           = require('express');
 const artworkController = require('@controllers/artworkController');
-const artworkAvailabilityController = require('@controllers/artworkAvailabilityController');
 const requireUser       = require('@middlewares/requireUser');
 const isOwner           = require('@middlewares/isOwner');
 const restrictTo        = require('@middlewares/restrictTo');
@@ -112,7 +111,7 @@ router.patch(
   '/:id/mark-sold',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.markArtworkSold
+  artworkController.markArtworkSold
 );
 
 // Reservar obra (solo admin)
@@ -120,7 +119,7 @@ router.patch(
   '/:id/reserve',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.reserveArtwork
+  artworkController.reserveArtwork
 );
 
 // Quitar reserva (solo admin)
@@ -128,7 +127,7 @@ router.patch(
   '/:id/unreserve',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.unreserveArtwork
+  artworkController.unreserveArtwork
 );
 
 // Marcar como no disponible para venta (solo admin)
@@ -136,7 +135,7 @@ router.patch(
   '/:id/not-for-sale',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.setNotForSale
+  artworkController.setNotForSale
 );
 
 // Marcar como en préstamo (solo admin)
@@ -144,7 +143,7 @@ router.patch(
   '/:id/on-loan',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.setOnLoan
+  artworkController.setOnLoan
 );
 
 // Volver a poner en venta (solo admin)
@@ -152,7 +151,7 @@ router.patch(
   '/:id/for-sale',
   requireUser,
   restrictTo('admin'),
-  artworkAvailabilityController.setForSale
+  artworkController.setForSale
 );
 
 // Lectura privada: ver cualquier obra si eres dueño o admin

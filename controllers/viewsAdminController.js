@@ -73,7 +73,7 @@ exports.getExhibitions = catchAsync(async (req, res) => {
   const locType = (req.query.loc || '').trim(); // physical | virtual
   const sortParam = (req.query.sort || 'recent').trim();
 
-  // Build filter
+  // Build filter (no excluir por status ni papelera por defecto)
   const filter = {};
 
   if (q) {

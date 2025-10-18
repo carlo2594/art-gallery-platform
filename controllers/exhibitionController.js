@@ -15,7 +15,22 @@ exports.createExhibition = (req, res, next) => {
   return factory.createOne(Exhibition)(req, res, next);
 };
 exports.updateExhibition = factory.updateOne(Exhibition);
-exports.deleteExhibition = factory.deleteOne(Exhibition);
+// Soft-delete: marca deletedAt/deletedBy en lugar de borrar definitivamente
+exports.deleteExhibition = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
+  const exh = await Exhibition.findById(id);
+  if (!exh) return next(new AppError('Exposición no encontrada.', 404));
+  if (exh.deletedAt) {
+    return res.status(200).json({ status: 'success', message: 'Ya estaba eliminada.', data: null });
+  }
+  exh.deletedAt = new Date();
+  // Actualiza estado a 'trashed' para reflejar papelera
+  try { exh.status = 'trashed'; } catch (_){ }
+  try { if (req.user && req.user._id) exh.deletedBy = req.user._id; } catch(_) {}
+  await exh.save({ validateModifiedOnly: true });
+  return res.status(200).json({ status: 'success', message: 'Exposición eliminada correctamente.', data: null });
+});
 
 // Subir o reemplazar imagen de portada (multipart: field 'coverImage')
 exports.uploadCoverImage = catchAsync(async (req, res, next) => {
