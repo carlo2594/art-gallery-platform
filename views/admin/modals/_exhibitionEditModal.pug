@@ -6,6 +6,7 @@
         h5.modal-title(id=`adminEditExhibitionLabel-${e._id}`) Editar exposicion - #{e.title || e.name}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
+        // Formulario principal (sin inputs de archivo)
         form.admin-edit-exhibition-form(id=`adminEditExhibitionForm-${e._id}` data-exhibition-id=e._id)
           // Basicos
           .row.g-3
@@ -44,6 +45,26 @@
               - const endVal = e.endDate ? new Date(e.endDate).toISOString().slice(0,10) : ''
               label.form-label Fecha de fin
               input.form-control(type='date', name='endDate', value=endVal)
+
+        // Imagen de portada (separada del formulario principal)
+        hr
+        .row.g-3.align-items-center
+          .col-md-8
+            label.form-label Portada actual
+            if e.coverImage
+              img.img-fluid.rounded.border.mb-2(src=e.coverImage alt='Portada' style='max-height: 180px;')
+            else
+              .text-muted.mb-2 Sin portada
+            form.admin-exhibition-cover-form(data-exhibition-id=e._id enctype='multipart/form-data')
+              .input-group
+                input.form-control(type='file', name='coverImage', accept='image/*')
+                button.btn.btn-outline-primary(type='submit') Guardar portada
+              if e.coverImage
+                button.btn.btn-outline-danger.btn-sm.mt-2(type='button' data-action='remove-cover' data-exhibition-id=e._id) Eliminar portada
+          .col-md-4
+            small.text-muted Subir una imagen para usar como portada de la exposicion.
+
+        // (Sin galeria de imagenes adicionales)
       .modal-footer
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
         button.btn.btn-primary.admin-exhibitions-save(type='submit' form=`adminEditExhibitionForm-${e._id}`) Guardar cambios

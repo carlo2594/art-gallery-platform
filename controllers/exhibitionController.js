@@ -17,6 +17,36 @@ exports.createExhibition = (req, res, next) => {
 exports.updateExhibition = factory.updateOne(Exhibition);
 exports.deleteExhibition = factory.deleteOne(Exhibition);
 
+// Subir o reemplazar imagen de portada (multipart: field 'coverImage')
+exports.uploadCoverImage = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
+  const exhibition = await Exhibition.findById(id);
+  if (!exhibition) return next(new AppError('Exposición no encontrada.', 404));
+  if (!req.file) return next(new AppError('No se recibió archivo de imagen.', 400));
+
+  const { upload, uploadBuffer } = require('@utils/cloudinaryImage');
+  let result;
+  if (req.file.path) result = await upload(req.file.path);
+  else if (req.file.buffer) result = await uploadBuffer(req.file.buffer);
+  else return next(new AppError('No se pudo procesar la imagen.', 400));
+
+  exhibition.coverImage = result.secure_url;
+  await exhibition.save({ validateModifiedOnly: true });
+  res.status(200).json({ status: 'success', message: 'Portada actualizada.', data: { coverImage: exhibition.coverImage } });
+});
+
+// Eliminar imagen de portada (solo elimina la referencia)
+exports.deleteCoverImage = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
+  const exhibition = await Exhibition.findById(id);
+  if (!exhibition) return next(new AppError('Exposición no encontrada.', 404));
+  exhibition.coverImage = undefined;
+  await exhibition.save({ validateModifiedOnly: true });
+  res.status(200).json({ status: 'success', message: 'Portada eliminada.' });
+});
+
 // PATCH /exhibitions/:id/add-artwork
 exports.addArtwork = catchAsync(async (req, res, next) => {
   const { id } = req.params;

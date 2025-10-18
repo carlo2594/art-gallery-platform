@@ -7,7 +7,6 @@ const exhibitionSchema = new mongoose.Schema({
   slug:  { type: String }, // índice único definido explícitamente abajo
   description: String,
   coverImage: String,
-  images: [String], // Imágenes adicionales
 
   location: {
     type: {

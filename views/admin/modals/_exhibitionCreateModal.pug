@@ -40,7 +40,11 @@
               label.form-label Fecha de fin
               input.form-control(type='date', name='endDate', required)
               .invalid-feedback Ingresa una fecha valida
+
+          // Imagen de portada (opcional, se sube tras crear)
+          .mt-3
+            label.form-label Portada (opcional)
+            input.form-control(type='file', name='coverImage', accept='image/*')
       .modal-footer
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
         button.btn.btn-primary.admin-exhibitions-create-submit(type='submit' form='adminCreateExhibitionForm') Crear
-

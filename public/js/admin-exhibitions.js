@@ -46,6 +46,20 @@ document.addEventListener('DOMContentLoaded', function(){
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error('Create failed');
+        var json = await res.json();
+        var created = json && json.data;
+        // Si se seleccionó una portada, subirla ahora
+        var coverInput = form.querySelector('input[name="coverImage"]');
+        if (created && created._id && coverInput && coverInput.files && coverInput.files[0]) {
+          var fd = new FormData();
+          fd.append('coverImage', coverInput.files[0]);
+          var up = await fetch('/api/v1/exhibitions/' + encodeURIComponent(created._id) + '/cover-image', {
+            method: 'PATCH',
+            credentials: 'include',
+            body: fd
+          });
+          if (!up.ok) console.warn('Cover upload failed after create');
+        }
         if (window.showAdminToast) showAdminToast('Exposicion creada','success');
         // simple: reload to see it in the list
         setTimeout(function(){ window.location.reload(); }, 400);
@@ -125,5 +139,64 @@ document.addEventListener('DOMContentLoaded', function(){
       if (btn) { btn.disabled = false; btn.textContent = oldText || 'Guardar cambios'; }
     }
   });
-});
 
+  // Portada: subir/actualizar
+  document.addEventListener('submit', async function(e){
+    var form = e.target.closest && e.target.closest('form.admin-exhibition-cover-form');
+    if (!form) return;
+    e.preventDefault();
+    var id = form.getAttribute('data-exhibition-id');
+    var fileInput = form.querySelector('input[name="coverImage"]');
+    if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) {
+      if (window.showAdminToast) showAdminToast('Selecciona una imagen', 'warning');
+      return;
+    }
+    var btn = form.querySelector('button[type="submit"]');
+    var oldText = btn && btn.textContent;
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+    try {
+      var fd = new FormData();
+      fd.append('coverImage', fileInput.files[0]);
+      var res = await fetch('/api/v1/exhibitions/' + encodeURIComponent(id) + '/cover-image', {
+        method: 'PATCH',
+        credentials: 'include',
+        body: fd
+      });
+      if (!res.ok) throw new Error('Upload cover failed');
+      if (window.showAdminToast) showAdminToast('Portada actualizada', 'success');
+      setTimeout(function(){ window.location.reload(); }, 300);
+    } catch (err) {
+      console.error(err);
+      if (window.showAdminToast) showAdminToast('No se pudo actualizar la portada', 'danger');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = oldText || 'Guardar portada'; }
+    }
+  });
+
+  // Portada: eliminar
+  document.addEventListener('click', async function(e){
+    var btn = e.target.closest && e.target.closest('button[data-action="remove-cover"]');
+    if (!btn) return;
+    e.preventDefault();
+    var id = btn.getAttribute('data-exhibition-id');
+    if (!id) return;
+    var oldText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Eliminando...';
+    try {
+      var res = await fetch('/api/v1/exhibitions/' + encodeURIComponent(id) + '/cover-image', {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Delete cover failed');
+      if (window.showAdminToast) showAdminToast('Portada eliminada', 'success');
+      setTimeout(function(){ window.location.reload(); }, 300);
+    } catch (err) {
+      console.error(err);
+      if (window.showAdminToast) showAdminToast('No se pudo eliminar la portada', 'danger');
+    } finally {
+      btn.disabled = false; btn.textContent = oldText || 'Eliminar portada';
+    }
+  });
+
+  // (Sin gestión de galería por URLs)
+});
