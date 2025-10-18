@@ -6,6 +6,8 @@ const requireUser       = require('@middlewares/requireUser');
 const isOwner           = require('@middlewares/isOwner');
 const restrictTo        = require('@middlewares/restrictTo');
 const Artwork           = require('@models/artworkModel');
+const multer            = require('multer');
+const upload            = multer({ storage: multer.memoryStorage() });
 
 const router = express.Router();
 
@@ -33,6 +35,7 @@ router.get('/:id', artworkController.getApprovedArtwork);
 router.post(
   '/',
   requireUser,
+  upload.single('image'),
   artworkController.createArtwork           // siempre inicia en 'draft'
 );
 
@@ -40,6 +43,7 @@ router.patch(
   '/:id',
   requireUser,
   isOwner(Artwork, 'artist'),               // dueño o admin
+  upload.single('image'),
   artworkController.updateArtwork
 );
 

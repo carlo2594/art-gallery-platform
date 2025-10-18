@@ -2,7 +2,13 @@ extends ../layouts/admin
 
 block content
   .container.py-5
-    h1.h3.mb-4 Obras
+    - const isAdmin = currentUser && currentUser.role === 'admin'
+    h1.h3.mb-4.d-flex.justify-content-between.align-items-center
+      span Obras
+      if isAdmin
+        button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateArtwork')
+          i.fas.fa-plus.me-1
+          | Agregar obra
     // Barra de búsqueda y filtros (inspirada en userList.pug)
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
@@ -10,8 +16,24 @@ block content
       .col-sm-6.col-md-3
         select.form-select(name='avail')
           option(value='') Disponibilidad: Todas
-          option(value='available' selected=!avail || avail === 'available') Disponibles
-          option(value='unavailable' selected=avail === 'unavailable') No disponibles
+          // Agrupaciones convenientes
+          option(value='available' selected=!avail || avail === 'available') Disponibles (en venta o reservadas)
+          option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en venta, en préstamo)
+          // Estados específicos
+          option(value='for_sale' selected=avail === 'for_sale') En venta
+          option(value='reserved' selected=avail === 'reserved') Reservada
+          option(value='sold' selected=avail === 'sold') Vendida
+          option(value='not_for_sale' selected=avail === 'not_for_sale') No en venta
+          option(value='on_loan' selected=avail === 'on_loan') En préstamo
+      .col-sm-6.col-md-3
+        select.form-select(name='status')
+          option(value='') Estado: Todos
+          option(value='draft' selected=statusFilter === 'draft') Borrador
+          option(value='submitted' selected=statusFilter === 'submitted') Enviado
+          option(value='under_review' selected=statusFilter === 'under_review') En revisión
+          option(value='approved' selected=statusFilter === 'approved') Aprobado
+          option(value='rejected' selected=statusFilter === 'rejected') Rechazado
+          option(value='trashed' selected=statusFilter === 'trashed') Papelera
       .col-sm-6.col-md-3
         select.form-select(name='sort')
           option(value='recent' selected=!sort || sort === 'recent') Recientes primero
@@ -37,6 +59,7 @@ block content
               th Precio
               th Favoritos
               th Creada
+              th Vista previa
               th Editar
           tbody
             each a in artworks
@@ -51,128 +74,35 @@ block content
                 td= typeof a.price_cents === 'number' ? `$${(a.price_cents/100).toLocaleString('en-US')}` : '—'
                 td= typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString() : '0'
                 td= new Date(a.createdAt).toLocaleDateString('es-ES')
+                // Columna Vista previa
+                td
+                  a.btn.btn-sm.btn-outline-secondary(target='_blank' href=`/admin/artworks/${a._id}`)
+                    i.fas.fa-eye.me-1
+                    | Vista previa
                 // Columna Editar (modal por fila)
                 td
                   button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditArtwork-${a._id}`)
                     i.fas.fa-pen-to-square.me-1
                     | Editar
-                  // Modal de edición de obra
-                  .modal.fade(id=`adminEditArtwork-${a._id}` tabindex='-1' aria-labelledby=`adminEditArtworkLabel-${a._id}` aria-hidden='true')
-                    .modal-dialog.modal-lg
-                      .modal-content
-                        .modal-header
-                          h5.modal-title(id=`adminEditArtworkLabel-${a._id}`) Editar obra - #{a.title}
-                          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                        .modal-body
-                          form.admin-edit-artwork-form(id=`adminEditArtworkForm-${a._id}` data-artwork-id=a._id)
-                            // Básicos
-                            .row.g-3
-                              .col-md-8
-                                label.form-label Título
-                                input.form-control(type='text', name='title', value=a.title)
-                              .col-md-4
-                                label.form-label Estado
-                                select.form-select(name='status')
-                                  option(value='draft' selected=(status || 'draft')==='draft') Borrador
-                                  option(value='submitted' selected=status==='submitted') Enviado
-                                  option(value='under_review' selected=status==='under_review') En revisión
-                                  option(value='approved' selected=status==='approved') Aprobado
-                                  option(value='rejected' selected=status==='rejected') Rechazado
-                                  option(value='trashed' selected=status==='trashed') Papelera
-                            .mb-3
-                              label.form-label Descripción
-                              textarea.form-control(name='description' rows='3')= a.description || ''
-                            .row.g-3
-                              .col-md-6
-                                label.form-label Artista
-                                input.form-control(type='text', value=(a.artist && a.artist.name) || '—', readonly)
-                              .col-md-6
-                                label.form-label Fecha de finalización
-                                - const completedVal = a.completedAt ? new Date(a.completedAt).toISOString().slice(0,10) : ''
-                                input.form-control(type='date', name='completedAt', value=completedVal)
-                            // Técnica y medidas
-                            .row.g-3
-                              .col-md-4
-                                label.form-label Tipo
-                                input.form-control(type='text', name='type', value=a.type || '')
-                              .col-md-4
-                                label.form-label Técnica
-                                input.form-control(type='text', name='technique', value=a.technique || '')
-                              .col-md-2
-                                label.form-label Ancho (cm)
-                                input.form-control(type='number', name='width_cm', min='0', step='1', value=a.width_cm)
-                              .col-md-2
-                                label.form-label Alto (cm)
-                                input.form-control(type='number', name='height_cm', min='0', step='1', value=a.height_cm)
-                            // Precio y disponibilidad
-                            .row.g-3
-                              .col-md-4
-                                label.form-label Precio (USD)
-                                - const priceUSD = (typeof a.price_cents === 'number') ? (a.price_cents/100).toFixed(2) : ''
-                                input.form-control(type='number', name='price_usd', min='0', step='0.01', value=priceUSD)
-                              .col-md-4
-                                label.form-label Disponibilidad
-                                select.form-select(name='availability')
-                                  option(value='not_for_sale' selected=a.availability==='not_for_sale') No a la venta
-                                  option(value='for_sale' selected=a.availability==='for_sale') En venta
-                                  option(value='reserved' selected=a.availability==='reserved') Reservada
-                                  option(value='sold' selected=a.availability==='sold') Vendida
-                                  option(value='on_loan' selected=a.availability==='on_loan') En préstamo
-                              .col-md-4
-                                label.form-label Reservada hasta
-                                - const reservedVal = a.reservedUntil ? new Date(a.reservedUntil).toISOString().slice(0,10) : ''
-                                input.form-control(type='date', name='reservedUntil', value=reservedVal)
-                            .row.g-3
-                              .col-md-4
-                                label.form-label Vendida el
-                                - const soldVal = a.soldAt ? new Date(a.soldAt).toISOString().slice(0,10) : ''
-                                input.form-control(type='date', name='soldAt', value=soldVal)
-                              .col-md-4
-                                label.form-label Canal de venta
-                                select.form-select(name='sale.channel')
-                                  option(value='') —
-                                  option(value='online' selected=a.sale && a.sale.channel==='online') Online
-                                  option(value='gallery' selected=a.sale && a.sale.channel==='gallery') Galería
-                                  option(value='fair' selected=a.sale && a.sale.channel==='fair') Feria
-                                  option(value='private' selected=a.sale && a.sale.channel==='private') Privada
-                              .col-md-4
-                                label.form-label Precio de venta (USD)
-                                - const saleUSD = (a.sale && typeof a.sale.price_cents === 'number') ? (a.sale.price_cents/100).toFixed(2) : ''
-                                input.form-control(type='number', name='sale.price_usd', min='0', step='0.01', value=saleUSD)
-                            .row.g-3
-                              .col-md-6
-                                label.form-label Comprador (nombre)
-                                input.form-control(type='text', name='sale.buyerName', value=(a.sale && a.sale.buyerName) || '')
-                              .col-md-6
-                                label.form-label Comprador (email)
-                                input.form-control(type='email', name='sale.buyerEmail', value=(a.sale && a.sale.buyerEmail) || '')
-                            .row.g-3
-                              .col-md-6
-                                label.form-label Moneda
-                                input.form-control(type='text', name='sale.currency', value=(a.sale && a.sale.currency) || 'USD')
-                              .col-md-6
-                                label.form-label Orden/ID
-                                input.form-control(type='text', name='sale.orderId', value=(a.sale && a.sale.orderId) || '')
-                            hr
-                            .row.g-3
-                              .col-md-4
-                                label.form-label Favoritos (solo lectura)
-                                input.form-control(type='number', value=a.favoritesCount || 0, readonly)
-                              .col-md-4
-                                label.form-label Vistas (solo lectura)
-                                input.form-control(type='number', value=a.views || 0, readonly)
-                              .col-md-4
-                                label.form-label Creada
-                                input.form-control(type='text', value=new Date(a.createdAt).toLocaleString('es-ES'), readonly)
-                        .modal-footer
-                          a.btn.btn-outline-secondary(target='_blank' href=`/admin/artworks/${a._id}`)
-                            i.fas.fa-up-right-from-square.me-1
-                            | Abrir detalle
-                          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
-                          // Nota: requiere JS para guardar
-                          button.btn.btn-primary.admin-artworks-save(type='submit' form=`adminEditArtworkForm-${a._id}`) Guardar cambios
+                  // Modal de edición de obra (extraído)
+                  // Modal de edici�n de obra (extra�do)
+                  include ./modals/_artworkEditModal.pug
+                  if isAdmin
+                    button.btn.btn-sm.btn-outline-danger.ms-2(type='button', data-bs-toggle='modal', data-bs-target=`#confirmDeleteArtwork-${a._id}`)
+                      i.fas.fa-trash-can.me-1
+                      | Eliminar
+                    - const modalId = `confirmDeleteArtwork-${a._id}`
+                    - const modalTitle = `Eliminar obra - ${a.title}`
+                    - const modalMessage = 'Esta acci�n enviar� la obra a la papelera. Escribe "ELIMINAR" para confirmar.'
+                    - const actionUrl = `/api/v1/artworks/${a._id}/trash`
+                    - const httpMethod = 'PATCH'
+                    - const confirmText = 'ELIMINAR'
+                    - const confirmBtnLabel = 'Eliminar'
+                    - const removeSelector = `#artRow-${a._id}`
+                    include ./modals/_confirmDeleteModal.pug
     else
       .alert.alert-info No hay obras
+
     if typeof totalPages !== 'undefined' && totalPages > 1
       nav.mt-4(aria-label='Paginación de obras')
         ul.pagination.justify-content-center
@@ -184,4 +114,6 @@ block content
             span.page-link= `Página ${page} de ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
-
+    // Modal: Crear nueva obra
+    if isAdmin
+      include ./modals/_artworkCreateModal.pug

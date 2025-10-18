@@ -53,6 +53,45 @@ html(lang='es')
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/main.js')
     script(src='/js/admin-users.js')
+    script(src='/js/admin-artworks.js')
+    // Confirm-delete modal handler
+    script.
+      (function(){
+        document.addEventListener('input', function(e){
+          var input = e.target.closest && e.target.closest('.confirm-delete-modal .confirm-delete-input');
+          if(!input) return;
+          var modal = input.closest('.confirm-delete-modal');
+          if(!modal) return;
+          var must = (modal.getAttribute('data-confirm-text')||'').trim();
+          var btn = modal.querySelector('.confirm-delete-submit');
+          if(!btn) return;
+          var val = (input.value||'').trim();
+          btn.disabled = (val !== must);
+        });
+        document.addEventListener('click', function(e){
+          var btn = e.target.closest && e.target.closest('.confirm-delete-submit');
+          if(!btn) return;
+          var modal = btn.closest('.confirm-delete-modal');
+          if(!modal) return;
+          var action = modal.getAttribute('data-action');
+          var method = (modal.getAttribute('data-method')||'DELETE').toUpperCase();
+          if(!action) return;
+          var old = btn.textContent; btn.disabled = true; btn.textContent = 'Eliminando...';
+          var opts = { method: method, credentials: 'include' };
+          fetch(action, opts).then(function(res){
+            if(!res.ok) return res.json().catch(function(){ return {}; }).then(function(d){ throw new Error(d.message || (d.error && (d.error.message || d.error.code)) || 'Error'); });
+            return res.json().catch(function(){ return {}; });
+          }).then(function(){
+            if (window.showAdminToast) showAdminToast('Eliminado', 'success');
+            try {
+              var sel = modal.getAttribute('data-remove-selector');
+              if (sel) { var el = document.querySelector(sel); if (el) el.remove(); }
+              if (window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modal).hide();
+            } catch(_){ }
+          }).catch(function(err){ console.error(err); if (window.showAdminToast) showAdminToast(err && err.message || 'No se pudo eliminar', 'danger'); })
+          .finally(function(){ btn.disabled = false; btn.textContent = old; });
+        });
+      })();
     // Toast helper
     script.
       (function(){

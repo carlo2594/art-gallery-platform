@@ -1,14 +1,14 @@
-﻿extends ../../layouts/admin
+extends ../../layouts/admin
 
 block content
   .container.py-5
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
       span= title || 'Usuarios'
-      // BotÃ³n para abrir modal de nuevo usuario
+      // Botón para abrir modal de nuevo usuario
       button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateUser')
         i.fas.fa-user-plus.me-1
         | Agregar usuario
-    // Barra de bÃºsqueda
+    // Barra de búsqueda
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
         input.form-control(type='text', name='q', placeholder='Buscar por nombre o correo', value=q || '')
@@ -30,7 +30,7 @@ block content
           option(value='oldest' selected=sort === 'oldest') Antiguos primero
           option(value='name_asc' selected=sort === 'name_asc') Nombre A-Z
           option(value='name_desc' selected=sort === 'name_desc') Nombre Z-A
-          option(value='last_login' selected=sort === 'last_login') Último acceso
+          option(value='last_login' selected=sort === 'last_login') �ltimo acceso
       .col-auto
         button.btn.btn-primary(type='submit') Buscar
       if q
@@ -61,144 +61,27 @@ block content
                   button.btn.btn-sm.btn-outline-primary.admin-users-edit-trigger(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditUser-${u._id}`, data-user-name=u.name, data-user-email=u.email)
                     i.fas.fa-pen-to-square.me-1
                     | Editar
-                  // Modal de ediciÃ³n por usuario
-                  .modal.fade.admin-edit-user-modal.admin-users-edit-modal(id=`adminEditUser-${u._id}` tabindex='-1' aria-labelledby=`adminEditUserLabel-${u._id}` aria-hidden='true' data-user-id=u._id)
-                    .modal-dialog
-                      .modal-content
-                        .modal-header
-                          h5.modal-title(id=`adminEditUserLabel-${u._id}`) Editar usuario - #{u.name}
-                          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                        .modal-body
-                          // Bloque de imagen de perfil
-                          .mb-3.admin-users-avatar-block
-                            label.form-label Imagen de perfil
-                            .d-flex.align-items-center.gap-3
-                              if u.profileImage
-                                img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;')
-                              else
-                                img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
-                              .d-flex.flex-wrap.gap-2
-                                input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
-                                button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
-                                button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
-                          // Formulario de datos
-                          form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
-                            .mb-3
-                              label.form-label Nombre
-                              input.form-control(type='text' name='name' placeholder='Nombre' value=u.name)
-                            .mb-3
-                              label.form-label Correo
-                              input.form-control(type='email' name='email' placeholder='correo@dominio.com' value=u.email)
-                            .mb-3
-                              label.form-label Biografía
-                              textarea.form-control(name='bio' rows='3' placeholder='Breve biografía')
-                            .mb-3
-                              label.form-label Ubicación
-                              input.form-control(type='text' name='location' placeholder='Ciudad, País')
-                            .mb-3
-                              label.form-label Sitio web
-                              input.form-control(type='url' name='website' placeholder='https://...')
-                            .mb-3
-                              label.form-label Redes sociales
-                              .row.g-2
-                                .col-md-4
-                                  input.form-control(type='text' name='social.instagram' placeholder='Instagram')
-                                .col-md-4
-                                  input.form-control(type='text' name='social.x' placeholder='X / Twitter')
-                                .col-md-4
-                                  input.form-control(type='text' name='social.facebook' placeholder='Facebook')
-                        .modal-footer
-                          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-                          button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Guardar cambios
+                  // Modal de edici�n por usuario (extra�do)
+                  include ../../admin/modals/_userEditModal.pug
                 td
-                  // BotÃ³n que abre el modal de acciones
+                  // Botón que abre el modal de acciones
                   button.btn.btn-sm.btn-outline-secondary(type='button', data-bs-toggle='modal', data-bs-target=`#userActions-${u._id}`) Ver
-                  // Modal de acciones por usuario
-                  .modal.fade(id=`userActions-${u._id}` tabindex='-1' aria-labelledby=`userActionsLabel-${u._id}` aria-hidden='true')
-                    .modal-dialog
-                      .modal-content
-                        .modal-header
-                          h5.modal-title(id=`userActionsLabel-${u._id}`) Acciones - #{u.name}
-                          button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-                        .modal-body
-                          h2.fs-5 Acciones de seguridad
-                          p
-                            button.btn.btn-warning.admin-reset-pass(type='button' data-user-id=u._id aria-label='Resetear contraseña')
-                              i.fas.fa-key.me-1
-                              | Resetear contraseña
-                          hr
-                          h2.fs-5 Cambiar rol
-                          .d-flex.gap-2.flex-wrap
-                            if u.role !== 'collector'
-                              button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Cambiar a coleccionista')
-                                i.fas.fa-arrow-down-long.me-1
-                                | Cambiar a Coleccionista
-                            if u.role !== 'artist'
-                              button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Cambiar a artista')
-                                i.fas.fa-arrow-up-right-dots.me-1
-                                | Cambiar a Artista
-                            if u.role !== 'admin'
-                              button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Cambiar a administrador')
-                                i.fas.fa-user-shield.me-1
-                                | Cambiar a Administrador
-                          hr
-                          h2.fs-5 Estado de la cuenta
-                          p
-                            if u.active === false
-                              button.btn.btn-success.admin-toggle-active(type='button' data-user-id=u._id data-action='reactivate' aria-label='Reactivar usuario')
-                                i.fas.fa-user-check.me-1
-                                | Reactivar cuenta
-                            else
-                              button.btn.btn-outline-secondary.admin-toggle-active(type='button' data-user-id=u._id data-action='deactivate' aria-label='Desactivar usuario')
-                                i.fas.fa-user-slash.me-1
-                                | Desactivar cuenta
-                        .modal-footer
-                          a.btn.btn-outline-secondary.admin-users-public-link(target='_blank' href=`/artists/${u.slug || u._id}`)
-                            i.fas.fa-user.me-1
-                            | Ver público
-                          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
+                  // Modal de acciones por usuario (extra�do)
+                  include ../../admin/modals/_userActionsModal.pug
+
     else
       .alert.alert-info No hay usuarios
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label=`PaginaciÃ³n de ${title || 'usuarios'}`)
+      nav.mt-4(aria-label=`Paginación de ${title || 'usuarios'}`)
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `PÃ¡gina ${page} de ${totalPages}`
+            span.page-link= `Página ${page} de ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
 
-    // Modal: Crear nuevo usuario
-    .modal.fade.admin-users-create-modal#adminCreateUser(tabindex='-1' aria-labelledby='adminCreateUserLabel' aria-hidden='true')
-      .modal-dialog
-        .modal-content
-          .modal-header
-            h5.modal-title#adminCreateUserLabel Crear nuevo usuario
-            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
-          .modal-body
-            form.admin-users-create-form#adminCreateUserForm
-              .mb-3
-                label.form-label(for='newUserName') Nombre
-                input.form-control#newUserName(type='text' name='name' placeholder='Nombre (opcional)')
-              .mb-3
-                label.form-label(for='newUserEmail') Correo
-                input.form-control#newUserEmail(type='email' name='email' placeholder='correo@dominio.com' required)
-              .mb-3
-                label.form-label(for='newUserRole') Rol
-                select.form-select#newUserRole(name='role')
-                  option(value='collector') Collector
-                  option(value='artist' selected=role === 'artist') Artist
-                  option(value='admin') Admin
-              .form-text
-                | Se generará una contraseña segura y se enviará un correo para que el usuario la establezca.
-          .modal-footer
-            button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-            button.btn.btn-primary.admin-users-create-submit#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Crear
-
-
-
-
-
+    // Modal: Crear nuevo usuario (extra�do)
+    include ../../admin/modals/_userCreateModal.pug

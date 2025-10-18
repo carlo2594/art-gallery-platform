@@ -1,0 +1,29 @@
+// Generic confirm delete modal
+// Expects variables in scope:
+// - modalId: string (required)
+// - modalTitle: string (required)
+// - modalMessage: string (optional)
+// - actionUrl: string (required)
+// - httpMethod: string (optional, default 'DELETE')
+// - confirmText: string (optional, default 'ELIMINAR')
+// - confirmBtnLabel: string (optional, default 'Eliminar')
+// - removeSelector: string (optional CSS selector to remove on success)
+.modal.fade.confirm-delete-modal(id=modalId tabindex='-1' aria-labelledby=`${modalId}-label` aria-hidden='true' data-action=actionUrl data-method=(typeof httpMethod !== 'undefined' ? httpMethod : 'DELETE') data-confirm-text=(typeof confirmText !== 'undefined' ? confirmText : 'ELIMINAR') data-remove-selector=(typeof removeSelector !== 'undefined' ? removeSelector : ''))
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`${modalId}-label`)= modalTitle || 'Confirmar eliminación'
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        if modalMessage
+          p.mb-3!= modalMessage
+        else
+          p.mb-3 Esta acción no se puede deshacer.
+        - const mustText = (typeof confirmText !== 'undefined' ? confirmText : 'ELIMINAR')
+        label.form-label(for=`${modalId}-input`) Escribe "#{mustText}" para confirmar
+        input.form-control.confirm-delete-input(type='text' id=`${modalId}-input` placeholder=`Escribe "${mustText}"` autocomplete='off')
+        .form-text.text-muted.mt-1 Sensible a mayúsculas/minúsculas.
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-danger.confirm-delete-submit(type='button' disabled)= (typeof confirmBtnLabel !== 'undefined' ? confirmBtnLabel : 'Eliminar')
+

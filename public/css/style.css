@@ -400,6 +400,16 @@ section.join-artists { position: relative; margin-top: 5rem; }
   font-size: clamp(1.4rem, 5vw, 4rem);
 }
 
+/* Admin: ocultar temporalmente campos de venta en el modal de obras */
+.admin-edit-artwork-form .col-md-4:has(select[name='sale.channel']),
+.admin-edit-artwork-form .col-md-4:has(input[name='sale.price_usd']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.buyerName']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.buyerEmail']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.currency']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.orderId']) {
+  display: none !important;
+}
+
 .collectors-title {
   font-size: clamp(1rem, 4vw, 3rem);
 }

@@ -223,6 +223,8 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     'title', 'description', 'type', 'width_cm', 'height_cm', 'technique',
     'exhibitions', 'status', 'amount', 'price_cents', 'images'
   ];
+  // Permitir que admin indique el artista destino
+  if (req.user && req.user.role === 'admin') allowed.push('artist');
 
   if (isEmptyBody(req.body)) {
     return res.status(400).json({
@@ -270,7 +272,12 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Sube la imagen principal a Cloudinary
   let imageResult = null;
   if (req.file) {
-    imageResult = await upload(req.file.path);
+    if (req.file.path) {
+      imageResult = await upload(req.file.path);
+    } else if (req.file.buffer) {
+      const { uploadBuffer } = require('@utils/cloudinaryImage');
+      imageResult = await uploadBuffer(req.file.buffer);
+    }
   }
   const widthCm = Number(req.body.width_cm);
   const heightCm = Number(req.body.height_cm);
@@ -293,7 +300,16 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Sin validación de aspecto: usamos secure_url tal cual
 
   const data = filterObject(req.body, ...allowed);
-  data.artist = req.user.id;
+  // Asignar artista: si es admin y envía artist válido, usarlo; si no, usar el propio
+  if (req.user && req.user.role === 'admin' && req.body && req.body.artist) {
+    const isValidObjectId = require('@utils/isValidObjectId');
+    if (!isValidObjectId(req.body.artist)) {
+      return next(new AppError('ID de artista inválido.', 400));
+    }
+    data.artist = req.body.artist;
+  } else {
+    data.artist = req.user.id;
+  }
   data.imageUrl = imageUrlToSave;
   data.imagePublicId = imagePublicId;
   data.imageWidth_px = imageWidth_px;
@@ -351,7 +367,13 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 
   // Si viene una nueva imagen, reemplaza la anterior sin validar aspecto
   if (req.file) {
-    const imageResult = await upload(req.file.path);
+    let imageResult;
+    if (req.file.path) {
+      imageResult = await upload(req.file.path);
+    } else if (req.file.buffer) {
+      const { uploadBuffer } = require('@utils/cloudinaryImage');
+      imageResult = await uploadBuffer(req.file.buffer);
+    }
     try { if (art.imagePublicId) await deleteImage(art.imagePublicId); } catch {}
     art.imageUrl = imageResult.secure_url;
     art.imagePublicId = imageResult.public_id;

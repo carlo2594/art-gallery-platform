@@ -1,0 +1,27 @@
+// Modal: Crear nuevo usuario
+.modal.fade.admin-users-create-modal#adminCreateUser(tabindex='-1' aria-labelledby='adminCreateUserLabel' aria-hidden='true')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title#adminCreateUserLabel Crear nuevo usuario
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        form.admin-users-create-form#adminCreateUserForm
+          .mb-3
+            label.form-label(for='newUserName') Nombre
+            input.form-control#newUserName(type='text' name='name' placeholder='Nombre (opcional)')
+          .mb-3
+            label.form-label(for='newUserEmail') Correo
+            input.form-control#newUserEmail(type='email' name='email' placeholder='correo@dominio.com' required)
+          .mb-3
+            label.form-label(for='newUserRole') Rol
+            select.form-select#newUserRole(name='role')
+              option(value='collector') Collector
+              option(value='artist' selected=role === 'artist') Artist
+              option(value='admin') Admin
+          .form-text
+            | Se generará una contraseña segura y se enviará un correo para que el usuario la establezca.
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-primary.admin-users-create-submit#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Crear
+

@@ -1,0 +1,50 @@
+// Modal de edición por usuario (usa variable local `u`)
+.modal.fade.admin-edit-user-modal.admin-users-edit-modal(id=`adminEditUser-${u._id}` tabindex='-1' aria-labelledby=`adminEditUserLabel-${u._id}` aria-hidden='true' data-user-id=u._id)
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`adminEditUserLabel-${u._id}`) Editar usuario - #{u.name}
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        // Bloque de imagen de perfil
+        .mb-3.admin-users-avatar-block
+          label.form-label Imagen de perfil
+          .d-flex.align-items-center.gap-3
+            if u.profileImage
+              img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;')
+            else
+              img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
+            .d-flex.flex-wrap.gap-2
+              input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
+              button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
+              button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
+        // Formulario de datos
+        form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
+          .mb-3
+            label.form-label Nombre
+            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name)
+          .mb-3
+            label.form-label Correo
+            input.form-control(type='email' name='email' placeholder='correo@dominio.com' value=u.email)
+          .mb-3
+            label.form-label Biografía
+            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía')
+          .mb-3
+            label.form-label Ubicación
+            input.form-control(type='text' name='location' placeholder='Ciudad, País')
+          .mb-3
+            label.form-label Sitio web
+            input.form-control(type='url' name='website' placeholder='https://...')
+          .mb-3
+            label.form-label Redes sociales
+            .row.g-2
+              .col-md-4
+                input.form-control(type='text' name='social.instagram' placeholder='Instagram')
+              .col-md-4
+                input.form-control(type='text' name='social.x' placeholder='X / Twitter')
+              .col-md-4
+                input.form-control(type='text' name='social.facebook' placeholder='Facebook')
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Guardar cambios
+

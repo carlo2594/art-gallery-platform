@@ -35,6 +35,33 @@ function buildQsPrefix(q) {
   return s ? `&${s}` : '';
 }
 
+// Regex inteligente: ignora acentos/diacríticos y mayúsculas/minúsculas
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+function buildDiacriticRegex(input) {
+  const map = {
+    a: 'aáàäâãåā',
+    e: 'eéèëêē',
+    i: 'iíìïîī',
+    o: 'oóòöôõō',
+    u: 'uúùüûū',
+    c: 'cç',
+    n: 'nñ',
+    y: 'yýÿ'
+  };
+  const pattern = String(input)
+    .split('')
+    .map(ch => {
+      const lower = ch.toLowerCase();
+      if (map[lower]) return `[${escapeRegex(map[lower])}]`;
+      if (/[a-z]/i.test(ch)) return `[${escapeRegex(lower)}]`;
+      return escapeRegex(ch);
+    })
+    .join('');
+  return new RegExp(pattern, 'i');
+}
+
 /* Exhibiciones */
 exports.getExhibitions = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
@@ -65,17 +92,80 @@ exports.getExhibition = catchAsync(async (req, res, next) => {
 /* Obras */
 exports.getArtworks = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
+
+  // Lectura de filtros básicos desde query
+  const q = (req.query.q || '').trim();
+  const avail = (req.query.avail || '').trim();
+  const statusFilter = (req.query.status || '').trim();
+  const sortParam = (req.query.sort || 'recent').trim();
+
+  // Construcción de filtro
+  const filter = {};
+
+  if (q) {
+    // Buscar obras por título/slug o por nombre de artista (tolerante a tildes)
+    const smart = buildDiacriticRegex(q);
+    const artistIds = await User.find({ name: { $regex: smart } }).distinct('_id');
+    filter.$or = [
+      { title: { $regex: smart } },
+      { slug: { $regex: smart } },
+      { artist: { $in: artistIds } }
+    ];
+  }
+
+  // Mapeo de disponibilidad
+  const AVAIL_ENUM = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
+  if (AVAIL_ENUM.includes(avail)) {
+    filter.availability = avail;
+  } else if (avail === 'available') {
+    filter.availability = { $in: ['for_sale', 'reserved'] };
+  } else if (avail === 'unavailable') {
+    filter.availability = { $in: ['sold', 'not_for_sale', 'on_loan'] };
+  }
+
+  // Filtro por estado (status)
+  const STATUS_ENUM = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+  if (STATUS_ENUM.includes(statusFilter)) {
+    filter.status = statusFilter;
+  }
+
+  // Ordenamiento
+  let sort = { createdAt: -1 };
+  switch (sortParam) {
+    case 'popular':
+      sort = { views: -1 };
+      break;
+    case 'most_favorited':
+      sort = { favoritesCount: -1 };
+      break;
+    case 'price_asc':
+      sort = { price_cents: 1 };
+      break;
+    case 'price_desc':
+      sort = { price_cents: -1 };
+      break;
+    case 'recent':
+    default:
+      sort = { createdAt: -1 };
+  }
+
   const [total, artworks] = await Promise.all([
-    Artwork.countDocuments({}),
-    Artwork.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('artist').lean()
+    Artwork.countDocuments(filter),
+    Artwork.find(filter).sort(sort).skip(skip).limit(perPage).populate('artist').lean()
   ]);
+
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/artworkAdmin', {
     title: 'Obras de arte',
     artworks,
     page,
     totalPages,
-    qsPrefix: buildQsPrefix(req.query)
+    qsPrefix: buildQsPrefix(req.query),
+    // para mantener estado del formulario
+    q,
+    avail,
+    sort: sortParam,
+    statusFilter
   });
 });
 exports.getArtwork = catchAsync(async (req, res, next) => {
@@ -83,7 +173,7 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
     .populate('artist exhibitions')
     .lean();
   if (!artwork) return next(new AppError('Obra no encontrada', 404));
-  res.status(200).render('admin/artworks/detail', {
+  res.status(200).render('admin/artworks/artworkDetailAdmin', {
     title: artwork.title,
     artwork
   });

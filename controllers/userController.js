@@ -365,3 +365,24 @@ exports.lookupByEmail = catchAsync(async (req, res, next) => {
     }
   }, 'OK');
 });
+
+// ADMIN: Buscar usuarios por nombre o email (limitado)
+exports.searchUsers = catchAsync(async (req, res, next) => {
+  const q = (req.query && (req.query.q || req.query.query)) || '';
+  const role = (req.query && req.query.role) || '';
+  const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+  if (!q || String(q).trim() === '') {
+    return sendResponse(res, { users: [] }, 'OK');
+  }
+  const s = String(q).trim();
+  const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const rx = new RegExp(escaped, 'i');
+  const filter = { $or: [ { name: rx }, { email: rx } ] };
+  if (role) filter.role = role;
+  const users = await User.find(filter)
+    .limit(limit)
+    .sort({ lastLoginAt: -1, createdAt: -1 })
+    .select('name email profileImage role')
+    .lean();
+  return sendResponse(res, { users }, 'OK');
+});
