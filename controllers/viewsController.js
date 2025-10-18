@@ -228,12 +228,39 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
 
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  // Top 10 obras más relevantes (aprobadas), ordenadas por views desc
-  const artworks = await getPopularArtworks(Artwork, 10);
+  // Intentar mostrar obras de la exposición más reciente publicada
+  let artworks = [];
+  let latestExhibition = null;
+
+  try {
+    latestExhibition = await Exhibition.findOne({ status: 'published', deletedAt: null })
+      .sort({ startDate: -1, endDate: -1, createdAt: -1 })
+      .select('title slug startDate endDate coverImage')
+      .lean();
+
+    if (latestExhibition) {
+      artworks = await Artwork.find({
+        exhibitions: latestExhibition._id,
+        status: 'approved',
+        deletedAt: null
+      })
+        .sort({ createdAt: -1 })
+        .limit(18)
+        .populate({ path: 'artist', select: 'name' });
+    }
+  } catch (e) {
+    // fallback silencioso a recientes
+  }
+
+  if (!artworks || artworks.length === 0) {
+    const { getRecentArtworks } = require('@utils/artworkHelpers');
+    artworks = await getRecentArtworks(Artwork, 18);
+  }
 
   res.status(200).render('public/home/index', {
     title: 'Inicio · Galería del Ox',
-    artworks
+    artworks,
+    latestExhibition
   });
 });
 

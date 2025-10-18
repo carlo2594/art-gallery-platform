@@ -1,5 +1,31 @@
 extends /layouts/public
 
+//- Estilos específicos de la Home
+block headExtra
+  style.
+    /* Tipografía y estilo para el bloque de pared de galería */
+    .gallery-wall-section .gallery-wall-tagline,
+    .gallery-wall-section .gallery-wall-subtitle {
+      display: none !important;
+    }
+    .gallery-wall-section .gallery-wall-heading {
+      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.02em;
+      color: var(--ox-blue);
+    }
+    .gallery-wall-section .gallery-wall-subtitle-new {
+      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+      font-weight: 600;
+      font-size: 1.8rem;
+      color: var(--ox-blue);
+    }
+    @media (min-width: 768px) {
+      .gallery-wall-section .gallery-wall-heading { font-size: 2.6rem; }
+      .gallery-wall-section .gallery-wall-subtitle-new { font-size: 2.2rem; }
+    }
+
 block content
   section.hero.home-hero
     .container.hero-container
@@ -21,11 +47,19 @@ block content
             decoding="async"
           )
 
-  section.my-5
-    .container-xxl
-      h2.h4.mb-4.text-center Muro de Galería
+  section.my-5.gallery-wall-section
+    .container-xxl.gallery-wall-container
+      //- Versión mejorada con Montserrat
+      h2.gallery-wall-heading.text-center.mb-1 Somos Galería del Ox — gracias a nuestras y nuestros artistas por dar tanto valor.
+      p.gallery-wall-subtitle-new.text-center.mb-4 Exposición: Luz y Materia
+      // Tagline arriba del título
+      p.small.text-muted.text-center.mb-1.gallery-wall-tagline Somos Galería del Ox — gracias a nuestras y nuestros artistas por dar tanto valor.
+      if latestExhibition
+        p.text-center.text-muted.mb-4.gallery-wall-subtitle
+          | Exposición: 
+          a.text-decoration-none(href=`/exhibitions/${latestExhibition.slug || latestExhibition._id}`)= latestExhibition.title
       if artworks && artworks.length
-        ul.grid.effect-2.artwork-grid#grid
+        ul.grid.effect-2.artwork-grid.gallery-wall-grid#grid
           each a in artworks
             - const _url = a.imageUrl || ''
             - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
@@ -33,9 +67,9 @@ block content
             - const src768 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_768/') : _url
             - const src1200 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/') : _url
             - const srcset = isCld ? `${src480} 480w, ${src768} 768w, ${src1200} 1200w` : undefined
-            li
-              a(href=`/artworks/${a.slug || a._id}`)
-                img(
+            li.gallery-wall-item
+              a.gallery-wall-link(href=`/artworks/${a.slug || a._id}` aria-label=a.title)
+                img.gallery-wall-img(
                   src=src480,
                   srcset=srcset,
                   sizes='(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
@@ -51,7 +85,7 @@ block content
           a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
 
   section.join-artists.position-relative
-    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Únete como coleccionista")
+    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Unete como coleccionista")
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
       .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
         i.fas.fa-gem.text-primary.mb-1.mb-md-3.collectors-icon

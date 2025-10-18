@@ -70,7 +70,22 @@ const getPopularArtworks = async (ArtworkModel, limit = 20) => {
     .populate({ path: 'artist', select: 'name' });
 };
 
+/**
+ * Obtiene obras recientes para la página de inicio
+ */
+const getRecentArtworks = async (ArtworkModel, limit = 20) => {
+  return ArtworkModel
+    .find({
+      status: 'approved',
+      deletedAt: null
+    })
+    .sort({ createdAt: -1 })
+    .limit(limit)
+    .populate({ path: 'artist', select: 'name' });
+};
+
 module.exports = {
   findArtworkByIdOrSlug,
-  getPopularArtworks
+  getPopularArtworks,
+  getRecentArtworks
 };
