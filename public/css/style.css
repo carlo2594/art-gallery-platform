@@ -946,6 +946,9 @@ section.join-artists { position: relative; margin-top: 5rem; }
   background: var(--ox-yellow) !important;
   color: var(--ox-blue) !important;
   border-color: var(--ox-yellow) !important;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
 }
 
 .artist-follow-btn:hover,
@@ -960,6 +963,36 @@ section.join-artists { position: relative; margin-top: 5rem; }
   background: var(--ox-yellow) !important;
   color: var(--ox-blue) !important;
   border-color: var(--ox-yellow) !important;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+/* Click effects for follow buttons */
+.btn-pop {
+  animation: btn-pop-keyframes 180ms ease-out;
+}
+
+@keyframes btn-pop-keyframes {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: btn-ripple-keyframes 600ms ease-out;
+  background: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+@keyframes btn-ripple-keyframes {
+  to {
+    transform: scale(12);
+    opacity: 0;
+  }
 }
 
 .artist-follow-btn-mobile:hover,

@@ -540,6 +540,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const { buildArtistArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
   const { getPaginationParams } = require('@utils/pagination');
   const { getPriceRanges } = require('@utils/priceUtils');
+  const Follow = require('@models/followModel');
   
   const artistId = req.params.id;
   const q = req.query;
@@ -598,6 +599,15 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
+  // Estado de seguimiento del usuario actual (si hay sesión)
+  let isFollowing = false;
+  try {
+    const currentUser = res.locals && res.locals.currentUser;
+    if (currentUser && currentUser.id) {
+      isFollowing = !!(await Follow.exists({ follower: currentUser.id, artist: artist._id }));
+    }
+  } catch (_) {}
+
   // Usar utility para construir estadísticas
   const stats = buildArtistStats(allArtworks);
 
@@ -614,7 +624,8 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     totalPages,
     totalArtworks, // Total filtrado
     q, // Query params para filtros
-    actionUrl: `/artists/${artist.slug || artist._id}` // Para formularios de filtro
+    actionUrl: `/artists/${artist.slug || artist._id}`, // Para formularios de filtro
+    isFollowing
   });
 });
 

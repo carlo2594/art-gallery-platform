@@ -48,9 +48,11 @@ block content
                         i.fab.fa-facebook.me-2
                         span Facebook
                 .hero-actions.artist-actions-desktop.d-flex.gap-3
-                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn
+                  // Botón Seguir/Siguiendo
+                  - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
+                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
                     i.fas.fa-heart.me-2
-                    | Seguir
+                    | #{following ? 'Siguiendo' : 'Seguir'}
                   button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
                     i.fas.fa-share.me-2
                     | Compartir
@@ -126,11 +128,84 @@ block content
                 p.text-muted.artist-portfolio-message Este artista estA� preparando su portfolio. A�Vuelve pronto para ver sus creaciones!
 
     // Botón de volver
-    section.back-navigation.py-4
-      .container
-        .row
-          .col-12.text-center
-            a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Volver")
-              i.fas.fa-arrow-left.me-2
-              | Volver
+  section.back-navigation.py-4
+    .container
+      .row
+        .col-12.text-center
+          a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Volver")
+            i.fas.fa-arrow-left.me-2
+            | Volver
 
+  // Inline script para manejar seguir/dejar de seguir
+  script.
+    (function(){
+      function toggleFollow(artistId, desired){
+        var useAxios = typeof window.axios !== 'undefined';
+        if (desired) {
+          if (useAxios) return axios.post('/api/v1/follows', { artistId }).then(function(){ return { ok: true, following: true }; }).catch(function(e){ return { ok: false, error: e }; });
+          return fetch('/api/v1/follows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ artistId: artistId }) })
+            .then(function(res){ if (!res.ok && res.status !== 200 && res.status !== 201) throw res; return { ok: true, following: true }; })
+            .catch(function(e){ return { ok: false, error: e }; });
+        } else {
+          if (useAxios) return axios.delete('/api/v1/follows/' + artistId).then(function(){ return { ok: true, following: false }; }).catch(function(e){ return { ok: false, error: e }; });
+          return fetch('/api/v1/follows/' + artistId, { method: 'DELETE', credentials: 'same-origin' })
+            .then(function(res){ if (!res.ok && res.status !== 204 && res.status !== 404) throw res; return { ok: true, following: false }; })
+            .catch(function(e){ return { ok: false, error: e }; });
+        }
+      }
+      function setup(){
+        var btns = document.querySelectorAll('.artist-follow-btn, .artist-follow-btn-mobile');
+        if (!btns || !btns.length) return;
+        btns.forEach(function(btn){
+          var artistId = btn.getAttribute('data-artist-id');
+          if (!artistId) return;
+          function getState(){ return btn.getAttribute('aria-pressed') === 'true'; }
+          function setState(following){
+            btn.setAttribute('aria-pressed', following ? 'true' : 'false');
+            btn.classList.toggle('active', !!following);
+            var label = following ? 'Siguiendo' : 'Seguir';
+            // rebuild content to keep icon
+            btn.innerHTML = '<i class="fas fa-heart me-2"></i>' + label;
+          }
+          btn.addEventListener('click', function(e){
+            if (btn.disabled) return;
+            // Visual click effects: ripple + pop
+            try {
+              var rect = btn.getBoundingClientRect();
+              var size = Math.max(rect.width, rect.height);
+              var x = (e.clientX - rect.left) - size / 2;
+              var y = (e.clientY - rect.top) - size / 2;
+              var ripple = document.createElement('span');
+              ripple.className = 'btn-ripple';
+              ripple.style.width = size + 'px';
+              ripple.style.height = size + 'px';
+              ripple.style.left = x + 'px';
+              ripple.style.top = y + 'px';
+              btn.appendChild(ripple);
+              ripple.addEventListener('animationend', function(){ ripple.remove(); });
+              btn.classList.add('btn-pop');
+              btn.addEventListener('animationend', function handler(){ btn.classList.remove('btn-pop'); btn.removeEventListener('animationend', handler); });
+            } catch(_) {}
+            var desired = !getState();
+            btn.disabled = true; btn.classList.add('disabled');
+            Promise.resolve(toggleFollow(artistId, desired)).then(function(res){
+              btn.disabled = false; btn.classList.remove('disabled');
+              if (res && res.ok) {
+                setState(!!res.following);
+              } else {
+                var status = (res && res.error && (res.error.status || (res.error.response && res.error.response.status))) || 0;
+                if (status === 401 || status === 403) {
+                  var returnTo = window.location.pathname + window.location.search;
+                  window.location.assign('/login?returnTo=' + encodeURIComponent(returnTo));
+                } else {
+                  console.error('No se pudo actualizar seguimiento', res && res.error);
+                }
+              }
+            });
+          });
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setup);
+      } else { setup(); }
+    })();

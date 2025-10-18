@@ -35,6 +35,8 @@ const userSchema = new mongoose.Schema({
     x: { type: String, trim: true },
     facebook: { type: String, trim: true }
   },
+  // Métrica pública
+  followersCount: { type: Number, default: 0 },
   active: { type: Boolean, default: true, select: false },
   lastLoginAt: { type: Date },
   createdAt: { type: Date, default: Date.now }
@@ -109,6 +111,14 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.correctPassword = function (candidatePassword) {
   if (!this.password) return false;            // evita bcrypt error si el hash no está presente
   return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Recalcular contador de seguidores
+userSchema.statics.recalculateFollowersCount = async function (userId) {
+  const Follow = require('@models/followModel');
+  const count = await Follow.countDocuments({ artist: userId });
+  await this.findByIdAndUpdate(userId, { followersCount: count });
+  return count;
 };
 
 module.exports = mongoose.model('User', userSchema);
