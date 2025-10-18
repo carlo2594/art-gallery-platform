@@ -1,59 +1,7 @@
 extends /layouts/public
 
-//- Estilos específicos de la Home
+//- Estilos específicos de la Home (migrados a /css/style.css)
 block headExtra
-  style.
-    /* Tipografía y estilo para el bloque de pared de galería */
-    .gallery-wall-section .gallery-wall-tagline,
-    .gallery-wall-section .gallery-wall-subtitle {
-      display: none !important;
-    }
-    .gallery-wall-section .gallery-wall-heading {
-      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-      font-weight: 700;
-      font-size: 2rem;
-      letter-spacing: 0.02em;
-      color: var(--ox-blue);
-    }
-    .gallery-wall-section .gallery-wall-subtitle-new {
-      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-      font-weight: 600;
-      font-size: 1.8rem;
-      color: var(--ox-blue);
-    }
-    @media (min-width: 768px) {
-      .gallery-wall-section .gallery-wall-heading { font-size: 2.6rem; }
-      .gallery-wall-section .gallery-wall-subtitle-new { font-size: 2.2rem; }
-    }
-  //- Oculta el bloque anterior de pared de galería para esta versión
-  style.
-    .gallery-wall-section { display: none !important; }
-  //- Estilos para sección de exposiciones recientes
-  style.
-    .home-exhibitions .featurette-heading,
-    .home-exhibitions .lead,
-    .home-exhibitions p,
-    .home-exhibitions .btn {
-      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
-    }
-    .home-exhibitions .featurette-heading { font-weight: 700; }
-    .home-exhibitions .home-expo-img {
-      width: 500px;
-      max-width: 100%;
-      height: auto;
-      object-fit: cover;
-      border-radius: .5rem;
-      display: block;
-    }
-
-  //- Tipografía distinta para el título de sección de exposiciones recientes
-  style.
-    .home-exhibitions .section-heading {
-      font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
-      font-weight: 700;
-      font-style: italic;
-      letter-spacing: .3px;
-    }
 
 block content
   section.hero.home-hero
@@ -76,47 +24,11 @@ block content
             decoding="async"
           )
 
-  section.my-5.gallery-wall-section
-    .container-xxl.gallery-wall-container
-      //- Versión mejorada con Montserrat
-      h2.gallery-wall-heading.text-center.mb-1 Somos Galería del Ox — gracias a nuestras y nuestros artistas por dar tanto valor.
-      p.gallery-wall-subtitle-new.text-center.mb-4 Exposición: Luz y Materia
-      // Tagline arriba del título
-      p.small.text-muted.text-center.mb-1.gallery-wall-tagline Somos Galería del Ox — gracias a nuestras y nuestros artistas por dar tanto valor.
-      if latestExhibition
-        p.text-center.text-muted.mb-4.gallery-wall-subtitle
-          | Exposición: 
-          a.text-decoration-none(href=`/exhibitions/${latestExhibition.slug || latestExhibition._id}`)= latestExhibition.title
-      if artworks && artworks.length
-        ul.grid.effect-2.artwork-grid.gallery-wall-grid#grid
-          each a in artworks
-            - const _url = a.imageUrl || ''
-            - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
-            - const src480 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_480/') : _url
-            - const src768 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_768/') : _url
-            - const src1200 = isCld ? _url.replace('/upload/', '/upload/f_auto,q_auto,w_1200/') : _url
-            - const srcset = isCld ? `${src480} 480w, ${src768} 768w, ${src1200} 1200w` : undefined
-            li.gallery-wall-item
-              a.gallery-wall-link(href=`/artworks/${a.slug || a._id}` aria-label=a.title)
-                img.gallery-wall-img(
-                  src=src480,
-                  srcset=srcset,
-                  sizes='(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
-                  alt=a.title,
-                  loading='lazy',
-                  decoding='async',
-                  width=a.imageWidth_px,
-                  height=a.imageHeight_px
-                )
-      else
-        .text-center.py-5
-          p.mb-2 No hay obras publicadas todavía.
-          a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
-
+  
   //- Exposiciones recientes (3) usando estilo Bootstrap featurette
   section.my-5.home-exhibitions
     .container.marketing
-      h2.section-heading.display-5.text-center.mb-4 Exhibiciones imperdibles
+      h2.section-heading.display-5.text-center.mb-4 Exposiciones imperdibles
       if latestExhibitions && latestExhibitions.length
         each expo, idx in latestExhibitions
           .row.featurette.mb-5.align-items-center
@@ -126,7 +38,7 @@ block content
               if expo.description
                 p.lead= expo.description
               if expo.location
-                - const locText = expo.location && expo.location.address ? expo.location.address : (expo.location && expo.location.type === 'virtual' ? (expo.location.url || 'Virtual') : '')
+                - const locText = (expo.location && expo.location.type === 'virtual') ? 'Virtual' : (expo.location && expo.location.address ? expo.location.address : '')
                 if locText
                   p.small.text-muted Ubicación: #{locText}
               - const sD = expo.startDate ? new Date(expo.startDate) : null
@@ -149,22 +61,26 @@ block content
       else
         p.text-center.text-muted No hay exposiciones publicadas por ahora.
 
+  //- CTA coleccionistas
   section.join-artists.position-relative
     img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Unete como coleccionista")
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
       .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
         i.fas.fa-gem.text-primary.mb-1.mb-md-3.collectors-icon
-        h1.card-title.fw-bold.mb-1.mb-md-3.collectors-title ¿Eres coleccionista?
-        p.card-text.mb-1.mb-md-3.collectors-description Únete a nuestra comunidad exclusiva de coleccionistas.
+        h1.card-title.fw-bold.mb-1.mb-md-3.collectors-title A?Eres coleccionista?
+        p.card-text.mb-1.mb-md-3.collectors-description Asnete a nuestra comunidad exclusiva de coleccionistas.
         .feature-list.mb-1.mb-md-3
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
             span.fw-medium.collectors-check-text Acceso anticipado a obras
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
-            span.fw-medium.collectors-check-text Asesoría personalizada
+            span.fw-medium.collectors-check-text AsesorA-a personalizada
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
             span.fw-medium.collectors-check-text Certificados de autenticidad
         a.btn.btn-primary.rounded-pill.fw-bold.d-flex.align-items-center.justify-content-center.text-center.collectors-cta-btn(href="/signup") 
           span Crear cuenta gratuita
+
+block scriptsExtra
+  //- JS movido a /js/main.js

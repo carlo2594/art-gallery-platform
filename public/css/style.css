@@ -55,6 +55,13 @@
 html { font-size: 62.5%; height: 100%; min-height: 100%; }
 body { font-family: var(--font-title); background-color: var(--ox-beige); color: var(--ox-blue); font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
 .main-content { flex: 1 0 auto; }
+/* Strengthen sticky footer behavior on home (and globally) */
+.main-content {
+  flex: 1 1 auto;              /* allow growth/shrink */
+  display: flex;               /* stack inner sections */
+  flex-direction: column;
+  min-height: 0;               /* avoid overflow pushing footer */
+}
 footer, .footer { flex-shrink: 0; }
 
 /* ==========================================
@@ -2247,3 +2254,86 @@ body.noscroll {
 /* Image/link helpers */
 .artwork-grid__image { display: block; width: 100%; height: auto; }
 .artwork-grid__stretched-link { position: absolute; inset: 0; }
+/* Home Exhibitions heading highlight and letter reveal */
+.home-exhibitions .section-heading {
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+  padding: 0 .15em;
+  background-image: linear-gradient(transparent 60%, var(--ox-yellow) 60%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.home-exhibitions .section-heading.ox-reveal .ox-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.35em);
+  transition: transform 600ms cubic-bezier(.2,.7,.1,1), opacity 600ms ease;
+}
+
+.home-exhibitions .section-heading.ox-reveal.is-visible .ox-letter {
+  opacity: 1;
+  transform: none;
+}
+/* Centered heading and extra spacing between words */
+.home-exhibitions .section-heading {
+  word-spacing: 0.25em; /* extra gap between words */
+}
+
+/* Do not animate spaces; give them consistent width */
+.home-exhibitions .section-heading.ox-reveal .ox-letter.ox-space {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  width: 0.35em; /* tweak to control word gap */
+  display: inline-block;
+}
+/* Center the section heading precisely */
+.home-exhibitions .section-heading {
+  display: block;              /* override earlier inline-block */
+  width: -moz-fit-content;     /* Firefox */
+  width: fit-content;          /* shrink to text width */
+  margin-left: auto;           /* center the block */
+  margin-right: auto;          /* center the block */
+  text-align: center;          /* center letters/spans inside */
+}
+/* Ensure footer sticks to bottom inside flex-column body */
+.footer { margin-top: auto; }
+
+/* Home: hide old gallery wall block on home */
+.gallery-wall-section { display: none !important; }
+
+/* Home exhibitions typography and image sizing */
+.home-exhibitions .featurette-heading,
+.home-exhibitions .lead,
+.home-exhibitions p,
+.home-exhibitions .btn {
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+.home-exhibitions .featurette-heading { font-weight: 700; }
+.home-exhibitions .home-expo-img {
+  width: 500px;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: .5rem;
+  display: block;
+}
+
+/* Home exhibitions heading display and style */
+.home-exhibitions .section-heading {
+  font-family: var(--font-subtitle), Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: .3px;
+  /* center and highlight (previously added rules for highlight/center) */
+  display: block;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}

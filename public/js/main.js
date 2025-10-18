@@ -1252,3 +1252,36 @@ document.addEventListener('DOMContentLoaded', function(){
     });
   })();
 });
+  // Home: letter reveal for home-exhibitions title
+  (function homeHeadingReveal(){
+    var heading = document.querySelector('.home-exhibitions .section-heading');
+    if (!heading) return;
+    var txt = (heading.textContent || '').trim();
+    if (!txt) return;
+    heading.textContent = '';
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < txt.length; i++) {
+      var ch = txt[i];
+      var span = document.createElement('span');
+      if (ch === ' ') {
+        span.className = 'ox-letter ox-space';
+        span.innerHTML = '\u00A0';
+      } else {
+        span.className = 'ox-letter';
+        span.textContent = ch;
+        span.style.transitionDelay = (i * 35) + 'ms';
+      }
+      frag.appendChild(span);
+    }
+    heading.appendChild(frag);
+    heading.classList.add('ox-reveal');
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          heading.classList.add('is-visible');
+          io.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+    io.observe(heading);
+  })();
