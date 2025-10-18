@@ -2,39 +2,115 @@ extends /layouts/admin
 
 block content
   .container.py-5
-    h1.h3.mb-4 Exposiciones
+    - const isAdmin = currentUser && currentUser.role === 'admin'
+    h1.h3.mb-4.d-flex.justify-content-between.align-items-center
+      span Exposiciones
+      if isAdmin
+        button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateExhibition')
+          i.fas.fa-plus.me-1
+          | Agregar exposicion
+
+    // Filtros y busqueda
+    form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
+      .col-sm-8.col-md-6
+        input.form-control(type='text', name='q', placeholder='Buscar por titulo, slug o creador', value=q || '')
+      .col-sm-6.col-md-3
+        select.form-select(name='when')
+          option(value='') Momento: Todos
+          option(value='current' selected=when === 'current') En curso
+          option(value='upcoming' selected=when === 'upcoming') Proximas
+          option(value='past' selected=when === 'past') Finalizadas
+      .col-sm-6.col-md-3
+        select.form-select(name='status')
+          option(value='') Estado: Todos
+          option(value='draft' selected=statusFilter === 'draft') Borrador
+          option(value='published' selected=statusFilter === 'published') Publicada
+          option(value='archived' selected=statusFilter === 'archived') Archivada
+      .col-sm-6.col-md-3
+        select.form-select(name='loc')
+          option(value='') Ubicacion: Todas
+          option(value='physical' selected=locType === 'physical') Fisica
+          option(value='virtual' selected=locType === 'virtual') Virtual
+      .col-sm-6.col-md-3
+        select.form-select(name='sort')
+          option(value='recent' selected=!sort || sort === 'recent') Recientes primero
+          option(value='start_asc' selected=sort === 'start_asc') Inicio: mas cercanas
+          option(value='start_desc' selected=sort === 'start_desc') Inicio: mas lejanas
+          option(value='end_asc' selected=sort === 'end_asc') Fin: mas cercanas
+          option(value='end_desc' selected=sort === 'end_desc') Fin: mas lejanas
+          option(value='title_asc' selected=sort === 'title_asc') Titulo A-Z
+      .col-auto
+        button.btn.btn-primary(type='submit') Buscar
+      if q || when || statusFilter || sort || locType
+        .col-auto
+          a.btn.btn-outline-secondary(href='?') Limpiar
+
     if exhibitions && exhibitions.length
       .table-responsive
         table.table.table-striped.table-hover.align-middle
           thead
             tr
-              th Título
+              th Titulo
+              th Estado
               th Creada por
+              th Ubicacion
               th Obras
               th Inicio
               th Fin
-              th Acciones
+              th Vista previa
+              th Editar
           tbody
             each e in exhibitions
-              tr
-                td= e.name || e.title
-                td= e.createdBy && (e.createdBy.name || e.createdBy.email) || '—'
-                td= e.artworks ? e.artworks.length : (e.artworksCount || '—')
-                td= e.startDate ? new Date(e.startDate).toLocaleDateString('es-ES') : '—'
-                td= e.endDate ? new Date(e.endDate).toLocaleDateString('es-ES') : '—'
+              - const st = e.status || 'draft'
+              - const loc = (e.location && e.location.type) || ''
+              tr(id=`exhRow-${e._id}`)
+                td= e.title || e.name
                 td
-                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}`) Ver
+                  span.badge(class=st === 'published' ? 'text-bg-success' : (st === 'archived' ? 'text-bg-dark' : 'text-bg-secondary'))= st
+                td= e.createdBy && (e.createdBy.name || e.createdBy.email) || '""'
+                td= loc ? (loc === 'physical' ? 'Fisica' : 'Virtual') : '""'
+                td= Array.isArray(e.artworks) ? e.artworks.length : (e.artworksCount || '""')
+                td= e.startDate ? new Date(e.startDate).toLocaleDateString('es-ES') : '""'
+                td= e.endDate ? new Date(e.endDate).toLocaleDateString('es-ES') : '""'
+                // Columna Vista previa
+                td
+                  a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}`)
+                    i.fas.fa-eye.me-1
+                    | Ver
+                // Columna Editar (modal por fila) + eliminar
+                td
+                  button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditExhibition-${e._id}`)
+                    i.fas.fa-pen-to-square.me-1
+                    | Editar
+                  include ../modals/_exhibitionEditModal.pug
+                  if isAdmin
+                    button.btn.btn-sm.btn-outline-danger.ms-2(type='button', data-bs-toggle='modal', data-bs-target=`#confirmDeleteExhibition-${e._id}`)
+                      i.fas.fa-trash-can.me-1
+                      | Eliminar
+                    - const modalId = `confirmDeleteExhibition-${e._id}`
+                    - const modalTitle = `Eliminar exposicion - ${e.title || e.name}`
+                    - const modalMessage = 'Esta accion eliminara la exposicion de forma permanente. Escribe "ELIMINAR" para confirmar.'
+                    - const actionUrl = `/api/v1/exhibitions/${e._id}`
+                    - const httpMethod = 'DELETE'
+                    - const confirmText = 'ELIMINAR'
+                    - const confirmBtnLabel = 'Eliminar'
+                    - const removeSelector = `#exhRow-${e._id}`
+                    include ../modals/_confirmDeleteModal.pug
     else
       .alert.alert-info No hay exposiciones
+
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label='Paginación de exposiciones')
+      nav.mt-4(aria-label='Paginacion de exposiciones')
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `Pagina ${page} de ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+
+    if isAdmin
+      include ../modals/_exhibitionCreateModal.pug
 

@@ -1,0 +1,46 @@
+// Modal: Crear nueva exposicion (solo admin)
+.modal.fade#adminCreateExhibition(tabindex='-1' aria-labelledby='adminCreateExhibitionLabel' aria-hidden='true')
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        h5.modal-title#adminCreateExhibitionLabel Agregar exposicion
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        form.admin-create-exhibition-form#adminCreateExhibitionForm
+          .row.g-3
+            .col-md-8
+              label.form-label Titulo
+              input.form-control(type='text', name='title', placeholder='Titulo de la exposicion', required)
+              .invalid-feedback Campo requerido
+            .col-md-4
+              label.form-label Estado
+              select.form-select(name='status')
+                option(value='draft' selected) Borrador
+                option(value='published') Publicada
+                option(value='archived') Archivada
+          .mb-3
+            label.form-label Descripcion
+            textarea.form-control(name='description' rows='3' placeholder='Descripcion (opcional)')
+          .row.g-3
+            .col-md-4
+              label.form-label Tipo de ubicacion
+              select.form-select(name='location_type')
+                option(value='') Sin especificar
+                option(value='physical') Fisica
+                option(value='virtual') Virtual
+            .col-md-8
+              label.form-label Direccion (si es fisica) o URL (si es virtual)
+              input.form-control(type='text', name='location_value', placeholder='Direccion o URL (opcional)')
+          .row.g-3
+            .col-md-6
+              label.form-label Fecha de inicio
+              input.form-control(type='date', name='startDate', required)
+              .invalid-feedback Ingresa una fecha valida
+            .col-md-6
+              label.form-label Fecha de fin
+              input.form-control(type='date', name='endDate', required)
+              .invalid-feedback Ingresa una fecha valida
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-primary.admin-exhibitions-create-submit(type='submit' form='adminCreateExhibitionForm') Crear
+

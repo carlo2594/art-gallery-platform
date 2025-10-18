@@ -4,6 +4,7 @@
 const express = require('express');
 const router = express.Router();
 const viewsController = require('@controllers/viewsController');
+const Exhibition = require('@models/exhibitionModel');
 
 // =================== PÁGINA DE INICIO ===================
 router.get('/', viewsController.getHome);
@@ -39,6 +40,22 @@ router.get('/artworks/:id', viewsController.getArtworkDetail);
 // =================== EXPOSICIONES ======================
 
 router.get('/exhibitions', viewsController.getExhibitionsView);
+router.get('/exhibitions/unpublished', viewsController.getExhibitionUnpublished);
+// Guard: si existe pero no publicada, redirige a pagina dedicada
+router.get('/exhibitions/:id', async (req, res, next) => {
+  try {
+    const idOrSlug = req.params.id;
+    const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(idOrSlug));
+    const base = isObjectId ? { _id: idOrSlug, deletedAt: null } : { slug: idOrSlug, deletedAt: null };
+    const ex = await Exhibition.findOne(base).select('_id status').lean();
+    if (ex && ex.status !== 'published') {
+      return res.redirect(303, '/exhibitions/unpublished');
+    }
+  } catch (_) {
+    // ignore and continue
+  }
+  return next();
+});
 router.get('/exhibitions/:id', viewsController.getExhibitionDetail);
 
 // =================== BÚSQUEDA GLOBAL ===================

@@ -1,0 +1,50 @@
+// Modal de edicion de exposicion (usa variable local `e`)
+.modal.fade(id=`adminEditExhibition-${e._id}` tabindex='-1' aria-labelledby=`adminEditExhibitionLabel-${e._id}` aria-hidden='true')
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`adminEditExhibitionLabel-${e._id}`) Editar exposicion - #{e.title || e.name}
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        form.admin-edit-exhibition-form(id=`adminEditExhibitionForm-${e._id}` data-exhibition-id=e._id)
+          // Basicos
+          .row.g-3
+            .col-md-8
+              label.form-label Titulo
+              input.form-control(type='text', name='title', value=e.title || e.name)
+            .col-md-4
+              label.form-label Estado
+              select.form-select(name='status')
+                option(value='draft' selected=(e.status||'draft')==='draft') Borrador
+                option(value='published' selected=e.status==='published') Publicada
+                option(value='archived' selected=e.status==='archived') Archivada
+          .mb-3
+            label.form-label Descripcion
+            textarea.form-control(name='description' rows='3')= e.description || ''
+          // Ubicacion
+          .row.g-3
+            .col-md-4
+              - const locTypeVal = (e.location && e.location.type) || ''
+              label.form-label Tipo de ubicacion
+              select.form-select(name='location_type')
+                option(value='' selected=!locTypeVal) Sin especificar
+                option(value='physical' selected=locTypeVal==='physical') Fisica
+                option(value='virtual' selected=locTypeVal==='virtual') Virtual
+            .col-md-8
+              - const locValue = (e.location && (e.location.address || e.location.url)) || ''
+              label.form-label Direccion (si es fisica) o URL (si es virtual)
+              input.form-control(type='text', name='location_value', value=locValue)
+          // Fechas
+          .row.g-3
+            .col-md-6
+              - const startVal = e.startDate ? new Date(e.startDate).toISOString().slice(0,10) : ''
+              label.form-label Fecha de inicio
+              input.form-control(type='date', name='startDate', value=startVal)
+            .col-md-6
+              - const endVal = e.endDate ? new Date(e.endDate).toISOString().slice(0,10) : ''
+              label.form-label Fecha de fin
+              input.form-control(type='date', name='endDate', value=endVal)
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
+        button.btn.btn-primary.admin-exhibitions-save(type='submit' form=`adminEditExhibitionForm-${e._id}`) Guardar cambios
+

@@ -192,8 +192,10 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
   const { buildExhibitionFilter, getExhibitionSort, getExhibitionDateBounds } = require('@utils/exhibitionSearch');
   const { getPaginationParams } = require('@utils/pagination');
 
-  // Filtro y orden
+  // Filtro y orden (solo publicadas)
   const exhibitionFilter = buildExhibitionFilter(q, search);
+  exhibitionFilter.status = 'published';
+  exhibitionFilter.deletedAt = null;
   const exhibitionSort = getExhibitionSort(q.sort);
 
   // Paginación (usa exhibitionPage para coherencia con parciales)
@@ -204,6 +206,8 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
 
   // Bounds de fechas disponibles (basado en filtros base, sin rango aplicado)
   const baseExhFilterForBounds = buildExhibitionFilter({ type: q.type }, search);
+  baseExhFilterForBounds.status = 'published';
+  baseExhFilterForBounds.deletedAt = null;
   const exhibitionDateBounds = await getExhibitionDateBounds(Exhibition, baseExhFilterForBounds);
 
   // Consulta principal
@@ -648,13 +652,13 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   let exhibition = null;
   const isObjectId = /^[0-9a-fA-F]{24}$/.test(String(idOrSlug));
   if (isObjectId) {
-    exhibition = await Exhibition.findOne({ _id: idOrSlug, deletedAt: null })
+    exhibition = await Exhibition.findOne({ _id: idOrSlug, status: 'published', deletedAt: null })
       .populate({ path: 'createdBy', select: 'name slug' })
       .populate({ path: 'participants.user', select: 'name slug' })
       .lean();
   }
   if (!exhibition) {
-    exhibition = await Exhibition.findOne({ slug: idOrSlug, deletedAt: null })
+    exhibition = await Exhibition.findOne({ slug: idOrSlug, status: 'published', deletedAt: null })
       .populate({ path: 'createdBy', select: 'name slug' })
       .populate({ path: 'participants.user', select: 'name slug' })
       .lean();
@@ -693,4 +697,12 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
     totalArtworks
   });
 });
+
+
+// Vista: exposicion privada o no publicada
+exports.getExhibitionUnpublished = (req, res) => {
+  return res.status(403).render('public/exhibitions/unpublished', {
+    title: 'Exposicion privada | Galeria del Ox'
+  });
+};
 

@@ -65,9 +65,77 @@ function buildDiacriticRegex(input) {
 /* Exhibiciones */
 exports.getExhibitions = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
+
+  // Read filters from query
+  const q = (req.query.q || '').trim();
+  const statusFilter = (req.query.status || '').trim(); // draft | published | archived
+  const when = (req.query.when || '').trim(); // current | upcoming | past
+  const locType = (req.query.loc || '').trim(); // physical | virtual
+  const sortParam = (req.query.sort || 'recent').trim();
+
+  // Build filter
+  const filter = {};
+
+  if (q) {
+    // Search by title/slug or creator name (diacritic tolerant)
+    const smart = buildDiacriticRegex(q);
+    const creatorIds = await User.find({ name: { $regex: smart } }).distinct('_id');
+    filter.$or = [
+      { title: { $regex: smart } },
+      { slug: { $regex: smart } },
+      { createdBy: { $in: creatorIds } }
+    ];
+  }
+
+  // Filter by status
+  const STATUS_ENUM = ['draft', 'published', 'archived'];
+  if (STATUS_ENUM.includes(statusFilter)) {
+    filter.status = statusFilter;
+  }
+
+  // Filter by time window
+  const now = new Date();
+  if (when === 'current') {
+    filter.startDate = { $lte: now };
+    filter.endDate = { $gte: now };
+  } else if (when === 'upcoming') {
+    filter.startDate = { $gt: now };
+  } else if (when === 'past') {
+    filter.endDate = { $lt: now };
+  }
+
+  // Filter by location type
+  const LOC_ENUM = ['physical', 'virtual'];
+  if (LOC_ENUM.includes(locType)) {
+    filter['location.type'] = locType;
+  }
+
+  // Sorting
+  let sort = { createdAt: -1 };
+  switch (sortParam) {
+    case 'start_asc':
+      sort = { startDate: 1 };
+      break;
+    case 'start_desc':
+      sort = { startDate: -1 };
+      break;
+    case 'end_asc':
+      sort = { endDate: 1 };
+      break;
+    case 'end_desc':
+      sort = { endDate: -1 };
+      break;
+    case 'title_asc':
+      sort = { title: 1 };
+      break;
+    case 'recent':
+    default:
+      sort = { createdAt: -1 };
+  }
+
   const [total, exhibitions] = await Promise.all([
-    Exhibition.countDocuments({}),
-    Exhibition.find({}).sort({ createdAt: -1 }).skip(skip).limit(perPage).populate('createdBy').lean()
+    Exhibition.countDocuments(filter),
+    Exhibition.find(filter).sort(sort).skip(skip).limit(perPage).populate('createdBy').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/exhibitions/index', {
@@ -75,7 +143,13 @@ exports.getExhibitions = catchAsync(async (req, res) => {
     exhibitions,
     page,
     totalPages,
-    qsPrefix: buildQsPrefix(req.query)
+    qsPrefix: buildQsPrefix(req.query),
+    // Form state
+    q,
+    sort: sortParam,
+    statusFilter,
+    when,
+    locType
   });
 });
 exports.getExhibition = catchAsync(async (req, res, next) => {
