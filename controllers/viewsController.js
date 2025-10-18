@@ -229,8 +229,10 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
 // Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
   // Intentar mostrar obras de la exposición más reciente publicada
+  // y listar las 3 exposiciones más recientes en la home
   let artworks = [];
   let latestExhibition = null;
+  let latestExhibitions = [];
 
   try {
     latestExhibition = await Exhibition.findOne({ status: 'published', deletedAt: null })
@@ -248,6 +250,12 @@ exports.getHome = catchAsync(async (req, res) => {
         .limit(18)
         .populate({ path: 'artist', select: 'name' });
     }
+    // También: obtener las 3 exposiciones más recientes publicadas
+    latestExhibitions = await Exhibition.find({ status: 'published', deletedAt: null })
+      .sort({ startDate: -1, endDate: -1, createdAt: -1 })
+      .limit(3)
+      .select('title slug description location startDate endDate coverImage')
+      .lean();
   } catch (e) {
     // fallback silencioso a recientes
   }
@@ -260,7 +268,8 @@ exports.getHome = catchAsync(async (req, res) => {
   res.status(200).render('public/home/index', {
     title: 'Inicio · Galería del Ox',
     artworks,
-    latestExhibition
+    latestExhibition,
+    latestExhibitions
   });
 });
 

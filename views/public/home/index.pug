@@ -25,6 +25,26 @@ block headExtra
       .gallery-wall-section .gallery-wall-heading { font-size: 2.6rem; }
       .gallery-wall-section .gallery-wall-subtitle-new { font-size: 2.2rem; }
     }
+  //- Oculta el bloque anterior de pared de galería para esta versión
+  style.
+    .gallery-wall-section { display: none !important; }
+  //- Estilos para sección de exposiciones recientes
+  style.
+    .home-exhibitions .featurette-heading,
+    .home-exhibitions .lead,
+    .home-exhibitions p,
+    .home-exhibitions .btn {
+      font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+    .home-exhibitions .featurette-heading { font-weight: 700; }
+    .home-exhibitions .home-expo-img {
+      width: 500px;
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
+      border-radius: .5rem;
+      display: block;
+    }
 
 block content
   section.hero.home-hero
@@ -83,6 +103,42 @@ block content
         .text-center.py-5
           p.mb-2 No hay obras publicadas todavía.
           a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
+
+  //- Exposiciones recientes (3) usando estilo Bootstrap featurette
+  section.my-5.home-exhibitions
+    .container.marketing
+      h2.text-center.mb-4(style="font-family: 'Montserrat'; font-weight: 700;") Exposiciones recientes
+      if latestExhibitions && latestExhibitions.length
+        each expo, idx in latestExhibitions
+          .row.featurette.mb-5
+            - const isEven = idx % 2 === 1
+            .col-md-7(class=isEven ? 'order-md-2' : '')
+              h2.featurette-heading.fw-bold= expo.title
+              if expo.description
+                p.lead= expo.description
+              if expo.location
+                - const locText = expo.location && expo.location.address ? expo.location.address : (expo.location && expo.location.type === 'virtual' ? (expo.location.url || 'Virtual') : '')
+                if locText
+                  p.small.text-muted Ubicación: #{locText}
+              - const sD = expo.startDate ? new Date(expo.startDate) : null
+              - const eD = expo.endDate ? new Date(expo.endDate) : null
+              - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
+              if dateText
+                p.small.text-muted= dateText
+              p.mt-2
+                a.btn.btn-secondary(href=`/exhibitions/${expo.slug || expo._id}`) Ver detalles »
+            .col-md-5(class=isEven ? 'order-md-1' : '')
+              a(href=`/exhibitions/${expo.slug || expo._id}`, aria-label=expo.title)
+                if expo.coverImage
+                  img.featurette-image.img-fluid.mx-auto.home-expo-img(src=expo.coverImage, alt=expo.title, loading='lazy', decoding='async')
+                else
+                  svg.bd-placeholder-img.bd-placeholder-img-lg.featurette-image.img-fluid.mx-auto(width='500', height='500', xmlns='http://www.w3.org/2000/svg', role='img', aria-label='Placeholder', preserveAspectRatio='xMidYMid slice')
+                    title Placeholder
+                    rect(width='100%', height='100%', fill='var(--bs-secondary-bg)')
+                    text(x='50%', y='50%', fill='var(--bs-secondary-color)', dy='.3em') 500x500
+        hr.featurette-divider
+      else
+        p.text-center.text-muted No hay exposiciones publicadas por ahora.
 
   section.join-artists.position-relative
     img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Unete como coleccionista")
