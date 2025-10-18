@@ -28,7 +28,7 @@ block content
   //- Exposiciones recientes (3) usando estilo Bootstrap featurette
   section.my-5.home-exhibitions
     .container.marketing
-      h2.section-heading.display-5.text-center.mb-4 Exposiciones imperdibles
+      h2.section-heading.display-5.text-center.mb-4 Exposiciones Imperdibles
       if latestExhibitions && latestExhibitions.length
         each expo, idx in latestExhibitions
           .row.featurette.mb-5.align-items-center
@@ -46,8 +46,7 @@ block content
               - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
               if dateText
                 p.small.text-muted= dateText
-              p.mt-2
-                a.btn.btn-secondary(href=`/exhibitions/${expo.slug || expo._id}`) Ver detalles »
+              //- Botón de "Ver detalles" eliminado a solicitud
             .col-md-5(class=isEven ? 'order-md-1 d-flex justify-content-center align-items-center' : 'd-flex justify-content-center align-items-center')
               a(href=`/exhibitions/${expo.slug || expo._id}`, aria-label=expo.title)
                 if expo.coverImage
@@ -57,7 +56,7 @@ block content
                     title Placeholder
                     rect(width='100%', height='100%', fill='var(--bs-secondary-bg)')
                     text(x='50%', y='50%', fill='var(--bs-secondary-color)', dy='.3em') 500x500
-        hr.featurette-divider
+        
       else
         p.text-center.text-muted No hay exposiciones publicadas por ahora.
 
@@ -67,15 +66,15 @@ block content
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
       .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
         i.fas.fa-gem.text-primary.mb-1.mb-md-3.collectors-icon
-        h1.card-title.fw-bold.mb-1.mb-md-3.collectors-title A?Eres coleccionista?
-        p.card-text.mb-1.mb-md-3.collectors-description Asnete a nuestra comunidad exclusiva de coleccionistas.
+        h1.card-title.fw-bold.mb-1.mb-md-3.collectors-title &iquest;Eres coleccionista?
+        p.card-text.mb-1.mb-md-3.collectors-description &Uacute;nete a nuestra comunidad exclusiva de coleccionistas.
         .feature-list.mb-1.mb-md-3
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
             span.fw-medium.collectors-check-text Acceso anticipado a obras
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
-            span.fw-medium.collectors-check-text AsesorA-a personalizada
+            span.fw-medium.collectors-check-text Asesor&iacute;a personalizada
           .d-flex.align-items-center.justify-content-center.mb-1
             i.fas.fa-check.text-success.me-1.me-md-3.collectors-check-icon
             span.fw-medium.collectors-check-text Certificados de autenticidad
@@ -83,4 +82,5 @@ block content
           span Crear cuenta gratuita
 
 block scriptsExtra
-  //- JS movido a /js/main.js
+  //- Efectos de texto para exposiciones de la Home
+  script(src="/js/home-effects.js")

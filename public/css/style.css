@@ -407,6 +407,60 @@ section.join-artists { position: relative; margin-top: 5rem; }
   font-size: clamp(1.4rem, 5vw, 4rem);
 }
 
+/* ==========================================
+  4.3. SECTIONS: HOME EXHIBITIONS EFFECTS
+  ========================================== */
+/* Simple, clean fade-up for text blocks */
+.home-exhibitions .section-heading {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .5s ease, transform .5s ease;
+  color: var(--ox-blue);
+  margin-bottom: 3rem !important; /* override Bootstrap mb-4 if present */
+}
+
+.home-exhibitions .section-heading.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+.home-exhibitions .featurette .featurette-heading,
+.home-exhibitions .featurette .lead,
+.home-exhibitions .featurette .text-muted {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+
+.home-exhibitions .featurette.in-view .featurette-heading { opacity: 1; transform: none; transition-delay: 0s; }
+.home-exhibitions .featurette.in-view .lead             { opacity: 1; transform: none; transition-delay: .08s; }
+.home-exhibitions .featurette.in-view .text-muted       { opacity: 1; transform: none; transition-delay: .16s; }
+
+/* Keep headings in brand blue, no gradients */
+.home-exhibitions .featurette .featurette-heading {
+  color: var(--ox-blue);
+}
+
+/* Ensure no underline decoration remains */
+.home-exhibitions .featurette .featurette-heading::after { content: none; }
+
+  /* Respect users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .home-exhibitions .section-heading {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .home-exhibitions .featurette .featurette-heading,
+    .home-exhibitions .featurette .lead,
+    .home-exhibitions .featurette .text-muted {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .home-exhibitions .featurette .featurette-heading::after { content: none !important; }
+  }
+
 /* Admin: ocultar temporalmente campos de venta en el modal de obras */
 .admin-edit-artwork-form .col-md-4:has(select[name='sale.channel']),
 .admin-edit-artwork-form .col-md-4:has(input[name='sale.price_usd']),
