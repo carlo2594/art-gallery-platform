@@ -22,67 +22,72 @@ block content
       .hero-content.exhibition-hero-content.position-absolute.bottom-0.start-0.w-100.exhibition-hero-z-index.exhibition-detail__hero-content
         .container.text-white.pb-5.exhibition-detail__hero-container
           .row.exhibition-detail__hero-row
-            .col-12.col-lg-8
-              .exhibition-hero-info.text-white.pb-5.exhibition-hero-card.p-4.p-lg-5
+            .col-12.col-lg-10.col-xl-8
+              // Card unificado: título, descripción, fechas, lugar y artistas invitados
+              .exhibition-hero-info.text-white.pb-4.pb-lg-5.exhibition-hero-card.p-4.p-lg-5
+                // Título y descripción
                 h1.display-4.fw-bold.mb-3.exhibition-title-font.exhibition-detail__title= title
                 if exhibition && exhibition.description
                   p.lead.mb-4.text-white-75.exhibition-description-style.exhibition-detail__description= exhibition.description
-            .col-12.col-lg-4
-              .text-center.p-4.exhibition-info-card.exhibition-stats-card
-                .small.text-white-75.mb-2 Fechas
-                - try {
-                -   var hasStart = exhibition && exhibition.startDate;
-                -   var hasEnd = exhibition && exhibition.endDate;
-                -   if (hasStart || hasEnd) {
-                -     var sD = hasStart ? new Date(exhibition.startDate) : null;
-                -     var eD = hasEnd ? new Date(exhibition.endDate) : null;
-                -     var sd = hasStart ? sD.getDate() : null;
-                -     var ed = hasEnd ? eD.getDate() : null;
-                -     var sMonthShort = hasStart ? sD.toLocaleDateString('es-MX', { month: 'short' }) : '';
-                -     var eMonthShort = hasEnd ? eD.toLocaleDateString('es-MX', { month: 'short' }) : '';
-                -     var sy = hasStart ? sD.getFullYear() : null;
-                -     var ey = hasEnd ? eD.getFullYear() : null;
-                -     if (hasStart && hasEnd) {
-                -       var sameYear = sy === ey;
-                -       var sameMonth = sameYear && (sD.getMonth() === eD.getMonth());
-                -       if (sameYear && sameMonth) {
-                -         dateText = `${sd}–${ed} ${sMonthShort} ${sy}`;
-                -       } else if (sameYear) {
-                -         dateText = `${sd} ${sMonthShort} – ${ed} ${eMonthShort} ${sy}`;
-                -       } else {
-                -         dateText = `${sd} ${sMonthShort} ${sy} – ${ed} ${eMonthShort} ${ey}`;
-                -       }
-                -     } else if (hasStart) {
-                -       dateText = `Desde ${sd} ${sMonthShort} ${sy}`;
-                -     } else if (hasEnd) {
-                -       dateText = `Hasta ${ed} ${eMonthShort} ${ey}`;
-                -     }
-                -   }
-                - } catch(e) { }
-                if dateText
-                  .h6.mb-0= dateText
-                else
-                  .small.text-white-50 Por anunciar
+
                 hr.my-3.opacity-50
-                .small.text-white-75.mb-2 Lugar
-                if exhibition && exhibition.location && exhibition.location.type === 'physical'
-                  .h6.mb-0= exhibition.venue || exhibition.location.address || 'Por anunciar'
-                else if exhibition && exhibition.location && exhibition.location.type === 'virtual'
-                  .h6.mb-0.exhibition-detail__venue
-                    span.text-white Exposición virtual
-                else
-                  .small.text-white-50 Por anunciar
-            if guestArtists && guestArtists.length
-              .flex-fill.exhibition-dates-flex.exhibition-detail__guests-col
-                .text-center.p-4.exhibition-info-card.exhibition-detail__guests-card
+
+                // Fechas y lugar en dos columnas en desktop
+                .row.g-4
+                  .col-12.col-lg-6
+                    .small.text-white-75.mb-2 Fechas
+                    - try {
+                    -   var hasStart = exhibition && exhibition.startDate;
+                    -   var hasEnd = exhibition && exhibition.endDate;
+                    -   if (hasStart || hasEnd) {
+                    -     var sD = hasStart ? new Date(exhibition.startDate) : null;
+                    -     var eD = hasEnd ? new Date(exhibition.endDate) : null;
+                    -     var sd = hasStart ? sD.getDate() : null;
+                    -     var ed = hasEnd ? eD.getDate() : null;
+                    -     var sMonthShort = hasStart ? sD.toLocaleDateString('es-MX', { month: 'short' }) : '';
+                    -     var eMonthShort = hasEnd ? eD.toLocaleDateString('es-MX', { month: 'short' }) : '';
+                    -     var sy = hasStart ? sD.getFullYear() : null;
+                    -     var ey = hasEnd ? eD.getFullYear() : null;
+                    -     if (hasStart && hasEnd) {
+                    -       var sameYear = sy === ey;
+                    -       var sameMonth = sameYear && (sD.getMonth() === eD.getMonth());
+                    -       if (sameYear && sameMonth) {
+                    -         dateText = `${sd}–${ed} ${sMonthShort} ${sy}`;
+                    -       } else if (sameYear) {
+                    -         dateText = `${sd} ${sMonthShort} – ${ed} ${eMonthShort} ${sy}`;
+                    -       } else {
+                    -         dateText = `${sd} ${sMonthShort} ${sy} – ${ed} ${eMonthShort} ${ey}`;
+                    -       }
+                    -     } else if (hasStart) {
+                    -       dateText = `Desde ${sd} ${sMonthShort} ${sy}`;
+                    -     } else if (hasEnd) {
+                    -       dateText = `Hasta ${ed} ${eMonthShort} ${ey}`;
+                    -     }
+                    -   }
+                    - } catch(e) { }
+                    if dateText
+                      .h6.mb-0= dateText
+                    else
+                      .small.text-white-50 Por anunciar
+                  .col-12.col-lg-6
+                    .small.text-white-75.mb-2 Lugar
+                    if exhibition && exhibition.location && exhibition.location.type === 'physical'
+                      .h6.mb-0= exhibition.venue || exhibition.location.address || 'Por anunciar'
+                    else if exhibition && exhibition.location && exhibition.location.type === 'virtual'
+                      .h6.mb-0.exhibition-detail__venue
+                        span.text-white Exposición virtual
+                    else
+                      .small.text-white-50 Por anunciar
+
+                if guestArtists && guestArtists.length
+                  hr.my-3.opacity-50
                   .small.text-white-75.mb-2.exhibition-detail__guests-label Artistas invitados
                   ul.list-unstyled.mb-0.exhibition-detail__guests-list
                     each p in guestArtists
                       li.text-white-75.exhibition-detail__guest-item
-                        if p.user && p.user.slug
+                        if p.user && p.user._id
                           // Enlazar por ID para redirigir al slug vigente
-                          a.text-decoration-none.exhibition-artist-link.exhibition-detail__guest-link(href=`/artists/${p.user._id}`)
-                            | #{p.user.name}
+                          a.text-decoration-none.exhibition-artist-link.exhibition-detail__guest-link(href=`/artists/${p.user._id}`)= p.user.name
                         else
                           span.exhibition-detail__guest-name #{p.user && p.user.name}
 
