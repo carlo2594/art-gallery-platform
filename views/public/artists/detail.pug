@@ -59,16 +59,16 @@ block content
                 .row.g-3.justify-content-center
                   .col-10
                     .stat-item.artist-techniques-card.text-center.p-4.artist-techniques-card
-                      .stat-label.artist-techniques-label.small.text-white-75.mb-3 Técnicas
+                      .stat-label.artist-techniques-label.small.text-white-75.mb-3 TAccnicas
                       .techniques-list.artist-techniques-list
                         if stats.techniques && stats.techniques.length > 0
                           each technique in stats.techniques.slice(0, 10)
                             - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
                             .technique-item.artist-technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
                           if stats.techniques.length > 10
-                            .small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} más
+                            .small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} mA�s
                         else
-                          .small.text-white-50.artist-no-techniques Sin técnicas
+                          .small.text-white-50.artist-no-techniques Sin tAccnicas
 
     // Obras del artista
     if artworks && artworks.length > 0
@@ -120,8 +120,17 @@ block content
                   |  para ver todas las obras de #{artist.name}
               else if stats.totalArtworks === 1
                 h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
-                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
+                p.text-muted.artist-single-work-message Esta es la A�nica obra disponible de este talentoso artista. A�Vuelve pronto para ver mA�s creaciones!
               else
-                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
-                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aA�n no tiene obras publicadas`
+                p.text-muted.artist-portfolio-message Este artista estA� preparando su portfolio. A�Vuelve pronto para ver sus creaciones!
+
+    // Botón de volver
+    section.back-navigation.py-4
+      .container
+        .row
+          .col-12.text-center
+            a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Volver")
+              i.fas.fa-arrow-left.me-2
+              | Volver
 
