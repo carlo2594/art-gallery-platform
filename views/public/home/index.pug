@@ -46,6 +46,15 @@ block headExtra
       display: block;
     }
 
+  //- Tipografía distinta para el título de sección de exposiciones recientes
+  style.
+    .home-exhibitions .section-heading {
+      font-family: 'Newsreader', Georgia, 'Times New Roman', serif;
+      font-weight: 700;
+      font-style: italic;
+      letter-spacing: .3px;
+    }
+
 block content
   section.hero.home-hero
     .container.hero-container
@@ -107,12 +116,12 @@ block content
   //- Exposiciones recientes (3) usando estilo Bootstrap featurette
   section.my-5.home-exhibitions
     .container.marketing
-      h2.text-center.mb-4(style="font-family: 'Montserrat'; font-weight: 700;") Exposiciones recientes
+      h2.section-heading.display-5.text-center.mb-4 Exhibiciones imperdibles
       if latestExhibitions && latestExhibitions.length
         each expo, idx in latestExhibitions
-          .row.featurette.mb-5
+          .row.featurette.mb-5.align-items-center
             - const isEven = idx % 2 === 1
-            .col-md-7(class=isEven ? 'order-md-2' : '')
+            .col-md-7(class=isEven ? 'order-md-2 d-flex flex-column justify-content-center text-center' : 'd-flex flex-column justify-content-center text-center')
               h2.featurette-heading.fw-bold= expo.title
               if expo.description
                 p.lead= expo.description
@@ -127,7 +136,7 @@ block content
                 p.small.text-muted= dateText
               p.mt-2
                 a.btn.btn-secondary(href=`/exhibitions/${expo.slug || expo._id}`) Ver detalles »
-            .col-md-5(class=isEven ? 'order-md-1' : '')
+            .col-md-5(class=isEven ? 'order-md-1 d-flex justify-content-center align-items-center' : 'd-flex justify-content-center align-items-center')
               a(href=`/exhibitions/${expo.slug || expo._id}`, aria-label=expo.title)
                 if expo.coverImage
                   img.featurette-image.img-fluid.mx-auto.home-expo-img(src=expo.coverImage, alt=expo.title, loading='lazy', decoding='async')
