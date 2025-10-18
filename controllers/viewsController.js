@@ -521,7 +521,8 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const { artist, shouldRedirect, redirectUrl } = await findArtistByIdOrSlug(User, artistId);
   
   if (shouldRedirect) {
-    return res.redirect(301, redirectUrl);
+    // Usar 302 para evitar cache permanente del navegador al cambiar slug
+    return res.redirect(302, redirectUrl);
   }
 
   // --- FILTROS Y PAGINACIÓN PARA OBRAS DEL ARTISTA ---

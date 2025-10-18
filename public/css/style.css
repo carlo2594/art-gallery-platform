@@ -441,6 +441,19 @@ section.join-artists { position: relative; margin-top: 5rem; }
 #pager-obras { margin-top: auto; }
 .pager-hidden { display: none !important; }
 
+/* Ensure artwork grid images keep aspect ratio and don't stretch */
+.artwork-grid li img {
+  width: 100%;
+  height: auto;
+  max-height: var(--art-max-h);
+}
+
+/* Make entire card clickable without link styles */
+.artwork-grid li a {
+  text-decoration: none;
+  color: inherit;
+}
+
 /* ==========================================
   7. COMPONENTS: ART CARDS & LABELS
   ========================================== */

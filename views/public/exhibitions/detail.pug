@@ -80,7 +80,8 @@ block content
                     each p in guestArtists
                       li.text-white-75.exhibition-detail__guest-item
                         if p.user && p.user.slug
-                          a.text-decoration-none.exhibition-artist-link.exhibition-detail__guest-link(href=`/artists/${p.user.slug}`)
+                          // Enlazar por ID para redirigir al slug vigente
+                          a.text-decoration-none.exhibition-artist-link.exhibition-detail__guest-link(href=`/artists/${p.user._id}`)
                             | #{p.user.name}
                         else
                           span.exhibition-detail__guest-name #{p.user && p.user.name}
@@ -122,4 +123,3 @@ block content
             a.btn.btn-outline-primary.btn-lg.exhibition-back-btn.ox-back-btn(href="/exhibitions")
               i.fas.fa-arrow-left.me-2
               | Volver
-

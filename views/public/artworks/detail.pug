@@ -43,7 +43,8 @@ block content
           if artwork.artist
             .mb-3.artwork-artist-info.artwork-detail__artist
               h6.text-uppercase.fw-bold.mb-1.text-muted.artwork-artist-name.artwork-detail__artist-name
-                a.text-decoration-none.artist-name-hover.artwork-detail__artist-link(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+                // Siempre usar ID para que redirija al slug vigente
+                a.text-decoration-none.artist-name-hover.artwork-detail__artist-link(href=`/artists/${artwork.artist._id}`)= artwork.artist.name
               if artwork.artist.location
                 small.text-muted.artwork-artist-location.artwork-detail__artist-location= artwork.artist.location
 
@@ -89,7 +90,8 @@ block content
         .row
           .col-12
             h3.mb-4.related-artworks-title Más obras de 
-              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+              // Siempre usar ID para que redirija al slug vigente
+              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist._id}`)= artwork.artist.name
         - var artworks = relatedArtworks
         - var backTo = `/artworks/${artwork.slug || artwork._id}`
         include /public/artworks/_artworkGrid.pug
@@ -119,4 +121,3 @@ block content
     - var message = 'Para agregar esta obra a tus favoritos, inicia sesión o regístrate.'
     - var returnTo = `/artworks/${artwork.slug || artwork._id}`
     include /public/common/_authRequiredModal.pug
-

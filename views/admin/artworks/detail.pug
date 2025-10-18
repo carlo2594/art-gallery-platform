@@ -47,7 +47,8 @@ block content
           if artwork.artist
             .mb-3.artwork-artist-info.artwork-detail__artist
               h6.text-uppercase.fw-bold.mb-1.text-muted.artwork-artist-name.artwork-detail__artist-name
-                a.text-decoration-none.artist-name-hover.artwork-detail__artist-link(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+                // Usar siempre ID para dejar que el backend canonicé al slug
+                a.text-decoration-none.artist-name-hover.artwork-detail__artist-link(href=`/artists/${artwork.artist._id}`)= artwork.artist.name
               if artwork.artist.location
                 small.text-muted.artwork-artist-location.artwork-detail__artist-location= artwork.artist.location
 
@@ -98,7 +99,8 @@ block content
         .row
           .col-12
             h3.mb-4.related-artworks-title Más obras de 
-              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist.slug || artwork.artist._id}`)= artwork.artist.name
+              // Usar siempre ID para dejar que el backend canonicé al slug
+              a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist._id}`)= artwork.artist.name
         // Grid usando el fragmento _artworkGrid.pug
         - var artworks = relatedArtworks
         - var backTo = `/artworks/${artwork.slug || artwork._id}`

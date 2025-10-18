@@ -25,7 +25,7 @@ block content
     .container-xxl
       h2.h4.mb-4.text-center Muro de Galería
       if artworks && artworks.length
-        ul.grid.effect-2#grid
+        ul.grid.effect-2.artwork-grid#grid
           each a in artworks
             - const _url = a.imageUrl || ''
             - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
@@ -69,4 +69,3 @@ block content
             span.fw-medium.collectors-check-text Certificados de autenticidad
         a.btn.btn-primary.rounded-pill.fw-bold.d-flex.align-items-center.justify-content-center.text-center.collectors-cta-btn(href="/signup") 
           span Crear cuenta gratuita
-

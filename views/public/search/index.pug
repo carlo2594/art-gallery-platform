@@ -35,6 +35,7 @@ block content
           if artworks && artworks.length
             .artworks-grid-paginate
               include /public/artworks/_artworkGrid.pug
+              - var tab = 'obras';
               include /public/artworks/_artworkPagination.pug
           else
             h3.h5.mt-4.text-muted No se encontraron obras.
@@ -69,4 +70,3 @@ block content
               include /public/exhibitions/_exhibitionPagination.pug
           else
             h3.h5.mt-4.text-muted No se encontraron exposiciones.
-

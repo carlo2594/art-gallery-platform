@@ -38,8 +38,8 @@
               i.fas.fa-user-slash.me-1
               | Desactivar cuenta
       .modal-footer
-        a.btn.btn-outline-secondary.admin-users-public-link(target='_blank' href=`/artists/${u.slug || u._id}`)
+        // Usar ID para que la vista pública canonicé al slug actual
+        a.btn.btn-outline-secondary.admin-users-public-link(target='_blank' href=`/artists/${u._id}`)
           i.fas.fa-user.me-1
           | Ver público
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
-

@@ -5,7 +5,8 @@
       - const eager = idx < 4
       .col
         .card.shadow-sm.h-100.position-relative.artist-card.reveal-item
-          a.stretched-link(href=`/artists/${artist.slug || artist._id}` aria-label=`Ver perfil de ${artist.name}`)
+          // Usar ID para que el backend canonicé al slug actual
+          a.stretched-link(href=`/artists/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
           .artist-image-container.position-relative
             if artist.profileImage
               img.artist-image(
@@ -31,4 +32,3 @@
                     .artist-artworks-count.small.opacity-85
                       i.fas.fa-palette.me-1
                       span= `${artist.approvedArtworksCount} obra${artist.approvedArtworksCount !== 1 ? 's' : ''}`
-

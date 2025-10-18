@@ -1,14 +1,34 @@
 // views/public/artworks/_artworkPagination.pug
-// Requiere: page, totalPages, q
+// Requiere: page, totalPages, q, (opcional: search, tab)
 if typeof page !== 'undefined' && typeof totalPages !== 'undefined' && totalPages > 1
-  nav.mt-4(aria-label='Paginación de obras')
-    ul.pagination.justify-content-center
-      - const prevDisabled = page <= 1
-      - const nextDisabled = page >= totalPages
-      li.page-item(class=prevDisabled ? 'disabled' : '')
-        a.page-link(href=`?page=${page-1}` aria-label='Anterior') Anterior
-      li.page-item.disabled
-        span.page-link= `Página ${page} de ${totalPages}`
-      li.page-item(class=nextDisabled ? 'disabled' : '')
-        a.page-link(href=`?page=${page+1}` aria-label='Siguiente') Siguiente
-
+  - var navAttrs = { class: 'mt-4 mb-4 d-flex justify-content-center', id: 'pager-obras', 'aria-label': 'Paginación de obras' };
+  - if (typeof tab !== 'undefined') navAttrs['data-tab'] = tab;
+  nav(&attributes(navAttrs))
+    ul.pagination-ox.pagination-lg
+      li.page-item(class=page === 1 ? 'disabled' : '')
+        a.page-link(
+          href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+            ? `?q=${search || ''}&tab=${tab}&page=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`
+            : `?page=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`)
+          aria-label="Anterior")
+          span(aria-hidden="true") &laquo;
+      - var startPage = Math.max(1, page - 2);
+      - var endPage = Math.min(totalPages, page + 2);
+      - if (endPage - startPage < 4) {
+      -   if (startPage === 1) endPage = Math.min(totalPages, startPage + 4);
+      -   else if (endPage === totalPages) startPage = Math.max(1, endPage - 4);
+      - }
+      each p in Array(endPage - startPage + 1).fill().map((_,i) => startPage + i)
+        li.page-item(class=p === page ? 'active' : '')
+          a.page-link(
+            href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+              ? `?q=${search || ''}&tab=${tab}&page=${p}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`
+              : `?page=${p}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`)
+            aria-current=(p === page ? 'page' : false))= p
+      li.page-item(class=page === totalPages ? 'disabled' : '')
+        a.page-link(
+          href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
+            ? `?q=${search || ''}&tab=${tab}&page=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`
+            : `?page=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.technique ? `&technique=${q.technique}` : ''}${q && q.minPrice ? `&minPrice=${q.minPrice}` : ''}${q && q.maxPrice ? `&maxPrice=${q.maxPrice}` : ''}`)
+          aria-label="Siguiente")
+          span(aria-hidden="true") &raquo;

@@ -1,5 +1,5 @@
 //- Grid de obras (reutilizable)
-ul.grid.effect-2#grid
+ul.grid.effect-2.artwork-grid#grid
   each a in artworks
     - const _url = a.imageUrl || ''
     - const isCld = _url.includes('res.cloudinary.com') && _url.includes('/upload/')
@@ -9,7 +9,7 @@ ul.grid.effect-2#grid
     - const srcset = isCld ? `${src480} 480w, ${src768} 768w, ${src1200} 1200w` : undefined
     li
       a(href=`/artworks/${a.slug || a._id}`)
-        img(
+        img.artwork-grid__image(
           src=src480,
           srcset=srcset,
           sizes='(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
@@ -19,4 +19,19 @@ ul.grid.effect-2#grid
           width=a.imageWidth_px,
           height=a.imageHeight_px
         )
-
+        .artwork-grid__body
+          .artwork-grid__content
+            .artwork-grid__info
+              if a.title
+                h3.artwork-grid__title= a.title
+              if a.artist && a.artist.name
+                .artwork-grid__artist= a.artist.name
+              .artwork-grid__details
+                if a.technique
+                  .artwork-grid__detail-item= a.technique
+                if a.width_cm && a.height_cm
+                  .artwork-grid__detail-item #{a.width_cm} x #{a.height_cm} cm
+            .artwork-grid__stats
+              if a.price_cents && a.price_cents > 0
+                .artwork-grid__price
+                  | $#{(a.price_cents / 100).toLocaleString('en-US')} USD
