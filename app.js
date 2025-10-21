@@ -2,6 +2,7 @@
 const express       = require('express');
 const path          = require('path');
 const helmet        = require('helmet');
+const compression   = require('compression');
 const cookieParser  = require('cookie-parser');
 const attachUserToViews = require('./middlewares/attachUserToViews');
 const xss           = require('xss-clean');
@@ -17,6 +18,11 @@ const app = express();
 
 /* --------------------- Middlewares globales --------------------- */
 
+// Habilitar cache de vistas en producción
+if ((process.env.NODE_ENV || '').toLowerCase() === 'production') {
+  try { app.set('view cache', true); } catch (_) {}
+}
+
 // Logging en desarrollo
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -29,6 +35,8 @@ app.use(
     crossOriginResourcePolicy: { policy: 'cross-origin' }
   })
 );
+// Compresión HTTP para respuestas más ligeras
+app.use(compression());
 app.use(cookieParser());
 app.use(attachUserToViews);
 app.use(xss());
@@ -48,11 +56,15 @@ const setUtf8Headers = (res, filePath) => {
   try {
     if (filePath.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
     else if (filePath.endsWith('.css')) res.setHeader('Content-Type', 'text/css; charset=utf-8');
+    // Cache estático razonable para activos comunes
+    if (/\.(?:js|css|png|jpg|jpeg|gif|svg|webp|ico|woff2?)$/i.test(filePath)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800'); // 7 días
+    }
   } catch (_) {}
 };
-app.use(express.static(path.join(__dirname, 'public'), { setHeaders: setUtf8Headers }));
+app.use(express.static(path.join(__dirname, 'public'), { setHeaders: setUtf8Headers, maxAge: '7d' }));
 // Servir Bootstrap desde node_modules para CSS/JS locales
-app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist'), { setHeaders: setUtf8Headers }));
+app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist'), { setHeaders: setUtf8Headers, maxAge: '7d' }));
 
 // admin.js estático concatenado en /public/js/admin.js
 

@@ -5,6 +5,7 @@ const authRoutes        = require('@routes/api/authRoutes');
 const favoriteRoutes    = require('@routes/api/favoriteRoutes');
 const followRoutes      = require('@routes/api/followRoutes');
 const artworkViewRoutes = require('@routes/api/artworkViewRoutes');
+const mediaRoutes       = require('@routes/media');
 
 
 const viewRoutes   = require('@routes/views/viewRoutes');
@@ -25,6 +26,8 @@ module.exports = app => {
   app.use('/api/v1/exhibitions', exhibitionRoutes);
   app.use('/api/v1/artwork-views', artworkViewRoutes);
   app.use('/api/v1/newsletter',  require('@routes/api/newsletterRoutes')); 
+  // Media endpoints (upload/public/original)
+  app.use('/', mediaRoutes);
 
 
   /* ---------- 404 ---------- */

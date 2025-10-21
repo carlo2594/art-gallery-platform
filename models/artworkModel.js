@@ -108,6 +108,8 @@ artworkSchema.index({ slug: 1 }, { unique: true, sparse: true });
 artworkSchema.index({ artist: 1, status: 1 });
 artworkSchema.index({ favoritesCount: -1 });
 artworkSchema.index({ exhibitions: 1 });
+// Index para obras por exposición + visibilidad (acelera detalle y home)
+artworkSchema.index({ exhibitions: 1, status: 1, deletedAt: 1, createdAt: -1 });
 
 // Nuevos Ã­ndices compuestos optimizados para viewsController
 // 1. Ãndice principal para consultas de obras aprobadas (getArtworks, getSearchResults)

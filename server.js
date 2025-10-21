@@ -12,6 +12,7 @@ const PORT = process.env.PORT || 3000;
 const mongooseOpts = {
   serverSelectionTimeoutMS: 8000, // 8 s para encontrar un nodo
   socketTimeoutMS: 45000,         // 45 s para operaciones largas
+  maxPoolSize: 20,                // pool de conexiones
 };
 
 /* 🔄 Función recursiva de conexión con reintentos */

@@ -7,16 +7,30 @@ block content
       .col-xl-8.artwork-detail-media.artwork-detail__media
         .artwork-image-container.mb-4.artwork-media-container.artwork-detail__media-container
           figure.art-thumb#artwork-thumb.artwork-thumb.artwork-detail__thumb(data-artwork-id=artwork._id)
-            img.artwork-image-main.artwork-detail__image(
-              src=artwork.imageUrl
-              alt=artwork.title
-              data-full=artwork.imageUrl
-              loading='eager'
-              fetchpriority='high'
-              decoding='async'
-              width=artwork.imageWidth_px
-              height=artwork.imageHeight_px
-            )
+            if artwork._media && artwork._media.src
+              img.artwork-image-main.artwork-detail__image(
+                src=artwork._media.src
+                srcset=artwork._media.srcset
+                sizes=artwork._media.sizes || '(max-width: 992px) 100vw, 800px'
+                alt=artwork.title
+                data-full=(artwork._mediaFull || artwork._media.src)
+                loading='eager'
+                fetchpriority='high'
+                decoding='async'
+                width=(artwork._media.width || artwork.imageWidth_px)
+                height=(artwork._media.height || artwork.imageHeight_px)
+              )
+            else
+              img.artwork-image-main.artwork-detail__image(
+                src=artwork.imageUrl
+                alt=artwork.title
+                data-full=artwork.imageUrl
+                loading='eager'
+                fetchpriority='high'
+                decoding='async'
+                width=artwork.imageWidth_px
+                height=artwork.imageHeight_px
+              )
 
       // Información de la obra
       .col-xl-4.artwork-detail-sidebar.artwork-detail__sidebar

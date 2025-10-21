@@ -154,12 +154,27 @@ exports.getExhibitions = catchAsync(async (req, res) => {
 });
 exports.getExhibition = catchAsync(async (req, res, next) => {
   const exhibition = await Exhibition.findById(req.params.id)
-    .populate('createdBy participants')
+    .populate({ path: 'createdBy', select: 'name slug' })
+    .populate({ path: 'participants.user', select: 'name slug' })
     .lean();
   if (!exhibition) return next(new AppError('Exhibición no encontrada', 404));
+
+  // Load only approved artworks linked to this exhibition
+  let artworks = [];
+  if (Array.isArray(exhibition.artworks) && exhibition.artworks.length) {
+    artworks = await Artwork.find({ _id: { $in: exhibition.artworks }, status: 'approved', deletedAt: null })
+      .select('title slug imageUrl imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents createdAt')
+      .sort({ createdAt: -1 })
+      .populate({ path: 'artist', select: 'name' })
+      .lean();
+  }
+  const totalArtworks = artworks.length;
+
   res.status(200).render('admin/exhibitions/detail', {
-    title: exhibition.name,
-    exhibition
+    title: exhibition.title || exhibition.name,
+    exhibition,
+    artworks,
+    totalArtworks
   });
 });
 
@@ -339,3 +354,4 @@ exports.getExhibitionPreview = catchAsync(async (req, res, next) => {
     totalArtworks
   });
 });
+
