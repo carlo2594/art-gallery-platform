@@ -1,0 +1,16 @@
+// Modal para especificar motivo de rechazo
+.modal.fade(id=`adminRejectArtwork-${a._id}` tabindex='-1' aria-labelledby=`adminRejectArtworkLabel-${a._id}` aria-hidden='true')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`adminRejectArtworkLabel-${a._id}`) Rechazar obra - #{a.title}
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      form.admin-reject-artwork-form(data-artwork-id=a._id data-edit-form-id=`adminEditArtworkForm-${a._id}`)
+        .modal-body
+          .mb-3
+            label.form-label(for=`rejectReason-${a._id}`) Motivo del rechazo
+            textarea.form-control(id=`rejectReason-${a._id}` name='reason' rows='4' placeholder='Describe claramente el motivo...' required)
+            small.text-muted.mt-1 Se notificará al artista con este motivo.
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+          button.btn.btn-danger(type='submit') Confirmar rechazo

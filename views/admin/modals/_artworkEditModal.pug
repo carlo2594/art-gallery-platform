@@ -6,7 +6,7 @@
         h5.modal-title(id=`adminEditArtworkLabel-${a._id}`) Editar obra - #{a.title}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
-        form.admin-edit-artwork-form(id=`adminEditArtworkForm-${a._id}` data-artwork-id=a._id enctype='multipart/form-data')
+        form.admin-edit-artwork-form(id=`adminEditArtworkForm-${a._id}` data-artwork-id=a._id data-initial-status=(status || 'draft') data-initial-availability=a.availability enctype='multipart/form-data')
           // Básicos
           .row.g-3
             .col-md-8
@@ -15,12 +15,11 @@
             .col-md-4
               label.form-label Estado
               select.form-select(name='status', disabled=!isAdmin)
-                option(value='draft' selected=(status || 'draft')==='draft') Borrador
+                // Ocultamos 'draft' y 'trashed' en el panel admin
                 option(value='submitted' selected=status==='submitted') Enviado
                 option(value='under_review' selected=status==='under_review') En revisión
                 option(value='approved' selected=status==='approved') Aprobado
                 option(value='rejected' selected=status==='rejected') Rechazado
-                option(value='trashed' selected=status==='trashed') Papelera
           .mb-3
             label.form-label Descripción
             textarea.form-control(name='description' rows='3')= a.description || ''
@@ -70,7 +69,7 @@
                 option(value='not_for_sale' selected=a.availability==='not_for_sale') No a la venta
                 option(value='for_sale' selected=a.availability==='for_sale') En venta
                 option(value='reserved' selected=a.availability==='reserved') Reservada
-                option(value='sold' selected=a.availability==='sold') Vendida
+                // Ocultamos 'sold' en el panel admin (requiere datos de venta)
                 option(value='on_loan' selected=a.availability==='on_loan') En préstamo
             .col-md-4
               label.form-label Reservada hasta
@@ -90,4 +89,3 @@
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
         // Nota: requiere JS para guardar
         button.btn.btn-primary.admin-artworks-save(type='submit' form=`adminEditArtworkForm-${a._id}`) Guardar cambios
-

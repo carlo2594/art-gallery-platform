@@ -327,6 +327,15 @@ document.addEventListener('DOMContentLoaded', function () {
       e.preventDefault();
       var id = form.getAttribute('data-artwork-id');
       if (!id) return;
+      // Capture initial vs new values for status/availability to drive dedicated endpoints
+      var initialStatus = form.getAttribute('data-initial-status') || '';
+      var initialAvail = form.getAttribute('data-initial-availability') || '';
+      var statusEl = form.querySelector('select[name="status"]');
+      var availEl = form.querySelector('select[name="availability"]');
+      var reservedUntilEl = form.querySelector('input[name="reservedUntil"]');
+      var newStatus = statusEl && statusEl.value || '';
+      var newAvail = availEl && availEl.value || '';
+      var reservedUntilVal = reservedUntilEl && reservedUntilEl.value || '';
 
       var fd = new FormData();
       var pick = function (n) { return form.querySelector('[name="' + n + '"]'); };
@@ -366,6 +375,110 @@ document.addEventListener('DOMContentLoaded', function () {
             imgPrev.hidden = false;
           }
         }
+        // After generic PATCH, apply status/availability changes via dedicated endpoints
+        async function updateStatusIfNeeded(){
+          if (!statusEl) return;
+          if (newStatus === initialStatus) return;
+          var endpoint = null;
+          var options = { method: 'PATCH', credentials: 'include' };
+          if (newStatus === 'submitted') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit';
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify({});
+          } else if (newStatus === 'under_review') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review';
+          } else if (newStatus === 'approved') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve';
+          } else if (newStatus === 'rejected') {
+            // Abrir modal de rechazo para capturar motivo
+            var rejModal = document.getElementById('adminRejectArtwork-' + id);
+            if (rejModal && window.bootstrap && bootstrap.Modal) {
+              // Marcar pendiente para saber si hay que revertir si se cierra
+              rejModal.setAttribute('data-pending-reject', '1');
+              // Asegurar apunta al form de edición correcto
+              var rejForm = rejModal.querySelector('form.admin-reject-artwork-form');
+              if (rejForm) {
+                rejForm.setAttribute('data-artwork-id', id);
+                rejForm.setAttribute('data-edit-form-id', form.id);
+                rejForm.setAttribute('data-initial-status', initialStatus);
+              }
+              bootstrap.Modal.getOrCreateInstance(rejModal).show();
+            }
+            return; // No continuar aquí; el submit del modal hará la llamada
+          } else if (newStatus === 'trashed' || newStatus === 'draft') {
+            // Not handled here; keep UI consistent
+            statusEl.value = initialStatus;
+            if (window.showAdminToast) showAdminToast('Usa los controles de Papelera/Restaurar para este estado', 'warning');
+            return;
+          } else { return; }
+          var r = await fetch(endpoint, options);
+          if (!r.ok) {
+            statusEl.value = initialStatus;
+            var txt = 'No se pudo actualizar el estado';
+            try { var j = await r.json(); txt = (j && (j.message || (j.error && j.error.message))) || txt; } catch(_){ }
+            throw new Error(txt);
+          }
+          // Update badge on table row
+          var modalEl = form.closest('.modal');
+          var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
+          var row = triggerBtn && triggerBtn.closest('tr');
+          var badge = row && row.querySelector('td:nth-child(3) .badge');
+          if (badge) {
+            badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
+            var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+            badge.classList.add(cls);
+            badge.textContent = newStatus || 'draft';
+          }
+          form.setAttribute('data-initial-status', newStatus);
+          if (window.showAdminToast) showAdminToast('Estado actualizado', 'success');
+        }
+
+        async function updateAvailabilityIfNeeded(){
+          if (!availEl) return;
+          if (newAvail === initialAvail) return;
+          var endpoint = null;
+          var options = { method: 'PATCH', credentials: 'include' };
+          if (newAvail === 'for_sale') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/for-sale';
+          } else if (newAvail === 'reserved') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/reserve';
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify({ reservedUntil: reservedUntilVal || undefined });
+          } else if (newAvail === 'not_for_sale') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/not-for-sale';
+          } else if (newAvail === 'on_loan') {
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/on-loan';
+          } else if (newAvail === 'sold') {
+            // Needs sale data; revert and notify
+            availEl.value = initialAvail;
+            if (window.showAdminToast) showAdminToast('Para marcar como vendida se requieren datos de venta', 'warning');
+            return;
+          } else { return; }
+          var r = await fetch(endpoint, options);
+          if (!r.ok) {
+            availEl.value = initialAvail;
+            var txt = 'No se pudo actualizar la disponibilidad';
+            try { var j = await r.json(); txt = (j && (j.message || (j.error && j.error.message))) || txt; } catch(_){ }
+            throw new Error(txt);
+          }
+          // Update availability badge
+          var modalEl = form.closest('.modal');
+          var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
+          var row = triggerBtn && triggerBtn.closest('tr');
+          var badge = row && row.querySelector('td:nth-child(4) .badge');
+          if (badge) {
+            badge.classList.remove('text-bg-success','text-bg-warning','text-bg-secondary','text-bg-info');
+            var cls = (newAvail === 'for_sale') ? 'text-bg-success' : (newAvail === 'reserved') ? 'text-bg-warning' : (newAvail === 'sold') ? 'text-bg-secondary' : 'text-bg-info';
+            badge.classList.add(cls);
+            badge.textContent = newAvail || '';
+          }
+          form.setAttribute('data-initial-availability', newAvail);
+          if (window.showAdminToast) showAdminToast('Disponibilidad actualizada', 'success');
+        }
+
+        try { await updateStatusIfNeeded(); } catch (e) { console.error(e); if (window.showAdminToast) showAdminToast(e.message || 'Error al actualizar estado', 'danger'); }
+        try { await updateAvailabilityIfNeeded(); } catch (e) { console.error(e); if (window.showAdminToast) showAdminToast(e.message || 'Error al actualizar disponibilidad', 'danger'); }
+
         if (window.showAdminToast) showAdminToast('Cambios guardados', 'success');
       } catch (err) {
         console.error(err);
@@ -476,6 +589,79 @@ document.addEventListener('DOMContentLoaded', function () {
       }
       return;
     }
+  });
+
+  // Submit handler for reject modal
+  document.addEventListener('submit', async function(e){
+    var form = e.target.closest && e.target.closest('form.admin-reject-artwork-form');
+    if (!form) return;
+    e.preventDefault();
+    var id = form.getAttribute('data-artwork-id');
+    var editFormId = form.getAttribute('data-edit-form-id');
+    var initialStatus = form.getAttribute('data-initial-status') || '';
+    var reasonEl = form.querySelector('textarea[name="reason"]');
+    var reason = (reasonEl && reasonEl.value || '').trim();
+    if (!id || !reason) { if (window.showAdminToast) showAdminToast('Debes indicar un motivo', 'warning'); return; }
+    var btn = form.querySelector('button[type="submit"]');
+    var oldText = btn && btn.textContent; if (btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+    try {
+      var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/reject', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ reason: reason })
+      });
+      if (!res.ok) throw new Error('No se pudo rechazar la obra');
+      // Update UI: badge + form initial status
+      var editForm = document.getElementById(editFormId);
+      if (editForm) {
+        editForm.setAttribute('data-initial-status', 'rejected');
+        var sel = editForm.querySelector('select[name="status"]');
+        if (sel) sel.value = 'rejected';
+      }
+      // Table badge
+      var modalEl = form.closest('.modal');
+      var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + (editFormId && editFormId.replace('Form','')) + '"]');
+      // Fallback: find the corresponding edit modal and then its trigger
+      var editModal = document.getElementById((editFormId || '').replace('Form',''));
+      if (editModal) triggerBtn = document.querySelector('button[data-bs-target="#' + editModal.id + '"]');
+      var row = triggerBtn && triggerBtn.closest('tr');
+      var badge = row && row.querySelector('td:nth-child(3) .badge');
+      if (badge){
+        badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
+        badge.classList.add('text-bg-danger');
+        badge.textContent = 'rejected';
+      }
+      // Close modal
+      var rejModal = form.closest('.modal');
+      if (rejModal && window.bootstrap && bootstrap.Modal) {
+        rejModal.removeAttribute('data-pending-reject');
+        bootstrap.Modal.getOrCreateInstance(rejModal).hide();
+      }
+      if (window.showAdminToast) showAdminToast('Obra rechazada', 'success');
+    } catch (err) {
+      console.error(err);
+      if (window.showAdminToast) showAdminToast(err && err.message || 'No se pudo rechazar la obra', 'danger');
+      // Revert select to initial on failure
+      var ef = document.getElementById(editFormId);
+      if (ef) { var s = ef.querySelector('select[name="status"]'); if (s) s.value = initialStatus; }
+    } finally {
+      if (btn){ btn.disabled = false; btn.textContent = oldText || 'Confirmar rechazo'; }
+    }
+  }, true);
+
+  // If reject modal closes without submitting, revert status select
+  document.addEventListener('hidden.bs.modal', function (e) {
+    var modal = e.target;
+    if (!modal || modal.id.indexOf('adminRejectArtwork-') !== 0) return;
+    if (modal.getAttribute('data-pending-reject') !== '1') return;
+    var editFormId = (modal.querySelector('form.admin-reject-artwork-form') || {}).getAttribute && modal.querySelector('form.admin-reject-artwork-form').getAttribute('data-edit-form-id');
+    var initialStatus = (modal.querySelector('form.admin-reject-artwork-form') || {}).getAttribute && modal.querySelector('form.admin-reject-artwork-form').getAttribute('data-initial-status');
+    if (editFormId) {
+      var ef = document.getElementById(editFormId);
+      if (ef) { var s = ef.querySelector('select[name="status"]'); if (s) s.value = initialStatus || s.value; }
+    }
+    modal.removeAttribute('data-pending-reject');
   });
 });
 
