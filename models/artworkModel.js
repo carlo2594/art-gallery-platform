@@ -188,7 +188,7 @@ artworkSchema.virtual('artistName').get(function () {
 
 // artist: draft â†’ submitted
 artworkSchema.methods.submit = function () {
-  if (this.status !== 'draft') return this;
+  // Permitir transicion a 'submitted' desde cualquier estado
   this.status = 'submitted';
   return this.save();
 };

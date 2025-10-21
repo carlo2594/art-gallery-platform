@@ -2,8 +2,21 @@ extends /layouts/public
 
 block content
   - var dateText = '';
+  //- Filtrar obras aprobadas y no eliminadas
+  - var approvedArtworks = Array.isArray(artworks) ? artworks.filter(function(a){
+  -   try { return a && a.status === 'approved' && !a.deletedAt; } catch(e) { return false; }
+  - }) : [];
+  //- Ids de artistas que tienen al menos una obra aprobada visible
+  - var visibleArtistIds = Array.isArray(approvedArtworks) ? approvedArtworks.map(function(a){
+  -   try { return String(a && a.artist && (a.artist._id || a.artist)); } catch(e) { return null; }
+  - }).filter(Boolean) : [];
+  //- Mostrar solo participantes artista/invitado que tengan obra aprobada
   - var guestArtists = Array.isArray(exhibition && exhibition.participants) ? exhibition.participants.filter(function(p){
-  -   try { return p && p.user && p.user.name && p.role && ['artista','invitado'].includes(String(p.role).toLowerCase()); } catch(e) { return false; }
+  -   try {
+  -     var roleOk = p && p.role && ['artista','invitado'].includes(String(p.role).toLowerCase());
+  -     var uid = p && p.user && (p.user._id || p.user);
+  -     return roleOk && uid && visibleArtistIds.includes(String(uid)) && p.user && p.user.name;
+  -   } catch(e) { return false; }
   - }) : [];
 
   main.main-content.exhibition-detail-page
@@ -101,16 +114,17 @@ block content
             if exhibition && exhibition.description
               p.lead.mb-0.text-dark.exhibition-mobile-description= exhibition.description
 
-    if artworks && artworks.length > 0
+    if approvedArtworks && approvedArtworks.length > 0
       section.exhibition-artworks.py-5.exhibition-artworks-bg
         .container
           .row.mb-5
             .col-12.text-center
               h2.section-title.display-5.fw-bold.mb-3.artist-section-title Obras en esta exposición
-              - var displayText = (typeof totalArtworks !== 'undefined' && typeof artworks !== 'undefined') ? (artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`) : `${artworks.length} obra${artworks.length === 1 ? '' : 's'}`
+              - var displayText = (typeof totalArtworks !== 'undefined' && typeof approvedArtworks !== 'undefined') ? (approvedArtworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${approvedArtworks.length} de ${totalArtworks} obras`) : `${approvedArtworks.length} obra${approvedArtworks.length === 1 ? '' : 's'}`
               p.lead.text-muted= displayText
         .container-xxl.artworks-flex.artist-container-padding
           .artworks-grid-paginate
+            - artworks = approvedArtworks
             include /public/artworks/_artworkGrid.pug
             if typeof totalPages !== 'undefined' && totalPages > 1
               include /public/artworks/_artworkPagination.pug

@@ -25,12 +25,7 @@ const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejec
 // HELPERS
 // =======================
 function checkAlreadyInStatus(res, art, status, mensaje) {
-  if (art.status === status) {
-    return res.status(400).json({
-      status: 'fail',
-      message: mensaje
-    });
-  }
+  // Allow idempotent state changes: never block
   return false;
 }
 

@@ -1,0 +1,44 @@
+/** PATCH /:id/submit  draft → submitted */
+exports.submitArtwork = catchAsync(async (req, res, next) => {
+  if (!isValidObjectId(req.params.id)) {
+    return next(new AppError('ID de obra inválido.', 400));
+  }
+  // Busca la obra y el artista
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  if (!art) return next(new AppError('Obra no encontrada.', 404));
+
+  if (checkAlreadyInStatus(res, art, 'submitted', 'La obra ya fue enviada a revisión.')) return;
+
+  await art.submit();
+
+  // Notifica a todos los administradores
+  const User = require('@models/userModel');
+  const admins = await User.find({ role: 'admin', active: true });
+
+  const artworkInfo = `
+Título: ${art.title}
+Descripción: ${art.description || '(sin descripción)'}
+Artista: ${art.artist.name} (${art.artist.email})
+ID de obra: ${art._id}
+`;
+
+  let extraInfo = '';
+  if (admins.length > 1) {
+    extraInfo = `
+
+Este correo ha sido enviado a otros administradores. 
+Si no ves la obra en el queue de aprobación, es posible que ya fue aprobada o rechazada por otro administrador.
+Puedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
+  }
+
+  const { adminSubmissionSubject, adminSubmissionText } = require('@services/emailTemplates');
+  for (const admin of admins) {
+    await sendMail({
+      to: admin.email,
+      subject: adminSubmissionSubject(),
+      text: adminSubmissionText({ art, artist: art.artist })
+    });
+  }
+
+  sendResponse(res, art, 'La obra fue enviada a revisión.');
+});
