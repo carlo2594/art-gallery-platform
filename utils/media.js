@@ -19,10 +19,12 @@ function signedWatermarkedUrl(publicId, width, opts = {}) {
     { flags: 'layer_apply', gravity: 'south_east', x: 12, y: 12 },
     { crop: 'fill', width: width }
   ];
+  // Firmar solo cuando el tipo de entrega lo requiere (private/authenticated)
+  const shouldSign = (deliveryType === 'private' || deliveryType === 'authenticated');
   const url = cloudinary.url(publicId, {
     type: deliveryType,
     secure: true,
-    sign_url: true,
+    sign_url: shouldSign,
     transformation
   });
   return url;

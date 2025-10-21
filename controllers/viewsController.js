@@ -115,6 +115,12 @@ exports.getSearchResults = catchAsync(async (req, res) => {
           sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
           type: 'upload'
         });
+      } else if (a.imageUrl) {
+        a._media = buildPublicSrcSet(a.imageUrl, {
+          widths: [400,800,1200],
+          sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
+          type: 'fetch'
+        });
       }
     } catch (_) {}
     return a;
@@ -276,7 +282,13 @@ exports.getHome = catchAsync(async (req, res) => {
         .lean();
       const { buildPublicSrcSet } = require('@utils/media');
       artworks = artworks.map(a => {
-        try { if (a.imagePublicId) { a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' }); } } catch(_) {}
+        try {
+          if (a.imagePublicId) {
+            a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+          } else if (a.imageUrl) {
+            a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+          }
+        } catch(_) {}
         return a;
       });
     }
@@ -518,6 +530,12 @@ exports.getArtworks = catchAsync(async (req, res) => {
           sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
           type: 'upload'
         });
+      } else if (a.imageUrl) {
+        a._media = buildPublicSrcSet(a.imageUrl, {
+          widths: [400,800,1200],
+          sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw',
+          type: 'fetch'
+        });
       }
     } catch (_) {}
     return a;
@@ -587,7 +605,13 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
     const { buildPublicSrcSet } = require('@utils/media');
     relatedArtworks = relatedArtworks.map(a => {
       const obj = a.toObject ? a.toObject() : a;
-      try { if (obj.imagePublicId) { obj._media = buildPublicSrcSet(obj.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' }); } } catch(_) {}
+      try {
+        if (obj.imagePublicId) {
+          obj._media = buildPublicSrcSet(obj.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+        } else if (obj.imageUrl) {
+          obj._media = buildPublicSrcSet(obj.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+        }
+      } catch(_) {}
       return obj;
     });
   } catch(_) {}
@@ -654,7 +678,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   // Consultas paralelas usando utilities optimizadas
   const [
     totalArtworks,
-    artworks,
+    artworksRaw,
     allArtworks, // Para estadÃ­sticas generales
     techniques,
     bounds
@@ -680,7 +704,13 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
   const { buildPublicSrcSet } = require('@utils/media');
   const artworksMapped = artworksRaw.map(a => {
-    try { if (a.imagePublicId) { a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' }); } } catch(_) {}
+    try {
+      if (a.imagePublicId) {
+        a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+      } else if (a.imageUrl) {
+        a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+      }
+    } catch(_) {}
     return a;
   });
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
@@ -772,7 +802,13 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
     ]);
     const { buildPublicSrcSet } = require('@utils/media');
     artworks = artworks.map(a => {
-      try { if (a.imagePublicId) { a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' }); } } catch(_) {}
+      try {
+        if (a.imagePublicId) {
+          a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+        } else if (a.imageUrl) {
+          a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+        }
+      } catch(_) {}
       return a;
     });
   }
@@ -796,6 +832,7 @@ exports.getExhibitionUnpublished = (req, res) => {
     title: 'Exposicion privada | Galeria del Ox'
   });
 };
+
 
 
 
