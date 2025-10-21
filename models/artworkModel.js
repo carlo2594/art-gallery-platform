@@ -355,6 +355,48 @@ artworkSchema.pre('save', async function (next) {
   next();
 });
 
+/* ====== Hooks to resync exhibition participants ====== */
+// Mark if we should resync participants when status or deletedAt changes
+artworkSchema.pre('save', function(next) {
+  try {
+    this._shouldResyncExhibitions = !!(this.isModified('status') || this.isModified('deletedAt'));
+  } catch (_) {
+    this._shouldResyncExhibitions = false;
+  }
+  next();
+});
+
+artworkSchema.post('save', async function(doc, next) {
+  // If status/deletedAt changed, recompute participants for linked exhibitions
+  try {
+    if (!this._shouldResyncExhibitions) return next();
+    const Exhibition = require('@models/exhibitionModel');
+    const ArtworkModel = this.constructor;
+    const exIds = Array.from(new Set((doc.exhibitions || []).map((id) => String(id))));
+    if (!exIds.length) return next();
+
+    const exhibitions = await Exhibition.find({ _id: { $in: exIds } });
+    for (const ex of exhibitions) {
+      const artIds = Array.from(new Set((ex.artworks || []).map((id) => String(id))));
+      let artistIds = [];
+      if (artIds.length) {
+        // Only artists from visible artworks (approved and not trashed)
+        artistIds = await ArtworkModel.find({ _id: { $in: artIds }, status: 'approved', deletedAt: null }).distinct('artist');
+      }
+      const artistSet = new Set((artistIds || []).filter(Boolean).map((x) => String(x)));
+      const existing = Array.isArray(ex.participants) ? ex.participants : [];
+      const keepNonArtist = existing.filter((p) => String((p && p.role) || '').toLowerCase() !== 'artista');
+      const newArtistParticipants = Array.from(artistSet).map((uid) => ({ user: uid, role: 'artista' }));
+      ex.participants = [...keepNonArtist, ...newArtistParticipants];
+      await ex.save({ validateModifiedOnly: true });
+    }
+    return next();
+  } catch (err) {
+    try { console.error('artwork post-save resync participants error:', err); } catch (_) {}
+    return next();
+  }
+});
+
 module.exports = mongoose.model('Artwork', artworkSchema);
 
 

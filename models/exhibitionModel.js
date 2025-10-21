@@ -106,7 +106,8 @@ exhibitionSchema.pre('save', async function(next){
     const ids = Array.from(new Set((this.artworks || []).map((x) => String(x))));
     let artistIds = [];
     if (ids.length) {
-      artistIds = await Artwork.find({ _id: { $in: ids } }).distinct('artist');
+      // Solo considerar obras visibles al p3blico: aprobadas y no en papelera
+      artistIds = await Artwork.find({ _id: { $in: ids }, status: 'approved', deletedAt: null }).distinct('artist');
     }
     const artistSet = new Set((artistIds || []).filter(Boolean).map((x) => String(x)));
     const existing = Array.isArray(this.participants) ? this.participants : [];

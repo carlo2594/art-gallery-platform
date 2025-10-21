@@ -2,8 +2,13 @@ extends /layouts/public
 
 block content
   - var dateText = '';
+  - var visibleArtistIds = Array.isArray(artworks) ? artworks.map(function(a){ try { return String(a && a.artist && a.artist._id); } catch(e) { return null; } }).filter(Boolean) : [];
   - var guestArtists = Array.isArray(exhibition && exhibition.participants) ? exhibition.participants.filter(function(p){
-  -   try { return p && p.user && p.user.name && p.role && ['artista','invitado'].includes(String(p.role).toLowerCase()); } catch(e) { return false; }
+  -   try {
+  -     var roleOk = p && p.role && ['artista','invitado'].includes(String(p.role).toLowerCase());
+  -     var uid = p && p.user && (p.user._id || p.user);
+  -     return roleOk && uid && visibleArtistIds.includes(String(uid)) && p.user && p.user.name;
+  -   } catch(e) { return false; }
   - }) : [];
 
   main.main-content.exhibition-detail-page

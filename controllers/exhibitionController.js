@@ -12,7 +12,8 @@ async function syncParticipantsFromArtworks(exhibitionDoc) {
     const artIds = Array.from(new Set((exhibitionDoc.artworks || []).map(id => String(id))));
     let artistIds = [];
     if (artIds.length) {
-      artistIds = await Artwork.find({ _id: { $in: artIds } }).distinct('artist');
+      // Solo artistas de obras aprobadas y no eliminadas (catálogo pAblico)
+      artistIds = await Artwork.find({ _id: { $in: artIds }, status: 'approved', deletedAt: null }).distinct('artist');
     }
     const artistSet = new Set((artistIds || []).filter(Boolean).map(id => String(id)));
 
