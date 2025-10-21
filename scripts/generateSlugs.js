@@ -1,5 +1,14 @@
 // Script para generar slugs para todas las obras existentes
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const rootDir = path.resolve(__dirname, '..');
+const envPath = path.join(rootDir, `.env.${ENV}`);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
 require('module-alias/register');
 
 const mongoose = require('mongoose');

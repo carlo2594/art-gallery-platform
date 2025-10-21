@@ -1,6 +1,15 @@
 // Script para limpiar completamente la base de datos y recrear índices
 require('module-alias/register');
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const rootDir = path.resolve(__dirname, '..');
+const envPath = path.join(rootDir, `.env.${ENV}`);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
 const mongoose = require('mongoose');
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);

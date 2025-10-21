@@ -1,6 +1,15 @@
 // Script para actualizar el campo "views" de cada artwork con vistas únicas por IP en las últimas 24 horas
 
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const rootDir = path.resolve(__dirname, '..');
+const envPath = path.join(rootDir, `.env.${ENV}`);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
 const mongoose = require('mongoose');
 const Artwork = require('../models/artworkModel');
 const ArtworkView = require('../models/artworkViewModel');

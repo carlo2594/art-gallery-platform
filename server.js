@@ -1,6 +1,14 @@
 // server.js
 require('module-alias/register');
-require('dotenv').config();
+const fs   = require('fs');
+const path = require('path');
+const ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const envPath = path.join(__dirname, `.env.${ENV}`);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
 
 const mongoose = require('mongoose');
 const app      = require('./app');

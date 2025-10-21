@@ -1,6 +1,20 @@
 ﻿// Script para poblar la base de datos: elimina toda la base y crea datos de prueba variados
 require('module-alias/register');
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const ENV = (process.env.NODE_ENV || 'development').toLowerCase();
+const rootDir = path.resolve(__dirname, '..');
+const envPath = path.join(rootDir, `.env.${ENV}`);
+if (fs.existsSync(envPath)) {
+  require('dotenv').config({ path: envPath });
+} else {
+  require('dotenv').config();
+}
+// Safety guard: never seed in production
+if (ENV === 'production') {
+  console.error('[GUARD] seedTestData.js bloqueado en NODE_ENV=production. Aborta.');
+  process.exit(1);
+}
 const mongoose = require('mongoose');
 
 const Artwork = require('../models/artworkModel');
