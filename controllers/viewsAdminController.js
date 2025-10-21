@@ -316,7 +316,8 @@ exports.getUser = catchAsync(async (req, res, next) => {
 // Vista de previa completa de la exposición (sin filtrar por estado de obra)
 exports.getExhibitionPreview = catchAsync(async (req, res, next) => {
   const exhibition = await Exhibition.findById(req.params.id)
-    .populate('createdBy participants')
+    .populate({ path: 'createdBy', select: 'name email' })
+    .populate({ path: 'participants.user', select: 'name email' })
     .lean();
   if (!exhibition) return next(new AppError('Exhibición no encontrada', 404));
 

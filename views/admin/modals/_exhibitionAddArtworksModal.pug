@@ -1,0 +1,58 @@
+// Modal: Agregar obras a la exposicion (usa variable local `e`)
+.modal.fade.exhibition-add-artworks-modal(id=`adminAddArtworks-${e._id}` tabindex='-1' aria-labelledby=`adminAddArtworksLabel-${e._id}` aria-hidden='true' data-exhibition-id=e._id data-existing-ids=(Array.isArray(e.artworks) ? e.artworks.map(String).join(',') : '') data-active-pane='add' data-add-sort='alpha')
+  .modal-dialog.modal-lg
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`adminAddArtworksLabel-${e._id}`) Agregar obras a #{e.title || e.name}
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      .modal-body
+        // Tabs de modo
+        ul.nav.nav-pills.mb-3(role='tablist' data-role='mode-tabs')
+          li.nav-item(role='presentation')
+            button.nav-link.active(type='button' data-pane='add')
+              i.fas.fa-plus.me-1
+              | Agregar
+          li.nav-item(role='presentation')
+            button.nav-link(type='button' data-pane='remove')
+              i.fas.fa-trash-can.me-1
+              | Quitar
+
+        // Pane: Agregar
+        .pane-add
+          // Controles de orden
+          .d-flex.flex-wrap.justify-content-between.align-items-center.mb-2
+            .small.text-muted Ordenar:
+            select.form-select.form-select-sm(style='max-width: 220px' data-action='artwork-add-sort')
+              option(value='alpha' selected) AlfabA(c)tico (A-Z)
+              option(value='recent') MAs recientes
+              option(value='oldest') MAs antiguas
+          // Buscador
+          input.form-control.mb-3(type='text' placeholder='Buscar por titulo o artista' data-action='artwork-search' autocomplete='off')
+          // Contenedor de lista (Agregar)
+          .list-group.artwork-list(style='max-height: 380px; overflow:auto')
+            // Placeholder de carga inicial
+            .text-center.py-4.text-muted(data-role='loading')
+              .spinner-border.spinner-border-sm.me-2(role='status')
+              | Cargando obras aprobadas...
+          .form-text.text-muted.mt-2
+            | Solo se muestran obras en estado aprobado. Las obras ya agregadas aparecen deshabilitadas.
+
+        // Pane: Quitar
+        .pane-remove.d-none
+          // Buscador quitar
+          input.form-control.mb-3(type='text' placeholder='Buscar en obras de la exposicion' data-action='artwork-remove-search' autocomplete='off')
+          // Contenedor de lista (Quitar)
+          .list-group.artwork-remove-list(style='max-height: 380px; overflow:auto')
+            .text-center.py-4.text-muted(data-role='loading-remove')
+              .spinner-border.spinner-border-sm.me-2(role='status')
+              | Cargando obras de la exposicion...
+          .form-text.text-muted.mt-2
+            | Marca una o varias obras para quitarlas de esta exposicion.
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-danger.d-none(data-action='remove-selected' data-exhibition-id=e._id disabled)
+          i.fas.fa-trash-can.me-1
+          | Quitar obras
+        button.btn.btn-primary(data-action='add-selected' data-exhibition-id=e._id disabled)
+          i.fas.fa-plus.me-1
+          | Agregar seleccionadas

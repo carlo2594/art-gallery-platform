@@ -82,8 +82,6 @@ exhibitionSchema.index({ "participants.user": 1 });
 // 6. TTL: purga 30 días después de moverse a la papelera
 exhibitionSchema.index({ deletedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
 
-module.exports = mongoose.model("Exhibition", exhibitionSchema);
-
 /* ---------------------- Hooks para slug ---------------------- */
 exhibitionSchema.pre("save", function (next) {
   if (!this.isModified("title")) return next();
@@ -98,3 +96,28 @@ exhibitionSchema.pre("save", function (next) {
   this.slug = simple || undefined;
   next();
 });
+
+/* ---------------------- Hooks para participants ---------------------- */
+// Mantiene `participants` (role: 'artista') sincronizado con los artistas de `artworks`
+exhibitionSchema.pre('save', async function(next){
+  try {
+    if (!this.isModified('artworks')) return next();
+    const Artwork = require('./artworkModel');
+    const ids = Array.from(new Set((this.artworks || []).map((x) => String(x))));
+    let artistIds = [];
+    if (ids.length) {
+      artistIds = await Artwork.find({ _id: { $in: ids } }).distinct('artist');
+    }
+    const artistSet = new Set((artistIds || []).filter(Boolean).map((x) => String(x)));
+    const existing = Array.isArray(this.participants) ? this.participants : [];
+    const keepNonArtist = existing.filter((p) => String((p && p.role) || '').toLowerCase() !== 'artista');
+    const newArtistParticipants = Array.from(artistSet).map((uid) => ({ user: uid, role: 'artista' }));
+    this.participants = [...keepNonArtist, ...newArtistParticipants];
+    return next();
+  } catch (err) {
+    try { console.error('exhibition participants sync error:', err); } catch(_) {}
+    return next();
+  }
+});
+
+module.exports = mongoose.model("Exhibition", exhibitionSchema);

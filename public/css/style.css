@@ -2357,6 +2357,56 @@ body.noscroll {
 /* Ensure footer sticks to bottom inside flex-column body */
 .footer { margin-top: auto; }
 
+/* Guests list (artists invited) on exhibition detail */
+.exhibition-detail__guests-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem 1.25rem; /* row x column */
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.exhibition-detail__guest-item { flex: 1 1 100%; } /* 1 columna en xs */
+@media (min-width: 576px) {
+  .exhibition-detail__guest-item { flex: 1 1 33.333%; } /* 3 columnas en sm+ */
+}
+@media (min-width: 992px) {
+  .exhibition-detail__guest-item { flex: 1 1 33.333%; } /* mantener 3 columnas */
+}
+
+.exhibition-detail__guest-link,
+.exhibition-detail__guest-name,
+.exhibition-artist-link {
+  color: var(--ox-yellow) !important;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: .02em;
+  transition: color .2s ease, text-shadow .2s ease;
+}
+.exhibition-detail__guest-link:hover,
+.exhibition-detail__guest-link:focus,
+.exhibition-artist-link:hover,
+.exhibition-artist-link:focus {
+  color: #fff !important;
+  text-shadow: 0 0 6px rgba(245, 196, 94, 0.6);
+}
+
+/* Larger body text in exhibition hero (keep title as-is, and do NOT change yellow links) */
+.exhibition-hero-card .exhibition-detail__description {
+  font-size: 1.6rem;
+  line-height: 1.9;
+}
+@media (min-width: 992px) {
+  .exhibition-hero-card .exhibition-detail__description { font-size: 1.8rem; line-height: 2.1; }
+}
+
+/* Labels and values (Fechas/Lugar) a bit larger */
+.exhibition-hero-card .row.g-4 .small { font-size: 1.2rem; }
+.exhibition-hero-card .row.g-4 .h6   { font-size: 1.6rem; }
+
+/* Guests label a bit larger (links keep their own sizing/color) */
+.exhibition-hero-card .exhibition-detail__guests-label { font-size: 1.3rem; }
+
 /* Home: hide old gallery wall block on home */
 .gallery-wall-section { display: none !important; }
 

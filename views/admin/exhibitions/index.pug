@@ -58,6 +58,7 @@ block content
               th Inicio
               th Fin
               th Vista previa
+              th Agregar obras
               th Editar
           tbody
             each e in exhibitions
@@ -77,6 +78,13 @@ block content
                   a.btn.btn-sm.btn-outline-secondary(href=`/admin/exhibitions/${e._id}` target='_blank')
                     i.fas.fa-eye.me-1
                     | Ver
+                // Columna Agregar obras
+                td
+                  if isAdmin
+                    button.btn.btn-sm.btn-outline-success(type='button', data-bs-toggle='modal', data-bs-target=`#adminAddArtworks-${e._id}`)
+                      i.fas.fa-plus.me-1
+                      | Agregar
+                    include ../modals/_exhibitionAddArtworksModal.pug
                 // Columna Editar (modal por fila) + eliminar
                 td
                   button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditExhibition-${e._id}`)

@@ -48,6 +48,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Servir Bootstrap desde node_modules para CSS/JS locales
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
 
+// admin.js estático concatenado en /public/js/admin.js
+
 // Parsers
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' })); // necesario para procesar formularios HTML
