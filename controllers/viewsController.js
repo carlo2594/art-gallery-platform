@@ -1,7 +1,7 @@
-﻿// Vista de contacto (inglÃ©s)
+﻿// Vista de contacto (inglés)
 exports.getContact = (req, res) => {
   res.status(200).render('public/static/contact', {
-    title: 'Contact Â· GalerÃ­a del Ox'
+    title: 'Contact · Galería del Ox'
   });
 };
 
@@ -33,7 +33,7 @@ exports.getArtistsView = catchAsync(async (req, res) => {
   }
   const artistSort = getSort(artistSortParam, 'artist');
   
-  // PaginaciÃ³n: usa artistPage para SSR paginator
+  // Paginación: usa artistPage para SSR paginator
   const artistPage = Number(req.query.artistPage) || 1;
   const perPage = 15;
   const skip = (artistPage - 1) * perPage;
@@ -70,7 +70,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const q = req.query;
   const search = (q.q || '').trim();
 
-  // 1. ConstrucciÃ³n de filtro y sort
+  // 1. Construcción de filtro y sort
   const artworkFilter = buildArtworkFilter(q);
   const sort = getArtworkSort(q.sort);
 
@@ -131,18 +131,18 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
-  // --- ARTISTAS: Filtros, paginaciÃ³n y orden ---
+  // --- ARTISTAS: Filtros, paginación y orden ---
   const { getSort } = require('@utils/sortUtils');
   const { getArtistsWithArtworksAndCount } = require('@utils/artistsWithArtworks');
   
-  // Normaliza el sort para artistas (evita errores por casing o valores vacÃ­os)
+  // Normaliza el sort para artistas (evita errores por casing o valores vacíos)
   let artistSortParam = q.sort;
   if (!artistSortParam || (artistSortParam !== 'name_asc' && artistSortParam !== 'name_desc' && artistSortParam !== 'recent' && artistSortParam !== 'oldest')) {
     artistSortParam = 'name_asc';
   }
   const artistSort = getSort(artistSortParam, 'artist');
 
-  // PaginaciÃ³n
+  // Paginación
   const { page: artistPage, perPage: artistPerPage, skip: artistSkip } = getPaginationParams({
     page: q.artistPage || q.page,
     perPage: q.artistPerPage || 15
@@ -164,7 +164,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   const exhibitionFilter = buildExhibitionFilter(q, search);
   const exhibitionSort = getExhibitionSort(q.sort);
   
-  // PaginaciÃ³n para exposiciones
+  // Paginación para exposiciones
   const { page: exhibitionPage, perPage: exhibitionPerPage, skip: exhibitionSkip } = getPaginationParams({
     page: q.exhibitionPage || q.page,
     perPage: q.exhibitionPerPage || 10
@@ -206,12 +206,12 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   });
 });
 
-// Vista de exposiciones pÃºblicas (listado con filtros y paginaciÃ³n)
+// Vista de exposiciones públicas (listado con filtros y paginación)
 exports.getExhibitionsView = catchAsync(async (req, res) => {
   const q = req.query;
   const search = (q.q || '').trim();
 
-  // Utils especÃ­ficos de exposiciones
+  // Utils específicos de exposiciones
   const { buildExhibitionFilter, getExhibitionSort, getExhibitionDateBounds } = require('@utils/exhibitionSearch');
   const { getPaginationParams } = require('@utils/pagination');
 
@@ -221,7 +221,7 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
   exhibitionFilter.deletedAt = null;
   const exhibitionSort = getExhibitionSort(q.sort);
 
-  // PaginaciÃ³n (usa exhibitionPage para coherencia con parciales)
+  // Paginación (usa exhibitionPage para coherencia con parciales)
   const { page: exhibitionPage, perPage: exhibitionPerPage, skip: exhibitionSkip } = getPaginationParams({
     page: q.exhibitionPage || q.page,
     perPage: q.exhibitionPerPage || 10
@@ -242,7 +242,7 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
   const exhibitionTotalPages = Math.max(1, Math.ceil(totalExhibitions / exhibitionPerPage));
 
   res.status(200).render('public/exhibitions/index', {
-    title: 'Exposiciones Â· GalerÃ­a del Ox',
+    title: 'Exposiciones · Galería del Ox',
     exhibitions,
     totalExhibitions,
     exhibitionPage,
@@ -253,10 +253,10 @@ exports.getExhibitionsView = catchAsync(async (req, res) => {
   });
 });
 
-// PÃ¡gina de inicio
+// Página de inicio
 exports.getHome = catchAsync(async (req, res) => {
-  // Intentar mostrar obras de la exposiciÃ³n mÃ¡s reciente publicada
-  // y listar las 3 exposiciones mÃ¡s recientes en la home
+  // Intentar mostrar obras de la exposición más reciente publicada
+  // y listar las 3 exposiciones más recientes en la home
   let artworks = [];
   let latestExhibition = null;
   let latestExhibitions = [];
@@ -292,7 +292,7 @@ exports.getHome = catchAsync(async (req, res) => {
         return a;
       });
     }
-    // TambiÃ©n: obtener las 3 exposiciones mÃ¡s recientes publicadas
+    // También: obtener las 3 exposiciones más recientes publicadas
     latestExhibitions = await viewsCache.getOrCompute('home-latest-exhibitions-3', async () => {
       return Exhibition.find({ status: 'published', deletedAt: null })
         .sort({ startDate: -1, endDate: -1, createdAt: -1 })
@@ -310,7 +310,7 @@ exports.getHome = catchAsync(async (req, res) => {
   }
 
   res.status(200).render('public/home/index', {
-    title: 'Inicio Â· GalerÃ­a del Ox',
+    title: 'Inicio · Galería del Ox',
     artworks,
     latestExhibition,
     latestExhibitions
@@ -323,13 +323,13 @@ exports.getHome = catchAsync(async (req, res) => {
 exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;
 
-  // Si faltan datos mÃ­nimos, muestra la pÃ¡gina con error genÃ©rico
+  // Si faltan datos mínimos, muestra la página con error genérico
   if (!uid || !token) {
     return res.render('public/auth/resetPassword', {
       uid,
       token,
       isNewPassword: type === 'new',
-      error: 'El enlace no es vÃ¡lido o ya venciÃ³. Solicita uno nuevo.',
+      error: 'El enlace no es válido o ya venció. Solicita uno nuevo.',
       hideNavbar: true,
       hideFooter: true
     });
@@ -345,7 +345,7 @@ exports.getResetPassword = catchAsync(async (req, res) => {
   });
 
   if (!resetToken) {
-    // Redirige a pÃ¡gina dedicada para enlace invÃ¡lido/expirado/ya usado
+    // Redirige a página dedicada para enlace inválido/expirado/ya usado
     return res.redirect(303, '/reset-link-invalid');
   }
 
@@ -358,10 +358,10 @@ exports.getResetPassword = catchAsync(async (req, res) => {
   });
 });
 
-// PÃ¡gina dedicada: enlace de restablecimiento invÃ¡lido/expirado/ya usado
+// Página dedicada: enlace de restablecimiento inválido/expirado/ya usado
 exports.getResetLinkInvalid = (req, res) => {
   res.status(410).render('public/auth/resetLinkInvalid', {
-    title: 'Enlace no vÃ¡lido Â· GalerÃ­a del Ox'
+    title: 'Enlace no válido · Galería del Ox'
   });
 };
 
@@ -369,7 +369,7 @@ exports.getResetLinkInvalid = (req, res) => {
 
 exports.getSignUp = (req, res) => {
   res.render('public/auth/loginSignUp', {
-    title: 'Registrarse Â· GalerÃ­a del Ox',
+    title: 'Registrarse · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     mode: 'signUp',
@@ -382,7 +382,7 @@ exports.getSignUp = (req, res) => {
 // Vista para login
 exports.getLogin = (req, res) => {
   res.render('public/auth/loginSignUp', {
-    title: 'Iniciar sesiÃ³n Â· GalerÃ­a del Ox',
+    title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     mode: 'login',
@@ -391,10 +391,10 @@ exports.getLogin = (req, res) => {
   });
 };
 
-// Vista para "OlvidÃ© mi contraseÃ±a"
+// Vista para "Olvidé mi contraseña"
 exports.getForgotPassword = (req, res) => {
   res.render('public/auth/forgotPassword', {
-    title: 'Recuperar contraseÃ±a Â· GalerÃ­a del Ox',
+    title: 'Recuperar contraseña · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     error: req.query.error,
@@ -406,7 +406,7 @@ exports.getForgotPassword = (req, res) => {
 // Vista de bienvenida (primera vez)
 exports.getWelcome = (req, res) => {
   res.status(200).render('public/auth/welcome', {
-    title: 'Bienvenido Â· GalerÃ­a del Ox',
+    title: 'Bienvenido · Galería del Ox',
   });
 };
 
@@ -433,36 +433,33 @@ exports.getArtworks = catchAsync(async (req, res) => {
   const q = req.query;
   const filter = {};
 
-  // Availability filter (default to available/reserved)
+  // Availability filter (no default: show all unless user selects)
   (function applyAvailability() {
     const raw = (q.avail ?? '').toString().toLowerCase();
     let mode = '';
     if (raw.includes('unavailable')) mode = 'unavailable';
     else if (raw.includes('available')) mode = 'available';
     if (mode === 'unavailable') {
-      // No en venta: incluye reservadas, vendidas, en prÃ©stamo o no a la venta
+      // No en venta: incluye reservadas, vendidas, en préstamo o no a la venta
       filter.availability = { $in: ['reserved', 'sold', 'not_for_sale', 'on_loan'] };
     } else if (mode === 'available') {
       // En venta (no incluye reservadas)
       filter.availability = { $in: ['for_sale'] };
-    } else {
-      // Default: en venta o reservadas
-      filter.availability = { $in: ['for_sale', 'reserved'] };
     }
   })();
 
-  // Facetas bÃ¡sicas (normalizadas)
+  // Facetas básicas (normalizadas)
   const typesN = normArr(q.type);
   const techsN  = normArr(q.technique);
   if (typesN.length) filter.type_norm      = { $in: typesN };
   if (techsN.length) filter.technique_norm = { $in: techsN };
 
-  // Rango de tamaÃ±o (cm)
+  // Rango de tamaño (cm)
   const minw = toNumber(q.minw), maxw = toNumber(q.maxw), minh = toNumber(q.minh), maxh = toNumber(q.maxh);
   if (minw || maxw) filter.width_cm  = { ...(minw?{$gte:minw}:{}), ...(maxw?{$lte:maxw}:{}) };
   if (minh || maxh) filter.height_cm = { ...(minh?{$gte:minh}:{}), ...(maxh?{$lte:maxh}:{}) };
 
-  // OrientaciÃ³n
+  // Orientación
   const orientations = inArr(q.orientation);
   if (orientations.length) {
     const ors = [];
@@ -472,11 +469,10 @@ exports.getArtworks = catchAsync(async (req, res) => {
     if (ors.length) filter.$or = ors;
   }
 
-  // Base: aprobadas, no borradas y disponibilidad segÃºn filtro
+  // Base: aprobadas y no borradas (sin imponer disponibilidad por defecto)
   const baseMatch = { 
     status: 'approved', 
     deletedAt: null, 
-    availability: filter.availability?.$in ? { $in: filter.availability.$in } : { $in: ['for_sale', 'reserved'] },
     ...filter 
   };
 
@@ -485,11 +481,11 @@ exports.getArtworks = catchAsync(async (req, res) => {
     { $match: baseMatch },
     { $group: { _id: null, minPriceCents: { $min: '$price_cents' }, maxPriceCents: { $max: '$price_cents' } } },
     { $project: { _id: 0, minPriceCents: 1, maxPriceCents: 1 } }
-  ]).hint({ status: 1, deletedAt: 1, createdAt: -1 }); // Forzar uso del Ã­ndice principal
+  ]).hint({ status: 1, deletedAt: 1, createdAt: -1 }); // Forzar uso del índice principal
 
   const bounds = boundsAgg[0] || { minPriceCents: null, maxPriceCents: null };
 
-  // 2) Obtener tÃ©cnicas Ãºnicas desde la base de datos (solo aprobados y no borrados)
+  // 2) Obtener técnicas únicas desde la base de datos (solo aprobados y no borrados)
   const techniques = await getAllTechniques(Artwork);
 
   let minCents = readMinCentsFromQuery(q);
@@ -507,7 +503,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
     filter.price_cents = pf;
   }
 
-  // 3) OrdenaciÃ³n
+  // 3) Ordenación
   const sort = getSort(q.sort);
 
   // 4) Consulta final: paginada
@@ -555,21 +551,21 @@ exports.getArtworks = catchAsync(async (req, res) => {
     maxUSD: maxCents != null ? maxCents / 100 : null
   };
 
-  // â¬‡ï¸ CanonicalizaciÃ³n de la query (opcional pero recomendado)
-  // Construye una query sin vacÃ­os ni defaults y redirige si difiere de la original.
+  // �‡ï¸ Canonicalización de la query (opcional pero recomendado)
+  // Construye una query sin vacíos ni defaults y redirige si difiere de la original.
   const redirectUrl = canonicalizeQuery(req, appliedPrice, priceBounds);
   if (redirectUrl) {
     return res.redirect(302, redirectUrl);
   }
 
-  // Render si ya es canÃ³nica
+  // Render si ya es canónica
   res.status(200).render('public/artworks/index', {
     title: 'Obras',
     artworks,
     q,
     priceBounds,   // rango total desde BD
     appliedPrice,  // rango aplicado (query o defaults)
-    techniques,    // tÃ©cnicas Ãºnicas para filtros
+    techniques,    // técnicas únicas para filtros
     page,
     perPage,
     totalPages,
@@ -578,10 +574,10 @@ exports.getArtworks = catchAsync(async (req, res) => {
   });
 });
 
-// Vista Â¿QuiÃ©nes somos?
+// Vista ¿Quiénes somos?
 exports.getAbout = (req, res) => {
   res.status(200).render('public/static/about', {
-    title: 'Â¿QuiÃ©nes somos? Â· GalerÃ­a del Ox'
+    title: '¿Quiénes somos? · Galería del Ox'
   });
 };
 
@@ -597,7 +593,7 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
     return res.redirect(302, redirectUrl);
   }
 
-  // Contador de vistas se actualiza solo vÃ­a script diario
+  // Contador de vistas se actualiza solo vía script diario
 
   // Buscar obras relacionadas del mismo artista
   let relatedArtworks = await getRelatedArtworks(Artwork, artwork.artist._id, artwork._id, 6);
@@ -632,7 +628,7 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
   } catch (_) {}
 
   res.status(200).render('public/artworks/detail', {
-    title: `${artwork.title} Â· GalerÃ­a del Ox`,
+    title: `${artwork.title} · Galería del Ox`,
     artwork,
     relatedArtworks
   });
@@ -656,7 +652,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     return res.redirect(302, redirectUrl);
   }
 
-  // --- FILTROS Y PAGINACIÃ“N PARA OBRAS DEL ARTISTA ---
+  // --- FILTROS Y PAGINACIÓN PARA OBRAS DEL ARTISTA ---
   
   // Filtro base: obras del artista aprobadas y no borradas
   const baseFilter = {
@@ -665,11 +661,11 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     deletedAt: null
   };
 
-  // Aplicar filtros adicionales (tÃ©cnica, precio, etc.) sin filtro de availability
+  // Aplicar filtros adicionales (técnica, precio, etc.) sin filtro de availability
   const artworkFilter = buildArtistArtworkFilter(q);
   const combinedFilter = { ...baseFilter, ...artworkFilter };
   
-  // PaginaciÃ³n (mÃ¡ximo 9 obras por pÃ¡gina)
+  // Paginación (máximo 9 obras por página)
   const { page, perPage, skip } = getPaginationParams(req.query, 9, 9);
   
   // Ordenamiento
@@ -679,7 +675,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   const [
     totalArtworks,
     artworksRaw,
-    allArtworks, // Para estadÃ­sticas generales
+    allArtworks, // Para estadísticas generales
     techniques,
     bounds
   ] = await Promise.all([
@@ -693,9 +689,9 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
       .skip(skip)
       .limit(perPage)
       .lean(),
-    // Todas las obras del artista para estadÃ­sticas (sin filtros adicionales)
+    // Todas las obras del artista para estadísticas (sin filtros adicionales)
     Artwork.find(baseFilter).populate({ path: 'artist', select: 'name' }),
-    // TÃ©cnicas disponibles del artista (usando utility con cache)
+    // Técnicas disponibles del artista (usando utility con cache)
     getArtistTechniques(Artwork, artist._id),
     // Rangos de precio del artista (usando utility con cache)
     getArtistPriceBounds(Artwork, artist._id)
@@ -715,7 +711,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   });
   const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
 
-  // Estado de seguimiento del usuario actual (si hay sesiÃ³n)
+  // Estado de seguimiento del usuario actual (si hay sesión)
   let isFollowing = false;
   try {
     const currentUser = res.locals && res.locals.currentUser;
@@ -724,14 +720,14 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     }
   } catch (_) {}
 
-  // Usar utility para construir estadÃ­sticas
+  // Usar utility para construir estadísticas
   const stats = buildArtistStats(allArtworks);
 
   res.status(200).render('public/artists/detail', {
-    title: `${artist.name} Â· GalerÃ­a del Ox`,
+    title: `${artist.name} · Galería del Ox`,
     artist,
     artworks: artworksMapped, // Obras paginadas y filtradas
-    stats, // Solo tÃ©cnicas y total de obras
+    stats, // Solo técnicas y total de obras
     techniques, // Para filtros
     priceBounds, // Para filtros de precio
     appliedPrice, // Precios aplicados
@@ -745,7 +741,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
   });
 });
 
-// Vista de detalle de exposiciÃ³n individual
+// Vista de detalle de exposición individual
 exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   const Exhibition = require('@models/exhibitionModel');
   const Artwork = require('@models/artworkModel');
@@ -769,12 +765,12 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
 
   if (!exhibition) {
     return res.status(404).render('public/error/index', {
-      title: 'ExposiciÃ³n no encontrada',
-      msg: 'No pudimos encontrar esta exposiciÃ³n.'
+      title: 'Exposición no encontrada',
+      msg: 'No pudimos encontrar esta exposición.'
     });
   }
 
-  // RedirecciÃ³n canÃ³nica a slug si llegÃ³ por ObjectId y la exposiciÃ³n tiene slug
+  // Redirección canónica a slug si llegó por ObjectId y la exposición tiene slug
   if (isObjectId && exhibition.slug) {
     return res.redirect(301, `/exhibitions/${exhibition.slug}`);
   }
@@ -815,7 +811,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
 
   return res.status(200).render('public/exhibitions/detail', {
-    title: `${exhibition.title} Â· GalerÃ­a del Ox`,
+    title: `${exhibition.title} · Galería del Ox`,
     exhibition,
     artworks,
     totalArtworks,
@@ -829,7 +825,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
 // Vista: exposicion privada o no publicada
 exports.getExhibitionUnpublished = (req, res) => {
   return res.status(403).render('public/exhibitions/unpublished', {
-    title: 'Exposicion privada | Galeria del Ox'
+    title: 'Exposición privada · Galería del Ox'
   });
 };
 

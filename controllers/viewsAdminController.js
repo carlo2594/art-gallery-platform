@@ -41,7 +41,7 @@ function escapeRegex(s) {
 }
 function buildDiacriticRegex(input) {
   const map = {
-    a: 'aáàäâãåā',
+    a: 'aáàä���ā',
     e: 'eéèëêē',
     i: 'iíìïîī',
     o: 'oóòöôõō',

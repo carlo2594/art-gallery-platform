@@ -8,9 +8,11 @@ const cloudinary = require('@services/cloudinary');
 
 (async () => {
   try {
-    const localPath = path.resolve(__dirname, '..', 'public', 'Logos', 'GOX_LOGO_09.png');
+    const preferred = path.resolve(__dirname, '..', 'public', 'Logos', 'GOX_LOGO_09_watermark_gris.png');
+    const fallback  = path.resolve(__dirname, '..', 'public', 'Logos', 'GOX_LOGO_09.png');
+    const localPath = fs.existsSync(preferred) ? preferred : fallback;
     if (!fs.existsSync(localPath)) {
-      console.error('Archivo no encontrado:', localPath);
+      console.error('Archivo no encontrado. Busqué:', preferred, 'y', fallback);
       process.exit(1);
     }
     const res = await cloudinary.uploader.upload(localPath, {

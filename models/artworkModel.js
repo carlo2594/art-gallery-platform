@@ -1,6 +1,6 @@
 ﻿const mongoose = require('mongoose');
 
-// Helper de normalizaciÃ³n (quita tildes, pasa a minÃºsculas, recorta)
+// Helper de normalización (quita tildes, pasa a minúsculas, recorta)
 const norm = (s) =>
   (s || '')
     .normalize('NFD')
@@ -16,16 +16,16 @@ const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
     title: { type: String, required: true, trim: true },
-    slug: { type: String }, // URL-friendly version of title (Ã­ndice Ãºnico definido explÃ­citamente abajo)
+    slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
     description: { type: String, trim: true },
-    completedAt: { type: Date }, // Fecha en que el artista terminÃ³ la obra
+    completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
     /* ------ Relations ------ */
     artist: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true,
-      index: true // (2) IndexaciÃ³n para bÃºsquedas por artista
+      index: true // (2) Indexación para búsquedas por artista
     },
     exhibitions: [
       {
@@ -36,12 +36,12 @@ const artworkSchema = new mongoose.Schema(
 
     /* ------ Media & meta ------ */
     // Campos para imagen en Cloudinary
-    imageUrl: { type: String, required: true },      // URL pÃºblica
+    imageUrl: { type: String, required: true },      // URL pública
     imagePublicId: { type: String }, // ID de Cloudinary
     imageWidth_px: { type: Number }, // opcional
     imageHeight_px: { type: Number }, // opcional
 
-    // (3) GalerÃ­a de imÃ¡genes adicional
+    // (3) Galería de imágenes adicional
     images: [{ type: String }], // Opcional: URLs adicionales
 
     type: { type: String },
@@ -68,7 +68,7 @@ const artworkSchema = new mongoose.Schema(
       orderId: { type: String, trim: true },
     },
 
-    // Campos normalizados para bÃºsquedas/indexaciÃ³n
+    // Campos normalizados para búsquedas/indexación
     type_norm: { type: String, index: true },
     technique_norm: { type: String, index: true },
 
@@ -76,7 +76,7 @@ const artworkSchema = new mongoose.Schema(
     views: { type: Number, default: 0 },
     favoritesCount: { type: Number, default: 0 },
 
-    // Fecha de creaciÃ³n en inglÃ©s (formato largo)
+    // Fecha de creación en inglés (formato largo)
     createdAt_en: { type: String },
 
     /* ------ Workflow ----- */
@@ -100,22 +100,22 @@ const artworkSchema = new mongoose.Schema(
   }
 );
 
-/* (2) Ãndices adicionales */
-// Ãndice Ãºnico para slug (para SEO y URLs amigables)
+/* (2) Índices adicionales */
+// Índice único para slug (para SEO y URLs amigables)
 artworkSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
-// Ãndices bÃ¡sicos existentes
+// Índices básicos existentes
 artworkSchema.index({ artist: 1, status: 1 });
 artworkSchema.index({ favoritesCount: -1 });
 artworkSchema.index({ exhibitions: 1 });
 // Index para obras por exposición + visibilidad (acelera detalle y home)
 artworkSchema.index({ exhibitions: 1, status: 1, deletedAt: 1, createdAt: -1 });
 
-// Nuevos Ã­ndices compuestos optimizados para viewsController
-// 1. Ãndice principal para consultas de obras aprobadas (getArtworks, getSearchResults)
+// Nuevos índices compuestos optimizados para viewsController
+// 1. Índice principal para consultas de obras aprobadas (getArtworks, getSearchResults)
 artworkSchema.index({ status: 1, deletedAt: 1, createdAt: -1 });
 
-// 2. Ãndice para filtros combinados en bÃºsquedas
+// 2. Índice para filtros combinados en búsquedas
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
@@ -124,7 +124,7 @@ artworkSchema.index({
   price_cents: 1 
 });
 
-// 3. Ãndice crÃ­tico para getArtistDetail - consultas por artista
+// 3. Índice crítico para getArtistDetail - consultas por artista
 artworkSchema.index({ 
   artist: 1, 
   status: 1, 
@@ -132,7 +132,7 @@ artworkSchema.index({
   createdAt: -1 
 });
 
-// 4. Ãndice para filtros de dimensiones
+// 4. Índice para filtros de dimensiones
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
@@ -140,31 +140,31 @@ artworkSchema.index({
   height_cm: 1 
 });
 
-// 5. Ãndice para ordenamiento por popularidad (getHome)
+// 5. Índice para ordenamiento por popularidad (getHome)
 artworkSchema.index({ 
   deletedAt: 1, 
   views: -1 
 });
 
-// 6. Ãndice para agregaciones de tÃ©cnicas y precios
+// 6. Índice para agregaciones de técnicas y precios
 artworkSchema.index({ 
   status: 1, 
   deletedAt: 1, 
   technique: 1 
 });
 
-// 7. Ãndices para disponibilidad y ventas
+// 7. Índices para disponibilidad y ventas
 artworkSchema.index({ availability: 1, status: 1, deletedAt: 1, createdAt: -1 });
 artworkSchema.index({ availability: 1, price_cents: 1 });
 // Index para búsqueda por título normalizado (admin)
 artworkSchema.index({ title_norm: 1 });
 
-/* Ãndices existentes */
-artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 dÃ­as despuÃ©s de ir a la papelera
+/* Índices existentes */
+artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 días después de ir a la papelera
 artworkSchema.index({ type_norm: 1, technique_norm: 1 });
 
 /* ====== Virtuals ====== */
-// Lectura conveniente del precio en dÃ³lares (USD)
+// Lectura conveniente del precio en dólares (USD)
 artworkSchema.virtual('price').get(function () {
   if (typeof this.price_cents !== 'number') return null;
   return this.price_cents / 100;
@@ -178,7 +178,7 @@ artworkSchema.virtual('aspectRatio').get(function () {
   return null;
 });
 
-/* (6) Virtual para nombre del artista si estÃ¡ populado */
+/* (6) Virtual para nombre del artista si está populado */
 artworkSchema.virtual('artistName').get(function () {
   if (this.populated('artist') && this.artist && this.artist.name) {
     return this.artist.name;
@@ -186,7 +186,7 @@ artworkSchema.virtual('artistName').get(function () {
   return undefined;
 });
 
-/* ====== MÃ©todos de Workflow ====== */
+/* ====== Métodos de Workflow ====== */
 
 // artist: draft â†’ submitted
 artworkSchema.methods.submit = function () {
@@ -219,7 +219,7 @@ artworkSchema.methods.reject = function (adminId, reason = '') {
   return this.save();
 };
 
-/* ====== MÃ©todos de Trash ====== */
+/* ====== Métodos de Trash ====== */
 
 // mover a papelera (soft delete)
 artworkSchema.methods.moveToTrash = function (userId) {
@@ -239,14 +239,14 @@ artworkSchema.methods.restore = function () {
   return this.save();
 };
 
-// forzar draft (excepto si estÃ¡ en papelera)
+// forzar draft (excepto si está en papelera)
 artworkSchema.methods.setDraft = function () {
   if (this.status === 'trashed') return this;
   this.status = 'draft';
   return this.save();
 };
 
-/* ====== MÃ©todos de Disponibilidad ====== */
+/* ====== Métodos de Disponibilidad ====== */
 
 artworkSchema.methods.markSold = function (opts = {}) {
   this.availability = 'sold';
@@ -284,14 +284,14 @@ artworkSchema.methods.setOnLoan = function () {
   return this.save();
 };
 
-/* ====== EstÃ¡ticos ====== */
+/* ====== Estáticos ====== */
 
-// CatÃ¡logo pÃºblico: aprobados y no en papelera
+// Catálogo público: aprobados y no en papelera
 artworkSchema.statics.findApproved = function (filter = {}) {
   return this.find({ status: 'approved', deletedAt: null, ...filter });
 };
 
-// Buscar por rango de precio en USD (min/max en dÃ³lares)
+// Buscar por rango de precio en USD (min/max en dólares)
 artworkSchema.statics.findByPriceRange = function ({ min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
   const centsMin = Math.round(min * 100);
   const centsMax = Math.round(max * 100);
@@ -308,7 +308,7 @@ artworkSchema.statics.recalculateFavoritesCount = async function (artworkId) {
 
 /* ====== Hooks ====== */
 
-// FunciÃ³n para generar slug Ãºnico
+// Función para generar slug único
 function generateSlug(title) {
   return title
     .toString()
@@ -318,12 +318,12 @@ function generateSlug(title) {
     .trim()
     .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
     .replace(/\s+/g, '-') // espacios a guiones
-    .replace(/-+/g, '-') // mÃºltiples guiones a uno
+    .replace(/-+/g, '-') // múltiples guiones a uno
     .replace(/^-|-$/g, ''); // remover guiones al inicio y final
 }
 
 artworkSchema.pre('save', async function (next) {
-  // Generar slug si es nuevo documento o cambiÃ³ el tÃ­tulo
+  // Generar slug si es nuevo documento o cambió el título
   if (this.isNew || this.isModified('title')) {
     let baseSlug = generateSlug(this.title);
     let slug = baseSlug;
@@ -350,7 +350,7 @@ artworkSchema.pre('save', async function (next) {
     this.price_cents = Math.max(0, Math.round(this.price_cents));
   }
 
-  // Calcular fecha de creaciÃ³n en inglÃ©s (ej: September 25, 2025)
+  // Calcular fecha de creación en inglés (ej: September 25, 2025)
   if (this.createdAt) {
     const date = new Date(this.createdAt);
     this.createdAt_en = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });

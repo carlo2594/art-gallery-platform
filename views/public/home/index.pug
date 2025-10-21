@@ -1,4 +1,4 @@
-extends /layouts/public
+﻿extends /layouts/public
 
 //- Estilos específicos de la Home (migrados a /css/style.css)
 block headExtra
@@ -13,8 +13,7 @@ block content
             br
             br
             | Desde obras originales hasta experiencias sensoriales, cada rincón de la galería está pensado para celebrar la diversidad creativa.
-          .d-grid.gap-2.d-md-flex.justify-content-md-start.mb-4.mb-lg-3.hero-cta.hero-cta-container
-            a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase.hero-cta-btn(href="/artworks") Ver el arte
+          a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase.hero-cta-btn.mt-3(href="/artworks") Ver el arte
         .col-lg-5.d-flex.justify-content-end.align-items-center.hero-image-container.hero-col-image
           img.hero-image.collectors-hero-image.hero-img-main(
             src="/img/Ox-hero-image-landing.jpg",
@@ -46,7 +45,7 @@ block content
               - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
               if dateText
                 p.small.text-muted= dateText
-              //- Botón de "Ver detalles" eliminado a solicitud
+              //- BotÃ³n de "Ver detalles" eliminado a solicitud
             .col-md-5(class=isEven ? 'order-md-1 d-flex justify-content-center align-items-center' : 'd-flex justify-content-center align-items-center')
               a(href=`/exhibitions/${expo.slug || expo._id}`, aria-label=expo.title)
                 if expo.coverImage

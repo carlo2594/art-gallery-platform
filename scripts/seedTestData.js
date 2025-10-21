@@ -7,7 +7,7 @@ const Artwork = require('../models/artworkModel');
 const User = require('../models/userModel');
 const Exhibition = require('../models/exhibitionModel');
 const Favorite = require('../models/favoriteModel');
-const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÃNEA
+const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
 const Comment = require('../models/commentModel');
 const PasswordResetToken = require('../models/passwordResetTokenModel');
 const Newsletter = require('../models/newsletterModel');
@@ -42,14 +42,14 @@ function randomFromArray(arr) {
 }
 
 /**
- * Devuelve un nÃºmero entero aleatorio entre min y max (ambos incluidos).
+ * Devuelve un número entero aleatorio entre min y max (ambos incluidos).
  */
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 /**
- * FunciÃ³n para generar slug Ãºnico
+ * Función para generar slug único
  */
 function generateSlug(title) {
   return title
@@ -60,12 +60,12 @@ function generateSlug(title) {
     .trim()
     .replace(/[^a-z0-9 -]/g, '') // remover caracteres especiales
     .replace(/\s+/g, '-') // espacios a guiones
-    .replace(/-+/g, '-') // mÃºltiples guiones a uno
+    .replace(/-+/g, '-') // múltiples guiones a uno
     .replace(/^-|-$/g, ''); // remover guiones al inicio y final
 }
 
 /**
- * Helper de normalizaciÃ³n (quita tildes, pasa a minÃºsculas, recorta)
+ * Helper de normalización (quita tildes, pasa a minúsculas, recorta)
  */
 function norm(s) {
   return (s || '')
@@ -80,14 +80,14 @@ const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rej
 const AVAILABILITY_STATUSES = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 
 /**
- * FunciÃ³n principal que conecta a la base de datos, elimina toda la base y agrega datos de prueba variados.
+ * Función principal que conecta a la base de datos, elimina toda la base y agrega datos de prueba variados.
  */
 async function seed() {
   await mongoose.connect(DB);
   
-  console.log('ðŸ”„ Sincronizando Ã­ndices...');
+  console.log('[SEED] Sincronizando índices...');
   
-  // Sincronizar Ã­ndices para evitar warnings de duplicados
+  // Sincronizar índices para evitar warnings de duplicados
   try {
     await User.syncIndexes();
     await Artwork.syncIndexes(); 
@@ -97,19 +97,19 @@ async function seed() {
     await Comment.syncIndexes();
     await PasswordResetToken.syncIndexes();
     await Newsletter.syncIndexes();
-    console.log('âœ… Ãndices sincronizados');
+    console.log('âœ… Índices sincronizados');
   } catch (error) {
-    console.log('âš ï¸  Warning sincronizando Ã­ndices:', error.message);
+    console.log('âš ï¸  Warning sincronizando índices:', error.message);
   }
 
-  console.log('ðŸ—‘ï¸  Limpiando datos existentes...');
-  // Elimina todos los documentos de cada colecciÃ³n (incluyendo artwork views)
+  console.log('[SEED] Limpiando datos existentes...');
+  // Elimina todos los documentos de cada colección (incluyendo artwork views)
   await Promise.all([
     User.deleteMany({}),
     Artwork.deleteMany({}),
     Exhibition.deleteMany({}),
     Favorite.deleteMany({}),
-    ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÃNEA
+    ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÍNEA
     Comment.deleteMany({}),
     PasswordResetToken.deleteMany({}),
     Newsletter.deleteMany({})
@@ -143,8 +143,8 @@ async function seed() {
     email: 'leonardo.martinez@test.com',
     password: '123456',
     role: 'artist',
-    bio: 'Artista contemporÃ¡neo especializado en pintura abstracta y escultura moderna. Con mÃ¡s de 15 aÃ±os de experiencia, ha expuesto en galerÃ­as de todo el mundo.',
-    location: 'Barcelona, EspaÃ±a',
+    bio: 'Artista contemporáneo especializado en pintura abstracta y escultura moderna. Con más de 15 años de experiencia, ha expuesto en galerías de todo el mundo.',
+    location: 'Barcelona, España',
     website: 'https://leonardo-martinez-art.com',
     social: {
       instagram: 'leonardo_martinez_art',
@@ -166,15 +166,15 @@ async function seed() {
       slug: `artista-${i}`
     });
   }
-  // Usar create secuencial para disparar hooks (hash de password y slug Ãºnico)
+  // Usar create secuencial para disparar hooks (hash de password y slug único)
   const users = [];
   for (const data of userData) {
-    // Si falta name, el hook lo igualarÃ¡ al email
+    // Si falta name, el hook lo igualará al email
     const created = await User.create(data);
     users.push(created);
   }
 
-  // TamaÃ±os reales de canvas (en cm)
+  // Tamaños reales de canvas (en cm)
   const canvasSizes = [
     { width: 20, height: 30 },
     { width: 30, height: 40 },
@@ -188,18 +188,18 @@ async function seed() {
 
   // Crea obras de arte de prueba (total 120: 20 para Leonardo + 100 para otros)
   const artworkData = [];
-  const slugsUsed = new Set(); // Para asegurar slugs Ãºnicos
+  const slugsUsed = new Set(); // Para asegurar slugs únicos
   
-  // Encontrar a Leonardo Martinez (serÃ¡ el Ã­ndice 2 despuÃ©s de Admin y UsuarioExtra)
+  // Encontrar a Leonardo Martinez (será el índice 2 después de Admin y UsuarioExtra)
   const leonardoUser = users[2]; // Leonardo Martinez
   
-  // Crear 20 obras especÃ­ficamente para Leonardo Martinez
+  // Crear 20 obras específicamente para Leonardo Martinez
   const leonardoArtworks = [
-    'SinfonÃ­a Urbana', 'Reflejos del Alma', 'Danza CÃ³smica', 'Laberinto Interior',
-    'Susurros de Color', 'GeometrÃ­a Emocional', 'Ritmos de la Naturaleza', 'Fragmentos de Luz',
-    'Metamorfosis Azul', 'Arquitectura de SueÃ±os', 'ExplosiÃ³n Silenciosa', 'Equilibrio DinÃ¡mico',
+    'Sinfonía Urbana', 'Reflejos del Alma', 'Danza Cósmica', 'Laberinto Interior',
+    'Susurros de Color', 'Geometría Emocional', 'Ritmos de la Naturaleza', 'Fragmentos de Luz',
+    'Metamorfosis Azul', 'Arquitectura de Sueños', 'Explosión Silenciosa', 'Equilibrio Dinámico',
     'Textura del Tiempo', 'Vibraciones Doradas', 'Mosaico de Sentimientos', 'Ondas Cerebrales',
-    'ConstrucciÃ³n EtÃ©rea', 'Paisaje Mental', 'Forma y VacÃ­o', 'EnergÃ­a Pura'
+    'Construcción Etérea', 'Paisaje Mental', 'Forma y Vacío', 'Energía Pura'
   ];
   
   for (let i = 0; i < 20; i++) {
@@ -208,7 +208,7 @@ async function seed() {
     const scale = randomFromArray(scaleOptions);
     const title = leonardoArtworks[i];
     
-    // Generar slug Ãºnico
+    // Generar slug único
     let baseSlug = generateSlug(title);
     let slug = baseSlug;
     let counter = 1;
@@ -218,21 +218,21 @@ async function seed() {
     }
     slugsUsed.add(slug);
     
-    // Genera una fecha aleatoria entre 2015 y 2024 para Leonardo (mÃ¡s reciente)
+    // Genera una fecha aleatoria entre 2015 y 2024 para Leonardo (más reciente)
     const year = randomInt(2015, 2024);
     const month = randomInt(0, 11);
     const day = randomInt(1, 28);
     const completedAt = new Date(year, month, day);
     
-    const types = ['pintura', 'escultura', 'tÃ©cnica mixta'];
-    const techniques = ['Ã³leo sobre lienzo', 'acrÃ­lico sobre papel', 'bronce', 'hierro forjado', 'tÃ©cnica mixta'];
+    const types = ['pintura', 'escultura', 'técnica mixta'];
+    const techniques = ['óleo sobre lienzo', 'acrílico sobre papel', 'bronce', 'hierro forjado', 'técnica mixta'];
     const type = randomFromArray(types);
     const technique = randomFromArray(techniques);
     
     artworkData.push({
       title,
       slug,
-      description: `Una obra magistral que explora ${title.toLowerCase()}. TÃ©cnica refinada que combina elementos abstractos con una profunda exploraciÃ³n emocional.`,
+      description: `Una obra magistral que explora ${title.toLowerCase()}. Técnica refinada que combina elementos abstractos con una profunda exploración emocional.`,
       imageUrl: randomFromArray(randomImages),
       type,
       technique,
@@ -242,43 +242,43 @@ async function seed() {
       artist: leonardoUser._id,
       status: "approved",
       availability: "for_sale", // Agregar disponibilidad por defecto
-      views: randomInt(50, 800), // MÃ¡s vistas para Leonardo
+      views: randomInt(50, 800), // Más vistas para Leonardo
       completedAt,
       width_cm: Math.round(canvas.width * scale),
       height_cm: Math.round(canvas.height * scale),
-      price_cents: randomInt(1500, 8000) * 100, // Precios mÃ¡s altos para Leonardo
+      price_cents: randomInt(1500, 8000) * 100, // Precios más altos para Leonardo
       size: `${Math.round(canvas.width * scale)} x ${Math.round(canvas.height * scale)} cm`
     });
   }
   
-  // Nombres Ãºnicos para las obras de otros artistas
-  // Descriptores Ãºnicos para las obras
+  // Nombres únicos para las obras de otros artistas
+  // Descriptores únicos para las obras
   const artworkDescriptors = [
     'Aurora', 'Ecos', 'Reflejo', 'Caminos', 'Fragmentos',
-    'Horizonte', 'RaÃ­ces', 'Alas', 'Susurros', 'CÃ­rculo',
-    'Misterio', 'Ritmo', 'JardÃ­n', 'Sombras', 'RÃ­o',
-    'ConstelaciÃ³n', 'Laberinto', 'Cumbre', 'Espejismo', 'TravesÃ­a',
+    'Horizonte', 'Raíces', 'Alas', 'Susurros', 'Círculo',
+    'Misterio', 'Ritmo', 'Jardín', 'Sombras', 'Río',
+    'Constelación', 'Laberinto', 'Cumbre', 'Espejismo', 'Travesía',
     'Niebla', 'Cascada', 'Paz', 'Fuego', 'Oasis',
     'Cosecha', 'Amanecer', 'Atardecer', 'Noche', 'Mar',
-    'Bosque', 'Danza', 'Caminante', 'RaÃ­z', 'Puente',
-    'Nevada', 'Invierno', 'Verano', 'OtoÃ±o', 'Primavera',
-    'Caverna', 'Escondida', 'Lava', 'MontaÃ±a', 'Valle',
+    'Bosque', 'Danza', 'Caminante', 'Raíz', 'Puente',
+    'Nevada', 'Invierno', 'Verano', 'Otoño', 'Primavera',
+    'Caverna', 'Escondida', 'Lava', 'Montaña', 'Valle',
     'Isla', 'Desierto', 'Lago', 'Cueva', 'Pradera',
     'Sendero', 'Mirador', 'Colina', 'Lejana', 'Plata',
     'Dorada', 'Niebla', 'Cielo', 'Nubes', 'Estrella',
     'Luna', 'Sol', 'Viento', 'Brisa', 'Azul',
     'Escondido', 'Sombras', 'Sagrada', 'Luz', 'Rojo',
-    'Esmeralda', 'SueÃ±os', 'Dorada', 'Perdido', 'Alba',
+    'Esmeralda', 'Sueños', 'Dorada', 'Perdido', 'Alba',
     'Verde', 'Cristal', 'Dorado', 'Plateada', 'Azul',
     'Fuego', 'Estrellas', 'Polar', 'Aurora', 'Medianoche',
-    'Sur', 'OtoÃ±o', 'Niebla', 'Jade', 'Azul',
+    'Sur', 'Otoño', 'Niebla', 'Jade', 'Azul',
     'Luz', 'Escondida', 'Cristal', 'Dorado', 'Plata',
     'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
   ];
   
   // Crear obras para el resto de artistas (100 obras adicionales)
   for (let i = 1; i <= 100; i++) {
-    // Excluir a Leonardo Martinez (Ã­ndice 2) para que las obras se distribuyan entre otros artistas
+    // Excluir a Leonardo Martinez (índice 2) para que las obras se distribuyan entre otros artistas
     const availableUsers = users.filter((user, index) => index !== 2);
     const user = randomFromArray(availableUsers);
     const canvas = randomFromArray(canvasSizes);
@@ -290,7 +290,7 @@ async function seed() {
     }
     const title = `Obra ${descriptor}`;
     
-    // Generar slug Ãºnico
+    // Generar slug único
     let baseSlug = generateSlug(title);
     let slug = baseSlug;
     let counter = 1;
@@ -306,13 +306,13 @@ async function seed() {
     const day = randomInt(1, 28);
     const completedAt = new Date(year, month, day);
     
-    const type = ['pintura', 'escultura', 'dibujo', 'fotografÃ­a'][i % 4];
-    const technique = ['Ã³leo', 'acrÃ­lico', 'metal', 'madera', 'carboncillo'][i % 5];
+    const type = ['pintura', 'escultura', 'dibujo', 'fotografía'][i % 4];
+    const technique = ['óleo', 'acrílico', 'metal', 'madera', 'carboncillo'][i % 5];
     
     artworkData.push({
       title,
       slug,
-      description: `DescripciÃ³n de la obra \"${title}\"`,
+      description: `Descripción de la obra \"${title}\"`,
       imageUrl: randomFromArray(randomImages),
       type,
       technique,
@@ -337,17 +337,17 @@ async function seed() {
     artwork.artist.toString() === leonardoUser._id.toString()
   ).length;
   
-  console.log(`\nðŸŽ¨ ARTISTA ESPECIAL CREADO:`);
-  console.log(`ðŸ“ Nombre: ${leonardoUser.name}`);
-  console.log(`ðŸ“§ Email: ${leonardoUser.email}`);
-  console.log(`ðŸ–¼ï¸  Obras creadas: ${leonardoArtworkCount}`);
-  console.log(`ðŸ”— Slug: leonardo-martinez`);
-  console.log(`ðŸ“ UbicaciÃ³n: ${leonardoUser.location || 'Barcelona, EspaÃ±a'}`);
-  console.log(`ðŸŒ Sitio web: ${leonardoUser.website || 'https://leonardo-martinez-art.com'}`);
-  console.log(`ðŸ“ Bio: ${leonardoUser.bio}`);
+  console.log('\n[SHOWCASE] Artista especial creado');
+  console.log('[SHOWCASE] Nombre:', leonardoUser.name);
+  console.log('[SHOWCASE] Email:', leonardoUser.email);
+  console.log('[SHOWCASE] Obras creadas:', leonardoArtworkCount);
+  console.log('[SHOWCASE] Slug:', 'leonardo-martinez');
+  console.log('[SHOWCASE] Ubicación:', leonardoUser.location || 'Barcelona, España');
+  console.log('[SHOWCASE] Sitio web:', leonardoUser.website || 'https://leonardo-martinez-art.com');
+  console.log('[SHOWCASE] Bio:', leonardoUser.bio);
   console.log(`\nâœ… Puedes encontrar a este artista en: /artists/leonardo-martinez\n`);
 
-  // EstadÃ­sticas de disponibilidad
+  // Estadísticas de disponibilidad
   const availabilityStats = {};
   AVAILABILITY_STATUSES.forEach(status => {
     availabilityStats[status] = artworks.filter(artwork => artwork.availability === status).length;
@@ -358,23 +358,23 @@ async function seed() {
     return sum + (artwork.sale?.price_cents || artwork.price_cents);
   }, 0);
   
-  console.log(`ðŸ“Š ESTADÃSTICAS DE DISPONIBILIDAD:`);
-  console.log(`ðŸª Disponibles para venta: ${availabilityStats.for_sale}`);
-  console.log(`â° Reservadas: ${availabilityStats.reserved}`);
-  console.log(`ðŸ’° Vendidas: ${availabilityStats.sold}`);
-  console.log(`ðŸš« No disponibles: ${availabilityStats.not_for_sale}`);
-  console.log(`ðŸ¤ En prÃ©stamo: ${availabilityStats.on_loan}`);
-  console.log(`ðŸ’µ Ingresos totales por ventas: $${(totalRevenue / 100).toFixed(2)} USD`);
-  console.log(`\nðŸ’¡ TIP: Usa las rutas de API para gestionar disponibilidad:`);
+  console.log('[SEED] ESTADÍSTICAS DE DISPONIBILIDAD:');
+  console.log('[SEED] Disponibles para venta:', availabilityStats.for_sale);
+  console.log(`⏰ Reservadas: ${availabilityStats.reserved}`);
+  console.log('[SEED] Vendidas:', availabilityStats.sold);
+  console.log('[SEED] No disponibles:', availabilityStats.not_for_sale);
+  console.log('[SEED] En préstamo:', availabilityStats.on_loan);
+  console.log('[SEED] Ingresos totales por ventas: $' + (totalRevenue / 100).toFixed(2) + ' USD');
+  console.log('\n[SEED] TIP: Usa las rutas de API para gestionar disponibilidad:');
   console.log(`   PATCH /api/v1/artworks/:id/mark-sold`);
   console.log(`   PATCH /api/v1/artworks/:id/reserve`);
   console.log(`   PATCH /api/v1/artworks/:id/unreserve\n`);
 
-  // Crea 10 exposiciones de prueba (mitad fÃ­sicas y mitad virtuales, con status y participantes con rol)
+  // Crea 10 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
   const participantRoles = ['artista', 'curador', 'coordinador', 'invitado'];
   for (let i = 1; i <= 10; i++) {
-    // Hasta 10 artworks y 10 participantes por exposiciÃ³n
+    // Hasta 10 artworks y 10 participantes por exposición
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
       artworksSet.add(artworks[randomInt(0, artworks.length - 1)]._id);
@@ -393,13 +393,13 @@ async function seed() {
       role: randomFromArray(participantRoles)
     }));
 
-    // Alternar entre fÃ­sica y virtual
+    // Alternar entre física y virtual
     let location;
     if (i % 2 === 1) {
-      // FÃ­sica
+      // Física
       location = {
         type: 'physical',
-        address: `DirecciÃ³n Ficticia ${i} Centro, Ciudad`,
+        address: `Dirección Ficticia ${i} Centro, Ciudad`,
         url: undefined
       };
     } else {
@@ -411,9 +411,9 @@ async function seed() {
       };
     }
 
-    // Genera imÃ¡genes para la exposiciÃ³n
+    // Genera imágenes para la exposición
     const coverImage = randomFromArray(randomImages);
-    // 3-6 imÃ¡genes adicionales, sin repetir coverImage
+    // 3-6 imágenes adicionales, sin repetir coverImage
     const shuffled = randomImages.filter(img => img !== coverImage).sort(() => 0.5 - Math.random());
     const images = shuffled.slice(0, randomInt(3, 6));
 
@@ -422,8 +422,8 @@ async function seed() {
     const status = statusOptions[i % statusOptions.length];
 
     exhibitionData.push({
-      title: `ExposiciÃ³n ${i}`,
-      description: `DescripciÃ³n de la exposiciÃ³n ${i}`,
+      title: `Exposición ${i}`,
+      description: `Descripción de la exposición ${i}`,
       startDate: new Date(2025, i, 1),
       endDate: new Date(2025, i, 15),
       artworks: artworksArray,
@@ -435,7 +435,7 @@ async function seed() {
       status
     });
   }
-  // Agregar slug a cada exposiciÃ³n (insertMany no dispara pre-save hooks)
+  // Agregar slug a cada exposición (insertMany no dispara pre-save hooks)
   const usedExpoSlugs = new Set();
   const exhibitionsWithSlug = exhibitionData.map((ex) => {
     const base = generateSlug(ex.title);
@@ -449,7 +449,7 @@ async function seed() {
   });
   const exhibitions = await Exhibition.insertMany(exhibitionsWithSlug);
 
-  // Backfill: agregar referencia de exposiciÃ³n en cada obra
+  // Backfill: agregar referencia de exposición en cada obra
   for (const expo of exhibitions) {
     if (Array.isArray(expo.artworks) && expo.artworks.length) {
       await Artwork.updateMany(
@@ -468,11 +468,11 @@ async function seed() {
   const favoriteCountMap = new Map(); // Para llevar el conteo por artwork
   
   for (const artwork of artworks) {
-    // Cada obra tendrÃ¡ entre 0-15 favoritos
+    // Cada obra tendrá entre 0-15 favoritos
     const numFavorites = randomInt(0, 15);
     const usersWhoFavorited = new Set();
     
-    // Seleccionar usuarios Ãºnicos para esta obra
+    // Seleccionar usuarios únicos para esta obra
     while (usersWhoFavorited.size < numFavorites && usersWhoFavorited.size < users.length) {
       const user = randomFromArray(users);
       if (!usersWhoFavorited.has(user._id.toString())) {
@@ -498,25 +498,25 @@ async function seed() {
     await artwork.save();
   }
 
-  // Showcase: crea un artista, una obra y una exposiciÃ³n realistas
+  // Showcase: crea un artista, una obra y una exposición realistas
   console.log('\n[SHOWCASE] Creando datos realistas para simular PROD...');
   const showcaseArtist = await User.create({
-    name: 'MarÃ­a FernÃ¡ndez',
+    name: 'María Fernández',
     email: 'maria.fernandez@example.com',
     password: '123456',
     role: 'artist',
     profileImage: randomFromArray(randomImages),
-    bio: `Artista contemporÃ¡nea argentina. Su prÃ¡ctica se centra en la pintura y el dibujo expandido,
-    con un fuerte Ã©nfasis en la relaciÃ³n entre color, luz y materia. Explora series de procesos largos en
+    bio: `Artista contemporánea argentina. Su práctica se centra en la pintura y el dibujo expandido,
+    con un fuerte énfasis en la relación entre color, luz y materia. Explora series de procesos largos en
     las que alterna capas de veladuras con zonas de alto empaste, permitiendo que la huella del gesto y
-    el tiempo de secado de los Ã³leos dialoguen con la geometrÃ­a de la composiciÃ³n.
+    el tiempo de secado de los óleos dialoguen con la geometría de la composición.
 
-    EstudiÃ³ Artes Visuales en la UNA (Buenos Aires) y realizÃ³ clÃ­nicas de obra con referentes locales e
-    internacionales. ParticipÃ³ en residencias en Madrid y Ciudad de MÃ©xico, y fue seleccionada en salones
-    y premios de pintura. Su obra integra colecciones privadas en Argentina, EspaÃ±a y MÃ©xico.
+    Estudió Artes Visuales en la UNA (Buenos Aires) y realizó clínicas de obra con referentes locales e
+    internacionales. Participó en residencias en Madrid y Ciudad de México, y fue seleccionada en salones
+    y premios de pintura. Su obra integra colecciones privadas en Argentina, España y México.
 
-    En los Ãºltimos aÃ±os ha desarrollado la serie â€œLuz y Materiaâ€, en la que indaga la vibraciÃ³n entre planos
-    cromÃ¡ticos y el espesor del material, buscando un equilibrio entre paisaje, abstracciÃ³n y memoria.`,
+    En los últimos años ha desarrollado la serie “Luz y Materia”, en la que indaga la vibración entre planos
+    cromáticos y el espesor del material, buscando un equilibrio entre paisaje, abstracción y memoria.`,
     website: 'https://maria-fernandez.art',
     location: 'Buenos Aires, Argentina',
     social: { instagram: 'maria_fernandez_art' }
@@ -525,17 +525,17 @@ async function seed() {
   const awTitle = 'Horizonte en Ocre';
   const awSlug = generateSlug(awTitle);
   const awType = 'pintura';
-  const awTechnique = 'Ã“leo sobre lienzo';
+  const awTechnique = 'Óleo sobre lienzo';
   const showcaseArtwork = await Artwork.create({
     title: awTitle,
     slug: awSlug,
-    description: `Ã“leo sobre lienzo de trazo gestual y paleta cÃ¡lida. La superficie alterna zonas de
+    description: `Óleo sobre lienzo de trazo gestual y paleta cálida. La superficie alterna zonas de
     veladura con sectores de alto empaste para construir un horizonte vibrante que parece avanzar y
-    retroceder con la luz. La pieza forma parte de la serie â€œLuz y Materiaâ€, en la que la artista trabaja
-    sobre la transiciÃ³n entre planos cromÃ¡ticos y la percepciÃ³n del relieve.
+    retroceder con la luz. La pieza forma parte de la serie “Luz y Materia”, en la que la artista trabaja
+    sobre la transición entre planos cromáticos y la percepción del relieve.
 
     Obra original firmada al dorso. Incluye certificado de autenticidad. Se recomienda luz indirecta y
-    limpieza en seco con paÃ±o suave.`,
+    limpieza en seco con paño suave.`,
     imageUrl: randomFromArray(randomImages),
     type: awType,
     technique: awTechnique,
@@ -561,16 +561,16 @@ async function seed() {
   const showcaseExhibition = await Exhibition.create({
     title: exTitle,
     slug: exSlug,
-    description: `SelecciÃ³n de obras recientes que indagan en el cruce entre luz, textura y color.
-    La muestra propone un recorrido en tres nÃºcleos: Materia, Horizonte y VibraciÃ³n. Cada secciÃ³n articula
-    obras que dialogan por capas, donde el espesor del Ã³leo y las transparencias construyen atmÃ³sferas
-    que invitan a detenerse en el detalle. La curadurÃ­a de Estudio Ox pone el foco en el proceso y en
-    la relaciÃ³n entre obra y espectador, proponiendo una lectura sensible y a la vez rigurosa.
+    description: `Selección de obras recientes que indagan en el cruce entre luz, textura y color.
+    La muestra propone un recorrido en tres núcleos: Materia, Horizonte y Vibración. Cada sección articula
+    obras que dialogan por capas, donde el espesor del óleo y las transparencias construyen atmósferas
+    que invitan a detenerse en el detalle. La curaduría de Estudio Ox pone el foco en el proceso y en
+    la relación entre obra y espectador, proponiendo una lectura sensible y a la vez rigurosa.
 
-    Actividades: visita guiada con la artista, conversaciÃ³n abierta con curadurÃ­a y ediciÃ³n de un pequeÃ±o
-    folleto-catÃ¡logo digital descargable mediante QR.`,
-    startDate: new Date(new Date().getFullYear(), 9, 1), // 1 Oct del aÃ±o actual
-    endDate: new Date(new Date().getFullYear(), 9, 15), // 15 Oct del aÃ±o actual
+    Actividades: visita guiada con la artista, conversación abierta con curaduría y edición de un pequeño
+    folleto-catálogo digital descargable mediante QR.`,
+    startDate: new Date(new Date().getFullYear(), 9, 1), // 1 Oct del año actual
+    endDate: new Date(new Date().getFullYear(), 9, 15), // 15 Oct del año actual
     artworks: [showcaseArtwork._id],
     createdBy: showcaseArtist._id,
     participants: [{ user: showcaseArtist._id, role: 'artista' }],
@@ -580,18 +580,18 @@ async function seed() {
     status: 'published'
   });
 
-  // Vincular exposiciÃ³n en la obra
+  // Vincular exposición en la obra
   await Artwork.updateOne({ _id: showcaseArtwork._id }, { $addToSet: { exhibitions: showcaseExhibition._id } });
   console.log('[SHOWCASE] Artista:', showcaseArtist.name, '\n          Slug:', showcaseArtist.slug || '(sin slug)');
   console.log('[SHOWCASE] Obra:', showcaseArtwork.title, '\n          Slug:', showcaseArtwork.slug);
-  console.log('[SHOWCASE] ExposiciÃ³n:', showcaseExhibition.title, '\n          Slug:', showcaseExhibition.slug);
-  console.log(`\nRutas Ãºtiles:
+  console.log('[SHOWCASE] Exposición:', showcaseExhibition.title, '\n          Slug:', showcaseExhibition.slug);
+  console.log(`\nRutas útiles:
   /artists/${showcaseArtist.slug || showcaseArtist._id}
   /artworks/${showcaseArtwork.slug || showcaseArtwork._id}
   /exhibitions/${showcaseExhibition.slug || showcaseExhibition._id}\n`);
 
   // Crear suscripciones de prueba al newsletter
-  console.log('ðŸ“§ Creando suscripciones de newsletter...');
+  console.log('[SEED] Creando suscripciones de newsletter...');
   const newsletterData = [
     { email: 'artlover@test.com', source: 'homepage' },
     { email: 'collector@test.com', source: 'artwork_page', preferences: { salesAlerts: true } },

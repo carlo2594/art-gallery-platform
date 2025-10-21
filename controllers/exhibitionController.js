@@ -38,7 +38,7 @@ exports.createExhibition = (req, res, next) => {
 // Update exhibition with soft-delete awareness: if status != 'trashed', clear deletedAt/deletedBy
 exports.updateExhibition = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  if (!isValidObjectId(id)) return next(new AppError('ID invÃ¡lido.', 400));
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
 
   const updates = { ...(req.body || {}) };
 
@@ -49,7 +49,7 @@ exports.updateExhibition = catchAsync(async (req, res, next) => {
       updates.deletedAt = null;
       updates.deletedBy = undefined; // limpiar referencia
     } else {
-      // Si explÃ­citamente ponen 'trashed', muevelo a papelera
+      // Si explícitamente ponen 'trashed', muevelo a papelera
       updates.deletedAt = new Date();
       if (req.user && req.user._id) updates.deletedBy = req.user._id;
     }
@@ -66,15 +66,15 @@ exports.updateExhibition = catchAsync(async (req, res, next) => {
   }
 
   const doc = await Exhibition.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
-  if (!doc) return next(new AppError('ExposiciÃ³n no encontrada.', 404));
-  return res.status(200).json({ status: 'success', message: 'ExposiciÃ³n actualizada', data: doc });
+  if (!doc) return next(new AppError('Exposición no encontrada.', 404));
+  return res.status(200).json({ status: 'success', message: 'Exposición actualizada', data: doc });
 });
 // Soft-delete: marca deletedAt/deletedBy en lugar de borrar definitivamente
 exports.deleteExhibition = catchAsync(async (req, res, next) => {
   const id = req.params.id;
-  if (!isValidObjectId(id)) return next(new AppError('ID invÃ¡lido.', 400));
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
   const exh = await Exhibition.findById(id);
-  if (!exh) return next(new AppError('ExposiciÃ³n no encontrada.', 404));
+  if (!exh) return next(new AppError('Exposición no encontrada.', 404));
   if (exh.deletedAt) {
     return res.status(200).json({ status: 'success', message: 'Ya estaba eliminada.', data: null });
   }
@@ -83,16 +83,16 @@ exports.deleteExhibition = catchAsync(async (req, res, next) => {
   try { exh.status = 'trashed'; } catch (_){ }
   try { if (req.user && req.user._id) exh.deletedBy = req.user._id; } catch(_) {}
   await exh.save({ validateModifiedOnly: true });
-  return res.status(200).json({ status: 'success', message: 'ExposiciÃ³n eliminada correctamente.', data: null });
+  return res.status(200).json({ status: 'success', message: 'Exposición eliminada correctamente.', data: null });
 });
 
 // Subir o reemplazar imagen de portada (multipart: field 'coverImage')
 exports.uploadCoverImage = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  if (!isValidObjectId(id)) return next(new AppError('ID invÃ¡lido.', 400));
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
   const exhibition = await Exhibition.findById(id);
-  if (!exhibition) return next(new AppError('ExposiciÃ³n no encontrada.', 404));
-  if (!req.file) return next(new AppError('No se recibiÃ³ archivo de imagen.', 400));
+  if (!exhibition) return next(new AppError('Exposición no encontrada.', 404));
+  if (!req.file) return next(new AppError('No se recibió archivo de imagen.', 400));
 
   const { upload, uploadBuffer } = require('@utils/cloudinaryImage');
   let result;
@@ -108,9 +108,9 @@ exports.uploadCoverImage = catchAsync(async (req, res, next) => {
 // Eliminar imagen de portada (solo elimina la referencia)
 exports.deleteCoverImage = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  if (!isValidObjectId(id)) return next(new AppError('ID invÃ¡lido.', 400));
+  if (!isValidObjectId(id)) return next(new AppError('ID inválido.', 400));
   const exhibition = await Exhibition.findById(id);
-  if (!exhibition) return next(new AppError('ExposiciÃ³n no encontrada.', 404));
+  if (!exhibition) return next(new AppError('Exposición no encontrada.', 404));
   exhibition.coverImage = undefined;
   await exhibition.save({ validateModifiedOnly: true });
   res.status(200).json({ status: 'success', message: 'Portada eliminada.' });

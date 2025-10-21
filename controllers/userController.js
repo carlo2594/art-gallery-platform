@@ -15,7 +15,7 @@ const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
 const handleDuplicateKeyError = require('@utils/handleDuplicateKeyError');
 
-// CRUD estÃ¡ndar
+// CRUD estándar
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
@@ -29,7 +29,7 @@ exports.getMe = catchAsync(async (req, res, next) => {
 // Actualizar perfil (limitado)
 exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.newPassword) {
-    return next(new AppError('Esta ruta no es para actualizar la contraseÃ±a.', 400));
+    return next(new AppError('Esta ruta no es para actualizar la contraseña.', 400));
   }
 
   // Solo permite actualizar estos campos
@@ -51,7 +51,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     filteredBody.profileImagePublicId = imageResult.public_id;
   }
 
-  // En updateMe y updateUser, despuÃ©s de obtener el usuario y antes de guardar:
+  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
   if (
     ('profileImage' in filteredBody) &&
     (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
@@ -76,13 +76,13 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     return handleDuplicateKeyError(err, res, next);
   }
 
-  // Si el email cambiÃ³, notifica al nuevo email
+  // Si el email cambió, notifica al nuevo email
   if (filteredBody.email && filteredBody.email !== oldEmail) {
     await sendMail({
       to: filteredBody.email,
-      subject: 'ConfirmaciÃ³n de cambio de correo',
-      text: `Hola ${user.name}, tu correo ha sido actualizado exitosamente en GalerÃ­a del Ox. 
-Si no realizaste este cambio, por favor contÃ¡ctanos de inmediato en soporte@galeriadelox.com.`
+      subject: 'Confirmación de cambio de correo',
+      text: `Hola ${user.name}, tu correo ha sido actualizado exitosamente en Galería del Ox. 
+Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
     });
   }
 
@@ -95,18 +95,18 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   sendResponse(res, null, 'Cuenta desactivada', 204);
 });
 
-// Cambiar contraseÃ±a autenticado
+// Cambiar contraseña autenticado
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user.id).select('+password');
 
   if (!(await user.correctPassword(req.body.currentPassword))) {
-    return next(new AppError('La contraseÃ±a actual es incorrecta', 401));
+    return next(new AppError('La contraseña actual es incorrecta', 401));
   }
 
   user.password = req.body.newPassword;
   await user.save();
 
-  sendResponse(res, null, 'ContraseÃ±a actualizada correctamente');
+  sendResponse(res, null, 'Contraseña actualizada correctamente');
 });
 
 // Obtener perfil completo con relaciones
@@ -161,12 +161,12 @@ exports.changeUserRole = catchAsync(async (req, res, next) => {
 });
 
 
-// ADMIN: Forzar cambio de contraseÃ±a
+// ADMIN: Forzar cambio de contraseña
 exports.resetUserPassword = catchAsync(async (req, res, next) => {
   const { newPassword } = req.body;
 
   if (!newPassword) {
-    return next(new AppError('Debes proporcionar una nueva contraseÃ±a', 400));
+    return next(new AppError('Debes proporcionar una nueva contraseña', 400));
   }
 
   const user = await User.findById(req.params.id).select('+password');
@@ -177,7 +177,7 @@ exports.resetUserPassword = catchAsync(async (req, res, next) => {
   user.password = newPassword;
   await user.save();
 
-  sendResponse(res, null, 'ContraseÃ±a restablecida por admin');
+  sendResponse(res, null, 'Contraseña restablecida por admin');
 });
 
 // ADMIN: Reactivar un usuario desactivado
@@ -189,7 +189,7 @@ exports.reactivateUser = catchAsync(async (req, res, next) => {
   }
 
   if (user.active) {
-    return next(new AppError('El usuario ya estÃ¡ activo.', 400));
+    return next(new AppError('El usuario ya está activo.', 400));
   }
 
   user.active = true;
@@ -198,10 +198,10 @@ exports.reactivateUser = catchAsync(async (req, res, next) => {
   sendResponse(res, user, 'Usuario reactivado');
 });
 
-// ADMIN: Actualizar usuario (sin permitir cambiar contraseÃ±a aquÃ­)
+// ADMIN: Actualizar usuario (sin permitir cambiar contraseña aquí)
 exports.updateUser = catchAsync(async (req, res, next) => {
   if (req.body.password) {
-    return next(new AppError('No puedes actualizar la contraseÃ±a desde esta ruta.', 400));
+    return next(new AppError('No puedes actualizar la contraseña desde esta ruta.', 400));
   }
 
   // Solo permite actualizar estos campos
@@ -232,7 +232,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     filteredBody.profileImagePublicId = imageResult.public_id;
   }
 
-  // En updateMe y updateUser, despuÃ©s de obtener el usuario y antes de guardar:
+  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
   if (
     ('profileImage' in filteredBody) &&
     (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
@@ -268,7 +268,7 @@ exports.deactivateUser = catchAsync(async (req, res, next) => {
   }
 
   if (!user.active) {
-    return next(new AppError('El usuario ya estÃ¡ desactivado.', 400));
+    return next(new AppError('El usuario ya está desactivado.', 400));
   }
 
   user.active = false;
@@ -277,7 +277,7 @@ exports.deactivateUser = catchAsync(async (req, res, next) => {
   sendResponse(res, user, 'Usuario desactivado');
 });
 
-// ADMIN: Crear usuario (similar a signup) y enviar correo para definir contraseÃ±a
+// ADMIN: Crear usuario (similar a signup) y enviar correo para definir contraseña
 exports.adminCreateUser = catchAsync(async (req, res, next) => {
   const { email, name, role } = req.body || {};
   if (!email) {
@@ -287,7 +287,7 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
   const normalizedEmail = normalizeEmail(email);
   const existingUser = await User.findOne({ email: normalizedEmail });
   if (existingUser) {
-    return next(new AppError('El correo ya estÃ¡ registrado.', 400));
+    return next(new AppError('El correo ya está registrado.', 400));
   }
 
   const tempPassword = crypto.randomBytes(16).toString('hex');
@@ -296,7 +296,7 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
 
   const newUser = await User.create(payload);
 
-  // Generar token para que el usuario cree su contraseÃ±a
+  // Generar token para que el usuario cree su contraseña
   const token = crypto.randomBytes(32).toString('hex');
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
   const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24h
@@ -306,15 +306,15 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
 
   await sendMail({
     to: newUser.email,
-    subject: 'Crea tu contraseÃ±a',
-    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseÃ±a:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+    subject: 'Crea tu contraseña',
+    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
   });
 
-  return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se enviÃ³ un correo para crear la contraseÃ±a.', 201);
+  return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se envió un correo para crear la contraseña.', 201);
 });
 
 // ADMIN: Subir/actualizar o eliminar imagen de perfil del usuario
-// Acepta multipart/form-data con campo 'profileImage'. Si se envÃ­a profileImage vacÃ­o en body, elimina la imagen.
+// Acepta multipart/form-data con campo 'profileImage'. Si se envía profileImage vacío en body, elimina la imagen.
 exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.params.id).select('+active');
   if (!user) {
@@ -322,7 +322,7 @@ exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
   }
 
   const filteredBody = {};
-  // Permitir eliminaciÃ³n explÃ­cita si llega un campo profileImage vacÃ­o
+  // Permitir eliminación explícita si llega un campo profileImage vacío
   if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'profileImage')) {
     filteredBody.profileImage = req.body.profileImage;
   }
@@ -343,7 +343,7 @@ exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
   sendResponse(res, user, 'Imagen de perfil actualizada');
 });
 
-// ADMIN: Lookup de usuario por email (para validaciÃ³n en UI)
+// ADMIN: Lookup de usuario por email (para validación en UI)
 exports.lookupByEmail = catchAsync(async (req, res, next) => {
   const { normalizeEmail } = require('@utils/emailUtils');
   const raw = (req.query && req.query.email) || '';

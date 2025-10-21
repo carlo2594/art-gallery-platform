@@ -1,4 +1,4 @@
-extends /layouts/public
+﻿extends /layouts/public
 
 block content
   // Barra de chips + botón filtros (fragmento reutilizable)
@@ -18,7 +18,7 @@ block content
       .small.text-muted
         | Mostrando: $
         = appliedPrice.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-        |  – $
+        |  — $
         = appliedPrice.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
   // === Masonry Grid ===
@@ -32,4 +32,5 @@ block content
         .text-center.py-5
           p.mb-2 No hay obras publicadas todavía.
           a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
+
 
