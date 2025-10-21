@@ -126,13 +126,13 @@ html(lang='es')
           e.preventDefault();
           var id = btn.getAttribute('data-user-id');
           if(!id) return;
-          if(!confirm('�Resetear contrase�a para este usuario?')) return;
+          if(!confirm('¿Resetear contraseña para este usuario?')) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Reseteando...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/reset-password';
           var success = function(){
-            if (window.showAdminToast) showAdminToast('Contrase�a reseteada.','success');
+            if (window.showAdminToast) showAdminToast('Contraseña reseteada.','success');
             var modalEl = btn.closest && btn.closest('.modal');
             if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
           };
@@ -150,7 +150,7 @@ html(lang='es')
           var id = btn.getAttribute('data-user-id');
           var role = btn.getAttribute('data-role');
           if(!id || !role) return;
-          if(!confirm('�Promover a "' + role + '"?')) return;
+          if(!confirm('¿Promover a "' + role + '"?')) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
@@ -183,7 +183,7 @@ html(lang='es')
           var id = btn.getAttribute('data-user-id');
           var action = btn.getAttribute('data-action'); // 'deactivate' | 'reactivate'
           if(!id || !action) return;
-          var confirmMsg = action === 'deactivate' ? '�Desactivar esta cuenta?' : '�Reactivar esta cuenta?';
+          var confirmMsg = action === 'deactivate' ? '¿Desactivar esta cuenta?' : '¿Reactivar esta cuenta?';
           if(!confirm(confirmMsg)) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
@@ -222,3 +222,9 @@ html(lang='es')
         }
         document.addEventListener('click', onToggle);
       })();
+
+
+
+
+
+

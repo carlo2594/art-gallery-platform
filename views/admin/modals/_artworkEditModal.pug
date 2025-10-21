@@ -14,12 +14,8 @@
               input.form-control(type='text', name='title', value=a.title)
             .col-md-4
               label.form-label Estado
-              select.form-select(name='status', disabled=!isAdmin)
-                // Ocultamos 'draft' y 'trashed' en el panel admin
-                option(value='submitted' selected=status==='submitted') Enviado
-                option(value='under_review' selected=status==='under_review') En revisión
-                option(value='approved' selected=status==='approved') Aprobado
-                option(value='rejected' selected=status==='rejected') Rechazado
+              .form-control-plaintext
+                span.badge(class=(status === 'approved' ? 'text-bg-success' : (status === 'under_review' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= status || 'draft'
           .mb-3
             label.form-label Descripción
             textarea.form-control(name='description' rows='3')= a.description || ''

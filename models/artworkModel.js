@@ -37,7 +37,7 @@ const artworkSchema = new mongoose.Schema(
     /* ------ Media & meta ------ */
     // Campos para imagen en Cloudinary
     imageUrl: { type: String, required: true },      // URL pÃºblica
-    imagePublicId: { type: String, required: true }, // ID de Cloudinary
+    imagePublicId: { type: String }, // ID de Cloudinary
     imageWidth_px: { type: Number }, // opcional
     imageHeight_px: { type: Number }, // opcional
 
@@ -154,6 +154,8 @@ artworkSchema.index({
 // 7. Ãndices para disponibilidad y ventas
 artworkSchema.index({ availability: 1, status: 1, deletedAt: 1, createdAt: -1 });
 artworkSchema.index({ availability: 1, price_cents: 1 });
+// Index para búsqueda por título normalizado (admin)
+artworkSchema.index({ title_norm: 1 });
 
 /* Ãndices existentes */
 artworkSchema.index({ deletedAt: 1 }, { expireAfterSeconds: THIRTY_DAYS }); // TTL: purga 30 dÃ­as despuÃ©s de ir a la papelera

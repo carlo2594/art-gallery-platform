@@ -1,4 +1,4 @@
-extends /layouts/admin
+﻿extends /layouts/admin
 
 block content
   .container.py-5
@@ -9,36 +9,36 @@ block content
         button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateArtwork')
           i.fas.fa-plus.me-1
           | Agregar obra
-    // Barra de búsqueda y filtros (inspirada en userList.pug)
+    // Barra de bÃºsqueda y filtros (inspirada en userList.pug)
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
-        input.form-control(type='text', name='q', placeholder='Buscar por título o slug', value=q || '')
+        input.form-control(type='text', name='q', placeholder='Buscar por tÃ­tulo o slug', value=q || '')
       .col-sm-6.col-md-3
         select.form-select(name='avail')
           option(value='') Disponibilidad: Todas
           // Agrupaciones convenientes
           option(value='available' selected=!avail || avail === 'available') Disponibles (en venta o reservadas)
-          option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en préstamo)
-          // Estados específicos
+          option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en prÃ©stamo)
+          // Estados especÃ­ficos
           option(value='for_sale' selected=avail === 'for_sale') En venta
           option(value='reserved' selected=avail === 'reserved') Reservada
           option(value='sold' selected=avail === 'sold') Vendida
           option(value='not_for_sale' selected=avail === 'not_for_sale') No en venta
-          option(value='on_loan' selected=avail === 'on_loan') En préstamo
+          option(value='on_loan' selected=avail === 'on_loan') En prÃ©stamo
       .col-sm-6.col-md-3
         select.form-select(name='status')
           option(value='') Estado: Todos
           option(value='draft' selected=statusFilter === 'draft') Borrador
           option(value='submitted' selected=statusFilter === 'submitted') Enviado
-          option(value='under_review' selected=statusFilter === 'under_review') En revisión
+          option(value='under_review' selected=statusFilter === 'under_review') En revisiÃ³n
           option(value='approved' selected=statusFilter === 'approved') Aprobado
           option(value='rejected' selected=statusFilter === 'rejected') Rechazado
           option(value='trashed' selected=statusFilter === 'trashed') Papelera
       .col-sm-6.col-md-3
         select.form-select(name='sort')
           option(value='recent' selected=!sort || sort === 'recent') Recientes primero
-          option(value='popular' selected=sort === 'popular') Más vistas
-          option(value='most_favorited' selected=sort === 'most_favorited') Más favoritas
+          option(value='popular' selected=sort === 'popular') MÃ¡s vistas
+          option(value='most_favorited' selected=sort === 'most_favorited') MÃ¡s favoritas
           option(value='price_asc' selected=sort === 'price_asc') Precio: menor a mayor
           option(value='price_desc' selected=sort === 'price_desc') Precio: mayor a menor
       .col-auto
@@ -52,7 +52,7 @@ block content
         table.table.table-striped.table-hover.align-middle
           thead
             tr
-              th Título
+              th TÃ­tulo
               th Artista
               th Estado
               th Disponibilidad
@@ -60,18 +60,19 @@ block content
               th Favoritos
               th Creada
               th Vista previa
+              th Estado
               th Editar
           tbody
             each a in artworks
               - const status = a.status || a.moderationStatus
-              tr
+              tr(id=`artRow-${a._id}`)
                 td= a.title
-                td= (a.artist && a.artist.name) || '—'
+                td= (a.artist && a.artist.name) || 'â€”'
                 td
                   span.badge(class=status === 'approved' ? 'text-bg-success' : (status === 'under_review' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary')))= status || 'draft'
                 td
-                  span.badge.text-capitalize(class=a.availability === 'for_sale' ? 'text-bg-success' : (a.availability === 'reserved' ? 'text-bg-warning' : (a.availability === 'sold' ? 'text-bg-secondary' : 'text-bg-info')))= a.availability || '—'
-                td= typeof a.price_cents === 'number' ? `$${(a.price_cents/100).toLocaleString('en-US')}` : '—'
+                  span.badge.text-capitalize(class=a.availability === 'for_sale' ? 'text-bg-success' : (a.availability === 'reserved' ? 'text-bg-warning' : (a.availability === 'sold' ? 'text-bg-secondary' : 'text-bg-info')))= a.availability || 'â€”'
+                td= typeof a.price_cents === 'number' ? `$${(a.price_cents/100).toLocaleString('en-US')}` : 'â€”'
                 td= typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString() : '0'
                 td= new Date(a.createdAt).toLocaleDateString('es-ES')
                 // Columna Vista previa
@@ -79,12 +80,19 @@ block content
                   a.btn.btn-sm.btn-outline-secondary(target='_blank' href=`/admin/artworks/${a._id}`)
                     i.fas.fa-eye.me-1
                     | Vista previa
+                // Columna Estado (modal dedicado)
+                td
+                  button.btn.btn-sm.btn-outline-secondary(type='button', data-bs-toggle='modal', data-bs-target=`#adminStatusArtwork-${a._id}`)
+                    i.fas.fa-sliders.me-1
+                    | Estado
+                  // Modal de estado
+                  include ../modals/_artworkStatusModal.pug
                 // Columna Editar (modal por fila)
                 td
                   button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditArtwork-${a._id}`)
                     i.fas.fa-pen-to-square.me-1
                     | Editar
-                  // Modal de edición de obra (extraído)
+                  // Modal de ediciÃ³n de obra (extraÃ­do)
                   include ../modals/_artworkEditModal.pug
                   // Modal de rechazo (motivo)
                   include ../modals/_artworkRejectModal.pug
@@ -94,7 +102,7 @@ block content
                       | Eliminar
                     - const modalId = `confirmDeleteArtwork-${a._id}`
                     - const modalTitle = `Eliminar obra - ${a.title}`
-                    - const modalMessage = 'Esta acción enviará la obra a la papelera. Escribe "ELIMINAR" para confirmar.'
+                    - const modalMessage = 'Esta acciÃ³n enviarÃ¡ la obra a la papelera. Escribe "ELIMINAR" para confirmar.'
                     - const actionUrl = `/api/v1/artworks/${a._id}/trash`
                     - const httpMethod = 'PATCH'
                     - const confirmText = 'ELIMINAR'
@@ -105,16 +113,20 @@ block content
       .alert.alert-info No hay obras
 
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label='Paginación de obras')
+      nav.mt-4(aria-label='PaginaciÃ³n de obras')
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `PÃ¡gina ${page} de ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
     // Modal: Crear nueva obra
     if isAdmin
       include ../modals/_artworkCreateModal.pug
+
+
+
+

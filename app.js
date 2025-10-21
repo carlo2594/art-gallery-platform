@@ -43,10 +43,16 @@ app.set('views', path.join(__dirname, 'views'));
 app.locals.basedir = path.join(__dirname, 'views'); // ← añadimos esto
 
 
-// Archivos estáticos
-app.use(express.static(path.join(__dirname, 'public')));
+// Archivos estáticos (forzar charset UTF-8 en JS/CSS)
+const setUtf8Headers = (res, filePath) => {
+  try {
+    if (filePath.endsWith('.js')) res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    else if (filePath.endsWith('.css')) res.setHeader('Content-Type', 'text/css; charset=utf-8');
+  } catch (_) {}
+};
+app.use(express.static(path.join(__dirname, 'public'), { setHeaders: setUtf8Headers }));
 // Servir Bootstrap desde node_modules para CSS/JS locales
-app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist')));
+app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules', 'bootstrap', 'dist'), { setHeaders: setUtf8Headers }));
 
 // admin.js estático concatenado en /public/js/admin.js
 

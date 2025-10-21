@@ -375,6 +375,26 @@ document.addEventListener('DOMContentLoaded', function () {
             imgPrev.hidden = false;
           }
         }
+        // Update basic row fields (title, price) for quick feedback
+        try {
+          var modalEl2 = form.closest('.modal');
+          var row2 = modalEl2 && modalEl2.closest && modalEl2.closest('tr');
+          if (!row2) {
+            var triggerBtn2 = modalEl2 && document.querySelector('button[data-bs-target="#' + modalEl2.id + '"]');
+            row2 = triggerBtn2 && triggerBtn2.closest && triggerBtn2.closest('tr');
+          }
+          if (row2) {
+            var tcell2 = row2.querySelector('td:nth-child(1)');
+            var pc2 = row2.querySelector('td:nth-child(5)');
+            var titleEl2 = pick('title');
+            if (tcell2 && titleEl2 && titleEl2.value) tcell2.textContent = titleEl2.value;
+            var priceUsd2 = pick('price_usd');
+            if (pc2 && priceUsd2 && priceUsd2.value) {
+              var n2 = parseFloat(priceUsd2.value);
+              if (isFinite(n2)) pc2.textContent = '$' + n2.toLocaleString('en-US');
+            }
+          }
+        } catch(_){ }
         // After generic PATCH, apply status/availability changes via dedicated endpoints
         async function updateStatusIfNeeded(){
           if (!statusEl) return;
@@ -418,10 +438,13 @@ document.addEventListener('DOMContentLoaded', function () {
             try { var j = await r.json(); txt = (j && (j.message || (j.error && j.error.message))) || txt; } catch(_){ }
             throw new Error(txt);
           }
-          // Update badge on table row
+          // Update badge on table row (prefer closest row)
           var modalEl = form.closest('.modal');
-          var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
-          var row = triggerBtn && triggerBtn.closest('tr');
+          var row = modalEl && modalEl.closest && modalEl.closest('tr');
+          if (!row) {
+            var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
+            row = triggerBtn && triggerBtn.closest && triggerBtn.closest('tr');
+          }
           var badge = row && row.querySelector('td:nth-child(3) .badge');
           if (badge) {
             badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
@@ -463,8 +486,11 @@ document.addEventListener('DOMContentLoaded', function () {
           }
           // Update availability badge
           var modalEl = form.closest('.modal');
-          var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
-          var row = triggerBtn && triggerBtn.closest('tr');
+          var row = modalEl && modalEl.closest && modalEl.closest('tr');
+          if (!row) {
+            var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
+            row = triggerBtn && triggerBtn.closest && triggerBtn.closest('tr');
+          }
           var badge = row && row.querySelector('td:nth-child(4) .badge');
           if (badge) {
             badge.classList.remove('text-bg-success','text-bg-warning','text-bg-secondary','text-bg-info');
@@ -632,11 +658,17 @@ document.addEventListener('DOMContentLoaded', function () {
         badge.classList.add('text-bg-danger');
         badge.textContent = 'rejected';
       }
-      // Close modal
+      // Close reject modal and edit modal
       var rejModal = form.closest('.modal');
       if (rejModal && window.bootstrap && bootstrap.Modal) {
         rejModal.removeAttribute('data-pending-reject');
         bootstrap.Modal.getOrCreateInstance(rejModal).hide();
+      }
+      if (editFormId) {
+        var editModalEl = document.getElementById((editFormId || '').replace('Form',''));
+        if (editModalEl && window.bootstrap && bootstrap.Modal) {
+          bootstrap.Modal.getOrCreateInstance(editModalEl).hide();
+        }
       }
       if (window.showAdminToast) showAdminToast('Obra rechazada', 'success');
     } catch (err) {
@@ -647,6 +679,117 @@ document.addEventListener('DOMContentLoaded', function () {
       if (ef) { var s = ef.querySelector('select[name="status"]'); if (s) s.value = initialStatus; }
     } finally {
       if (btn){ btn.disabled = false; btn.textContent = oldText || 'Confirmar rechazo'; }
+    }
+  }, true);
+
+  // Submit handler for status modal (centraliza cambios de estado)
+  document.addEventListener('submit', async function(e){
+    var form = e.target.closest && e.target.closest('form.admin-status-artwork-form');
+    if (!form) return;
+    e.preventDefault();
+    var id = form.getAttribute('data-artwork-id');
+    var initialStatus = form.getAttribute('data-initial-status') || '';
+    if (!id) return;
+    var statusInput = form.querySelector('input[name="status"]:checked');
+    var newStatus = statusInput && statusInput.value;
+    var reasonEl = form.querySelector('textarea[name="reason"]');
+    var reason = (reasonEl && reasonEl.value || '').trim();
+    if (!newStatus) { if (window.showAdminToast) showAdminToast('Selecciona un estado', 'warning'); return; }
+    var endpoint = null, options = { method: 'PATCH', credentials: 'include' };
+
+    async function restoreIfTrashed(){
+      if (initialStatus !== 'trashed') return true;
+      // Restaurar a borrador primero
+      var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/draft', { method: 'PATCH', credentials: 'include' });
+      if (!res.ok) {
+        var txt = 'No se pudo restaurar la obra desde la papelera';
+        try { var j = await res.json(); txt = (j && (j.message || (j.error && j.error.message))) || txt; } catch(_){ }
+        throw new Error(txt);
+      }
+      // Actualiza UI a draft de inmediato
+      try {
+        var modalEl0 = form.closest('.modal');
+        var row0 = modalEl0 && modalEl0.closest && modalEl0.closest('tr');
+        if (!row0) {
+          var triggerBtn0 = modalEl0 && document.querySelector('button[data-bs-target="#' + modalEl0.id + '"]');
+          row0 = triggerBtn0 && triggerBtn0.closest && triggerBtn0.closest('tr');
+        }
+        var badge0 = row0 && row0.querySelector('td:nth-child(3) .badge');
+        if (badge0) {
+          badge0.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
+          badge0.classList.add('text-bg-secondary');
+          badge0.textContent = 'draft';
+        }
+      } catch(_){ }
+      return true;
+    }
+    if (newStatus === 'submitted') {
+      endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit';
+      options.headers = { 'Content-Type': 'application/json' };
+      options.body = JSON.stringify({});
+    } else if (newStatus === 'under_review') {
+      endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review';
+    } else if (newStatus === 'approved') {
+      endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve';
+    } else if (newStatus === 'rejected') {
+      if (!reason) { if (window.showAdminToast) showAdminToast('Indica el motivo de rechazo', 'warning'); return; }
+      endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/reject';
+      options.headers = { 'Content-Type': 'application/json' };
+      options.body = JSON.stringify({ reason: reason });
+    } else {
+      if (window.showAdminToast) showAdminToast('Estado no soportado desde este modal', 'warning');
+      return;
+    }
+    var btn = form.querySelector('button[type="submit"]');
+    var old = btn && btn.textContent; if (btn){ btn.disabled = true; btn.textContent = 'Guardando...'; }
+    try {
+      // Si estaba en papelera y el nuevo estado no es 'trashed', restaurar primero (a draft)
+      await restoreIfTrashed();
+      if (newStatus === 'draft') {
+        // Ya restaurado, solo cerrar y actualizar estado inicial del form
+        form.setAttribute('data-initial-status', 'draft');
+        var modalElDraft = form.closest('.modal');
+        if (modalElDraft && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalElDraft).hide();
+        if (window.showAdminToast) showAdminToast('Obra restaurada a borrador', 'success');
+        return;
+      }
+      var res = await fetch(endpoint, options);
+      if (!res.ok) {
+        var txt = 'No se pudo actualizar el estado';
+        try { var j = await res.json(); txt = (j && (j.message || (j.error && j.error.message))) || txt; } catch(_){ }
+        if (res.status === 404) {
+          txt = txt || 'Obra no encontrada.';
+          txt += ' Verifica que la obra no esté en la papelera o haya sido eliminada.';
+        }
+        throw new Error(txt);
+      }
+      // Update status badge on row
+      var modalEl = form.closest('.modal');
+      var row = modalEl && modalEl.closest && modalEl.closest('tr');
+      if (!row) {
+        var triggerBtn = modalEl && document.querySelector('button[data-bs-target="#' + modalEl.id + '"]');
+        row = triggerBtn && triggerBtn.closest && triggerBtn.closest('tr');
+      }
+      var badge = row && row.querySelector('td:nth-child(3) .badge');
+      if (badge) {
+        badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
+        var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+        badge.classList.add(cls);
+        badge.textContent = newStatus || 'draft';
+      }
+      // Close modal
+      if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+      // Also sync edit modal initial status if present
+      try {
+        var editForm = document.getElementById('adminEditArtworkForm-' + id);
+        if (editForm) editForm.setAttribute('data-initial-status', newStatus);
+      } catch(_){ }
+      if (window.showAdminToast) showAdminToast('Estado actualizado', 'success');
+    } catch (err) {
+      console.error(err);
+      if (window.showAdminToast) showAdminToast(err && err.message || 'No se pudo actualizar el estado', 'danger');
+    } finally {
+      if (btn){ btn.disabled = false; btn.textContent = old || 'Guardar estado'; }
     }
   }, true);
 
@@ -730,7 +873,7 @@ document.addEventListener('DOMContentLoaded', function(){
           });
           if (!up.ok) console.warn('Cover upload failed after create');
         }
-        if (window.showAdminToast) showAdminToast('Exposicion creada','success');
+        if (window.showAdminToast) showAdminToast('exposición creada','success');
         // simple: reload to see it in the list
         setTimeout(function(){ window.location.reload(); }, 400);
       } catch (err) {
@@ -1241,7 +1384,7 @@ document.addEventListener('DOMContentLoaded', function(){
         }
       }
 
-      if (window.showAdminToast) showAdminToast('Obras agregadas a la exposicion', 'success');
+      if (window.showAdminToast) showAdminToast('Obras agregadas a la exposición', 'success');
       if (window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modal).hide();
     } catch (err){
       console.error(err);
@@ -1262,7 +1405,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if (!modal || !id) return;
     const checks = qsa(modal, '.artwork-remove-list input[type="checkbox"]:checked');
     if (!checks.length) return;
-    if (!confirm('Â¿Quitar las obras seleccionadas de la exposiciÃ³n?')) return;
+    if (!confirm('¿Quitar las obras seleccionadas de la exposiciÃ³n?')) return;
 
     const oldHTML = btn.innerHTML; btn.disabled = true; btn.textContent = 'Quitando...';
     try {
@@ -1334,3 +1477,118 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 })();
 
+
+
+
+// ==== admin-artworks-bulk.js ====
+(function(){
+  function getSelected(){
+    return Array.prototype.slice.call(document.querySelectorAll('.artwork-select:checked')).map(function(cb){ return cb.value; });
+  }
+  function setBulkEnabled(){
+    var any = getSelected().length > 0;
+    ['#bulkStatusBtn','#bulkRestoreBtn','#bulkTrashBtn'].forEach(function(sel){ var b=document.querySelector(sel); if(b) b.disabled = !any; });
+    var master = document.getElementById('selectAllArtworks'); if (master) master.checked = any && document.querySelectorAll('.artwork-select:not(:checked)').length===0;
+    var masterH = document.getElementById('selectAllArtworksHead'); if (masterH) masterH.checked = any && document.querySelectorAll('.artwork-select:not(:checked)').length===0;
+  }
+  document.addEventListener('change', function(e){
+    var cb = e.target.closest && e.target.closest('.artwork-select');
+    if (cb) setBulkEnabled();
+    var all = e.target.closest && (e.target.closest('#selectAllArtworks') || e.target.closest('#selectAllArtworksHead'));
+    if (all){
+      var checked = e.target.checked;
+      document.querySelectorAll('.artwork-select').forEach(function(c){ c.checked = checked; });
+      setBulkEnabled();
+    }
+  });
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('button[data-action="bulk-status"]');
+    if (btn){ e.preventDefault(); var modal = document.getElementById('adminBulkStatusModal'); if (modal && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modal).show(); }
+  });
+  // Bulk restore
+  document.addEventListener('click', async function(e){
+    var btn = e.target.closest && e.target.closest('button[data-action="bulk-restore"]');
+    if (!btn) return;
+    e.preventDefault();
+    var ids = getSelected(); if (!ids.length) return;
+    var old = btn.textContent; btn.disabled = true; btn.textContent = 'Restaurando...';
+    try {
+      for (const id of ids){
+        var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/draft', { method: 'PATCH', credentials: 'include' });
+        if (!res.ok) continue;
+        var row = document.getElementById('artRow-' + id);
+        if (row){ var b = row.querySelector('td:nth-child(3) .badge'); if (b){ b.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary'); b.classList.add('text-bg-secondary'); b.textContent='draft'; } }
+      }
+      if (window.showAdminToast) showAdminToast('Obras restauradas a borrador','success');
+    } catch(err){ console.error(err); if (window.showAdminToast) showAdminToast('No se pudo restaurar algunas obras','danger'); }
+    finally { btn.disabled=false; btn.textContent = old; }
+  });
+  // Bulk trash
+  document.addEventListener('click', async function(e){
+    var btn = e.target.closest && e.target.closest('button[data-action="bulk-trash"]');
+    if (!btn) return;
+    e.preventDefault();
+    var ids = getSelected(); if (!ids.length) return;
+    if (!confirm('Enviar ' + ids.length + ' obra(s) a la papelera?')) return;
+    var old = btn.textContent; btn.disabled = true; btn.textContent = 'Enviando...';
+    try {
+      for (const id of ids){
+        var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/trash', { method: 'PATCH', credentials: 'include' });
+        if (!res.ok) continue;
+        var row = document.getElementById('artRow-' + id); if (row) row.remove();
+      }
+      if (window.showAdminToast) showAdminToast('Obras enviadas a la papelera','success');
+      setBulkEnabled();
+    } catch(err){ console.error(err); if (window.showAdminToast) showAdminToast('No se pudo enviar algunas obras a la papelera','danger'); }
+    finally { btn.disabled=false; btn.textContent = old; }
+  });
+  // Bulk status submit
+  document.addEventListener('submit', async function(e){
+    var form = e.target.closest && e.target.closest('form.admin-bulk-status-form');
+    if (!form) return;
+    e.preventDefault();
+    var ids = getSelected(); if (!ids.length) { if (window.showAdminToast) showAdminToast('Selecciona al menos una obra','warning'); return; }
+    var statusInput = form.querySelector('input[name="status"]:checked'); var newStatus = statusInput && statusInput.value;
+    var reasonEl = form.querySelector('textarea[name="reason"]'); var reason = (reasonEl && reasonEl.value || '').trim();
+    if (!newStatus) { if (window.showAdminToast) showAdminToast('Selecciona un estado','warning'); return; }
+    if (newStatus === 'rejected' && !reason) { if (window.showAdminToast) showAdminToast('Indica el motivo de rechazo','warning'); return; }
+    var btn = form.querySelector('button[type="submit"]'); var old = btn && btn.textContent; if (btn){ btn.disabled=true; btn.textContent='Aplicando...'; }
+    try {
+      for (const id of ids){
+        async function doChange(){
+          var endpoint = null, options = { method:'PATCH', credentials:'include' };
+          if (newStatus === 'draft') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/draft'; }
+          else if (newStatus === 'submitted') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit'; options.headers={ 'Content-Type':'application/json' }; options.body=JSON.stringify({}); }
+          else if (newStatus === 'under_review') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review'; }
+          else if (newStatus === 'approved') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve'; }
+          else if (newStatus === 'rejected') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/reject'; options.headers={ 'Content-Type':'application/json' }; options.body=JSON.stringify({ reason: reason }); }
+          if (!endpoint) return;
+          var r = await fetch(endpoint, options);
+          if (!r.ok) {
+            if (r.status === 404 && newStatus !== 'draft') {
+              var rr = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/draft', { method:'PATCH', credentials:'include' });
+              if (rr.ok) {
+                if (newStatus === 'draft') return;
+                r = await fetch(endpoint, options);
+              }
+            }
+            if (!r.ok) return;
+          }
+          var row = document.getElementById('artRow-' + id);
+          if (row) {
+            var badge = row.querySelector('td:nth-child(3) .badge');
+            if (badge){
+              badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
+              var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+              badge.classList.add(cls); badge.textContent = newStatus || 'draft';
+            }
+          }
+        }
+        await doChange();
+      }
+      if (window.showAdminToast) showAdminToast('Estado aplicado a ' + ids.length + ' obra(s)','success');
+      var modal = document.getElementById('adminBulkStatusModal'); if (modal && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modal).hide();
+    } catch(err){ console.error(err); if (window.showAdminToast) showAdminToast('No se pudo aplicar el estado a algunas obras','danger'); }
+    finally { if (btn){ btn.disabled=false; btn.textContent= old || 'Aplicar'; } }
+  }, true);
+})();

@@ -6,7 +6,15 @@ const isOwner           = require('@middlewares/isOwner');
 const restrictTo        = require('@middlewares/restrictTo');
 const Artwork           = require('@models/artworkModel');
 const multer            = require('multer');
-const upload            = multer({ storage: multer.memoryStorage() });
+const upload            = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    if (!file || !file.mimetype) return cb(null, false);
+    if (/^image\//i.test(file.mimetype)) return cb(null, true);
+    cb(new Error('Tipo de archivo no permitido. Se requieren imágenes.'));
+  }
+});
 
 const router = express.Router();
 

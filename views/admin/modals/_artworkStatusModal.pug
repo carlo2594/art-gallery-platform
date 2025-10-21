@@ -1,0 +1,39 @@
+// Modal de cambio de estado de obra (usa variable local `a`)
+.modal.fade(id=`adminStatusArtwork-${a._id}` tabindex='-1' aria-labelledby=`adminStatusArtworkLabel-${a._id}` aria-hidden='true')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title(id=`adminStatusArtworkLabel-${a._id}`) Cambiar estado — #{a.title}
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
+      form.admin-status-artwork-form(data-artwork-id=a._id data-initial-status=(a.status || 'draft'))
+        .modal-body
+          .mb-2
+            small.text-muted Estado actual:
+            - const _st = a.status || 'draft'
+            div
+              span.badge(class=(_st === 'approved' ? 'text-bg-success' : (_st === 'under_review' ? 'text-bg-warning' : (_st === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= _st
+          .mt-3
+            label.form-label Nuevo estado
+            .list-group
+              label.list-group-item
+                input.form-check-input.me-1(type='radio', name='status', value='draft', checked=_st==='draft')
+                | Borrador
+              label.list-group-item
+                input.form-check-input.me-1(type='radio', name='status', value='submitted', checked=_st==='submitted')
+                | Enviado
+              label.list-group-item
+                input.form-check-input.me-1(type='radio', name='status', value='under_review', checked=_st==='under_review')
+                | En revisión
+              label.list-group-item
+                input.form-check-input.me-1(type='radio', name='status', value='approved', checked=_st==='approved')
+                | Aprobado
+              label.list-group-item
+                input.form-check-input.me-1(type='radio', name='status', value='rejected', checked=_st==='rejected')
+                | Rechazado
+          .mt-3
+            label.form-label(for=`rejectReason2-${a._id}`) Motivo del rechazo (solo si "Rechazado")
+            textarea.form-control(id=`rejectReason2-${a._id}` name='reason' rows='3' placeholder='Describe el motivo...')
+            small.text-muted Si eliges "Rechazado", este texto se enviará al artista.
+        .modal-footer
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+          button.btn.btn-primary(type='submit') Guardar estado
