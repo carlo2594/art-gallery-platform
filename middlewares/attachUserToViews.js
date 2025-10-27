@@ -10,8 +10,24 @@ module.exports = async (req, res, next) => {
     if (!token) return next();
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('name +role');
-    if (user) res.locals.currentUser = { id: user.id, name: user.name, role: user.role };
+    const user = await User.findById(decoded.id)
+      .select('name firstName lastName headline bio website locale country social profileImage +role');
+    if (user) {
+      res.locals.currentUser = {
+        id: user.id,
+        name: user.name,
+        role: user.role,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        headline: user.headline,
+        bio: user.bio,
+        website: user.website,
+        locale: user.locale,
+        country: user.country,
+        social: user.social,
+        profileImage: user.profileImage
+      };
+    }
   } catch (e) {
     // token inválido/expirado: continuar sin usuario
   }

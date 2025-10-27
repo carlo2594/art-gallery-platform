@@ -319,6 +319,13 @@ exports.getHome = catchAsync(async (req, res) => {
 
 
 
+// Vista: Mi cuenta (perfil del usuario)
+exports.getMyAccount = (req, res) => {
+  return res.status(200).render('public/account/index', {
+    title: 'Mi cuenta'
+  });
+};
+
 // Vista para reset password (prevalida el enlace)
 exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;
@@ -828,6 +835,7 @@ exports.getExhibitionUnpublished = (req, res) => {
     title: 'Exposición privada · Galería del Ox'
   });
 };
+
 
 
 

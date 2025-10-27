@@ -4,6 +4,12 @@
 const express = require('express');
 const router = express.Router();
 const viewsController = require('@controllers/viewsController');
+// Middleware para vistas: redirige a login si no hay usuario
+const ensureLoggedInView = (req, res, next) => {
+  if (res.locals && res.locals.currentUser) return next();
+  const returnTo = encodeURIComponent(req.originalUrl || '/my-account');
+  return res.redirect(`/login?returnTo=${returnTo}`);
+};
 const Exhibition = require('@models/exhibitionModel');
 
 // =================== PÁGINA DE INICIO ===================
@@ -17,6 +23,11 @@ router.get('/reset-password', viewsController.getResetPassword);
 router.get('/reset-link-invalid', viewsController.getResetLinkInvalid);
 router.get('/forgot-password', viewsController.getForgotPassword);
 router.get('/welcome', viewsController.getWelcome);
+
+// =================== MI CUENTA =========================
+router.get('/my-account', ensureLoggedInView, viewsController.getMyAccount);
+// Alias antiguo en español
+router.get('/mi-cuenta', (req, res) => res.redirect(301, '/my-account'));
 
 
 // =================== QUIÉNES SOMOS =====================

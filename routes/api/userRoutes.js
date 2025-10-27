@@ -13,8 +13,12 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 /* ---- Perfil propio ---- */
 router.get('/me',           requireUser, userController.getMe);
-router.patch('/update-me',  requireUser, userController.updateMe);
+router.patch('/update-me',  requireUser, upload.single('profileImage'), userController.updateMe);
+// Alias para formularios HTML (POST)
+router.post('/update-me',   requireUser, upload.single('profileImage'), userController.updateMe);
 router.patch('/update-password', requireUser, userController.updatePassword);
+// Alias POST para formularios HTML
+router.post('/update-password', requireUser, userController.updatePassword);
 router.delete('/delete-me', requireUser, userController.deleteMe);
 router.get('/my-profile',   requireUser, userController.getMyProfileWithArt);
 

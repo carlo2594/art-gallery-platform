@@ -33,7 +33,21 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   }
 
   // Solo permite actualizar estos campos
-  const filteredBody = filterObject(req.body, 'name', 'email', 'profileImage', 'bio');
+  const filteredBody = filterObject(
+    req.body,
+    'name',
+    'email',
+    'profileImage',
+    'bio',
+    'firstName',
+    'lastName',
+    'headline',
+    'location',
+    'website',
+    'locale',
+    'country',
+    'social'
+  );
 
   // Busca el usuario actual
   const user = await User.findById(req.user.id);
@@ -41,32 +55,32 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   const oldEmail = user.email;
 
-  // Si viene una nueva imagen, elimina la anterior y sube la nueva
-  if (req.file) {
-    if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
-    }
-    const imageResult = await upload(req.file.path);
-    filteredBody.profileImage = imageResult.secure_url;
-    filteredBody.profileImagePublicId = imageResult.public_id;
+  // Manejo de imagen de perfil (subir/actualizar/eliminar)
+  try {
+    await handleProfileImage(user, req, filteredBody);
+  } catch (e) {
+    return next(new AppError('No se pudo procesar la imagen de perfil.', 500));
   }
 
-  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
-  if (
-    ('profileImage' in filteredBody) &&
-    (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
-  ) {
-    if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
+  // Normalizar objeto social para evitar campos inesperados
+  if (filteredBody.social && typeof filteredBody.social === 'object') {
+    const allowedSocial = ['instagram', 'x', 'facebook', 'linkedin', 'youtube', 'tiktok'];
+    const s = {};
+    for (const k of allowedSocial) {
+      if (Object.prototype.hasOwnProperty.call(filteredBody.social, k) && filteredBody.social[k] !== undefined) {
+        s[k] = filteredBody.social[k];
+      }
     }
-    user.profileImage = undefined;
-    user.profileImagePublicId = undefined;
-    // Elimina el campo para que no quede la referencia
-    delete filteredBody.profileImage;
-    delete filteredBody.profileImagePublicId;
+    filteredBody.social = s;
   }
 
-  await handleProfileImage(user, req, filteredBody);
+  // Si llegan firstName/lastName y no se envía name, construir name a partir de ellos
+  if (!('name' in filteredBody)) {
+    const fn = (filteredBody.firstName || '').trim();
+    const ln = (filteredBody.lastName || '').trim();
+    const combined = `${fn} ${ln}`.trim();
+    if (combined) filteredBody.name = combined;
+  }
 
   // Actualiza los campos permitidos
   Object.assign(user, filteredBody);
@@ -222,32 +236,11 @@ exports.updateUser = catchAsync(async (req, res, next) => {
     return next(new AppError('Usuario no encontrado', 404));
   }
 
-  // Si viene una nueva imagen, elimina la anterior y sube la nueva
-  if (req.file) {
-    if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
-    }
-    const imageResult = await upload(req.file.path);
-    filteredBody.profileImage = imageResult.secure_url;
-    filteredBody.profileImagePublicId = imageResult.public_id;
+  try {
+    await handleProfileImage(user, req, filteredBody);
+  } catch (e) {
+    return next(new AppError('No se pudo procesar la imagen de perfil. ' + (e && e.message ? e.message : ''), 500));
   }
-
-  // En updateMe y updateUser, después de obtener el usuario y antes de guardar:
-  if (
-    ('profileImage' in filteredBody) &&
-    (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
-  ) {
-    if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
-    }
-    user.profileImage = undefined;
-    user.profileImagePublicId = undefined;
-    // Elimina el campo para que no quede la referencia
-    delete filteredBody.profileImage;
-    delete filteredBody.profileImagePublicId;
-  }
-
-  await handleProfileImage(user, req, filteredBody);
 
   Object.assign(user, filteredBody);
   try {

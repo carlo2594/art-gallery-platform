@@ -75,7 +75,7 @@ html.no-js(lang='es')
                     aria-label='Menú de usuario')= currentUser.name
                   ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenu')
                     li
-                      a.dropdown-item.mb-2(href='/mi-cuenta' aria-label='Ir a mi cuenta') Mi cuenta
+                      a.dropdown-item.mb-2(href='/my-account' aria-label='Ir a mi cuenta') Mi cuenta
                     if currentUser && currentUser.role === 'admin'
                       li
                         a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador

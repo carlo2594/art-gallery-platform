@@ -5,6 +5,8 @@ const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   name:     { type: String, required: true },
+  firstName: { type: String, trim: true },
+  lastName:  { type: String, trim: true },
   email: {
   type: String,
   required: true,
@@ -28,12 +30,18 @@ const userSchema = new mongoose.Schema({
   profileImage: { type: String, trim: true },
   profileImagePublicId: { type: String, trim: true },
   bio: { type: String, trim: true },
+  headline: { type: String, trim: true },
   location: { type: String, trim: true },
   website: { type: String, trim: true },
+  locale: { type: String, trim: true },
+  country: { type: String, trim: true, maxlength: 2 },
   social: {
     instagram: { type: String, trim: true },
     x: { type: String, trim: true },
-    facebook: { type: String, trim: true }
+    facebook: { type: String, trim: true },
+    linkedin: { type: String, trim: true },
+    youtube: { type: String, trim: true },
+    tiktok: { type: String, trim: true }
   },
   // Métrica pública
   followersCount: { type: Number, default: 0 },

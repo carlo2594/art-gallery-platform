@@ -1,0 +1,170 @@
+﻿extends /layouts/public
+
+block scriptsExtra
+  script(src='/js/account.js')
+
+block content
+  section.py-5
+    .container
+      .row.mb-4
+        .col
+          h1.h3.mb-0.font-title Mi cuenta
+          p.text-muted Actualiza tu perfil, foto y contrasena.
+
+      #accountAlerts
+
+      ul.nav.nav-tabs(role='tablist')
+        li.nav-item(role='presentation')
+          button.nav-link.active(data-bs-toggle='tab' data-bs-target='#tab-perfil' type='button' role='tab' aria-controls='tab-perfil' aria-selected='true' data-ox-tab='perfil') Perfil
+        li.nav-item(role='presentation')
+          button.nav-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') Foto de perfil
+        li.nav-item(role='presentation')
+          button.nav-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contrasena
+
+      .tab-content.mt-4
+        .tab-pane.fade.show.active#tab-perfil(role='tabpanel' aria-labelledby='tab-perfil')
+          form#accountProfileForm(action='/api/v1/users/update-me' method='POST')
+            .row.g-4
+              .col-12.col-lg-6
+                .mb-3
+                  label.form-label(for='firstName') Nombre
+                  input#firstName.form-control(type='text' name='firstName' maxlength='64' value=(currentUser && currentUser.firstName) || '')
+                .mb-3
+                  label.form-label(for='lastName') Apellidos
+                  input#lastName.form-control(type='text' name='lastName' maxlength='64' value=(currentUser && currentUser.lastName) || '')
+                .mb-3
+                  label.form-label(for='name') Nombre publico (se mostrara)
+                  input#name.form-control(type='text' name='name' maxlength='128' required value=(currentUser && currentUser.name) || '')
+                .mb-3
+                  label.form-label(for='headline') Titular
+                  input#headline.form-control(type='text' name='headline' maxlength='60' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
+                .mb-3
+                  label.form-label(for='bio') Biografia
+                  textarea#bio.form-control(name='bio' rows='5' maxlength='1000')= (currentUser && currentUser.bio) || ''
+                .mb-3
+                  label.form-label(for='locale') Idioma
+                  - var currentLocale = (currentUser && currentUser.locale) || 'default'
+                  select#locale.form-select(name='locale')
+                    option(value='default' selected=(currentLocale==='default') ? true : false) Seleccionar idioma
+                    option(value='es_ES' selected=(currentLocale==='es_ES') ? true : false) Espanol (Espana)
+                    option(value='es_419' selected=(currentLocale==='es_419') ? true : false) Espanol (Latinoamerica) 
+                    option(value='es_CR' selected=(currentLocale==='es_CR') ? true : false) Espanol (Costa Rica)
+                    option(value='en_US' selected=(currentLocale==='en_US') ? true : false) English (US)
+                    option(value='de_DE' selected=(currentLocale==='de_DE') ? true : false) Deutsch
+                    option(value='fr_FR' selected=(currentLocale==='fr_FR') ? true : false) Francais (France)
+                    option(value='it_IT' selected=(currentLocale==='it_IT') ? true : false) Italiano
+                    option(value='pt_BR' selected=(currentLocale==='pt_BR') ? true : false) Portugues (Brasil)
+                    option(value='nl_NL' selected=(currentLocale==='nl_NL') ? true : false) Nederlands
+                    option(value='pl_PL' selected=(currentLocale==='pl_PL') ? true : false) Polski
+                    option(value='ro_RO' selected=(currentLocale==='ro_RO') ? true : false) Romana
+                    option(value='vi_VN' selected=(currentLocale==='vi_VN') ? true : false) Tieng Viet
+                    option(value='tr_TR' selected=(currentLocale==='tr_TR') ? true : false) Turkce
+                    option(value='ru_RU' selected=(currentLocale==='ru_RU') ? true : false) Russkiy
+                    option(value='ar_SA' selected=(currentLocale==='ar_SA') ? true : false) Arabic (Saudi Arabia)
+                    option(value='th_TH' selected=(currentLocale==='th_TH') ? true : false) Thai
+                    option(value='zh_TW' selected=(currentLocale==='zh_TW') ? true : false) Chinese (Traditional)
+                    option(value='zh_CN' selected=(currentLocale==='zh_CN') ? true : false) Chinese (Simplified)
+                    option(value='ja_JP' selected=(currentLocale==='ja_JP') ? true : false) Japanese
+                    option(value='ko_KR' selected=(currentLocale==='ko_KR') ? true : false) Korean
+                .mb-3
+                  label.form-label(for='country') Pais
+                  - var currentCountry = (currentUser && currentUser.country) || 'CR'
+                  select#country.form-select(name='country')
+                    option(value='CR' selected=(currentCountry==='CR') ? true : false) Costa Rica
+                    option(value='MX' selected=(currentCountry==='MX') ? true : false) Mexico
+                    option(value='CO' selected=(currentCountry==='CO') ? true : false) Colombia
+                    option(value='AR' selected=(currentCountry==='AR') ? true : false) Argentina
+                    option(value='CL' selected=(currentCountry==='CL') ? true : false) Chile
+                    option(value='PE' selected=(currentCountry==='PE') ? true : false) Peru
+                    option(value='PA' selected=(currentCountry==='PA') ? true : false) Panama
+                    option(value='GT' selected=(currentCountry==='GT') ? true : false) Guatemala
+                    option(value='SV' selected=(currentCountry==='SV') ? true : false) El Salvador
+                    option(value='HN' selected=(currentCountry==='HN') ? true : false) Honduras
+                    option(value='NI' selected=(currentCountry==='NI') ? true : false) Nicaragua
+                    option(value='DO' selected=(currentCountry==='DO') ? true : false) Republica Dominicana
+                    option(value='PR' selected=(currentCountry==='PR') ? true : false) Puerto Rico
+                    option(value='EC' selected=(currentCountry==='EC') ? true : false) Ecuador
+                    option(value='UY' selected=(currentCountry==='UY') ? true : false) Uruguay
+                    option(value='BO' selected=(currentCountry==='BO') ? true : false) Bolivia
+                    option(value='PY' selected=(currentCountry==='PY') ? true : false) Paraguay
+
+              .col-12.col-lg-6
+                .mb-3
+                  label.form-label(for='website') Sitio web
+                  input#website.form-control(type='url' name='website' placeholder='URL' maxlength='128' value=(currentUser && currentUser.website) || '')
+                .mb-3
+                  label.form-label(for='facebook') Facebook
+                  .input-group
+                    span.input-group-text facebook.com/
+                    input#facebook.form-control(type='text' name='social[facebook]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.facebook) || '')
+                .mb-3
+                  label.form-label(for='instagram') Instagram
+                  .input-group
+                    span.input-group-text instagram.com/
+                    input#instagram.form-control(type='text' name='social[instagram]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.instagram) || '')
+                .mb-3
+                  label.form-label(for='linkedin') LinkedIn
+                  .input-group
+                    span.input-group-text linkedin.com/
+                    input#linkedin.form-control(type='text' name='social[linkedin]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.linkedin) || '')
+                .mb-3
+                  label.form-label(for='tiktok') TikTok
+                  .input-group
+                    span.input-group-text tiktok.com/
+                    input#tiktok.form-control(type='text' name='social[tiktok]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.tiktok) || '')
+                .mb-3
+                  label.form-label(for='x') X
+                  .input-group
+                    span.input-group-text x.com/
+                    input#x.form-control(type='text' name='social[x]' maxlength='128' value=(currentUser && currentUser.social && (currentUser.social.x || currentUser.social.twitter)) || '')
+                .mb-3
+                  label.form-label(for='youtube') YouTube
+                  .input-group
+                    span.input-group-text youtube.com/
+                    input#youtube.form-control(type='text' name='social[youtube]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
+
+            .mt-3
+              button.btn.btn-primary(type='submit') Guardar cambios
+
+        .tab-pane.fade#tab-foto(role='tabpanel' aria-labelledby='tab-foto')
+          .row
+            .col-12.col-md-6
+              .mb-3
+                label.form-label Vista previa
+                if currentUser && currentUser.profileImage
+                  img.img-fluid.rounded-circle(src=currentUser.profileImage alt='Foto de perfil' style='max-width: 180px;')
+                else
+                  .d-inline-flex.align-items-center.justify-content-center.rounded-circle.bg-light(style='width:180px;height:180px;')
+                    i.fas.fa-user.fa-3x.text-muted
+            .col-12.col-md-6
+              form#accountPhotoForm(action='/api/v1/users/update-me' method='POST' enctype='multipart/form-data')
+                .mb-3
+                  label.form-label(for='profileImage') Subir nueva foto
+                  input#profileImage.form-control(type='file' name='profileImage' accept='image/*')
+                  small.form-text.text-muted Formato JPG/PNG, maximo 5MB.
+                button.btn.btn-primary(type='submit') Actualizar foto
+              hr.my-4
+              form#accountPhotoDeleteForm(action='/api/v1/users/update-me' method='POST')
+                input(type='hidden' name='profileImage' value='')
+                button.btn.btn-outline-danger(type='submit') Eliminar foto
+
+        .tab-pane.fade#tab-password(role='tabpanel' aria-labelledby='tab-password')
+          form#accountPasswordForm(action='/api/v1/users/update-password' method='POST')
+            .row.g-3
+              .col-12.col-md-6
+                label.form-label(for='currentPassword') Contrasena actual
+                .input-group
+                  input#currentPassword.form-control(type='password' name='currentPassword' required minlength='6')
+                  button.btn.btn-outline-secondary(type='button' data-toggle-password='#currentPassword' aria-pressed='false' title='Mostrar/ocultar')
+                    i.fas.fa-eye
+              .col-12.col-md-6
+                label.form-label(for='newPassword') Nueva contrasena
+                .input-group
+                  input#newPassword.form-control(type='password' name='newPassword' required minlength='8')
+                  button.btn.btn-outline-secondary(type='button' data-toggle-password='#newPassword' aria-pressed='false' title='Mostrar/ocultar')
+                    i.fas.fa-eye
+            .mt-3
+              button.btn.btn-primary(type='submit') Cambiar contrasena
+
+
+
