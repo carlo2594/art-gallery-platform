@@ -319,10 +319,10 @@ exports.getHome = catchAsync(async (req, res) => {
 
 
 
-// Vista: Mi cuenta (perfil del usuario)
+// Vista: Editar cuenta (perfil del usuario)
 exports.getMyAccount = (req, res) => {
   return res.status(200).render('public/account/index', {
-    title: 'Mi cuenta'
+    title: 'Editar cuenta'
   });
 };
 

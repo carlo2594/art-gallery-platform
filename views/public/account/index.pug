@@ -4,47 +4,47 @@ block scriptsExtra
   script(src='/js/account.js')
 
 block content
-  section.py-5
-    .container
-      .row.mb-4
-        .col
-          h1.h3.mb-0.font-title Mi cuenta
-          p.text-muted Actualiza tu perfil, foto y contrasena.
+  section.account-page-section.py-5
+    .container.account-page-container
+      .row.mb-4.account-page-header-row
+        .col.account-page-header-col
+          h1.h3.mb-0.font-title.account-page-title Editar cuenta
+          p.text-muted.account-page-subtitle Actualiza tu perfil, foto y contrasena.
 
-      #accountAlerts
+      #accountAlerts.account-page-alerts
 
-      ul.nav.nav-tabs(role='tablist')
-        li.nav-item(role='presentation')
-          button.nav-link.active(data-bs-toggle='tab' data-bs-target='#tab-perfil' type='button' role='tab' aria-controls='tab-perfil' aria-selected='true' data-ox-tab='perfil') Perfil
-        li.nav-item(role='presentation')
-          button.nav-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') Foto de perfil
-        li.nav-item(role='presentation')
-          button.nav-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contrasena
+      ul.nav.nav-tabs.account-tabs.account-tabs-list(role='tablist')
+        li.nav-item.account-tabs-item(role='presentation')
+          button.nav-link.account-tabs-link.active(data-bs-toggle='tab' data-bs-target='#tab-perfil' type='button' role='tab' aria-controls='tab-perfil' aria-selected='true' data-ox-tab='perfil') Perfil
+        li.nav-item.account-tabs-item(role='presentation')
+          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') Foto de perfil
+        li.nav-item.account-tabs-item(role='presentation')
+          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contrasena
 
-      .tab-content.mt-4
-        .tab-pane.fade.show.active#tab-perfil(role='tabpanel' aria-labelledby='tab-perfil')
-          form#accountProfileForm(action='/api/v1/users/update-me' method='POST')
-            .row.g-4
-              .col-12.col-lg-6
-                .mb-3
-                  label.form-label(for='firstName') Nombre
-                  input#firstName.form-control(type='text' name='firstName' maxlength='60' value=(currentUser && currentUser.firstName) || '')
-                .mb-3
-                  label.form-label(for='lastName') Apellidos
-                  input#lastName.form-control(type='text' name='lastName' maxlength='60' value=(currentUser && currentUser.lastName) || '')
-                .mb-3
-                  label.form-label(for='name') Nombre publico (se mostrara)
-                  input#name.form-control(type='text' name='name' maxlength='120' required value=(currentUser && currentUser.name) || '')
-                .mb-3
-                  label.form-label(for='headline') Titular
-                  input#headline.form-control(type='text' name='headline' maxlength='80' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
-                .mb-3
-                  label.form-label(for='bio') Biografia
-                  textarea#bio.form-control(name='bio' rows='5' maxlength='1200')= (currentUser && currentUser.bio) || ''
-                .mb-3
-                  label.form-label(for='country') Pais
+      .tab-content.mt-4.account-tabs-content
+        .tab-pane.account-tab-pane.account-tab-pane--profile.fade.show.active#tab-perfil(role='tabpanel' aria-labelledby='tab-perfil')
+          form#accountProfileForm.account-form.account-form-profile(action='/api/v1/users/update-me' method='POST')
+            .row.g-4.account-form-row
+              .col-12.col-lg-6.account-form-column
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='firstName') Nombre
+                  input#firstName.form-control.account-form-control(type='text' name='firstName' maxlength='60' value=(currentUser && currentUser.firstName) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='lastName') Apellidos
+                  input#lastName.form-control.account-form-control(type='text' name='lastName' maxlength='60' value=(currentUser && currentUser.lastName) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='name') Nombre publico (se mostrara)
+                  input#name.form-control.account-form-control(type='text' name='name' maxlength='120' required value=(currentUser && currentUser.name) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='headline') Titular
+                  input#headline.form-control.account-form-control(type='text' name='headline' maxlength='80' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='bio') Biografia
+                  textarea#bio.form-control.account-form-control(name='bio' rows='5' maxlength='1200')= (currentUser && currentUser.bio) || ''
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='country') Pais
                   - var currentCountry = (currentUser && currentUser.country) || 'CR'
-                  select#country.form-select(name='country')
+                  select#country.form-select.account-form-control(name='country')
                     option(value='' selected=(currentCountry==='') ? true : false) Seleccionar pais
                     option(value='AF' selected=(currentCountry==='AF') ? true : false) Afghanistan
                     option(value='AL' selected=(currentCountry==='AL') ? true : false) Albania
@@ -242,85 +242,86 @@ block content
                     option(value='ZM' selected=(currentCountry==='ZM') ? true : false) Zambia
                     option(value='ZW' selected=(currentCountry==='ZW') ? true : false) Zimbabwe
 
-              .col-12.col-lg-6
-                .mb-3
-                  label.form-label(for='website') Sitio web
-                  input#website.form-control(type='url' name='website' placeholder='URL' maxlength='200' value=(currentUser && currentUser.website) || '')
-                .mb-3
-                  label.form-label(for='facebook') Facebook
-                  .input-group
-                    span.input-group-text facebook.com/
-                    input#facebook.form-control(type='text' name='social[facebook]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.facebook) || '')
-                .mb-3
-                  label.form-label(for='instagram') Instagram
-                  .input-group
-                    span.input-group-text instagram.com/
-                    input#instagram.form-control(type='text' name='social[instagram]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.instagram) || '')
-                .mb-3
-                  label.form-label(for='linkedin') LinkedIn
-                  .input-group
-                    span.input-group-text linkedin.com/
-                    input#linkedin.form-control(type='text' name='social[linkedin]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.linkedin) || '')
-                .mb-3
-                  label.form-label(for='tiktok') TikTok
-                  .input-group
-                    span.input-group-text tiktok.com/
-                    input#tiktok.form-control(type='text' name='social[tiktok]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.tiktok) || '')
-                .mb-3
-                  label.form-label(for='x') X
-                  .input-group
-                    span.input-group-text x.com/
-                    input#x.form-control(type='text' name='social[x]' maxlength='80' value=(currentUser && currentUser.social && (currentUser.social.x || currentUser.social.twitter)) || '')
-                .mb-3
-                  label.form-label(for='youtube') YouTube
-                  .input-group
-                    span.input-group-text youtube.com/
-                    input#youtube.form-control(type='text' name='social[youtube]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
+              .col-12.col-lg-6.account-form-column
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='website') Sitio web
+                  input#website.form-control.account-form-control(type='url' name='website' placeholder='URL' maxlength='200' value=(currentUser && currentUser.website) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='facebook') Facebook
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon facebook.com/
+                    input#facebook.form-control.account-form-control(type='text' name='social[facebook]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.facebook) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='instagram') Instagram
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon instagram.com/
+                    input#instagram.form-control.account-form-control(type='text' name='social[instagram]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.instagram) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='linkedin') LinkedIn
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon linkedin.com/
+                    input#linkedin.form-control.account-form-control(type='text' name='social[linkedin]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.linkedin) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='tiktok') TikTok
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon tiktok.com/
+                    input#tiktok.form-control.account-form-control(type='text' name='social[tiktok]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.tiktok) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='x') X
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon x.com/
+                    input#x.form-control.account-form-control(type='text' name='social[x]' maxlength='80' value=(currentUser && currentUser.social && (currentUser.social.x || currentUser.social.twitter)) || '')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='youtube') YouTube
+                  .input-group.account-form-input-group
+                    span.input-group-text.account-form-addon youtube.com/
+                    input#youtube.form-control.account-form-control(type='text' name='social[youtube]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
 
-            .mt-3
-              button.btn.btn-primary(type='submit') Guardar cambios
+            .mt-3.account-form-actions
+              button.btn.btn-primary.account-form-submit(type='submit') Guardar cambios
 
-        .tab-pane.fade#tab-foto(role='tabpanel' aria-labelledby='tab-foto')
-          .row
-            .col-12.col-md-6
-              .mb-3
+        .tab-pane.account-tab-pane.account-tab-pane--photo.fade#tab-foto(role='tabpanel' aria-labelledby='tab-foto')
+          .row.account-photo-row
+            .col-12.col-md-6.account-form-column
+              .mb-3.account-form-group.account-photo-preview-group
                 if currentUser && currentUser.profileImage
                   img.img-fluid.rounded.account-photo-preview(src=currentUser.profileImage alt='Foto de perfil' style='max-width: 220px; width: 100%; height: auto; object-fit: contain;')
                 else
                   .d-inline-flex.align-items-center.justify-content-center.bg-light.rounded.account-photo-placeholder(style='width:220px;height:220px;')
-                    i.fas.fa-user.fa-3x.text-muted
-            .col-12.col-md-6
-              form#accountPhotoForm(action='/api/v1/users/update-me' method='POST' enctype='multipart/form-data')
-                .mb-3
-                  label.form-label(for='profileImage') Subir nueva foto
-                  input#profileImage.form-control(type='file' name='profileImage' accept='image/*')
-                  small.form-text.text-muted Formato JPG/PNG, maximo 5MB.
-                  small.form-text.d-flex.align-items-center.gap-2.mt-2(style='color: var(--ox-blue);')
-                    i.fas.fa-info-circle
-                    span Usa una imagen horizontal (ancho mayor que alto) para mantener la composicion del perfil.
-                button.btn.btn-primary(type='submit') Actualizar foto
-              hr.my-4
-              form#accountPhotoDeleteForm(action='/api/v1/users/update-me' method='POST')
-                input(type='hidden' name='profileImage' value='')
-                button.btn.btn-outline-danger(type='submit') Eliminar foto
+                    i.fas.fa-user.fa-3x.text-muted.account-photo-placeholder-icon
+            .col-12.col-md-6.account-form-column
+              form#accountPhotoForm.account-form.account-form-photo(action='/api/v1/users/update-me' method='POST' enctype='multipart/form-data')
+                .mb-3.account-form-group
+                  label.form-label.account-form-label(for='profileImage') Subir nueva foto
+                  input#profileImage.form-control.account-form-control(type='file' name='profileImage' accept='image/*')
+                  small.form-text.text-muted.account-form-hint Formato JPG/PNG, maximo 5MB.
+                  small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info(style='color: var(--ox-blue);')
+                    i.fas.fa-info-circle.account-form-info-icon
+                    span.account-form-hint-copy Usa una imagen horizontal (ancho mayor que alto) para mantener la composicion del perfil.
+                button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
+              hr.my-4.account-form-divider
+              form#accountPhotoDeleteForm.account-form.account-form-photo-delete(action='/api/v1/users/update-me' method='POST')
+                input.account-form-hidden(type='hidden' name='profileImage' value='')
+                button.btn.btn-outline-danger.account-form-delete(type='submit') Eliminar foto
 
-        .tab-pane.fade#tab-password(role='tabpanel' aria-labelledby='tab-password')
-          form#accountPasswordForm(action='/api/v1/users/update-password' method='POST')
-            .row.g-3
-              .col-12.col-md-6
-                label.form-label(for='currentPassword') Contrasena actual
-                .input-group
-                  input#currentPassword.form-control(type='password' name='currentPassword' required minlength='6')
-                  button.btn.btn-outline-secondary(type='button' data-toggle-password='#currentPassword' aria-pressed='false' title='Mostrar/ocultar')
-                    i.fas.fa-eye
-              .col-12.col-md-6
-                label.form-label(for='newPassword') Nueva contrasena
-                .input-group
-                  input#newPassword.form-control(type='password' name='newPassword' required minlength='8')
-                  button.btn.btn-outline-secondary(type='button' data-toggle-password='#newPassword' aria-pressed='false' title='Mostrar/ocultar')
-                    i.fas.fa-eye
-            .mt-3
-              button.btn.btn-primary(type='submit') Cambiar contrasena
+        .tab-pane.account-tab-pane.account-tab-pane--password.fade#tab-password(role='tabpanel' aria-labelledby='tab-password')
+          form#accountPasswordForm.account-form.account-form-password(action='/api/v1/users/update-password' method='POST')
+            .row.g-3.account-form-row
+              .col-12.col-md-6.account-form-column
+                label.form-label.account-form-label(for='currentPassword') Contrasena actual
+                .input-group.account-form-input-group
+                  input#currentPassword.form-control.account-form-control(type='password' name='currentPassword' required minlength='6')
+                  button.btn.btn-outline-secondary.account-form-toggle(type='button' data-toggle-password='#currentPassword' aria-pressed='false' title='Mostrar/ocultar')
+                    i.fas.fa-eye.account-form-toggle-icon
+              .col-12.col-md-6.account-form-column
+                label.form-label.account-form-label(for='newPassword') Nueva contrasena
+                .input-group.account-form-input-group
+                  input#newPassword.form-control.account-form-control(type='password' name='newPassword' required minlength='8')
+                  button.btn.btn-outline-secondary.account-form-toggle(type='button' data-toggle-password='#newPassword' aria-pressed='false' title='Mostrar/ocultar')
+                    i.fas.fa-eye.account-form-toggle-icon
+            .mt-3.account-form-actions
+              button.btn.btn-primary.account-form-submit(type='submit') Cambiar contrasena
+
 
 
 

@@ -798,9 +798,38 @@ section.join-artists { position: relative; margin-top: 5rem; }
 /* Icons inside chips should follow ox-blue, overriding global icon color */
 .chip i, .chip .fa, .chip .fas, .chip .fab { color: var(--ox-blue) !important; }
 
-/* COMPONENTS: SEARCH TABS (scoped) */
-.search-tabs { border-bottom: 0 !important; gap: .75rem; }
-.search-tabs .nav-item { margin-bottom: 0 !important; }
+/* COMPONENTS: TAB GROUPS (search + account) */
+.search-tabs {
+  border-bottom: 0 !important;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.account-tabs {
+  border: 0 !important;
+  border-bottom: 0 !important;
+  gap: .75rem;
+  flex-wrap: wrap;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  justify-content: flex-start;
+  box-shadow: none !important;
+}
+.nav-tabs.account-tabs {
+  box-shadow: none !important;
+  border: 0 !important;
+  --bs-nav-tabs-border-width: 0;
+  --bs-nav-tabs-border-color: transparent;
+  --bs-nav-tabs-link-hover-border-color: transparent;
+  --bs-nav-tabs-link-active-border-color: transparent;
+}
+
+.search-tabs .nav-item,
+.account-tabs .nav-item {
+  margin-bottom: 0 !important;
+}
+
 .search-tabs .nav-link {
   font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
   color: var(--ox-blue);
@@ -811,8 +840,17 @@ section.join-artists { position: relative; margin-top: 5rem; }
   font-weight: 600;
   transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .12s ease;
 }
-.search-tabs .nav-link:hover { background: color-mix(in srgb, var(--ox-yellow) 18%, #fff); color: var(--ox-blue); }
-.search-tabs .nav-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--ox-orange) 45%, transparent); outline-offset: 2px; }
+
+.search-tabs .nav-link:hover {
+  background: color-mix(in srgb, var(--ox-yellow) 18%, #fff);
+  color: var(--ox-blue);
+}
+
+.search-tabs .nav-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ox-orange) 45%, transparent);
+  outline-offset: 2px;
+}
+
 .search-tabs .nav-link.active,
 .search-tabs .nav-link[aria-current="page"],
 .search-tabs .nav-link[aria-selected="true"] {
@@ -820,11 +858,162 @@ section.join-artists { position: relative; margin-top: 5rem; }
   color: var(--ox-blue) !important;
   box-shadow: 0 6px 16px rgba(16,46,80,0.12);
 }
-.search-tabs .nav-link:active { transform: translateY(1px); }
+
+.search-tabs .nav-link:active {
+  transform: translateY(1px);
+}
+
+.account-tabs .nav-link {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 84%, var(--ox-beige) 16%);
+  padding: .7rem 1.6rem;
+  font-weight: 600;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .12s ease;
+  box-shadow: none !important;
+}
+
+.account-tabs .nav-link:hover {
+  background: color-mix(in srgb, var(--ox-yellow) 22%, #fff);
+}
+
+.account-tabs .nav-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ox-orange) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.account-tabs .nav-link.active,
+.account-tabs .nav-link[aria-current="page"],
+.account-tabs .nav-link[aria-selected="true"] {
+  background: linear-gradient(120deg, var(--ox-yellow) 0%, color-mix(in srgb, var(--ox-orange) 45%, var(--ox-yellow) 55%) 100%) !important;
+  color: var(--ox-blue) !important;
+  box-shadow: none !important;
+}
+
+.account-tabs .nav-link:active {
+  transform: translateY(1px);
+}
+
+.account-page-section {
+  position: relative;
+  background: transparent;
+}
+
+.account-page-container {
+  max-width: 1080px;
+}
+
+.account-page-header-row {
+  align-items: center;
+}
+
+.account-page-title {
+  letter-spacing: .04em;
+}
+
+.account-page-subtitle {
+  max-width: 66ch;
+}
+
+.account-page-alerts {
+  margin-top: 1.5rem;
+}
+
+.account-tabs-content {
+  margin-top: 2.8rem;
+}
+
+.account-form-row {
+  row-gap: 1.75rem;
+}
+
+.account-form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.account-form-group {
+  margin-bottom: 0 !important;
+}
+
+.account-form-label {
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--ox-blue);
+}
+
+.account-form-control { border-radius: .375rem; border: 1px solid transparent; background-color: var(--ox-beige); box-shadow: none; transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out; }
+.account-form-control:focus { border-color: var(--ox-blue); box-shadow: none; background-color: var(--ox-beige); }
+.account-form-input-group { border-radius: 0; overflow: visible; box-shadow: none; }
+.account-form-addon { border: 1px solid transparent; background: var(--ox-beige); color: inherit; font-weight: 600; }
+.account-form-hint { display: block; font-size: 1.2rem; color: color-mix(in srgb, var(--ox-blue) 65%, transparent); }
+.account-form-hint-info { color: var(--ox-blue) !important; }
+.account-form-actions { display: flex; justify-content: flex-end; gap: 1.2rem; background: transparent; }
+.account-form-submit { padding: .8rem 2.4rem; border-radius: .375rem; font-weight: 700; letter-spacing: .02em; box-shadow: none; border: 1px solid transparent; }
+.account-form-toggle { border-radius: 0; }
+.account-form-toggle-icon { pointer-events: none; color: var(--ox-blue); }
+.account-form-delete { border-radius: .375rem; padding: .65rem 1.8rem; font-weight: 600; box-shadow: none; }
+.account-form-divider { border-color: transparent; opacity: 1; }
+.account-form-info-icon { color: var(--ox-yellow); }
+.account-form-hint-copy { font-size: 1.2rem; color: var(--ox-blue); }
+.account-photo-row { row-gap: 2rem; align-items: flex-start; }
+.account-photo-preview-group { display: flex; justify-content: center; }
+.account-photo-placeholder-icon { color: color-mix(in srgb, var(--ox-blue) 65%, transparent); box-shadow: none; }
+.account-form-hidden { display: none; }
 
 @media (max-width: 575.98px) {
-  .search-tabs { gap: .5rem; }
-  .search-tabs .nav-link { padding: .5rem .9rem; font-size: 1.2rem; }
+  .search-tabs {
+    gap: .5rem;
+  }
+  .search-tabs .nav-link {
+    padding: .5rem .9rem;
+    font-size: 1.2rem;
+  }
+  .account-tabs {
+    gap: .5rem;
+    padding: 0;
+    border-radius: 0;
+  }
+  .account-tabs .nav-link {
+    padding: .5rem .9rem;
+    font-size: 1.2rem;
+  }
+  .account-tab-pane {
+    padding: 0;
+  }
+  .account-form-column {
+    gap: 1rem;
+  }
+  .account-form-actions {
+    justify-content: center;
+  }
+  .account-form-submit {
+    width: 100%;
+  }
+}
+
+.account-tab-pane {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  transition: none;
+}
+
+@media (max-width: 991.98px) {
+  .account-tab-pane {
+    padding: 0;
+  }
+  .account-form-column {
+    gap: 1.1rem;
+  }
+  .account-form-actions {
+    justify-content: center;
+  }
 }
 
 /* ==========================================
@@ -2440,4 +2629,9 @@ body.noscroll {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+}
+.account-tab-pane--profile,
+.account-tab-pane--photo,
+.account-tab-pane--password {
+  position: relative;
 }
