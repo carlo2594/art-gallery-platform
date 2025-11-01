@@ -19,6 +19,17 @@ block content
             .col-12.col-lg-8
               .artist-hero-info.artist-info-desktop.text-white.pb-5.artist-hero-card.p-4.p-lg-5
                 h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
+                if stats && stats.techniques && stats.techniques.length
+                  .artist-techniques-inline.d-flex.flex-wrap.align-items-center.gap-3.mb-4
+                    span.artist-techniques-heading.text-white-75.text-uppercase.small.fw-semibold Tecnicas
+                    .artist-techniques-tags.d-flex.flex-wrap.align-items-center.gap-2
+                      each technique in stats.techniques.slice(0, 10)
+                        - var normalizedTechnique = technique ? technique.toString().trim() : ''
+                        - normalizedTechnique = normalizedTechnique ? normalizedTechnique.charAt(0).toUpperCase() + normalizedTechnique.slice(1).toLowerCase() : ''
+                        if normalizedTechnique
+                          span.small.text-warning.fw-bold.artist-technique-tag= normalizedTechnique
+                    if stats.techniques.length > 10
+                      span.small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} mas
                 if artist.createdAt
                   h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
                 if artist.bio
@@ -56,21 +67,6 @@ block content
                   button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
                     i.fas.fa-share.me-2
                     | Compartir
-            .col-12.col-lg-4
-              .stats-floating.artist-stats-desktop.text-white.pb-5
-                .row.g-3.justify-content-center
-                  .col-10
-                    .stat-item.artist-techniques-card.text-center.p-4.artist-techniques-card
-                      .stat-label.artist-techniques-label.small.text-white-75.mb-3 TAccnicas
-                      .techniques-list.artist-techniques-list
-                        if stats.techniques && stats.techniques.length > 0
-                          each technique in stats.techniques.slice(0, 10)
-                            - var capitalizedTechnique = technique ? technique.toString().trim().charAt(0).toUpperCase() + technique.toString().trim().slice(1).toLowerCase() : ''
-                            .technique-item.artist-technique-item.small.text-warning.fw-bold.mb-1= capitalizedTechnique
-                          if stats.techniques.length > 10
-                            .small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} mA�s
-                        else
-                          .small.text-white-50.artist-no-techniques Sin tAccnicas
 
     // Obras del artista
     if artworks && artworks.length > 0

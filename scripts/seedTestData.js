@@ -111,9 +111,9 @@ async function seed() {
     await Comment.syncIndexes();
     await PasswordResetToken.syncIndexes();
     await Newsletter.syncIndexes();
-    console.log('âœ… Índices sincronizados');
+    console.log('✅ Índices sincronizados');
   } catch (error) {
-    console.log('âš ï¸  Warning sincronizando índices:', error.message);
+    console.log('⚠️  Advertencia sincronizando índices:', error.message);
   }
 
   console.log('[SEED] Limpiando datos existentes...');
@@ -128,7 +128,7 @@ async function seed() {
     PasswordResetToken.deleteMany({}),
     Newsletter.deleteMany({})
   ]);
-  console.log('âœ… Datos eliminados');
+  console.log('✅ Datos eliminados');
 
 
   // Crea 20 artistas de prueba y 2 admins
@@ -359,7 +359,7 @@ async function seed() {
   console.log('[SHOWCASE] Ubicación:', leonardoUser.location || 'Barcelona, España');
   console.log('[SHOWCASE] Sitio web:', leonardoUser.website || 'https://leonardo-martinez-art.com');
   console.log('[SHOWCASE] Bio:', leonardoUser.bio);
-  console.log(`\nâœ… Puedes encontrar a este artista en: /artists/leonardo-martinez\n`);
+  console.log(`\n✅ Puedes encontrar a este artista en: /artists/leonardo-martinez\n`);
 
   // Estadísticas de disponibilidad
   const availabilityStats = {};
@@ -615,7 +615,7 @@ async function seed() {
   ];
 
   await Newsletter.insertMany(newsletterData);
-  console.log(`âœ… ${newsletterData.length} suscripciones de newsletter creadas`);
+  console.log(`✅ ${newsletterData.length} suscripciones de newsletter creadas`);
 
   await mongoose.disconnect();
 }
