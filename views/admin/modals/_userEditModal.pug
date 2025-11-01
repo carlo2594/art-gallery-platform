@@ -22,29 +22,28 @@
         form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
           .mb-3
             label.form-label Nombre
-            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name)
+            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name maxlength='120')
           .mb-3
             label.form-label Correo
             input.form-control(type='email' name='email' placeholder='correo@dominio.com' value=u.email)
           .mb-3
             label.form-label Biografía
-            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía')
+            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía' maxlength='1200')
           .mb-3
             label.form-label Ubicación
-            input.form-control(type='text' name='location' placeholder='Ciudad, País')
+            input.form-control(type='text' name='location' placeholder='Ciudad, País' maxlength='100')
           .mb-3
             label.form-label Sitio web
-            input.form-control(type='url' name='website' placeholder='https://...')
+            input.form-control(type='url' name='website' placeholder='https://...' maxlength='200')
           .mb-3
             label.form-label Redes sociales
             .row.g-2
               .col-md-4
-                input.form-control(type='text' name='social.instagram' placeholder='Instagram')
+                input.form-control(type='text' name='social.instagram' placeholder='Instagram' maxlength='80')
               .col-md-4
-                input.form-control(type='text' name='social.x' placeholder='X / Twitter')
+                input.form-control(type='text' name='social.x' placeholder='X / Twitter' maxlength='80')
               .col-md-4
-                input.form-control(type='text' name='social.facebook' placeholder='Facebook')
+                input.form-control(type='text' name='social.facebook' placeholder='Facebook' maxlength='80')
       .modal-footer
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
         button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Guardar cambios
-

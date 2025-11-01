@@ -11,7 +11,7 @@ module.exports = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id)
-      .select('name firstName lastName headline bio website locale country social profileImage +role');
+      .select('name firstName lastName headline bio website country social profileImage +role');
     if (user) {
       res.locals.currentUser = {
         id: user.id,
@@ -22,7 +22,6 @@ module.exports = async (req, res, next) => {
         headline: user.headline,
         bio: user.bio,
         website: user.website,
-        locale: user.locale,
         country: user.country,
         social: user.social,
         profileImage: user.profileImage

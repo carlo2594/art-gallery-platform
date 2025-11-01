@@ -18,6 +18,63 @@ document.addEventListener('DOMContentLoaded', function () {
     alerts.appendChild(el);
   };
 
+  const ensureProfileHorizontal = (file) => {
+    if (!file) return Promise.resolve();
+    if (typeof window.ensureHorizontalImage === 'function') {
+      return window.ensureHorizontalImage(file);
+    }
+    return new Promise((resolve, reject) => {
+      const type = (file.type || '').toLowerCase();
+      if (type && !type.startsWith('image/')) {
+        return reject(new Error('Selecciona un archivo de imagen valido.'));
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        if (width > height) {
+          resolve();
+        } else {
+          reject(new Error('La foto debe ser horizontal (mas ancha que alta).'));
+        }
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('No se pudo leer la imagen seleccionada.'));
+      };
+    });
+  };
+
+  const PROFILE_FIELD_LIMITS = [
+    { key: 'firstName', label: 'Nombre', max: 60 },
+    { key: 'lastName', label: 'Apellidos', max: 60 },
+    { key: 'name', label: 'Nombre público', max: 120 },
+    { key: 'headline', label: 'Titular', max: 80 },
+    { key: 'bio', label: 'Biografía', max: 1200 },
+    { key: 'website', label: 'Sitio web', max: 200 },
+    { key: 'social[facebook]', label: 'Facebook', max: 80 },
+    { key: 'social[instagram]', label: 'Instagram', max: 80 },
+    { key: 'social[linkedin]', label: 'LinkedIn', max: 80 },
+    { key: 'social[tiktok]', label: 'TikTok', max: 80 },
+    { key: 'social[x]', label: 'X', max: 80 },
+    { key: 'social[youtube]', label: 'YouTube', max: 80 }
+  ];
+
+  const validateProfileLengths = (formData) => {
+    for (const { key, label, max } of PROFILE_FIELD_LIMITS) {
+      const raw = formData.get(key);
+      if (raw == null) continue;
+      const value = String(raw).trim();
+      if (value.length > max) {
+        showAlert('warning', `${label} no puede exceder ${max} caracteres.`);
+        return false;
+      }
+    }
+    return true;
+  };
+
   const setBtnState = (btn, disabled, text) => {
     if (!btn) return;
     btn.disabled = !!disabled;
@@ -30,9 +87,12 @@ document.addEventListener('DOMContentLoaded', function () {
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = profileForm.querySelector('button[type=submit]');
+      const formData = new FormData(profileForm);
+      if (!validateProfileLengths(formData)) {
+        return;
+      }
       setBtnState(btn, true, 'Guardando...');
       try {
-        const formData = new FormData(profileForm);
         const body = new URLSearchParams();
         for (const [k, v] of formData.entries()) body.append(k, v);
         const res = await fetch(profileForm.action, {
@@ -43,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.message || 'No se pudieron guardar los cambios');
         showAlert('success', 'Perfil actualizado correctamente');
+        setTimeout(() => location.reload(), 600);
       } catch (err) {
         console.error(err);
         showAlert('danger', err.message || 'Ocurrió un error');
@@ -58,8 +119,13 @@ document.addEventListener('DOMContentLoaded', function () {
     photoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = photoForm.querySelector('button[type=submit]');
-      setBtnState(btn, true, 'Subiendo...');
       try {
+        const fileInput = photoForm.querySelector('input[name=\"profileImage\"][type=\"file\"]');
+        const file = fileInput && fileInput.files && fileInput.files[0];
+        if (file) {
+          await ensureProfileHorizontal(file);
+        }
+        setBtnState(btn, true, 'Subiendo...');
         const fd = new FormData(photoForm);
         const res = await fetch(photoForm.action, { method: 'POST', body: fd });
         const data = await res.json().catch(() => ({}));
@@ -68,9 +134,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data && data.data && data.data.profileImage) {
           const img = document.querySelector('#tab-foto img');
           if (img) img.src = data.data.profileImage;
-        } else {
-          setTimeout(() => location.reload(), 600);
         }
+        setTimeout(() => location.reload(), 600);
       } catch (err) {
         console.error(err);
         showAlert('danger', err.message || 'Ocurrió un error');

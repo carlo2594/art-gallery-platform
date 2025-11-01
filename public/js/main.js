@@ -86,6 +86,36 @@ document.addEventListener('DOMContentLoaded', function () {
     if (text != null) btn.textContent = text;
   };
 
+  const ensureHorizontalImage = (file) => {
+    return new Promise((resolve, reject) => {
+      if (!file) {
+        return reject(new Error('Selecciona una imagen.'));
+      }
+      const type = (file.type || '').toLowerCase();
+      if (type && !type.startsWith('image/')) {
+        return reject(new Error('Selecciona un archivo de imagen valido.'));
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        const width = img.naturalWidth || img.width;
+        const height = img.naturalHeight || img.height;
+        if (width > height) {
+          resolve();
+        } else {
+          reject(new Error('La foto debe ser horizontal (mas ancha que alta).'));
+        }
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('No se pudo leer la imagen seleccionada.'));
+      };
+    });
+  };
+
+  window.ensureHorizontalImage = ensureHorizontalImage;
+
   const parseQS = () => Object.fromEntries(new URLSearchParams(location.search).entries());
 
   // Marca el tab activo basado en ?tab=
@@ -1119,7 +1149,7 @@ document.addEventListener('DOMContentLoaded', function(){
     });
 
     // Subir imagen de perfil (delegado)
-    document.addEventListener('click', function(e){
+    document.addEventListener('click', async function(e){
       var btn = e.target.closest && e.target.closest('.admin-users-avatar-upload-btn');
       if (!btn) return;
       var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
@@ -1128,6 +1158,17 @@ document.addEventListener('DOMContentLoaded', function(){
       var fileInput = modalEl.querySelector('.admin-users-avatar-input');
       if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
       var file = fileInput.files[0];
+      try {
+        await ensureHorizontalImage(file);
+      } catch (err) {
+        var msgValidate = (err && err.message) || 'La foto debe ser horizontal (mas ancha que alta).';
+        if (window.showAdminToast) {
+          showAdminToast(msgValidate, 'warning');
+        } else {
+          alert(msgValidate);
+        }
+        return;
+      }
       var old = btn.textContent; btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Subiendo...';
       var done = function(){ btn.disabled = false; btn.classList.remove('disabled'); btn.textContent = old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/profile-image';
@@ -1138,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', function(){
           var data = (resp && resp.data) || resp; var user = data && (data.data || data.user || data);
           var newUrl = user && user.profileImage; setAvatarPreview(modalEl, newUrl || '');
           fileInput.value = '';
-        } catch(_){}
+        } catch(_){ }
         if (window.showAdminToast) showAdminToast('Imagen actualizada','success');
       };
       var onError = function(err){
@@ -1210,6 +1251,27 @@ document.addEventListener('DOMContentLoaded', function(){
         Object.keys(payload.social).forEach(function(k){ if (payload.social[k] === undefined || payload.social[k] === '') delete payload.social[k]; });
         if (Object.keys(payload.social).length === 0) delete payload.social;
       }
+      var lengthChecks = [
+        { value: payload.name, label: 'Nombre', max: 120 },
+        { value: payload.bio, label: 'BiografÃ­a', max: 1200 },
+        { value: payload.location, label: 'UbicaciÃ³n', max: 100 },
+        { value: payload.website, label: 'Sitio web', max: 200 }
+      ];
+      if (payload.social) {
+        lengthChecks.push(
+          { value: payload.social.instagram, label: 'Instagram', max: 80 },
+          { value: payload.social.x, label: 'X', max: 80 },
+          { value: payload.social.facebook, label: 'Facebook', max: 80 }
+        );
+      }
+      for (var i = 0; i < lengthChecks.length; i++) {
+        var check = lengthChecks[i];
+        if (check.value && String(check.value).trim().length > check.max) {
+          var msg = check.label + ' no puede exceder ' + check.max + ' caracteres.';
+          if (window.showAdminToast) showAdminToast(msg, 'warning'); else alert(msg);
+          return;
+        }
+      }
       var submitBtn = modalEl && modalEl.querySelector('.admin-users-edit-submit, .admin-edit-user-submit');
       var oldText = submitBtn && submitBtn.textContent;
       if (submitBtn) { submitBtn.disabled = true; submitBtn.classList.add('disabled'); submitBtn.textContent = 'Guardando...'; }
@@ -1227,7 +1289,7 @@ document.addEventListener('DOMContentLoaded', function(){
             if (newEmail) { var emailCell = row.querySelector('td:nth-child(2)'); if (emailCell) emailCell.textContent = newEmail; }
           }
         } catch(_){ }
-        // Actualiza link público con el slug más reciente (si existe)
+        // Actualiza link pï¿½blico con el slug mï¿½s reciente (si existe)
         try {
           var user = updated && updated.data;
           var slug = user && user.slug;

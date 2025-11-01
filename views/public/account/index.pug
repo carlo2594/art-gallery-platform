@@ -28,100 +28,254 @@ block content
               .col-12.col-lg-6
                 .mb-3
                   label.form-label(for='firstName') Nombre
-                  input#firstName.form-control(type='text' name='firstName' maxlength='64' value=(currentUser && currentUser.firstName) || '')
+                  input#firstName.form-control(type='text' name='firstName' maxlength='60' value=(currentUser && currentUser.firstName) || '')
                 .mb-3
                   label.form-label(for='lastName') Apellidos
-                  input#lastName.form-control(type='text' name='lastName' maxlength='64' value=(currentUser && currentUser.lastName) || '')
+                  input#lastName.form-control(type='text' name='lastName' maxlength='60' value=(currentUser && currentUser.lastName) || '')
                 .mb-3
                   label.form-label(for='name') Nombre publico (se mostrara)
-                  input#name.form-control(type='text' name='name' maxlength='128' required value=(currentUser && currentUser.name) || '')
+                  input#name.form-control(type='text' name='name' maxlength='120' required value=(currentUser && currentUser.name) || '')
                 .mb-3
                   label.form-label(for='headline') Titular
-                  input#headline.form-control(type='text' name='headline' maxlength='60' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
+                  input#headline.form-control(type='text' name='headline' maxlength='80' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
                 .mb-3
                   label.form-label(for='bio') Biografia
-                  textarea#bio.form-control(name='bio' rows='5' maxlength='1000')= (currentUser && currentUser.bio) || ''
-                .mb-3
-                  label.form-label(for='locale') Idioma
-                  - var currentLocale = (currentUser && currentUser.locale) || 'default'
-                  select#locale.form-select(name='locale')
-                    option(value='default' selected=(currentLocale==='default') ? true : false) Seleccionar idioma
-                    option(value='es_ES' selected=(currentLocale==='es_ES') ? true : false) Espanol (Espana)
-                    option(value='es_419' selected=(currentLocale==='es_419') ? true : false) Espanol (Latinoamerica) 
-                    option(value='es_CR' selected=(currentLocale==='es_CR') ? true : false) Espanol (Costa Rica)
-                    option(value='en_US' selected=(currentLocale==='en_US') ? true : false) English (US)
-                    option(value='de_DE' selected=(currentLocale==='de_DE') ? true : false) Deutsch
-                    option(value='fr_FR' selected=(currentLocale==='fr_FR') ? true : false) Francais (France)
-                    option(value='it_IT' selected=(currentLocale==='it_IT') ? true : false) Italiano
-                    option(value='pt_BR' selected=(currentLocale==='pt_BR') ? true : false) Portugues (Brasil)
-                    option(value='nl_NL' selected=(currentLocale==='nl_NL') ? true : false) Nederlands
-                    option(value='pl_PL' selected=(currentLocale==='pl_PL') ? true : false) Polski
-                    option(value='ro_RO' selected=(currentLocale==='ro_RO') ? true : false) Romana
-                    option(value='vi_VN' selected=(currentLocale==='vi_VN') ? true : false) Tieng Viet
-                    option(value='tr_TR' selected=(currentLocale==='tr_TR') ? true : false) Turkce
-                    option(value='ru_RU' selected=(currentLocale==='ru_RU') ? true : false) Russkiy
-                    option(value='ar_SA' selected=(currentLocale==='ar_SA') ? true : false) Arabic (Saudi Arabia)
-                    option(value='th_TH' selected=(currentLocale==='th_TH') ? true : false) Thai
-                    option(value='zh_TW' selected=(currentLocale==='zh_TW') ? true : false) Chinese (Traditional)
-                    option(value='zh_CN' selected=(currentLocale==='zh_CN') ? true : false) Chinese (Simplified)
-                    option(value='ja_JP' selected=(currentLocale==='ja_JP') ? true : false) Japanese
-                    option(value='ko_KR' selected=(currentLocale==='ko_KR') ? true : false) Korean
+                  textarea#bio.form-control(name='bio' rows='5' maxlength='1200')= (currentUser && currentUser.bio) || ''
                 .mb-3
                   label.form-label(for='country') Pais
                   - var currentCountry = (currentUser && currentUser.country) || 'CR'
                   select#country.form-select(name='country')
-                    option(value='CR' selected=(currentCountry==='CR') ? true : false) Costa Rica
-                    option(value='MX' selected=(currentCountry==='MX') ? true : false) Mexico
-                    option(value='CO' selected=(currentCountry==='CO') ? true : false) Colombia
+                    option(value='' selected=(currentCountry==='') ? true : false) Seleccionar pais
+                    option(value='AF' selected=(currentCountry==='AF') ? true : false) Afghanistan
+                    option(value='AL' selected=(currentCountry==='AL') ? true : false) Albania
+                    option(value='DZ' selected=(currentCountry==='DZ') ? true : false) Algeria
+                    option(value='AD' selected=(currentCountry==='AD') ? true : false) Andorra
+                    option(value='AO' selected=(currentCountry==='AO') ? true : false) Angola
+                    option(value='AG' selected=(currentCountry==='AG') ? true : false) Antigua and Barbuda
                     option(value='AR' selected=(currentCountry==='AR') ? true : false) Argentina
-                    option(value='CL' selected=(currentCountry==='CL') ? true : false) Chile
-                    option(value='PE' selected=(currentCountry==='PE') ? true : false) Peru
-                    option(value='PA' selected=(currentCountry==='PA') ? true : false) Panama
-                    option(value='GT' selected=(currentCountry==='GT') ? true : false) Guatemala
-                    option(value='SV' selected=(currentCountry==='SV') ? true : false) El Salvador
-                    option(value='HN' selected=(currentCountry==='HN') ? true : false) Honduras
-                    option(value='NI' selected=(currentCountry==='NI') ? true : false) Nicaragua
-                    option(value='DO' selected=(currentCountry==='DO') ? true : false) Republica Dominicana
-                    option(value='PR' selected=(currentCountry==='PR') ? true : false) Puerto Rico
-                    option(value='EC' selected=(currentCountry==='EC') ? true : false) Ecuador
-                    option(value='UY' selected=(currentCountry==='UY') ? true : false) Uruguay
+                    option(value='AM' selected=(currentCountry==='AM') ? true : false) Armenia
+                    option(value='AU' selected=(currentCountry==='AU') ? true : false) Australia
+                    option(value='AT' selected=(currentCountry==='AT') ? true : false) Austria
+                    option(value='AZ' selected=(currentCountry==='AZ') ? true : false) Azerbaijan
+                    option(value='BS' selected=(currentCountry==='BS') ? true : false) Bahamas
+                    option(value='BH' selected=(currentCountry==='BH') ? true : false) Bahrain
+                    option(value='BD' selected=(currentCountry==='BD') ? true : false) Bangladesh
+                    option(value='BB' selected=(currentCountry==='BB') ? true : false) Barbados
+                    option(value='BY' selected=(currentCountry==='BY') ? true : false) Belarus
+                    option(value='BE' selected=(currentCountry==='BE') ? true : false) Belgium
+                    option(value='BZ' selected=(currentCountry==='BZ') ? true : false) Belize
+                    option(value='BJ' selected=(currentCountry==='BJ') ? true : false) Benin
+                    option(value='BT' selected=(currentCountry==='BT') ? true : false) Bhutan
                     option(value='BO' selected=(currentCountry==='BO') ? true : false) Bolivia
+                    option(value='BA' selected=(currentCountry==='BA') ? true : false) Bosnia and Herzegovina
+                    option(value='BW' selected=(currentCountry==='BW') ? true : false) Botswana
+                    option(value='BR' selected=(currentCountry==='BR') ? true : false) Brazil
+                    option(value='BN' selected=(currentCountry==='BN') ? true : false) Brunei
+                    option(value='BG' selected=(currentCountry==='BG') ? true : false) Bulgaria
+                    option(value='BF' selected=(currentCountry==='BF') ? true : false) Burkina Faso
+                    option(value='BI' selected=(currentCountry==='BI') ? true : false) Burundi
+                    option(value='CV' selected=(currentCountry==='CV') ? true : false) Cabo Verde
+                    option(value='KH' selected=(currentCountry==='KH') ? true : false) Cambodia
+                    option(value='CM' selected=(currentCountry==='CM') ? true : false) Cameroon
+                    option(value='CA' selected=(currentCountry==='CA') ? true : false) Canada
+                    option(value='CF' selected=(currentCountry==='CF') ? true : false) Central African Republic
+                    option(value='TD' selected=(currentCountry==='TD') ? true : false) Chad
+                    option(value='CL' selected=(currentCountry==='CL') ? true : false) Chile
+                    option(value='CN' selected=(currentCountry==='CN') ? true : false) China
+                    option(value='CO' selected=(currentCountry==='CO') ? true : false) Colombia
+                    option(value='KM' selected=(currentCountry==='KM') ? true : false) Comoros
+                    option(value='CG' selected=(currentCountry==='CG') ? true : false) Congo
+                    option(value='CD' selected=(currentCountry==='CD') ? true : false) Congo (DRC)
+                    option(value='CR' selected=(currentCountry==='CR') ? true : false) Costa Rica
+                    option(value='CI' selected=(currentCountry==='CI') ? true : false) Cote d'Ivoire
+                    option(value='HR' selected=(currentCountry==='HR') ? true : false) Croatia
+                    option(value='CU' selected=(currentCountry==='CU') ? true : false) Cuba
+                    option(value='CY' selected=(currentCountry==='CY') ? true : false) Cyprus
+                    option(value='CZ' selected=(currentCountry==='CZ') ? true : false) Czech Republic
+                    option(value='DK' selected=(currentCountry==='DK') ? true : false) Denmark
+                    option(value='DJ' selected=(currentCountry==='DJ') ? true : false) Djibouti
+                    option(value='DM' selected=(currentCountry==='DM') ? true : false) Dominica
+                    option(value='DO' selected=(currentCountry==='DO') ? true : false) Republica Dominicana
+                    option(value='EC' selected=(currentCountry==='EC') ? true : false) Ecuador
+                    option(value='EG' selected=(currentCountry==='EG') ? true : false) Egypt
+                    option(value='SV' selected=(currentCountry==='SV') ? true : false) El Salvador
+                    option(value='GQ' selected=(currentCountry==='GQ') ? true : false) Equatorial Guinea
+                    option(value='ER' selected=(currentCountry==='ER') ? true : false) Eritrea
+                    option(value='EE' selected=(currentCountry==='EE') ? true : false) Estonia
+                    option(value='SZ' selected=(currentCountry==='SZ') ? true : false) Eswatini
+                    option(value='ET' selected=(currentCountry==='ET') ? true : false) Ethiopia
+                    option(value='FJ' selected=(currentCountry==='FJ') ? true : false) Fiji
+                    option(value='FI' selected=(currentCountry==='FI') ? true : false) Finland
+                    option(value='FR' selected=(currentCountry==='FR') ? true : false) France
+                    option(value='GA' selected=(currentCountry==='GA') ? true : false) Gabon
+                    option(value='GM' selected=(currentCountry==='GM') ? true : false) Gambia
+                    option(value='GE' selected=(currentCountry==='GE') ? true : false) Georgia
+                    option(value='DE' selected=(currentCountry==='DE') ? true : false) Germany
+                    option(value='GH' selected=(currentCountry==='GH') ? true : false) Ghana
+                    option(value='GR' selected=(currentCountry==='GR') ? true : false) Greece
+                    option(value='GD' selected=(currentCountry==='GD') ? true : false) Grenada
+                    option(value='GT' selected=(currentCountry==='GT') ? true : false) Guatemala
+                    option(value='GN' selected=(currentCountry==='GN') ? true : false) Guinea
+                    option(value='GW' selected=(currentCountry==='GW') ? true : false) Guinea-Bissau
+                    option(value='GY' selected=(currentCountry==='GY') ? true : false) Guyana
+                    option(value='HT' selected=(currentCountry==='HT') ? true : false) Haiti
+                    option(value='HN' selected=(currentCountry==='HN') ? true : false) Honduras
+                    option(value='HU' selected=(currentCountry==='HU') ? true : false) Hungary
+                    option(value='IS' selected=(currentCountry==='IS') ? true : false) Iceland
+                    option(value='IN' selected=(currentCountry==='IN') ? true : false) India
+                    option(value='ID' selected=(currentCountry==='ID') ? true : false) Indonesia
+                    option(value='IR' selected=(currentCountry==='IR') ? true : false) Iran
+                    option(value='IQ' selected=(currentCountry==='IQ') ? true : false) Iraq
+                    option(value='IE' selected=(currentCountry==='IE') ? true : false) Ireland
+                    option(value='IL' selected=(currentCountry==='IL') ? true : false) Israel
+                    option(value='IT' selected=(currentCountry==='IT') ? true : false) Italy
+                    option(value='JM' selected=(currentCountry==='JM') ? true : false) Jamaica
+                    option(value='JP' selected=(currentCountry==='JP') ? true : false) Japan
+                    option(value='JO' selected=(currentCountry==='JO') ? true : false) Jordan
+                    option(value='KZ' selected=(currentCountry==='KZ') ? true : false) Kazakhstan
+                    option(value='KE' selected=(currentCountry==='KE') ? true : false) Kenya
+                    option(value='KI' selected=(currentCountry==='KI') ? true : false) Kiribati
+                    option(value='KP' selected=(currentCountry==='KP') ? true : false) North Korea
+                    option(value='KR' selected=(currentCountry==='KR') ? true : false) South Korea
+                    option(value='KW' selected=(currentCountry==='KW') ? true : false) Kuwait
+                    option(value='KG' selected=(currentCountry==='KG') ? true : false) Kyrgyzstan
+                    option(value='LA' selected=(currentCountry==='LA') ? true : false) Laos
+                    option(value='LV' selected=(currentCountry==='LV') ? true : false) Latvia
+                    option(value='LB' selected=(currentCountry==='LB') ? true : false) Lebanon
+                    option(value='LS' selected=(currentCountry==='LS') ? true : false) Lesotho
+                    option(value='LR' selected=(currentCountry==='LR') ? true : false) Liberia
+                    option(value='LY' selected=(currentCountry==='LY') ? true : false) Libya
+                    option(value='LI' selected=(currentCountry==='LI') ? true : false) Liechtenstein
+                    option(value='LT' selected=(currentCountry==='LT') ? true : false) Lithuania
+                    option(value='LU' selected=(currentCountry==='LU') ? true : false) Luxembourg
+                    option(value='MG' selected=(currentCountry==='MG') ? true : false) Madagascar
+                    option(value='MW' selected=(currentCountry==='MW') ? true : false) Malawi
+                    option(value='MY' selected=(currentCountry==='MY') ? true : false) Malaysia
+                    option(value='MV' selected=(currentCountry==='MV') ? true : false) Maldives
+                    option(value='ML' selected=(currentCountry==='ML') ? true : false) Mali
+                    option(value='MT' selected=(currentCountry==='MT') ? true : false) Malta
+                    option(value='MH' selected=(currentCountry==='MH') ? true : false) Marshall Islands
+                    option(value='MR' selected=(currentCountry==='MR') ? true : false) Mauritania
+                    option(value='MU' selected=(currentCountry==='MU') ? true : false) Mauritius
+                    option(value='MX' selected=(currentCountry==='MX') ? true : false) Mexico
+                    option(value='FM' selected=(currentCountry==='FM') ? true : false) Micronesia
+                    option(value='MD' selected=(currentCountry==='MD') ? true : false) Moldova
+                    option(value='MC' selected=(currentCountry==='MC') ? true : false) Monaco
+                    option(value='MN' selected=(currentCountry==='MN') ? true : false) Mongolia
+                    option(value='ME' selected=(currentCountry==='ME') ? true : false) Montenegro
+                    option(value='MA' selected=(currentCountry==='MA') ? true : false) Morocco
+                    option(value='MZ' selected=(currentCountry==='MZ') ? true : false) Mozambique
+                    option(value='MM' selected=(currentCountry==='MM') ? true : false) Myanmar
+                    option(value='NA' selected=(currentCountry==='NA') ? true : false) Namibia
+                    option(value='NR' selected=(currentCountry==='NR') ? true : false) Nauru
+                    option(value='NP' selected=(currentCountry==='NP') ? true : false) Nepal
+                    option(value='NL' selected=(currentCountry==='NL') ? true : false) Netherlands
+                    option(value='NZ' selected=(currentCountry==='NZ') ? true : false) New Zealand
+                    option(value='NI' selected=(currentCountry==='NI') ? true : false) Nicaragua
+                    option(value='NE' selected=(currentCountry==='NE') ? true : false) Niger
+                    option(value='NG' selected=(currentCountry==='NG') ? true : false) Nigeria
+                    option(value='MK' selected=(currentCountry==='MK') ? true : false) North Macedonia
+                    option(value='NO' selected=(currentCountry==='NO') ? true : false) Norway
+                    option(value='OM' selected=(currentCountry==='OM') ? true : false) Oman
+                    option(value='PK' selected=(currentCountry==='PK') ? true : false) Pakistan
+                    option(value='PW' selected=(currentCountry==='PW') ? true : false) Palau
+                    option(value='PS' selected=(currentCountry==='PS') ? true : false) Palestine
+                    option(value='PA' selected=(currentCountry==='PA') ? true : false) Panama
+                    option(value='PG' selected=(currentCountry==='PG') ? true : false) Papua New Guinea
                     option(value='PY' selected=(currentCountry==='PY') ? true : false) Paraguay
+                    option(value='PE' selected=(currentCountry==='PE') ? true : false) Peru
+                    option(value='PH' selected=(currentCountry==='PH') ? true : false) Philippines
+                    option(value='PL' selected=(currentCountry==='PL') ? true : false) Poland
+                    option(value='PT' selected=(currentCountry==='PT') ? true : false) Portugal
+                    option(value='QA' selected=(currentCountry==='QA') ? true : false) Qatar
+                    option(value='RO' selected=(currentCountry==='RO') ? true : false) Romania
+                    option(value='RU' selected=(currentCountry==='RU') ? true : false) Russia
+                    option(value='RW' selected=(currentCountry==='RW') ? true : false) Rwanda
+                    option(value='KN' selected=(currentCountry==='KN') ? true : false) Saint Kitts and Nevis
+                    option(value='LC' selected=(currentCountry==='LC') ? true : false) Saint Lucia
+                    option(value='VC' selected=(currentCountry==='VC') ? true : false) Saint Vincent and the Grenadines
+                    option(value='WS' selected=(currentCountry==='WS') ? true : false) Samoa
+                    option(value='SM' selected=(currentCountry==='SM') ? true : false) San Marino
+                    option(value='ST' selected=(currentCountry==='ST') ? true : false) Sao Tome and Principe
+                    option(value='SA' selected=(currentCountry==='SA') ? true : false) Saudi Arabia
+                    option(value='SN' selected=(currentCountry==='SN') ? true : false) Senegal
+                    option(value='RS' selected=(currentCountry==='RS') ? true : false) Serbia
+                    option(value='SC' selected=(currentCountry==='SC') ? true : false) Seychelles
+                    option(value='SL' selected=(currentCountry==='SL') ? true : false) Sierra Leone
+                    option(value='SG' selected=(currentCountry==='SG') ? true : false) Singapore
+                    option(value='SK' selected=(currentCountry==='SK') ? true : false) Slovakia
+                    option(value='SI' selected=(currentCountry==='SI') ? true : false) Slovenia
+                    option(value='SB' selected=(currentCountry==='SB') ? true : false) Solomon Islands
+                    option(value='SO' selected=(currentCountry==='SO') ? true : false) Somalia
+                    option(value='ZA' selected=(currentCountry==='ZA') ? true : false) South Africa
+                    option(value='SS' selected=(currentCountry==='SS') ? true : false) South Sudan
+                    option(value='ES' selected=(currentCountry==='ES') ? true : false) Spain
+                    option(value='LK' selected=(currentCountry==='LK') ? true : false) Sri Lanka
+                    option(value='SD' selected=(currentCountry==='SD') ? true : false) Sudan
+                    option(value='SR' selected=(currentCountry==='SR') ? true : false) Suriname
+                    option(value='SE' selected=(currentCountry==='SE') ? true : false) Sweden
+                    option(value='CH' selected=(currentCountry==='CH') ? true : false) Switzerland
+                    option(value='SY' selected=(currentCountry==='SY') ? true : false) Syria
+                    option(value='TJ' selected=(currentCountry==='TJ') ? true : false) Tajikistan
+                    option(value='TZ' selected=(currentCountry==='TZ') ? true : false) Tanzania
+                    option(value='TH' selected=(currentCountry==='TH') ? true : false) Thailand
+                    option(value='TL' selected=(currentCountry==='TL') ? true : false) Timor-Leste
+                    option(value='TG' selected=(currentCountry==='TG') ? true : false) Togo
+                    option(value='TO' selected=(currentCountry==='TO') ? true : false) Tonga
+                    option(value='TT' selected=(currentCountry==='TT') ? true : false) Trinidad and Tobago
+                    option(value='TN' selected=(currentCountry==='TN') ? true : false) Tunisia
+                    option(value='TR' selected=(currentCountry==='TR') ? true : false) Turkiye
+                    option(value='TM' selected=(currentCountry==='TM') ? true : false) Turkmenistan
+                    option(value='TV' selected=(currentCountry==='TV') ? true : false) Tuvalu
+                    option(value='UG' selected=(currentCountry==='UG') ? true : false) Uganda
+                    option(value='UA' selected=(currentCountry==='UA') ? true : false) Ukraine
+                    option(value='AE' selected=(currentCountry==='AE') ? true : false) United Arab Emirates
+                    option(value='GB' selected=(currentCountry==='GB') ? true : false) United Kingdom
+                    option(value='US' selected=(currentCountry==='US') ? true : false) United States
+                    option(value='UY' selected=(currentCountry==='UY') ? true : false) Uruguay
+                    option(value='UZ' selected=(currentCountry==='UZ') ? true : false) Uzbekistan
+                    option(value='VU' selected=(currentCountry==='VU') ? true : false) Vanuatu
+                    option(value='VA' selected=(currentCountry==='VA') ? true : false) Holy See (Vatican City)
+                    option(value='VE' selected=(currentCountry==='VE') ? true : false) Venezuela
+                    option(value='VN' selected=(currentCountry==='VN') ? true : false) Vietnam
+                    option(value='YE' selected=(currentCountry==='YE') ? true : false) Yemen
+                    option(value='ZM' selected=(currentCountry==='ZM') ? true : false) Zambia
+                    option(value='ZW' selected=(currentCountry==='ZW') ? true : false) Zimbabwe
 
               .col-12.col-lg-6
                 .mb-3
                   label.form-label(for='website') Sitio web
-                  input#website.form-control(type='url' name='website' placeholder='URL' maxlength='128' value=(currentUser && currentUser.website) || '')
+                  input#website.form-control(type='url' name='website' placeholder='URL' maxlength='200' value=(currentUser && currentUser.website) || '')
                 .mb-3
                   label.form-label(for='facebook') Facebook
                   .input-group
                     span.input-group-text facebook.com/
-                    input#facebook.form-control(type='text' name='social[facebook]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.facebook) || '')
+                    input#facebook.form-control(type='text' name='social[facebook]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.facebook) || '')
                 .mb-3
                   label.form-label(for='instagram') Instagram
                   .input-group
                     span.input-group-text instagram.com/
-                    input#instagram.form-control(type='text' name='social[instagram]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.instagram) || '')
+                    input#instagram.form-control(type='text' name='social[instagram]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.instagram) || '')
                 .mb-3
                   label.form-label(for='linkedin') LinkedIn
                   .input-group
                     span.input-group-text linkedin.com/
-                    input#linkedin.form-control(type='text' name='social[linkedin]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.linkedin) || '')
+                    input#linkedin.form-control(type='text' name='social[linkedin]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.linkedin) || '')
                 .mb-3
                   label.form-label(for='tiktok') TikTok
                   .input-group
                     span.input-group-text tiktok.com/
-                    input#tiktok.form-control(type='text' name='social[tiktok]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.tiktok) || '')
+                    input#tiktok.form-control(type='text' name='social[tiktok]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.tiktok) || '')
                 .mb-3
                   label.form-label(for='x') X
                   .input-group
                     span.input-group-text x.com/
-                    input#x.form-control(type='text' name='social[x]' maxlength='128' value=(currentUser && currentUser.social && (currentUser.social.x || currentUser.social.twitter)) || '')
+                    input#x.form-control(type='text' name='social[x]' maxlength='80' value=(currentUser && currentUser.social && (currentUser.social.x || currentUser.social.twitter)) || '')
                 .mb-3
                   label.form-label(for='youtube') YouTube
                   .input-group
                     span.input-group-text youtube.com/
-                    input#youtube.form-control(type='text' name='social[youtube]' maxlength='128' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
+                    input#youtube.form-control(type='text' name='social[youtube]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
 
             .mt-3
               button.btn.btn-primary(type='submit') Guardar cambios
@@ -130,11 +284,10 @@ block content
           .row
             .col-12.col-md-6
               .mb-3
-                label.form-label Vista previa
                 if currentUser && currentUser.profileImage
-                  img.img-fluid.rounded-circle(src=currentUser.profileImage alt='Foto de perfil' style='max-width: 180px;')
+                  img.img-fluid.rounded.account-photo-preview(src=currentUser.profileImage alt='Foto de perfil' style='max-width: 220px; width: 100%; height: auto; object-fit: contain;')
                 else
-                  .d-inline-flex.align-items-center.justify-content-center.rounded-circle.bg-light(style='width:180px;height:180px;')
+                  .d-inline-flex.align-items-center.justify-content-center.bg-light.rounded.account-photo-placeholder(style='width:220px;height:220px;')
                     i.fas.fa-user.fa-3x.text-muted
             .col-12.col-md-6
               form#accountPhotoForm(action='/api/v1/users/update-me' method='POST' enctype='multipart/form-data')
@@ -142,6 +295,9 @@ block content
                   label.form-label(for='profileImage') Subir nueva foto
                   input#profileImage.form-control(type='file' name='profileImage' accept='image/*')
                   small.form-text.text-muted Formato JPG/PNG, maximo 5MB.
+                  small.form-text.d-flex.align-items-center.gap-2.mt-2(style='color: var(--ox-blue);')
+                    i.fas.fa-info-circle
+                    span Usa una imagen horizontal (ancho mayor que alto) para mantener la composicion del perfil.
                 button.btn.btn-primary(type='submit') Actualizar foto
               hr.my-4
               form#accountPhotoDeleteForm(action='/api/v1/users/update-me' method='POST')

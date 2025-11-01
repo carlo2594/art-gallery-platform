@@ -44,7 +44,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
     'headline',
     'location',
     'website',
-    'locale',
     'country',
     'social'
   );
@@ -59,6 +58,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   try {
     await handleProfileImage(user, req, filteredBody);
   } catch (e) {
+    if (e instanceof AppError) return next(e);
     return next(new AppError('No se pudo procesar la imagen de perfil.', 500));
   }
 
@@ -239,6 +239,7 @@ exports.updateUser = catchAsync(async (req, res, next) => {
   try {
     await handleProfileImage(user, req, filteredBody);
   } catch (e) {
+    if (e instanceof AppError) return next(e);
     return next(new AppError('No se pudo procesar la imagen de perfil. ' + (e && e.message ? e.message : ''), 500));
   }
 
@@ -323,6 +324,7 @@ exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
   try {
     await handleProfileImage(user, req, filteredBody);
   } catch (e) {
+    if (e instanceof AppError) return next(e);
     return next(new AppError('No se pudo procesar la imagen de perfil. ' + (e && e.message ? e.message : ''), 500));
   }
 
