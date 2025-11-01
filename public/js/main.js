@@ -178,6 +178,208 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  (function handleAccountPage() {
+    const alerts = document.getElementById('accountAlerts');
+    const profileForm = document.getElementById('accountProfileForm');
+    const photoForm = document.getElementById('accountPhotoForm');
+    const photoDeleteForm = document.getElementById('accountPhotoDeleteForm');
+    const passwordForm = document.getElementById('accountPasswordForm');
+    if (!alerts && !profileForm && !photoForm && !photoDeleteForm && !passwordForm) return;
+
+    const showAccountAlert = (type, message) => {
+      if (alerts) {
+        const wrapper = document.createElement('div');
+        wrapper.className = `alert alert-${type} alert-dismissible fade show`;
+        wrapper.setAttribute('role', 'alert');
+        wrapper.textContent = message;
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'btn-close';
+        closeBtn.setAttribute('data-bs-dismiss', 'alert');
+        closeBtn.setAttribute('aria-label', 'Cerrar');
+        wrapper.appendChild(closeBtn);
+
+        alerts.innerHTML = '';
+        alerts.appendChild(wrapper);
+      } else if (message) {
+        if (typeof window.alert === 'function') window.alert(message);
+        else console.log(message);
+      }
+    };
+
+    const PROFILE_FIELD_LIMITS = [
+      { key: 'firstName', label: 'Nombre', max: 60 },
+      { key: 'lastName', label: 'Apellidos', max: 60 },
+      { key: 'name', label: 'Nombre público', max: 120 },
+      { key: 'headline', label: 'Titular', max: 80 },
+      { key: 'bio', label: 'Biografía', max: 1200 },
+      { key: 'website', label: 'Sitio web', max: 200 },
+      { key: 'social[facebook]', label: 'Facebook', max: 80 },
+      { key: 'social[instagram]', label: 'Instagram', max: 80 },
+      { key: 'social[linkedin]', label: 'LinkedIn', max: 80 },
+      { key: 'social[tiktok]', label: 'TikTok', max: 80 },
+      { key: 'social[x]', label: 'X', max: 80 },
+      { key: 'social[youtube]', label: 'YouTube', max: 80 }
+    ];
+
+    const validateProfileLengths = (formData) => {
+      for (const { key, label, max } of PROFILE_FIELD_LIMITS) {
+        const raw = formData.get(key);
+        if (raw == null) continue;
+        const value = String(raw).trim();
+        if (value.length > max) {
+          showAccountAlert('warning', `${label} no puede exceder ${max} caracteres.`);
+          return false;
+        }
+      }
+      return true;
+    };
+
+    if (profileForm) {
+      profileForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = profileForm.querySelector('button[type=submit]');
+        const formData = new FormData(profileForm);
+        if (!validateProfileLengths(formData)) {
+          setBtnState(btn, false, 'Guardar cambios');
+          return;
+        }
+
+        setBtnState(btn, true, 'Guardando...');
+        try {
+          const body = new URLSearchParams();
+          for (const [key, value] of formData.entries()) body.append(key, value);
+
+          const res = await fetch(profileForm.action, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.message || 'No se pudieron guardar los cambios');
+          showAccountAlert('success', data.message || 'Perfil actualizado correctamente');
+          setTimeout(() => location.reload(), 600);
+        } catch (err) {
+          console.error(err);
+          showAccountAlert('danger', err.message || 'Ocurrió un error');
+        } finally {
+          setBtnState(btn, false, 'Guardar cambios');
+        }
+      });
+    }
+
+    if (photoForm) {
+      photoForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = photoForm.querySelector('button[type=submit]');
+        try {
+          const fileInput = photoForm.querySelector('input[name="profileImage"][type="file"]');
+          const file = fileInput && fileInput.files && fileInput.files[0];
+          if (!file) {
+            showAccountAlert('warning', 'Selecciona una imagen antes de actualizar la foto.');
+            return;
+          }
+
+          await ensureHorizontalImage(file);
+          setBtnState(btn, true, 'Subiendo...');
+
+          const res = await fetch(photoForm.action, {
+            method: 'POST',
+            body: new FormData(photoForm)
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.message || 'No se pudo actualizar la foto');
+
+          showAccountAlert('success', (data && data.message) || 'Foto actualizada');
+
+          if (data && data.data && data.data.profileImage) {
+            const img = document.querySelector('#tab-foto img');
+            if (img) img.src = data.data.profileImage;
+          }
+
+          setTimeout(() => location.reload(), 600);
+        } catch (err) {
+          console.error(err);
+          showAccountAlert('danger', err.message || 'Ocurrió un error');
+        } finally {
+          setBtnState(btn, false, 'Actualizar foto');
+          photoForm.reset();
+        }
+      });
+    }
+
+    if (photoDeleteForm) {
+      photoDeleteForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = photoDeleteForm.querySelector('button[type=submit]');
+        setBtnState(btn, true, 'Eliminando...');
+        try {
+          const body = new URLSearchParams();
+          body.set('profileImage', '');
+
+          const res = await fetch(photoDeleteForm.action, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+            },
+            body
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.message || 'No se pudo eliminar la foto');
+
+          showAccountAlert('success', data.message || 'Foto eliminada');
+          setTimeout(() => location.reload(), 600);
+        } catch (err) {
+          console.error(err);
+          showAccountAlert('danger', err.message || 'Ocurrió un error');
+        } finally {
+          setBtnState(btn, false, 'Eliminar foto');
+        }
+      });
+    }
+
+    if (passwordForm) {
+      passwordForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = passwordForm.querySelector('button[type=submit]');
+        setBtnState(btn, true, 'Actualizando...');
+
+        try {
+          const fd = new FormData(passwordForm);
+          const currentPassword = fd.get('currentPassword');
+          const newPassword = fd.get('newPassword');
+          if (!currentPassword || !newPassword) {
+            throw new Error('Completa ambos campos de contraseña');
+          }
+
+          const res = await fetch(passwordForm.action, {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data.message || 'No se pudo actualizar la contraseña');
+
+          showAccountAlert('success', data.message || 'Contraseña actualizada correctamente');
+          passwordForm.reset();
+        } catch (err) {
+          console.error(err);
+          showAccountAlert('danger', err.message || 'Ocurrió un error');
+        } finally {
+          setBtnState(btn, false, 'Cambiar contraseña');
+        }
+      });
+    }
+  })();
+
   // Paginación SSR: los enlaces ya vienen con href correcto desde la vista (searchResults.pug)
   // Solo manejamos accesibilidad/UX mínima (scroll al inicio del listado al navegar, si el navegador mantiene pos)
   const obrasList = document.querySelector('#tab-obras');

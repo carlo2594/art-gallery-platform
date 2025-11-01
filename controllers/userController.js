@@ -100,7 +100,11 @@ Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@gal
     });
   }
 
-  sendResponse(res, user, 'Perfil actualizado');
+  const acceptHeader = req.headers.accept || '';
+  if (!acceptHeader.includes('application/json')) {
+    return res.redirect(303, '/edit-profile?status=perfil-actualizado');
+  }
+  return sendResponse(res, user, 'Perfil actualizado');
 });
 
 // Desactivar cuenta (soft delete)
