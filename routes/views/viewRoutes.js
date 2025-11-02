@@ -36,7 +36,7 @@ router.get('/mi-cuenta', (req, res) => res.redirect(301, ACCOUNT_EDIT_PATH));
 // =================== QUIÉNES SOMOS =====================
 router.get('/about', viewsController.getAbout);
 
-// =================== CONTACT (ENGLISH) =================
+// =================== CONTACTO ==========================
 router.get('/contact', viewsController.getContact);
 
 // =================== ARTISTAS ==========================

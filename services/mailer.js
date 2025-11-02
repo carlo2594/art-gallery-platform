@@ -11,18 +11,22 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-async function sendMail({ to, subject, text, html }) {
+async function sendMail({ to, subject, text, html, replyTo, cc, bcc, attachments, from }) {
   // Evitar errores si falta destinatario: no bloquear flujos de admin
   if (!to || String(to).trim().length === 0) {
     try { console.warn('sendMail skipped: no recipient defined for subject:', subject); } catch (_) {}
     return { skipped: true, reason: 'no_recipient' };
   }
   return transporter.sendMail({
-    from: process.env.EMAIL_FROM,
+    from: from || process.env.EMAIL_FROM,
     to,
     subject,
     text,
     html,
+    replyTo,
+    cc,
+    bcc,
+    attachments
   });
 }
 

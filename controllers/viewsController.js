@@ -162,6 +162,9 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   // --- Filtros y orden para exposiciones ---
   const { buildExhibitionFilter, getExhibitionSort, getExhibitionDateBounds } = require('@utils/exhibitionSearch');
   const exhibitionFilter = buildExhibitionFilter(q, search);
+  // Solo exposiciones publicadas y no eliminadas en resultados de búsqueda
+  exhibitionFilter.status = 'published';
+  exhibitionFilter.deletedAt = null;
   const exhibitionSort = getExhibitionSort(q.sort);
   
   // Paginación para exposiciones
@@ -172,6 +175,8 @@ exports.getSearchResults = catchAsync(async (req, res) => {
 
   // Bounds de fechas disponibles (basado en filtros base, sin rango aplicado)
   const baseExhFilterForBounds = buildExhibitionFilter({ ex_type: q.ex_type || q.type }, search);
+  baseExhFilterForBounds.status = 'published';
+  baseExhFilterForBounds.deletedAt = null;
   const exhibitionDateBounds = await getExhibitionDateBounds(Exhibition, baseExhFilterForBounds);
 
   const totalExhibitions = await Exhibition.countDocuments(exhibitionFilter);
@@ -839,4 +844,28 @@ exports.getExhibitionUnpublished = (req, res) => {
 
 
 
+// Sobrescribe getContact en español y añade flags de feedback
+exports.getContact = (req, res) => {
+  const success = !!req.query.success;
+  const error = req.query.error;
+  let formData = { name: '', email: '', message: '' };
+  try {
+    if (req.cookies && req.cookies.contact_form) {
+      const parsed = JSON.parse(req.cookies.contact_form);
+      if (parsed && typeof parsed === 'object') {
+        formData.name = String(parsed.name || '');
+        formData.email = String(parsed.email || '');
+        formData.message = String(parsed.message || '');
+      }
+      try { res.clearCookie('contact_form', { path: '/' }); } catch (_) {}
+    }
+  } catch (_) {}
+
+  res.status(200).render('public/static/contact', {
+    title: 'Contacto · Galería del Ox',
+    success,
+    error,
+    formData
+  });
+};
 

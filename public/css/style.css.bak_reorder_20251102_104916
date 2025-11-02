@@ -1,0 +1,2720 @@
+﻿/* Hero section: background color for text column */
+.hero-col-text {
+  background-color: var(--ox-beige) !important;
+}
+/* ==========================================
+   EXHIBITION HERO CUSTOM CLASSES
+   ========================================== */
+.exhibition-hero-overlay-custom {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.exhibition-hero-bg-custom {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+/* ==========================================
+  0. HELPERS & ANIMATIONS
+  ========================================== */
+.fade-in-img { opacity: 0; transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1); }
+.fade-in-img.loaded { opacity: 1; }
+.article-template:first-of-type { margin-top: 4rem; }
+.article-template > * { margin-bottom: 3rem; }
+
+/* Skeletons (simple placeholders for empty exhibitions) */
+.skeleton { position: relative; overflow: hidden; background: #eee; border-radius: 1rem; }
+.skeleton::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.5) 50%, rgba(255,255,255,0) 100%); transform: translateX(-100%); animation: skeleton-shimmer 1.4s infinite; }
+.skeleton-hero { height: 40vh; }
+@media (max-width: 767.98px) { .skeleton-hero { height: 28vh; } }
+@keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
+
+/* ==========================================
+  1. VARIABLES & BASE
+  ========================================== */
+:root {
+  --ox-yellow: #F5C45E;
+  --ox-blue:   #102E50;
+  --ox-orange: #E78B48;
+  --ox-red:    #BE3D2A;
+  --ox-beige:  #F7F6EF;
+  --font-title: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; /* UI font */
+  --font-subtitle: 'Newsreader', Georgia, 'Times New Roman', serif;                 /* Artwork/label font */
+  --art-max-h: 68rem;
+}
+html { font-size: 62.5%; height: 100%; min-height: 100%; }
+body { font-family: var(--font-title); background-color: var(--ox-beige); color: var(--ox-blue); font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+.main-content { flex: 1 0 auto; }
+/* Strengthen sticky footer behavior on home (and globally) */
+.main-content {
+  flex: 1 1 auto;              /* allow growth/shrink */
+  display: flex;               /* stack inner sections */
+  flex-direction: column;
+  min-height: 0;               /* avoid overflow pushing footer */
+}
+footer, .footer { flex-shrink: 0; }
+
+/* ==========================================
+  2. COMPONENTS: NAVBAR & SEARCHBAR
+  ========================================== */
+.main-navbar { margin-bottom: 2.2rem; background-color: var(--ox-beige) !important; box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10); border-bottom: none; }
+.navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
+.navbar-light .navbar-toggler { border: none; }
+.logo-navbar { max-height: 5rem; width: auto; display: block; }
+.navbar-title { color: var(--ox-blue); font-family: var(--font-title); font-weight: 700; letter-spacing: 0.1em; font-size: 1.6rem; text-transform: uppercase; }
+.navbar .nav-link { color: var(--ox-blue); text-transform: uppercase; font-size: 1.4rem; font-weight: 500; }
+.navbar .nav-link:hover, .navbar .nav-link:focus { background-color: var(--ox-yellow); color: var(--ox-blue); border-radius: 2rem; }
+.main-navbar .navbar-collapse { width: 100%; padding: .5rem 0; }
+/* Searchbar */
+.searchbar-navbar { position: relative; width: 100%; }
+.searchbar-input { height: 4.2rem; font-size: 1.6rem; padding-right: 3rem; border-radius: 2rem; border: 2px solid var(--ox-yellow); width: 100%; }
+.searchbar-input:focus { border-color: var(--ox-orange); outline: none; box-shadow: 0 0 0 0.15rem rgba(231,139,72,0.15); }
+.searchbar-input::placeholder { font-family: var(--font-title); font-style: italic; color: #bbb; padding-left: 1rem; }
+.search-icon { position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%); color: var(--ox-yellow); pointer-events: none; display: flex; align-items: center; font-size: 1.7rem; }
+
+/* ==========================================
+  3. SECTIONS: EXHIBITIONS (GRID/DETAIL)
+  ========================================== */
+.exhibition-hero-container { flex: 0 0 auto; width: 100%; overflow: hidden; }
+.exhibition-hero-adapt { width: 100%; padding-bottom: 41.5%; position: relative; overflow: hidden; }
+.exhibition-hero-img-absolute { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.exhibition-content-flex { flex: 1 1 auto; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; }
+.exhibition-hero-image { width: 100%; max-width: 100%; max-height: 100%; height: auto; object-fit: cover; object-position: center; display: block; margin-left: auto; margin-right: auto; }
+/* Scroll-snap (only exhibitions pages) */
+.exhibition-section .exhibition-hero-container { margin-top: 3rem; }
+body.exhibitions-scroll-snap { scroll-snap-type: y proximity; overscroll-behavior-y: none; }
+body.exhibitions-scroll-snap .exhibition-section { scroll-snap-align: start; scroll-snap-stop: always; }
+
+/* ==========================================
+  4. SECTIONS: HERO (LANDING)
+  ========================================== */
+section.hero, section.home-hero { min-height: calc(100vh - 6rem); display: flex; align-items: center; overflow: hidden; }
+section.hero .hero-content > *, section.home-hero .hero-content > * { margin-bottom: 2rem; max-width: 48rem; }
+section.hero .hero-content > *:last-child, section.home-hero .hero-content > *:last-child { margin-bottom: 0; }
+section.hero .hero-description, section.home-hero .hero-description { font-family: var(--font-subtitle) !important; font-style: italic !important; font-weight: 400 !important; font-size: 2rem !important; color: var(--ox-blue) !important; }
+section.hero .hero-row, section.home-hero .hero-row { display: flex; flex-direction: column; }
+section.hero .hero-image-container, section.home-hero .hero-image-container { order: 1; }
+section.hero .hero-text, section.home-hero .hero-text { order: 2; }
+section.hero .hero-cta .btn-primary, section.home-hero .hero-cta .btn-primary { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; border-radius: 2rem !important; font-weight: 700; font-size: 1.5rem; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10); text-transform: uppercase; padding: 1rem 2.5rem; transition: background 0.2s, color 0.2s; }
+section.hero .hero-cta .btn-primary:hover, section.hero .hero-cta .btn-primary:focus, section.home-hero .hero-cta .btn-primary:hover, section.home-hero .hero-cta .btn-primary:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+
+/* ==========================================
+  4.1. SECTIONS: ABOUT PAGE
+  ========================================== */
+.about-main-title { 
+  font-family: var(--font-title); 
+  font-weight: 900; 
+  font-size: 5.2rem; 
+  color: var(--ox-blue); 
+  letter-spacing: 0.15em; 
+  text-transform: uppercase; 
+  line-height: 0.9; 
+  margin-bottom: 0;
+  text-shadow: 0 2px 4px rgba(16, 46, 80, 0.1);
+  position: relative;
+}
+
+.about-section-title { 
+  font-family: var(--font-subtitle); 
+  font-style: italic; 
+  font-weight: 300; 
+  font-size: 3.2rem; 
+  color: var(--ox-blue); 
+  letter-spacing: 0.02em; 
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.about-underline {
+  width: 12rem;
+  height: 4px;
+  background: linear-gradient(90deg, var(--ox-orange) 0%, var(--ox-yellow) 100%);
+  margin-bottom: 3rem;
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.about-underline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.about-content { 
+  padding-right: 3rem; 
+  position: relative;
+}
+
+.about-text { 
+  font-family: var(--font-subtitle); 
+  font-size: 1.8rem; 
+  line-height: 1.75; 
+  color: #4a4a4a; 
+  text-align: left;
+  font-style: italic;
+  margin-bottom: 2.8rem;
+}
+
+.about-image-container { 
+  position: relative; 
+  height: 100%;
+  min-height: 50rem;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 40px rgba(16, 46, 80, 0.1),
+    0 8px 16px rgba(16, 46, 80, 0.08),
+    0 4px 8px rgba(16, 46, 80, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.about-image-container:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 32px 64px rgba(16, 46, 80, 0.15),
+    0 16px 32px rgba(16, 46, 80, 0.12),
+    0 8px 16px rgba(16, 46, 80, 0.08);
+}
+
+.about-image-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg, 
+    rgba(16, 46, 80, 0.1) 0%, 
+    transparent 50%, 
+    rgba(245, 196, 94, 0.1) 100%
+  );
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.about-image-container:hover::before {
+  opacity: 1;
+}
+
+.about-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  min-height: 50rem;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: contrast(1.05) saturate(1.1);
+}
+
+.about-image-container:hover .about-image {
+  transform: scale(1.05);
+}
+
+/* Decorative elements */
+.about-content::before {
+  content: '';
+  position: absolute;
+  top: -2rem;
+  right: 0;
+  width: 6rem;
+  height: 6rem;
+  background: radial-gradient(circle, var(--ox-yellow) 0%, transparent 70%);
+  opacity: 0.1;
+  border-radius: 50%;
+}
+
+/* ==========================================
+  4.2. SECTIONS: ARTIST DETAIL PAGE (GOOGLE ARTS STYLE)
+  ========================================== */
+.artist-profile-hero {
+  min-height: 100vh;
+  position: relative;
+}
+
+.hero-bg-image {
+  filter: brightness(0.8) contrast(1.1);
+  transition: transform 0.5s ease;
+}
+
+.hero-bg-placeholder {
+  background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.hero-bio {
+  font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  line-height: 1.6;
+}
+
+.meta-item {
+  font-size: 0.95rem;
+}
+
+.stats-floating .stat-item {
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.stats-floating .stat-item:hover {
+  transform: translateY(-5px);
+  background: rgba(255,255,255,0.2) !important;
+}
+
+.hero-actions .btn {
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.hero-actions .btn:hover {
+  background: rgba(255,255,255,0.2) !important;
+  border-color: rgba(255,255,255,0.5);
+  transform: translateY(-2px);
+}
+
+.artwork-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(16, 46, 80, 0.15);
+}
+
+.artwork-card:hover .artwork-image {
+  transform: scale(1.05);
+}
+
+.section-title {
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background: var(--ox-yellow);
+  border-radius: 2px;
+}
+
+@media (max-width: 991.98px) {
+  .hero-content {
+    position: static;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .stats-floating {
+    margin-top: 2rem;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .about-main-title { 
+    font-size: 3.8rem; 
+    text-align: center;
+    margin-bottom: 3rem;
+    letter-spacing: 0.1em;
+  }
+  
+  .about-section-title { 
+    font-size: 2.6rem; 
+    text-align: center;
+  }
+  
+  .about-underline {
+    margin: 0 auto 2.5rem auto;
+    width: 10rem;
+  }
+  
+  .about-content { 
+    padding-right: 0; 
+    margin-bottom: 4rem;
+    text-align: center;
+  }
+  
+  .about-content::before {
+    display: none;
+  }
+  
+  .about-text {
+    text-align: left;
+    margin-bottom: 2.5rem;
+  }
+  
+  .about-image-container {
+    min-height: 30rem;
+  }
+  
+  .about-image {
+    min-height: 30rem;
+  }
+}
+
+/* ==========================================
+  5. SECTIONS: JOIN ARTISTS (COLLECTORS)
+  ========================================== */
+section.join-artists { position: relative; margin-top: 5rem; }
+.join-artists-bg { width: 100%; height: auto; display: block; border-radius: 2rem; object-fit: cover; }
+.join-artists-card { width: 80%; max-width: 120rem; height: 80%; max-height: 80rem; min-height: 16rem; padding-left: 1.5rem; padding-right: 1.5rem; background: rgba(255,255,255,0.32); backdrop-filter: blur(16px); border-radius: 2rem; box-shadow: 0 8px 32px rgba(16,46,80,0.18), 0 2px 8px rgba(16,46,80,0.10); display: flex; flex-direction: column; justify-content: center; }
+.join-artists-card .card-body { padding: 2rem; }
+.join-artists-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; padding: .75rem 2.5rem !important; font-size: 1.15rem !important; border-radius: 2rem !important; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.15); }
+.join-artists-btn:hover, .join-artists-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+
+/* Collectors section styling */
+.collectors-hero-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 1.5rem;
+}
+
+.collectors-icon {
+  font-size: clamp(1.4rem, 5vw, 4rem);
+}
+
+/* ==========================================
+  4.3. SECTIONS: HOME EXHIBITIONS EFFECTS
+  ========================================== */
+/* Simple, clean fade-up for text blocks */
+.home-exhibitions .section-heading {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .5s ease, transform .5s ease;
+  color: var(--ox-blue);
+  margin-bottom: 3rem !important; /* override Bootstrap mb-4 if present */
+}
+
+.home-exhibitions .section-heading.in-view {
+  opacity: 1;
+  transform: none;
+}
+
+.home-exhibitions .featurette .featurette-heading,
+.home-exhibitions .featurette .lead,
+.home-exhibitions .featurette .text-muted {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .5s ease, transform .5s ease;
+}
+
+.home-exhibitions .featurette.in-view .featurette-heading { opacity: 1; transform: none; transition-delay: 0s; }
+.home-exhibitions .featurette.in-view .lead             { opacity: 1; transform: none; transition-delay: .08s; }
+.home-exhibitions .featurette.in-view .text-muted       { opacity: 1; transform: none; transition-delay: .16s; }
+
+/* Keep headings in brand blue, no gradients */
+.home-exhibitions .featurette .featurette-heading {
+  color: var(--ox-blue);
+}
+
+/* Ensure no underline decoration remains */
+.home-exhibitions .featurette .featurette-heading::after { content: none; }
+
+  /* Respect users who prefer reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .home-exhibitions .section-heading {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .home-exhibitions .featurette .featurette-heading,
+    .home-exhibitions .featurette .lead,
+    .home-exhibitions .featurette .text-muted {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+    .home-exhibitions .featurette .featurette-heading::after { content: none !important; }
+  }
+
+/* Admin: ocultar temporalmente campos de venta en el modal de obras */
+.admin-edit-artwork-form .col-md-4:has(select[name='sale.channel']),
+.admin-edit-artwork-form .col-md-4:has(input[name='sale.price_usd']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.buyerName']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.buyerEmail']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.currency']),
+.admin-edit-artwork-form .col-md-6:has(input[name='sale.orderId']) {
+  display: none !important;
+}
+
+.collectors-title {
+  font-size: clamp(1rem, 4vw, 3rem);
+}
+
+.collectors-description {
+  font-size: clamp(0.7rem, 2.5vw, 1.5rem);
+  line-height: 1.2;
+}
+
+.collectors-check-icon {
+  font-size: clamp(0.7rem, 2vw, 1.4rem);
+}
+
+.collectors-check-text {
+  font-size: clamp(0.65rem, 2vw, 1.3rem);
+}
+
+.collectors-cta-btn {
+  font-size: clamp(0.75rem, 2.5vw, 1.4rem);
+  padding: clamp(0.5rem, 1.5vw, 1rem) clamp(1.5rem, 4vw, 3rem) !important;
+}
+
+/* ==========================================
+  6. LAYOUT: ARTWORKS GRID & PAGER
+  ========================================== */
+.artworks-flex { display: flex; flex-direction: column; min-height: 48rem; }
+.artworks-grid-paginate { display: flex; flex-direction: column; flex: 1 1 auto; }
+#grid { min-height: 24rem; }
+#pager-obras { margin-top: auto; }
+.pager-hidden { display: none !important; }
+
+/* Ensure artwork grid images keep aspect ratio and don't stretch */
+.artwork-grid li img {
+  width: 100%;
+  height: auto;
+  max-height: var(--art-max-h);
+}
+
+/* Make entire card clickable without link styles */
+.artwork-grid li a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ==========================================
+  7. COMPONENTS: ART CARDS & LABELS
+  ========================================== */
+.art-card-shadow { box-shadow: 0 4px 18px 0 rgba(16,46,80,0.13), 0 1.5px 6px 0 rgba(16,46,80,0.08); border-radius: 0.7rem; background: #fff; }
+.art-label { font-family: var(--font-subtitle); background: #fff; border: 1.5px solid #222; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.04); padding: 1.25rem 1rem 1.5rem 1rem; letter-spacing: 0.005em; }
+
+/* ==========================================
+  GRID CARD SYSTEM - Clean & Minimal Spacing
+  ========================================== */
+
+/* Card body container */
+.grid-card-body {
+  padding: 0.5rem;
+  font-family: var(--font-subtitle);
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Main flex container - two columns */
+.grid-card-flex {
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+/* Left column - artwork info */
+.grid-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Right column - stats */
+.grid-card-stats {
+  flex: 1;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+/* Typography with minimal spacing */
+.grid-card-title {
+  font-weight: bold;
+  font-size: 1.3rem;
+  line-height: 1.1;
+  margin-bottom: 0.4rem;
+  color: var(--ox-blue);
+}
+
+.grid-card-artist {
+  font-weight: bold;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  color: #666;
+  letter-spacing: 0.02em;
+}
+
+.grid-card-details {
+  margin-bottom: 0.3rem;
+}
+
+.grid-card-detail-item {
+  font-size: 1rem;
+  line-height: 1;
+  margin-bottom: 0.15rem;
+  color: #888;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.02em;
+}
+
+.grid-card-detail-item:last-child {
+  margin-bottom: 0;
+}
+
+.grid-card-price {
+  font-weight: bold;
+  font-size: 1.2rem;
+  line-height: 1;
+  margin-bottom: 0;
+  color: var(--ox-blue);
+  font-variant-numeric: lining-nums;
+}
+
+.grid-card-stat-item {
+  font-size: 0.9rem;
+  line-height: 1.1;
+  margin-bottom: 0.2rem;
+  color: #999;
+  font-weight: normal;
+}
+
+.grid-card-stat-item:last-child {
+  margin-bottom: 0;
+}
+
+.grid-card-stat-item:first-child {
+  font-weight: 600;
+}
+
+/* ==========================================
+  ARTIST GRID SYSTEM - Image Overlay Design
+  ========================================== */
+
+.artist-card {
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.artist-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 25px rgba(16, 46, 80, 0.2);
+}
+
+.artist-image-container {
+  overflow: hidden;
+}
+
+.artist-image {
+  transition: transform 0.3s ease;
+}
+
+.artist-card:hover .artist-image {
+  transform: scale(1.05);
+}
+
+.artist-placeholder {
+  background: linear-gradient(135deg, #55595c 0%, #6c757d 100%);
+}
+
+.artist-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(16, 46, 80, 0.9) 0%,
+    rgba(16, 46, 80, 0.7) 60%,
+    rgba(16, 46, 80, 0.3) 90%,
+    transparent 100%
+  );
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+}
+
+.artist-name {
+  font-family: var(--font-title);
+  font-size: 1.4rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.artist-bio {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.artist-member-since {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.artist-artworks-count {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  background: rgba(245, 196, 94, 0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.artist-artworks-count i {
+  color: var(--ox-yellow);
+}
+
+.btn-outline-overlay {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: var(--ox-blue);
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.btn-outline-overlay:hover {
+  background: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+  color: var(--ox-blue);
+  transform: translateY(-1px);
+}
+
+/* ==========================================
+  EXHIBITION GRID SYSTEM - Image Overlay Design
+  ========================================== */
+
+.exhibition-section {
+  overflow: hidden;
+  transition: transform 0.4s ease;
+  cursor: pointer;
+}
+
+.exhibition-section:hover {
+  transform: scale(1.02);
+}
+
+.exhibition-hero-container {
+  overflow: hidden;
+}
+
+.exhibition-hero-image {
+  transition: transform 0.4s ease;
+}
+
+.exhibition-section:hover .exhibition-hero-image {
+  transform: scale(1.05);
+}
+
+.exhibition-placeholder {
+  background: linear-gradient(135deg, #343a40 0%, #495057 100%);
+}
+
+.exhibition-overlay {
+  background: linear-gradient(
+    0deg,
+    rgba(16, 46, 80, 0.95) 0%,
+    rgba(16, 46, 80, 0.8) 40%,
+    rgba(16, 46, 80, 0.6) 70%,
+    rgba(16, 46, 80, 0.2) 90%,
+    transparent 100%
+  );
+  backdrop-filter: blur(3px);
+  transition: opacity 0.4s ease;
+}
+
+.exhibition-title {
+  font-family: var(--font-title);
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.7);
+}
+
+.exhibition-description {
+  font-family: var(--font-subtitle);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  max-width: 70%;
+}
+
+.exhibition-info .fas {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.exhibition-info span {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+.museum-price.fw-bold.fs-5.mt-2 { font-family: var(--font-subtitle); font-variant-numeric: lining-nums; }
+.art-label .h5 { font-style: italic; letter-spacing: 0.02em; }
+.art-label .h4 { color: var(--ox-blue); }
+.museum-artist { font-weight: 700; letter-spacing: 0.02em; }
+.museum-title { font-style: italic; font-weight: 600; }
+.museum-material, .museum-created { font-variant-caps: small-caps; letter-spacing: 0.02em; }
+
+/* ==========================================
+  8. COMPONENTS: PAGINATION (OX)
+  ========================================== */
+.pagination-ox { display: flex; justify-content: center; align-items: center; gap: 0.6rem; padding: 0; margin: 0; list-style: none; }
+.pagination-ox .page-item { display: inline-block; }
+.pagination-ox .page-link { font-size: 2.1rem; font-family: var(--font-title); color: var(--ox-blue); background: #fff; border: 2px solid var(--ox-yellow); border-radius: 1.5rem; padding: 0.7rem 1.6rem; margin: 0 0.1rem; font-weight: 600; transition: background 0.2s, color 0.2s, border 0.2s; outline: none; cursor: pointer; }
+.pagination-ox .page-link:hover { background: var(--ox-orange); color: var(--ox-beige); border-color: var(--ox-orange); }
+.pagination-ox .page-link:focus, .pagination-ox .page-link:active { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); outline: 2px solid var(--ox-orange); }
+.pagination-ox .page-item.active .page-link, .pagination-ox .page-link[aria-current="page"] { background: var(--ox-yellow); color: var(--ox-blue); border-color: var(--ox-orange); font-weight: 700; outline: 2px solid var(--ox-orange); }
+.pagination-ox .page-link[disabled], .pagination-ox .page-item.disabled .page-link { color: #bbb; background: #f7f6ef; border-color: #eee; cursor: not-allowed; pointer-events: none; }
+.pagination-ox .page-link:focus-visible { outline: 2px solid var(--ox-orange); }
+
+/* ==========================================
+  9. COMPONENTS: CHIPS & BUTTONS
+  ========================================== */
+.chip { display: inline-flex; align-items: center; gap: .5rem; padding: .35rem .9rem; border: 2px solid var(--ox-yellow); border-radius: 2rem; cursor: pointer; user-select: none; font-size: 1.3rem; color: var(--ox-blue); background: #fff; }
+.chip input { display: none; }
+.chip input:checked + span { font-weight: 700; }
+.chip:has(input:checked) { background: var(--ox-yellow); }
+/* Active state for button-based chips */
+.chip.active { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; font-weight: 700; }
+/* Icons inside chips should follow ox-blue, overriding global icon color */
+.chip i, .chip .fa, .chip .fas, .chip .fab { color: var(--ox-blue) !important; }
+
+/* COMPONENTS: TAB GROUPS (search + account) */
+.search-tabs {
+  border-bottom: 0 !important;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.account-tabs {
+  border: 0 !important;
+  border-bottom: 0 !important;
+  gap: .75rem;
+  flex-wrap: wrap;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  justify-content: flex-start;
+  box-shadow: none !important;
+}
+.nav-tabs.account-tabs {
+  box-shadow: none !important;
+  border: 0 !important;
+  --bs-nav-tabs-border-width: 0;
+  --bs-nav-tabs-border-color: transparent;
+  --bs-nav-tabs-link-hover-border-color: transparent;
+  --bs-nav-tabs-link-active-border-color: transparent;
+}
+
+.search-tabs .nav-item,
+.account-tabs .nav-item {
+  margin-bottom: 0 !important;
+}
+
+.search-tabs .nav-link {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+  border: 2px solid var(--ox-yellow);
+  border-radius: 999px;
+  background: #fff;
+  padding: .6rem 1.1rem;
+  font-weight: 600;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .12s ease;
+}
+
+.search-tabs .nav-link:hover {
+  background: color-mix(in srgb, var(--ox-yellow) 18%, #fff);
+  color: var(--ox-blue);
+}
+
+.search-tabs .nav-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ox-orange) 45%, transparent);
+  outline-offset: 2px;
+}
+
+.search-tabs .nav-link.active,
+.search-tabs .nav-link[aria-current="page"],
+.search-tabs .nav-link[aria-selected="true"] {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  box-shadow: 0 6px 16px rgba(16,46,80,0.12);
+}
+
+.search-tabs .nav-link:active {
+  transform: translateY(1px);
+}
+
+.account-tabs .nav-link {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, #fff 84%, var(--ox-beige) 16%);
+  padding: .7rem 1.6rem;
+  font-weight: 600;
+  transition: background .2s ease, color .2s ease, box-shadow .2s ease, transform .12s ease;
+  box-shadow: none !important;
+}
+
+.account-tabs .nav-link:hover {
+  background: color-mix(in srgb, var(--ox-yellow) 22%, #fff);
+}
+
+.account-tabs .nav-link:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--ox-orange) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.account-tabs .nav-link.active,
+.account-tabs .nav-link[aria-current="page"],
+.account-tabs .nav-link[aria-selected="true"] {
+  background: linear-gradient(120deg, var(--ox-yellow) 0%, color-mix(in srgb, var(--ox-orange) 45%, var(--ox-yellow) 55%) 100%) !important;
+  color: var(--ox-blue) !important;
+  box-shadow: none !important;
+}
+
+.account-tabs .nav-link:active {
+  transform: translateY(1px);
+}
+
+.account-page-section {
+  position: relative;
+  background: transparent;
+}
+
+.account-page-container {
+  max-width: 1080px;
+}
+
+.account-page-header-row {
+  align-items: center;
+}
+
+.account-page-title {
+  letter-spacing: .04em;
+}
+
+.account-page-subtitle {
+  max-width: 66ch;
+}
+
+.account-page-alerts {
+  margin-top: 1.5rem;
+}
+
+.account-tabs-content {
+  margin-top: 2.8rem;
+}
+
+.account-form-row {
+  row-gap: 1.75rem;
+}
+
+.account-form-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.account-form-group {
+  margin-bottom: 0 !important;
+}
+
+.account-form-label {
+  font-weight: 600;
+  letter-spacing: .01em;
+  color: var(--ox-blue);
+}
+
+.account-form-control {
+  border: 1px solid color-mix(in srgb, var(--ox-blue) 14%, transparent) !important;
+  border-radius: .5rem !important;
+  background-color: color-mix(in srgb, #fff 88%, var(--ox-beige) 12%);
+  box-shadow: none !important;
+  transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out;
+}
+.account-form-control:hover,
+.account-form-control:focus,
+.account-form-control:active {
+  border-color: color-mix(in srgb, var(--ox-blue) 38%, transparent) !important;
+  box-shadow: none !important;
+  background-color: color-mix(in srgb, #fff 92%, var(--ox-beige) 8%);
+}
+.account-form-input-group {
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none !important;
+  border: 0 !important;
+  background: transparent;
+}
+.account-form-input-group .account-form-addon + .account-form-control {
+  border-left: 0 !important;
+  border-radius: 0 .5rem .5rem 0 !important;
+}
+.account-form-addon {
+  border: 1px solid color-mix(in srgb, var(--ox-blue) 14%, transparent) !important;
+  background: color-mix(in srgb, #fff 88%, var(--ox-beige) 12%);
+  color: inherit;
+  font-weight: 600;
+  border-radius: .5rem 0 0 .5rem;
+}
+.account-form-input-group--append .account-form-control {
+  border-right: 0 !important;
+  border-radius: .5rem 0 0 .5rem !important;
+}
+.account-form-hint { display: block; font-size: 1.2rem; color: color-mix(in srgb, var(--ox-blue) 65%, transparent); }
+.account-form-hint-info { color: var(--ox-blue) !important; }
+.account-form-actions { display: flex; justify-content: flex-end; gap: 1.2rem; background: transparent; }
+.account-form-submit {
+  padding: .8rem 2.4rem;
+  border-radius: .5rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  box-shadow: none;
+  border: 0 !important;
+}
+.account-form-submit:hover,
+.account-form-submit:focus,
+.account-form-submit:active {
+  box-shadow: none !important;
+  border: 0 !important;
+}
+.account-form-toggle {
+  border-radius: 0 .5rem .5rem 0;
+  border: 1px solid color-mix(in srgb, var(--ox-blue) 14%, transparent) !important;
+  background: color-mix(in srgb, #fff 88%, var(--ox-beige) 12%);
+}
+.account-form-toggle:hover,
+.account-form-toggle:focus,
+.account-form-toggle:active {
+  border-color: color-mix(in srgb, var(--ox-blue) 38%, transparent) !important;
+  background-color: color-mix(in srgb, #fff 92%, var(--ox-beige) 8%);
+}
+.account-form-toggle-icon { pointer-events: none; color: var(--ox-blue); }
+.account-form-delete {
+  border-radius: .5rem;
+  padding: .65rem 1.8rem;
+  font-weight: 600;
+  box-shadow: none;
+  border: 1px solid color-mix(in srgb, var(--ox-blue) 22%, transparent);
+  background: transparent;
+  color: var(--ox-blue);
+}
+.account-form-delete:hover,
+.account-form-delete:focus,
+.account-form-delete:active {
+  background: var(--ox-blue);
+  color: var(--ox-beige);
+  box-shadow: none;
+}
+.account-form-divider { border-color: transparent; opacity: 1; }
+.account-form-info-icon { color: var(--ox-yellow); }
+.account-form-hint-copy { font-size: 1.2rem; color: var(--ox-blue); }
+.account-photo-row { row-gap: 2rem; align-items: flex-start; }
+.account-photo-preview-group { display: flex; justify-content: center; }
+.account-photo-placeholder-icon { color: color-mix(in srgb, var(--ox-blue) 65%, transparent); box-shadow: none; }
+.account-form-hidden { display: none; }
+
+@media (max-width: 575.98px) {
+  .search-tabs {
+    gap: .5rem;
+  }
+  .search-tabs .nav-link {
+    padding: .5rem .9rem;
+    font-size: 1.2rem;
+  }
+  .account-tabs {
+    gap: .5rem;
+    padding: 0;
+    border-radius: 0;
+  }
+  .account-tabs .nav-link {
+    padding: .5rem .9rem;
+    font-size: 1.2rem;
+  }
+  .account-tab-pane {
+    padding: 0;
+  }
+  .account-form-column {
+    gap: 1rem;
+  }
+  .account-form-actions {
+    justify-content: center;
+  }
+  .account-form-submit {
+    width: 100%;
+  }
+}
+
+.account-tab-pane {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
+  transition: none;
+}
+
+@media (max-width: 991.98px) {
+  .account-tab-pane {
+    padding: 0;
+  }
+  .account-form-column {
+    gap: 1.1rem;
+  }
+  .account-form-actions {
+    justify-content: center;
+  }
+}
+
+/* ==========================================
+  EXHIBITION DETAIL: Hero (mirror of artist/artwork)
+  ========================================== */
+.exhibition-hero-fullscreen { min-height: 100vh; min-height: 100svh; min-height: 100dvh; height: 100dvh; overflow: hidden; }
+.exhibition-detail-page .exhibition-hero-content { position: absolute; inset: 0; display: flex; align-items: center; }
+.exhibition-detail-page .exhibition-hero-content .container { width: 100%; }
+.exhibition-detail-page .exhibition-hero-content .row { align-items: center; justify-content: center; }
+.exhibition-detail-page .exhibition-hero-card { margin-left: auto; margin-right: auto; }
+.exhibition-detail-page .hero-background { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+.exhibition-detail-page .hero-bg-image,
+.exhibition-detail-page .exhibition-bg-image,
+.exhibition-detail-page .exhibition-detail__hero-img { width: 100vw; height: 100dvh; object-fit: cover; object-position: center; will-change: transform; animation: hero-kenburns 28s ease-in-out infinite alternate; }
+
+/* Do NOT add dark background/blur to hero content (override global mobile rule) */
+.exhibition-detail-page .hero-content,
+.exhibition-detail-page .exhibition-hero-content { background: transparent !important; backdrop-filter: none !important; }
+@media (max-width: 991.98px) {
+  .exhibition-detail-page .hero-content,
+  .exhibition-detail-page .exhibition-hero-content { position: absolute !important; }
+}
+/* Neutralize overlay tint on exhibition hero */
+.exhibition-detail-page .hero-overlay,
+.exhibition-detail-page .exhibition-hero-overlay { background: none !important; background-color: transparent !important; background-image: none !important; }
+
+/* Translucent info card */
+.exhibition-hero-card {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.exhibition-hero-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.exhibition-hero-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+.exhibition-hero-card .hero-title { text-shadow: 0 2px 8px rgba(0,0,0,0.45), 0 0 1px rgba(0,0,0,0.35); }
+
+/* Right column stats card */
+.exhibition-stats-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  margin-bottom: 1rem;
+}
+
+/* Unify surface style for all exhibition cards (desktop + mobile) */
+.exhibition-hero-card,
+.exhibition-stats-card,
+.exhibition-info-card,
+.exhibition-detail__guests-card,
+.exhibition-detail__mobile-card,
+.exhibition-detail__mobile-guests-card {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20) !important;
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  margin-bottom: 1rem;
+}
+
+/* Strengthen secondary whites inside exhibition cards for contrast */
+.exhibition-hero-card .text-white-50,
+.exhibition-stats-card .text-white-50,
+.exhibition-detail__guests-card .text-white-50,
+.exhibition-detail__mobile-card .text-white-50,
+.exhibition-detail__mobile-guests-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.exhibition-hero-card .text-white-75,
+.exhibition-stats-card .text-white-75,
+.exhibition-detail__guests-card .text-white-75,
+.exhibition-detail__mobile-card .text-white-75,
+.exhibition-detail__mobile-guests-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+
+/* Add vertical gap between columns/cards in hero row */
+.exhibition-detail-page .exhibition-hero-content .row { row-gap: 1rem; }
+
+/* Ensure children headings and paragraphs in cards use readable colors */
+.exhibition-hero-card h1, .exhibition-hero-card h2, .exhibition-hero-card h3,
+.exhibition-stats-card h1, .exhibition-stats-card h2, .exhibition-stats-card h3,
+.exhibition-info-card h1, .exhibition-info-card h2, .exhibition-info-card h3,
+.exhibition-detail__guests-card h1, .exhibition-detail__guests-card h2, .exhibition-detail__guests-card h3 { color: #fff; }
+
+/* ==========================================
+  Exhibition guests list: first 5 full width, rest 2 columns
+  ========================================== */
+.exhibition-detail__guests-list { display: flex; flex-wrap: wrap; row-gap: .5rem; column-gap: 1rem; }
+.exhibition-detail__guests-list .exhibition-detail__guest-item { width: 100%; box-sizing: border-box; }
+/* On md+ turn the list into a 2-col grid when flagged */
+@media (min-width: 768px) {
+  .exhibition-detail__guests-list.two-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1rem; row-gap: .5rem; }
+  .exhibition-detail__guests-list.two-cols .exhibition-detail__guest-item { width: auto; }
+}
+/* Apply same behavior to mobile guests list if present */
+.exhibition-detail__mobile-guests-list { display: flex; flex-wrap: wrap; row-gap: .5rem; column-gap: .75rem; }
+.exhibition-detail__mobile-guests-list > * { width: 100%; }
+@media (min-width: 576px) {
+  .exhibition-detail__mobile-guests-list.two-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: .75rem; row-gap: .5rem; }
+.exhibition-detail__mobile-guests-list.two-cols > * { width: auto; }
+}
+
+/* Constrain guests card width and center it */
+.exhibition-detail__guests-col { display: flex; justify-content: center; }
+.exhibition-detail__guests-card { max-width: 720px; width: 100%; margin-left: auto; margin-right: auto; }
+.btn-apply { background: var(--ox-yellow); color: var(--ox-blue); border: none; border-radius: 2rem; }
+.btn-apply:hover { background: var(--ox-orange); color: var(--ox-beige); }
+
+/* Bootstrap primary color overrides */
+.btn-primary { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: var(--ox-orange) !important; color: var(--ox-beige) !important; border-color: var(--ox-orange) !important; }
+.btn-outline-primary { color: var(--ox-yellow) !important; border-color: var(--ox-yellow) !important; }
+.btn-outline-primary:hover, .btn-outline-primary:focus, .btn-outline-primary:active { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border-color: var(--ox-yellow) !important; }
+.text-primary { color: var(--ox-yellow) !important; }
+.bg-primary { background-color: var(--ox-yellow) !important; color: var(--ox-blue) !important; }
+.badge.bg-primary { background-color: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: 1px solid var(--ox-yellow) !important; }
+
+/* Technique badges specific styling */
+.artist-technique-badge.badge.bg-primary { 
+  background-color: var(--ox-yellow) !important; 
+  color: var(--ox-blue) !important; 
+  border: 1px solid var(--ox-yellow) !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 1.5rem;
+}
+
+/* Icon styling - ensure icons use ox-yellow */
+.fas, .fab, .fa {
+  color: var(--ox-yellow);
+}
+
+/* Icon exceptions - icons that should remain with their context color */
+.text-white .fas, .text-white .fab, .text-white .fa,
+.text-warning .fas, .text-warning .fab, .text-warning .fa,
+.text-muted .fas, .text-muted .fab, .text-muted .fa {
+  color: inherit;
+}
+
+/* Social media links - responsive text colors, icons remain ox-yellow */
+.artist-meta-desktop a, .artist-meta-mobile a {
+  color: var(--ox-blue) !important;
+}
+
+.artist-meta-desktop a .fas, .artist-meta-desktop a .fab,
+.artist-meta-mobile a .fas, .artist-meta-mobile a .fab {
+  color: var(--ox-yellow) !important;
+}
+
+/* Desktop social media links (ΓëÑ992px) - text should be ox-beige */
+@media (min-width: 992px) {
+  .artist-meta-desktop a {
+    color: var(--ox-beige) !important;
+  }
+}
+
+/* Mobile social media links (<992px) - text should be ox-blue */
+@media (max-width: 991.98px) {
+  .artist-meta-mobile a {
+    color: var(--ox-blue) !important;
+  }
+}
+
+/* Follow button heart icon should be ox-blue */
+.artist-follow-btn .fas.fa-heart,
+.artist-follow-btn-mobile .fas.fa-heart {
+  color: var(--ox-blue) !important;
+}
+
+/* Follow button specific styling */
+.artist-follow-btn {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-yellow) !important;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+.artist-follow-btn:hover,
+.artist-follow-btn:focus,
+.artist-follow-btn:active {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-orange) !important;
+}
+
+.artist-follow-btn-mobile {
+  background: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-yellow) !important;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+/* Click effects for follow buttons */
+.btn-pop {
+  animation: btn-pop-keyframes 180ms ease-out;
+}
+
+@keyframes btn-pop-keyframes {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  transform: scale(0);
+  animation: btn-ripple-keyframes 600ms ease-out;
+  background: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+@keyframes btn-ripple-keyframes {
+  to {
+    transform: scale(12);
+    opacity: 0;
+  }
+}
+
+.artist-follow-btn-mobile:hover,
+.artist-follow-btn-mobile:focus,
+.artist-follow-btn-mobile:active {
+  background: var(--ox-orange) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-orange) !important;
+}
+
+/* Artist back button specific styling */
+.artist-back-btn {
+  color: var(--ox-blue) !important;
+  border-color: var(--ox-blue) !important;
+}
+
+.artist-back-btn .fas {
+  color: var(--ox-blue) !important;
+}
+
+.artist-back-btn:hover,
+.artist-back-btn:focus,
+.artist-back-btn:active {
+  background: var(--ox-blue) !important;
+  color: var(--ox-beige) !important;
+  border-color: var(--ox-blue) !important;
+}
+
+.artist-back-btn:hover .fas,
+.artist-back-btn:focus .fas,
+.artist-back-btn:active .fas {
+  color: var(--ox-beige) !important;
+}
+
+/* ==========================================
+  10. AUTH (LOGIN/SIGNIN)
+  ========================================== */
+.login-signin-btn { background: var(--ox-yellow) !important; color: var(--ox-blue) !important; border: none !important; border-radius: 2rem !important; font-weight: 700; font-size: 1.5rem; box-shadow: 0 2px 8px -2px rgba(16, 46, 80, 0.10); transition: background 0.2s, color 0.2s; }
+.login-signin-btn:hover, .login-signin-btn:focus { background: var(--ox-orange) !important; color: var(--ox-beige) !important; }
+.login-signin-side-img { max-height: 100vh; width: auto; height: 100vh; display: block; object-fit: cover; }
+/* Hide side image below 1150px; show at >=1150px (overrides Bootstrap d-none/d-lg-block) */
+@media (max-width: 1199.98px) {
+  .login-signin-container .login-signin-img-col { display: none !important; }
+}
+@media (min-width: 1200px) {
+  .login-signin-container .login-signin-img-col { display: block !important; }
+}
+
+/* ==========================================
+  11. OFFCANVAS & FILTERS
+  ========================================== */
+.offcanvas .filter-block { border-top: 1px solid #eee; padding-top: 1rem; }
+.sticky-apply { position: sticky; bottom: 0; background: #fff; padding-top: .75rem; }
+
+/* ==========================================
+  12. FOOTER
+  ========================================== */
+.footer { background-color: var(--ox-blue) !important; color: var(--ox-beige) !important; font-family: var(--font-title), sans-serif !important; }
+.footer-quote { font-family: var(--font-subtitle), serif; font-weight: 400; font-style: italic; font-size: 2.4rem; line-height: 1; letter-spacing: 0; text-align: center; color: var(--ox-beige); margin: 0 0 .6rem; }
+.footer .row.d-flex.align-items-center { font-size: 1.6rem; line-height: 1.35; }
+.footer .nav-link, .footer p, .footer a { color: var(--ox-beige) !important; }
+.footer a { color: var(--ox-beige) !important; font-size: 1.6rem !important; line-height: 1.35; text-decoration: none; }
+.footer .nav { display: flex; flex-wrap: nowrap; white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: .25rem; }
+.footer .nav li { flex: 0 0 auto; }
+.footer .nav-link { white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
+.footer .nav::-webkit-scrollbar { height: 6px; }
+.footer .container-xxl, .footer .container { max-width: 1440px; padding-left: 2rem; padding-right: 2rem; }
+.logo-footer { max-height: 8rem; width: auto; display: block; }
+.footer-title { font-family: var(--font-title); font-weight: 700; font-size: 1.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ox-beige) !important; margin-left: -1rem; display: inline-block; }
+.footer-quote { margin-bottom: 1rem; }
+.footer .container-xxl > * + * { margin-top: 1.2rem; }
+
+/* ==========================================
+  13. MEDIA QUERIES
+  ========================================== */
+@media (min-width: 992px) {
+  .logo-navbar { margin-right: 1rem; }
+  #navbarsExample05 form[role="search"] .searchbar-input { width: 32rem; }
+  section.hero .hero-row, section.home-hero .hero-row { flex-direction: row; align-items: center; justify-content: center; }
+  section.hero .hero-text, section.home-hero .hero-text { order: 1; }
+  section.hero .hero-image-container, section.home-hero .hero-image-container { order: 2; }
+}
+@media (max-width: 1399.98px) {
+  #navbarsExample05 form[role="search"] { margin-left: auto; margin-right: auto; max-width: 60rem; width: 100%; display: flex; justify-content: center; }
+  #navbarsExample05 .navbar-nav .nav-item:first-child { margin-top: 1.2rem; }
+  #navbarsExample05 .navbar-nav .nav-item { margin-bottom: 1.2rem; }
+  #navbarsExample05 form[role="search"] { margin-bottom: 1.2rem; }
+}
+@media (max-width: 991.98px) {
+  #navbarsExample05 { padding-left: 1rem; padding-right: 1rem; }
+  #navbarsExample05 .navbar-nav { align-items: center; }
+  #navbarsExample05 form[role="search"] { width: 100%; }
+  #navbarsExample05 .searchbar-input { width: 100%; }
+  section.hero .hero-row, section.home-hero .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  section.hero .hero-text, section.home-hero .hero-text { align-items: center; display: flex; flex-direction: column; }
+  .footer .row { --bs-gutter-y: 1rem; }
+}
+@media (min-width: 768px) and (max-width: 991.98px) {
+  section.hero .hero-row, section.home-hero .hero-row { flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  section.hero .hero-text, section.home-hero .hero-text { align-items: center; display: flex; flex-direction: column; }
+}
+@media (max-width: 1500px) {
+  .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; white-space: normal !important; justify-content: center !important; gap: .5rem 1rem; }
+  .footer .nav li { flex: 0 0 auto; margin-bottom: .6rem; }
+  .footer .nav-link { display: inline-block; white-space: nowrap; word-break: normal; overflow-wrap: normal; hyphens: none; min-width: max-content; }
+}
+@media (min-width: 1456px) { .footer .container-xxl, .footer .container { max-width: 1600px; } }
+@media (max-width: 1455px) { .footer .nav { flex-wrap: wrap !important; overflow-x: visible !important; justify-content: center !important; gap: .8rem 1.2rem !important; } .footer .nav li { margin: 0; } }
+
+/* Center login/signup logo + title */
+.login-signin-form .navbar-logo-link { justify-content: center; }
+/* Center forgot password logo + title */
+#forgotForm .navbar-logo-link { justify-content: center; margin-bottom: 2rem !important; }
+/* Center reset password logo + title */
+.reset-password-form .navbar-logo-link { justify-content: center; }
+
+/* Artist card reveal animation */
+.reveal-item { opacity: 0; transform: translateY(12px); transition: opacity .5s ease, transform .5s ease; will-change: opacity, transform; }
+.reveal-item.reveal-in { opacity: 1; transform: translateY(0); }
+/* Artist image fade-in when loaded */
+.artist-image { opacity: 0; transition: opacity .4s ease; }
+.artist-image.loaded { opacity: 1; }
+/* Exhibition image fade-in */
+.exhibition-hero-image { opacity: 0; transition: opacity .4s ease; }
+.exhibition-hero-image.loaded { opacity: 1; }
+/* Ajuste r├ípido: alturas m├ís compactas para heroes de exposiciones */
+@media (max-width: 991.98px) { .exhibition-section { min-height: 50vh; } }
+@media (min-width: 992px) and (max-width: 1199.98px) { .exhibition-section { min-height: 60vh; } }
+@media (min-width: 1200px) { .exhibition-section { min-height: 70vh; } }
+/* Split exhibitions layout */
+.exhibitions-split-list .exhibition-split { margin-bottom: 2.5rem; }
+.exhibition-media { border-radius: .5rem; overflow: hidden; box-shadow: 0 6px 18px -6px rgba(0,0,0,.2); }
+.exhibition-info-block { max-width: 56rem; }
+@media (max-width: 991.98px) { .exhibition-media img { height: 260px !important; } }
+@media (min-width: 992px) { .exhibition-media img { height: 360px !important; } }
+
+/* Skeleton shimmer while image loads */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.artist-image-container.img-loading {
+  position: relative;
+  overflow: hidden;
+}
+.artist-image-container.img-loading::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+/* Apply shimmer to exhibitions container as well */
+.exhibition-hero-container.img-loading { position: relative; overflow: hidden; }
+.exhibition-hero-container.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }
+/* Related exhibitions styling */
+.related-exhibition-card { position: relative; border: none; border-radius: .75rem; overflow: hidden; min-height: 240px; }
+/* Ensure overlay does not block clicks */
+.related-exhibition-card::before { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.55) 100%); pointer-events: none; z-index: 0; }
+.related-exhibition-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; display: block; }
+.related-exhibition-card .stretched-link { position: absolute; inset: 0; z-index: 2; }
+.related-exhibition-body { position: relative; z-index: 1; display: flex; flex-direction: column; justify-content: flex-end; min-height: 240px; }
+.related-exhibition-title { color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.6); }
+.related-exhibition-desc, .related-exhibition-loc-text, .related-exhibition-date-text { color: rgba(255,255,255,0.9) !important; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+.related-exhibitions-grid { row-gap: 1rem; }
+/* Shimmer for split media */
+.exhibition-media.img-loading { position: relative; overflow: hidden; }
+.exhibition-media.img-loading::before { content:''; position:absolute; inset:0; background: linear-gradient(90deg, rgba(240,242,245,0.8) 0%, rgba(230,232,236,0.9) 20%, rgba(240,242,245,0.8) 40%); background-size:200% 100%; animation: shimmer 1.2s infinite; }
+
+/* ==========================================
+  14. ARTWORK DETAIL PAGE
+  ========================================== */
+.artwork-image-container {
+  position: relative;
+}
+
+.artwork-card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.artwork-card:hover {
+  transform: translateY(-5px);
+}
+
+.price-info {
+  border: 2px solid var(--ox-yellow);
+}
+
+/* Main artwork section with full height */
+.artwork-detail-main {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+}
+
+/* Custom background colors */
+.bg-beige {
+  background-color: var(--ox-beige) !important;
+}
+
+/* Artwork detail minimal styling */
+.artwork-info .details-list {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 1.5rem;
+}
+
+.artwork-info .detail-item {
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.artwork-info h1 {
+  font-family: var(--font-title);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Artwork stats styling */
+.artwork-action-section {
+  position: relative;
+}
+
+.artwork-stats {
+  position: relative;
+}
+
+.artwork-stats.centered-to-button {
+  /* El JavaScript establecer├í estas custom properties */
+  --button-width: 200px;
+  --button-left: 0px;
+  
+  position: absolute;
+  left: var(--button-left);
+  width: var(--button-width);
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+.artwork-stats .stat-item {
+  font-size: 1rem;
+  color: #999;
+}
+
+.artwork-stats .stat-item:not(:last-child)::after {
+  content: 'ΓÇó';
+  margin-left: 1rem;
+  color: #ddd;
+}
+
+@media (max-width: 768px) {
+  .artwork-info {
+    margin-top: 2rem;
+  }
+  
+  .artwork-detail-main {
+    min-height: auto;
+    align-items: flex-start;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Artwork info responsive container */
+.artwork-info-container {
+  max-width: 600px;
+}
+
+/* Artist name hover effects */
+.artist-name-hover {
+  color: var(--bs-gray-600) !important;
+  transition: color 0.3s ease;
+}
+
+.artist-name-hover:hover {
+  color: var(--ox-orange) !important;
+}
+
+.artist-title-hover {
+  color: var(--ox-blue);
+  transition: color 0.3s ease;
+}
+
+.artist-title-hover:hover {
+  color: var(--ox-orange);
+}
+
+/* Button letter spacing */
+.btn-letter-spacing {
+  letter-spacing: 0.1em;
+}
+
+/* Related artworks section */
+.related-artworks {
+  margin-top: 4rem;
+}
+
+/* Back navigation section */
+.back-navigation {
+  margin-top: 3rem;
+}
+
+/* ==========================================
+  14.1. ARTIST DETAIL PAGE IMPROVEMENTS
+  ========================================== */
+/* Artist hero section */
+.artist-hero-fullscreen {
+  /* Fill the viewport height robustly across browsers */
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.artist-hero-image {
+  object-fit: cover;
+  object-position: center;
+}
+
+.artist-hero-placeholder {
+  background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.artist-hero-overlay {
+  background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+}
+
+.artist-hero-content {
+  z-index: 10;
+}
+
+.artist-name-desktop {
+  font-family: var(--font-title);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.artist-member-since {
+  font-family: var(--font-subtitle);
+  font-weight: 300;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.artist-bio-desktop {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.5;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  max-width: 600px;
+}
+
+.artist-action-btn {
+  border-radius: 2rem;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.1);
+}
+
+.artist-techniques-card {
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* Artist Detail - Additional Classes */
+.artist-image-cover {
+    object-fit: cover;
+    object-position: center;
+}
+
+.artist-gradient-bg {
+    background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.artist-hero-z-index {
+    z-index: 10;
+}
+
+.artist-title-font {
+    font-family: var(--font-title);
+}
+
+.artist-text-shadow {
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.artist-text-shadow-light {
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.artist-subtitle-font {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.artist-bio-style {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    max-width: 600px;
+}
+
+/* Mobile Layout Styles */
+.artist-mobile-bg {
+    background: var(--ox-beige);
+}
+
+.artist-mobile-title {
+    font-family: var(--font-title);
+    color: var(--ox-blue);
+}
+
+.artist-mobile-subtitle {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.artist-mobile-bio {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.artist-mobile-action-btn {
+    border-radius: 2rem;
+}
+
+.artist-mobile-techniques-card {
+    background: white;
+    border-radius: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.artist-mobile-techniques-label {
+    color: var(--ox-blue);
+}
+
+.artist-artworks-bg {
+    background: var(--ox-beige);
+}
+
+/* ========================================
+   EXHIBITION DETAIL STYLES
+======================================== */
+
+/* Exhibition Hero Section */
+
+/* ==========================================
+  Artwork Grid (scoped to new class names)
+  Use the new BEM classes to avoid touching Bootstrap globals
+  ========================================== */
+.artwork-grid {
+  max-width: none;
+  width: 100%;
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
+  position: relative;
+}
+.artwork-grid li,
+.artwork-grid .artwork-grid__item {
+  display: block;
+  float: left;
+  padding: 7px;
+  width: 33%;
+  opacity: 0;
+  box-sizing: border-box;
+}
+.artwork-grid li.shown,
+.no-js .artwork-grid li,
+.no-cssanimations .artwork-grid li { opacity: 1; }
+.artwork-grid li a,
+.artwork-grid li img { outline: none; border: none; display: block; max-width: 100%; }
+
+/* Responsive columns for artwork grid */
+@media (max-width: 991.98px) {
+  .artwork-grid li,
+  .artwork-grid .artwork-grid__item { width: 50%; }
+}
+@media (max-width: 575.98px) {
+  .artwork-grid li,
+  .artwork-grid .artwork-grid__item { width: 100%; }
+}
+
+.artwork-grid__body {
+  padding: 0.5rem;
+  font-family: var(--font-subtitle);
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  color: var(--ox-blue);
+}
+.artwork-grid__content { display: flex; flex-direction: row; gap: 0.75rem; align-items: stretch; }
+.artwork-grid__info { flex: 1; display: flex; flex-direction: column; }
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; }
+.artwork-grid__title { font-weight: 700; font-size: 1.6rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); font-family: 'Montserrat', var(--font-title), Arial, sans-serif; }
+.artwork-grid__artist { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.3rem; text-transform: uppercase; color: #666; letter-spacing: 0.02em; }
+.artwork-grid__details { margin-bottom: 0.3rem; }
+.artwork-grid__detail-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.15rem; color: #888; font-variant-caps: small-caps; letter-spacing: 0.02em; }
+.artwork-grid__detail-item:last-child { margin-bottom: 0; }
+.artwork-grid__price { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0; color: var(--ox-blue); font-variant-numeric: lining-nums; }
+.artwork-grid__price-value { font-weight: 400 !important; color: inherit !important; }
+.artwork-grid__stat-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.2rem; color: #999; font-weight: 400; }
+.artwork-grid__stat-item:last-child { margin-bottom: 0; }
+.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+.artwork-grid__image { display: block; width: 100%; height: auto; }
+.artwork-grid__stretched-link { position: absolute; inset: 0; }
+
+/* ==========================================
+  Artist Detail: Hero overlay/filters neutralized so image/background are not tinted
+  ========================================== */
+.artist-detail-page .artist-hero-overlay,
+.artist-detail-page .exhibition-hero-overlay,
+.artist-detail-page .hero-overlay {
+  background: none !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+.artist-detail-page .hero-content { background: transparent !important; backdrop-filter: none !important; }
+/* Center the hero content vertically and horizontally over the image */
+.artist-detail-page .artist-hero-content { position: absolute !important; inset: 0 !important; display: flex !important; align-items: center !important; }
+.artist-detail-page .artist-hero-content .container { width: 100%; }
+.artist-detail-page .artist-hero-content .row { align-items: center; justify-content: center; }
+.artist-detail-page .artist-hero-card { margin-left: auto; margin-right: auto; }
+@media (max-width: 991.98px) { .artist-detail-page .hero-content { position: absolute !important; } }
+.artist-detail-page .hero-bg-image,
+.artist-detail-page .artist-bg-image {
+  /* Fill the hero container without causing horizontal overflow on very small screens */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: none !important;
+  will-change: transform;
+  animation: hero-kenburns 28s ease-in-out infinite alternate;
+}
+
+/* Ensure the absolute background wrapper truly spans the hero */
+.artist-hero-bg,
+.hero-background { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
+
+@keyframes hero-kenburns {
+  0%   { transform: scale(1.06) translate3d(0%, 0%, 0); }
+  50%  { transform: scale(1.10) translate3d(1.5%, -1.5%, 0); }
+  100% { transform: scale(1.06) translate3d(-1.5%, 1.5%, 0); }
+}
+
+/* Small devices polish: < 400px width */
+@media (max-width: 400px) {
+  .artist-detail-page .artist-hero-content .container { padding-left: 12px; padding-right: 12px; }
+  .artist-detail-page .artist-hero-card { padding: 12px !important; }
+  .artist-detail-page .artist-actions-desktop .btn { padding-left: 0.875rem; padding-right: 0.875rem; }
+  .artist-detail-page .artist-hero-card .hero-title { font-size: clamp(1.8rem, 8vw, 2.4rem); }
+  .artist-detail-page .stats-floating .col-10 { width: 100%; max-width: 100%; }
+  .artist-detail-page .artist-techniques-card { padding: 12px !important; }
+}
+
+/* Artwork grid final responsive overrides to win cascade order */
+@media (max-width: 991.98px) {
+  .artwork-grid > li,
+  .artwork-grid .artwork-grid__item { width: 50% !important; }
+}
+@media (max-width: 575.98px) {
+  .artwork-grid > li,
+  .artwork-grid .artwork-grid__item { width: 100% !important; }
+}
+
+/* Transparent card style for left hero content
+   tuned for readability over any background image */
+.artist-hero-card {
+  position: relative;
+  /* subtle brand-tinted translucent layer + light vertical scrim */
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+/* Make secondary whites a bit stronger for contrast on mixed backgrounds */
+.artist-hero-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.artist-hero-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+/* Strengthen big title legibility slightly */
+.artist-hero-card .hero-title { text-shadow: 0 2px 8px rgba(0,0,0,0.45), 0 0 1px rgba(0,0,0,0.35); }
+
+/* Techniques card: match the translucent readable style */
+.artist-techniques-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.18) 100%), rgba(16,46,80,0.20);
+  color: #fff;
+  border-radius: 1rem;
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+}
+.artist-techniques-card .text-white-50 { color: rgba(255,255,255,0.78) !important; }
+.artist-techniques-card .text-white-75 { color: rgba(255,255,255,0.90) !important; }
+/* Keep gradient on hover, overriding generic stat-item hover */
+.stats-floating .artist-techniques-card:hover {
+  background: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.22) 100%), rgba(16,46,80,0.24) !important;
+}
+.exhibition-hero-fullscreen {
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.exhibition-image-cover {
+    object-fit: cover;
+    object-position: center;
+}
+
+.exhibition-gradient-bg {
+    background: linear-gradient(135deg, var(--ox-blue) 0%, var(--ox-orange) 50%, var(--ox-yellow) 100%);
+}
+
+.exhibition-hero-overlay {
+    background: linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.2) 100%);
+}
+
+.exhibition-hero-z-index {
+    z-index: 10;
+}
+
+.exhibition-title-font {
+    font-family: var(--font-title);
+    color: white;
+}
+
+.exhibition-description-style {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.exhibition-info-flex {
+    min-width: 300px;
+    max-width: 100%;
+}
+
+.exhibition-dates-flex {
+    min-width: 260px;
+    max-width: 100%;
+}
+
+.exhibition-info-card {
+    height: 100%;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.exhibition-artist-link {
+    color: rgba(255,255,255,0.85);
+    transition: all 0.2s ease;
+}
+
+.exhibition-artist-link:hover {
+    color: var(--ox-orange);
+}
+
+/* Exhibition Mobile Section */
+.exhibition-mobile-bg {
+    background: var(--ox-beige);
+}
+
+.exhibition-mobile-title {
+    font-family: var(--font-title);
+    color: var(--ox-blue);
+}
+
+.exhibition-mobile-date {
+    font-family: var(--font-subtitle);
+    font-weight: 300;
+}
+
+.exhibition-mobile-description {
+    font-family: var(--font-subtitle);
+    font-style: italic;
+    line-height: 1.5;
+}
+
+.exhibition-mobile-card {
+    max-width: 350px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+}
+
+.exhibition-venue-text {
+    font-family: var(--font-subtitle);
+}
+
+/* Artist Detail - Section Titles and Container Padding */
+.artist-section-title {
+    color: var(--ox-blue);
+    font-family: var(--font-title);
+}
+
+.artist-container-padding {
+    padding-left: 3rem;
+    padding-right: 3rem;
+}
+
+.artist-back-btn {
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+}
+
+/* Exhibition Detail - Additional Styles */
+.exhibition-guests-card {
+    max-width: 400px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(10px);
+}
+
+.exhibition-guests-title {
+    font-family: var(--font-subtitle);
+    font-weight: 500;
+    color: var(--ox-blue);
+}
+
+.exhibition-artist-badge {
+    font-size: 0.85rem;
+    font-weight: 400;
+    border-radius: 2rem;
+    transition: all 0.2s ease;
+    color: var(--ox-blue) !important;
+}
+
+.exhibition-artist-badge:hover {
+    background-color: var(--ox-blue) !important;
+    color: white !important;
+}
+
+.exhibition-guest-badge {
+    font-size: 0.85rem;
+    font-weight: 400;
+    border-radius: 2rem;
+}
+
+.exhibition-artworks-bg {
+    background: var(--ox-beige);
+}
+
+.exhibition-back-btn {
+    border-radius: 2rem;
+    padding: 0.75rem 2rem;
+}
+/* Make the back button use ox-blue instead of the global yellow outline */
+a.btn.btn-outline-primary.exhibition-back-btn {
+    color: var(--ox-blue) !important;
+    border-color: var(--ox-blue) !important;
+}
+a.btn.btn-outline-primary.exhibition-back-btn:hover,
+a.btn.btn-outline-primary.exhibition-back-btn:focus,
+a.btn.btn-outline-primary.exhibition-back-btn:active {
+    background: var(--ox-blue) !important;
+    color: #fff !important;
+    border-color: var(--ox-blue) !important;
+}
+/* Ensure the arrow icon follows the button color */
+.exhibition-back-btn .fa,
+.exhibition-back-btn .fas,
+.exhibition-back-btn .fab {
+    color: var(--ox-blue) !important;
+}
+.exhibition-back-btn:hover .fa,
+.exhibition-back-btn:hover .fas,
+.exhibition-back-btn:hover .fab,
+.exhibition-back-btn:focus .fa,
+.exhibition-back-btn:focus .fas,
+.exhibition-back-btn:focus .fab {
+    color: #fff !important;
+}
+
+/* Generic back button style (apply to all back buttons) */
+.btn.ox-back-btn {
+    color: var(--ox-blue) !important;
+    border-color: var(--ox-blue) !important;
+    background: transparent !important;
+    border-radius: 2rem !important;
+    padding: 0.75rem 2rem !important;
+}
+.btn.ox-back-btn:hover,
+.btn.ox-back-btn:focus,
+.btn.ox-back-btn:active {
+    background: var(--ox-blue) !important;
+    color: #fff !important;
+    border-color: var(--ox-blue) !important;
+}
+.ox-back-btn .fa,
+.ox-back-btn .fas,
+.ox-back-btn .fab {
+    color: var(--ox-blue) !important;
+}
+.ox-back-btn:hover .fa,
+.ox-back-btn:hover .fas,
+.ox-back-btn:hover .fab,
+.ox-back-btn:focus .fa,
+.ox-back-btn:focus .fas,
+.ox-back-btn:focus .fab {
+    color: #fff !important;
+}
+/* Artist mobile section */
+.artist-mobile-bg {
+  background: var(--ox-beige);
+}
+
+.artist-name-mobile {
+  font-family: var(--font-title);
+  color: var(--ox-blue);
+}
+
+.artist-member-since-mobile {
+  font-family: var(--font-subtitle);
+  font-weight: 300;
+}
+
+.artist-bio-mobile {
+  font-family: var(--font-subtitle);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.artist-techniques-card-mobile {
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e9ecef;
+}
+
+.artist-techniques-label-mobile {
+  color: var(--ox-blue);
+}
+
+.artist-artworks-bg {
+  background: var(--ox-beige);
+}
+
+.artist-artworks-title {
+  color: var(--ox-blue);
+  font-family: var(--font-title);
+}
+
+/* ==========================================
+  15. LIGHTBOX ZOOM EFFECT
+  ========================================== */
+:root {
+  --overlay-bg: rgba(247,246,239,0.9);
+  --close-size: 4.2rem;
+}
+
+/* Contenedor de la miniatura */
+.art-thumb {
+  max-width: 100%;
+  margin: 0 auto;
+  aspect-ratio: 4/3;
+  background: var(--ox-beige);
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.art-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: clamp(8px, 2.5vw, 24px);
+  cursor: zoom-in;
+  transition: transform .2s ease;
+}
+
+.art-thumb img:hover {
+  transform: scale(1.02);
+}
+
+/* Overlay (fullscreen) */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--overlay-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s ease, visibility 0s linear .22s;
+  z-index: 9999;
+}
+
+.lightbox.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity .22s ease;
+}
+
+.lightbox__inner {
+  width: min(95vw, 1600px);
+  height: min(90vh, 95dvh);
+  display: grid;
+  place-items: center;
+  transform: scale(.98);
+  transition: transform .22s ease;
+  padding: 2rem;
+}
+
+.lightbox.open .lightbox__inner {
+  transform: scale(1);
+}
+
+.lightbox__img {
+  max-width: 80vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.8rem;
+  box-shadow: 0 2rem 4rem rgba(0,0,0,.15), 0 0.8rem 1.6rem rgba(0,0,0,.1);
+}
+
+/* Bot├│n cerrar (X) */
+.lightbox__close {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  width: var(--close-size);
+  height: var(--close-size);
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0,0,0,.15);
+  backdrop-filter: blur(0.8rem);
+  -webkit-backdrop-filter: blur(0.8rem);
+  color: var(--ox-blue);
+  cursor: pointer;
+  transition: background .2s ease, transform .08s ease;
+  box-shadow: 0 0.4rem 1.2rem rgba(0,0,0,.1);
+}
+
+.lightbox__close:hover { 
+  background: rgba(0,0,0,.25);
+  color: var(--ox-red);
+}
+
+.lightbox__close:active { 
+  transform: scale(.96); 
+}
+
+.lightbox__close svg { 
+  width: 2.2rem; 
+  height: 2.2rem; 
+}
+
+/* Ocultar scroll del body al abrir */
+body.noscroll { 
+  overflow: hidden; 
+}
+
+/* Accesibilidad: ocultar texto visual del label para lectores */
+.sr-only {
+  position: absolute !important;
+  width: 1px; 
+  height: 1px;
+  padding: 0; 
+  margin: -1px;
+  overflow: hidden; 
+  clip: rect(0,0,0,0); 
+  white-space: nowrap; 
+  border: 0;
+}
+/* Availability badge overlay for artwork cards */
+.artwork-badge { position: absolute; top: .5rem; left: .5rem; z-index: 2; padding: .25rem .5rem; border-radius: .5rem; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #fff; backdrop-filter: blur(2px); }
+.availability-reserved { background: #ff9800; }
+.availability-sold { background: #6c757d; }
+.availability-not_for_sale { background: #6c757d; }
+.availability-on_loan { background: #17a2b8; }
+.artwork-badge{pointer-events:none;}
+/* --- Favoritos: feedback visual --- */
+.artwork-fav-btn {
+  transition: background-color .2s ease, color .2s ease, border-color .2s ease, transform .1s ease;
+  /* Color base usando la marca */
+  color: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+  /* Forzar variables de Bootstrap para evitar rojos en cualquier estado */
+  --bs-btn-color: var(--ox-yellow);
+  --bs-btn-border-color: var(--ox-yellow);
+  --bs-btn-hover-color: #111;
+  --bs-btn-hover-bg: var(--ox-yellow);
+  --bs-btn-hover-border-color: var(--ox-yellow);
+  --bs-btn-focus-shadow-rgb: 255, 205, 0; /* aproximaci├│n del amarillo */
+  --bs-btn-active-color: #111;
+  --bs-btn-active-bg: var(--ox-yellow);
+  --bs-btn-active-border-color: var(--ox-yellow);
+  --bs-btn-disabled-color: var(--ox-yellow);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-disabled-border-color: var(--ox-yellow);
+}
+.artwork-fav-btn.btn-outline-danger,
+.artwork-fav-btn.btn-danger {
+  /* Reafirmar variables incluso si Bootstrap aplica variantes danger */
+  --bs-btn-color: var(--ox-yellow);
+  --bs-btn-border-color: var(--ox-yellow);
+  --bs-btn-hover-color: #111;
+  --bs-btn-hover-bg: var(--ox-yellow);
+  --bs-btn-hover-border-color: var(--ox-yellow);
+  --bs-btn-focus-shadow-rgb: 255, 205, 0;
+  --bs-btn-active-color: #111;
+  --bs-btn-active-bg: var(--ox-yellow);
+  --bs-btn-active-border-color: var(--ox-yellow);
+}
+.artwork-fav-btn:hover,
+.artwork-fav-btn:focus {
+  color: var(--ox-yellow);
+  border-color: var(--ox-yellow);
+}
+.artwork-fav-btn.favorited,
+.artwork-fav-btn.btn-danger {
+  /* Forzar el color de marca cuando est├í activo */
+  background-color: var(--ox-yellow) !important;
+  border-color: var(--ox-yellow) !important;
+  color: #111 !important;
+  --bs-btn-bg: var(--ox-yellow);
+  --bs-btn-color: #111;
+}
+.artwork-fav-btn.favorited .fa-heart { color: #111 !important; }
+.artwork-fav-btn:not(.favorited) .fa-heart { color: var(--ox-yellow) !important; }
+.artwork-fav-btn.btn-outline-danger {
+  /* Asegurar que el outline use el amarillo de marca */
+  color: var(--ox-yellow) !important;
+  border-color: var(--ox-yellow) !important;
+}
+.artwork-fav-btn.favorited:hover {
+  filter: brightness(0.97);
+}
+.artwork-fav-btn:focus,
+.artwork-fav-btn:focus-visible {
+  box-shadow: 0 0 0 .25rem rgba(255, 205, 0, .35) !important;
+}
+.artwork-fav-btn .fa-heart.pop {
+  animation: heart-pop 260ms ease-in-out;
+}
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* --- Separador para secci├│n de exposiciones relacionadas --- */
+.related-exhibitions-section {
+  /* Empuje claro desde la secci├│n anterior */
+  margin-top: 4rem; /* m├ís aire que mt-5 */
+}
+
+/* --- Artwork detail: stats spacing --- */
+.artwork-stats {
+  margin-top: 0.75rem;
+  margin-bottom: 2rem; /* asegura espacio antes de la siguiente secci├│n */
+  position: relative;
+  z-index: 1; /* evita que elementos posteriores se dibujen encima por accidente */
+}
+.artwork-stats.centered-to-button {
+  /* actualmente no usamos posicionamiento absoluto; mantenemos en flujo */
+}
+.related-exhibitions-section {
+  clear: both; /* asegura separaci├│n si alg├║n elemento previo flotara */
+}
+
+/* --- Back button: ocultar hasta que el layout est├⌐ listo --- */
+.artwork-back-section {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .18s ease, transform .18s ease;
+}
+.artwork-back-section.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ================= Admin Layout ================= */
+.admin-sidebar {
+  /* Ancho fijo del sidebar */
+  width: 280px;
+  flex: 0 0 280px;
+  /* Colores marca */
+  background: var(--ox-beige);
+  color: var(--ox-blue);
+  /* Altura independiente del contenido (m├íximo viewport) */
+  position: sticky; /* se mantiene visible al hacer scroll */
+  top: 0;
+  height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto; /* scroll interno si excede */
+}
+.admin-sidebar .nav-link,
+.admin-sidebar .fs-5,
+.admin-sidebar a { color: var(--ox-blue); }
+.admin-sidebar .nav-link.active,
+.admin-sidebar .nav-link:hover {
+  background-color: rgba(0,0,0,.06);
+  color: var(--ox-blue);
+}
+.admin-main {
+  background: #fff;
+}
+.related-exhibitions-section > .col-12 {
+  padding-top: 1.25rem; /* pt-4 */
+  border-top: 1px solid rgba(0,0,0,.08); /* separador sutil alineado al contenido */
+  /* Si prefieres toque de marca: */
+  /* border-top-color: color-mix(in srgb, var(--ox-yellow) 25%, transparent); */
+}
+
+/* ==========================================
+  9. ARTWORK GRID CARD TYPOGRAPHY
+  ========================================== */
+/* Make all card text Montserrat, same size and color.
+   Only the artwork title is bold and slightly larger. */
+.grid-card-body {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  color: var(--ox-blue);
+}
+
+/* Unify font sizing for all text elements inside the card body */
+.grid-card-body,
+.grid-card-body .grid-card-info,
+.grid-card-body .grid-card-details,
+.grid-card-body .grid-card-stats,
+.grid-card-body .grid-card-artist,
+.grid-card-body .grid-card-price,
+.grid-card-body .grid-card-detail-item,
+.grid-card-body .grid-card-stat-item {
+  font-size: 1.4rem;
+  line-height: 1.4;
+}
+
+/* Ensure descendant elements inherit Montserrat */
+.grid-card-body * { font-family: inherit; }
+/* Restore Font Awesome font for icons inside the card */
+.grid-card-body .fa,
+.grid-card-body .fa-solid,
+.grid-card-body .fa-regular,
+.grid-card-body .fa-light,
+.grid-card-body .fa-thin,
+.grid-card-body .fa-duotone {
+  font-family: "Font Awesome 6 Free" !important;
+}
+.grid-card-body .fa-brands { font-family: "Font Awesome 6 Brands" !important; }
+/* Preserve appropriate weights */
+.grid-card-body .fa-solid { font-weight: 900 !important; }
+.grid-card-body .fa-regular { font-weight: 400 !important; }
+.grid-card-body .fa-light { font-weight: 300 !important; }
+.grid-card-body .fa-thin { font-weight: 100 !important; }
+
+/* Only the title is bold and a bit larger */
+.grid-card-title {
+  font-family: 'Montserrat', var(--font-title), Arial, sans-serif;
+  font-weight: 700;
+  font-size: 1.6rem; /* a bit larger than body */
+}
+
+/* Normalize headings and other bolds so only title stands out */
+.grid-card-body h1,
+.grid-card-body h2,
+.grid-card-body h3,
+.grid-card-body h4:not(.grid-card-title),
+.grid-card-body h5,
+.grid-card-body h6 { font-weight: 400; font-size: 1.4rem; }
+
+.grid-card-body .grid-card-price .fw-bold { font-weight: 400 !important; }
+
+/* Neutralize special text colors inside the card (keep badges as-is) */
+.grid-card-body .text-success { color: inherit !important; }
+
+/* Position availability badge at top-right of stats column */
+.grid-card-stats { position: relative; }
+.grid-card-stats .grid-card-stat-item:first-child {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* ==========================================
+  Artwork Grid (scoped to new class names)
+  Use the new BEM classes to avoid touching Bootstrap globals
+  ========================================== */
+/* Base list/grid behavior scoped */
+.artwork-grid {
+  max-width: none;
+  width: 100%;
+  list-style: none;
+  margin: 30px auto;
+  padding: 0;
+}
+.artwork-grid li,
+.artwork-grid .artwork-grid__item {
+  display: block;
+  float: left;
+  padding: 7px;
+  width: 33%;
+  opacity: 0;
+}
+.artwork-grid li.shown,
+.no-js .artwork-grid li,
+.no-cssanimations .artwork-grid li { opacity: 1; }
+.artwork-grid li a,
+.artwork-grid li img { outline: none; border: none; display: block; max-width: 100%; }
+
+/* Card body container */
+.artwork-grid__body {
+  padding: 0.5rem;
+  font-family: var(--font-subtitle);
+  background: #fff;
+  border: 1.5px solid #222;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  color: var(--ox-blue);
+}
+
+/* Main flex container - two columns */
+.artwork-grid__content { display: flex; flex-direction: row; gap: 0.75rem; align-items: stretch; }
+
+/* Left column - artwork info */
+.artwork-grid__info { flex: 1; display: flex; flex-direction: column; }
+
+/* Right column - stats */
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; }
+
+/* Typography with minimal spacing */
+.artwork-grid__title { font-weight: 700; font-size: 1.6rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); font-family: 'Montserrat', var(--font-title), Arial, sans-serif; }
+.artwork-grid__artist { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.3rem; text-transform: uppercase; color: #666; letter-spacing: 0.02em; }
+.artwork-grid__details { margin-bottom: 0.3rem; }
+.artwork-grid__detail-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.15rem; color: #888; font-variant-caps: small-caps; letter-spacing: 0.02em; }
+.artwork-grid__detail-item:last-child { margin-bottom: 0; }
+
+/* Price */
+.artwork-grid__price { font-weight: 700; font-size: 1.4rem; line-height: 1.4; margin-bottom: 0; color: var(--ox-blue); font-variant-numeric: lining-nums; }
+.artwork-grid__price-value { font-weight: 400 !important; color: inherit !important; }
+
+/* Stat items */
+.artwork-grid__stat-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.2rem; color: #999; font-weight: 400; }
+.artwork-grid__stat-item:last-child { margin-bottom: 0; }
+
+/* Availability badge placement (avoid :first-child hacks) */
+.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+
+/* Image/link helpers */
+.artwork-grid__image { display: block; width: 100%; height: auto; }
+.artwork-grid__stretched-link { position: absolute; inset: 0; }
+/* Home Exhibitions heading highlight and letter reveal */
+.home-exhibitions .section-heading {
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+  padding: 0 .15em;
+  background-image: linear-gradient(transparent 60%, var(--ox-yellow) 60%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.home-exhibitions .section-heading.ox-reveal .ox-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.35em);
+  transition: transform 600ms cubic-bezier(.2,.7,.1,1), opacity 600ms ease;
+}
+
+.home-exhibitions .section-heading.ox-reveal.is-visible .ox-letter {
+  opacity: 1;
+  transform: none;
+}
+/* Centered heading and extra spacing between words */
+.home-exhibitions .section-heading {
+  word-spacing: 0.25em; /* extra gap between words */
+}
+
+/* Do not animate spaces; give them consistent width */
+.home-exhibitions .section-heading.ox-reveal .ox-letter.ox-space {
+  opacity: 1;
+  transform: none;
+  transition: none;
+  width: 0.35em; /* tweak to control word gap */
+  display: inline-block;
+}
+/* Center the section heading precisely */
+.home-exhibitions .section-heading {
+  display: block;              /* override earlier inline-block */
+  width: -moz-fit-content;     /* Firefox */
+  width: fit-content;          /* shrink to text width */
+  margin-left: auto;           /* center the block */
+  margin-right: auto;          /* center the block */
+  text-align: center;          /* center letters/spans inside */
+}
+/* Ensure footer sticks to bottom inside flex-column body */
+.footer { margin-top: auto; }
+
+/* Guests list (artists invited) on exhibition detail */
+.exhibition-detail__guests-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem 1.25rem; /* row x column */
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+.exhibition-detail__guest-item { flex: 1 1 100%; } /* 1 columna en xs */
+@media (min-width: 576px) {
+  .exhibition-detail__guest-item { flex: 1 1 33.333%; } /* 3 columnas en sm+ */
+}
+@media (min-width: 992px) {
+  .exhibition-detail__guest-item { flex: 1 1 33.333%; } /* mantener 3 columnas */
+}
+
+.exhibition-detail__guest-link,
+.exhibition-detail__guest-name,
+.exhibition-artist-link {
+  color: var(--ox-yellow) !important;
+  text-decoration: none;
+  font-weight: 600;
+  letter-spacing: .02em;
+  transition: color .2s ease, text-shadow .2s ease;
+}
+.exhibition-detail__guest-link:hover,
+.exhibition-detail__guest-link:focus,
+.exhibition-artist-link:hover,
+.exhibition-artist-link:focus {
+  color: #fff !important;
+  text-shadow: 0 0 6px rgba(245, 196, 94, 0.6);
+}
+
+/* Larger body text in exhibition hero (keep title as-is, and do NOT change yellow links) */
+.exhibition-hero-card .exhibition-detail__description {
+  font-size: 1.6rem;
+  line-height: 1.9;
+}
+@media (min-width: 992px) {
+  .exhibition-hero-card .exhibition-detail__description { font-size: 1.8rem; line-height: 2.1; }
+}
+
+/* Labels and values (Fechas/Lugar) a bit larger */
+.exhibition-hero-card .row.g-4 .small { font-size: 1.2rem; }
+.exhibition-hero-card .row.g-4 .h6   { font-size: 1.6rem; }
+
+/* Guests label a bit larger (links keep their own sizing/color) */
+.exhibition-hero-card .exhibition-detail__guests-label { font-size: 1.3rem; }
+
+/* Home: hide old gallery wall block on home */
+.gallery-wall-section { display: none !important; }
+
+/* Home exhibitions typography and image sizing */
+.home-exhibitions .featurette-heading,
+.home-exhibitions .lead,
+.home-exhibitions p,
+.home-exhibitions .btn {
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+.home-exhibitions .featurette-heading { font-weight: 700; }
+.home-exhibitions .home-expo-img {
+  width: 500px;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: .5rem;
+  display: block;
+}
+
+/* Home exhibitions heading display and style */
+.home-exhibitions .section-heading {
+  font-family: var(--font-subtitle), Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  font-weight: 700;
+  letter-spacing: .3px;
+  /* center and highlight (previously added rules for highlight/center) */
+  display: block;
+  width: -moz-fit-content;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+.account-tab-pane--profile,
+.account-tab-pane--photo,
+.account-tab-pane--password {
+  position: relative;
+}
+
+/* ==========================================
+  6. SECTIONS: CONTACT PAGE
+  ========================================== */
+.contact-section .contact-label {
+  display: inline-block;
+  margin-right: .75rem;
+}
+
+.contact-email-link {
+  color: var(--ox-yellow) !important;
+  font-weight: 700;
+}
