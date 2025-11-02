@@ -966,7 +966,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   border: 0 !important;
   background: transparent;
 }
-.account-form-input-group .account-form-control {
+.account-form-input-group .account-form-addon + .account-form-control {
   border-left: 0 !important;
   border-radius: 0 .5rem .5rem 0 !important;
 }
@@ -976,6 +976,10 @@ section.join-artists { position: relative; margin-top: 5rem; }
   color: inherit;
   font-weight: 600;
   border-radius: .5rem 0 0 .5rem;
+}
+.account-form-input-group--append .account-form-control {
+  border-right: 0 !important;
+  border-radius: .5rem 0 0 .5rem !important;
 }
 .account-form-hint { display: block; font-size: 1.2rem; color: color-mix(in srgb, var(--ox-blue) 65%, transparent); }
 .account-form-hint-info { color: var(--ox-blue) !important; }
@@ -994,7 +998,17 @@ section.join-artists { position: relative; margin-top: 5rem; }
   box-shadow: none !important;
   border: 0 !important;
 }
-.account-form-toggle { border-radius: 0; }
+.account-form-toggle {
+  border-radius: 0 .5rem .5rem 0;
+  border: 1px solid color-mix(in srgb, var(--ox-blue) 14%, transparent) !important;
+  background: color-mix(in srgb, #fff 88%, var(--ox-beige) 12%);
+}
+.account-form-toggle:hover,
+.account-form-toggle:focus,
+.account-form-toggle:active {
+  border-color: color-mix(in srgb, var(--ox-blue) 38%, transparent) !important;
+  background-color: color-mix(in srgb, #fff 92%, var(--ox-beige) 8%);
+}
 .account-form-toggle-icon { pointer-events: none; color: var(--ox-blue); }
 .account-form-delete {
   border-radius: .5rem;

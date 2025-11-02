@@ -6,19 +6,20 @@ const cloudinary = require('@services/cloudinary');
 const fs = require('fs');
 const stream = require('stream');
 
-// Sube una imagen a Cloudinary
-async function upload(filePath, folder = 'galeria-del-ox') {
-  const result = await cloudinary.uploader.upload(filePath, { folder });
+// Sube una imagen a Cloudinary con opciones
+async function upload(filePath, folder = 'galeria-del-ox', optionsOverride = {}) {
+  const options = Object.assign({ folder }, optionsOverride || {});
+  const result = await cloudinary.uploader.upload(filePath, options);
   // Borra el archivo temporal si existe
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
   return result;
 }
 
-// Sube una imagen a Cloudinary desde un Buffer
-async function uploadBuffer(buffer, folder = 'galeria-del-ox') {
+// Sube una imagen a Cloudinary desde un Buffer con opciones
+async function uploadBuffer(buffer, folder = 'galeria-del-ox', optionsOverride = {}) {
   return new Promise((resolve, reject) => {
     const pass = new stream.PassThrough();
-    const options = { folder };
+    const options = Object.assign({ folder }, optionsOverride || {});
     const uploadStream = cloudinary.uploader.upload_stream(options, (err, result) => {
       if (err) return reject(err);
       resolve(result);

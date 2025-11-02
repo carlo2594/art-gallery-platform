@@ -28,6 +28,8 @@ exports.getMe = catchAsync(async (req, res, next) => {
 
 // Actualizar perfil (limitado)
 exports.updateMe = catchAsync(async (req, res, next) => {
+  const DEBUG = process.env.NODE_ENV !== 'production';
+  const dlog = (...args) => { try { if (DEBUG) console.log('[updateMe]', ...args); } catch(_) {} };
   if (req.body.password || req.body.newPassword) {
     return next(new AppError('Esta ruta no es para actualizar la contraseña.', 400));
   }
@@ -53,6 +55,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (!user) return next(new AppError('Usuario no encontrado.', 404));
 
   const oldEmail = user.email;
+  dlog('incoming body keys', Object.keys(req.body || {}));
+  dlog('has file?', !!req.file, req.file && { mimetype: req.file.mimetype, size: req.file.size, originalname: req.file.originalname });
 
   // Manejo de imagen de perfil (subir/actualizar/eliminar)
   try {
@@ -89,6 +93,12 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   } catch (err) {
     return handleDuplicateKeyError(err, res, next);
   }
+
+  // Si se subió/eliminó imagen, eliminar la anterior después de guardar (no bloquear respuesta)
+  if (req._oldProfileImagePublicId && req._oldProfileImagePublicId !== user.profileImagePublicId) {
+    deleteImage(req._oldProfileImagePublicId).catch(() => {});
+  }
+  dlog('saved user image', { profileImage: user.profileImage, profileImagePublicId: user.profileImagePublicId });
 
   // Si el email cambió, notifica al nuevo email
   if (filteredBody.email && filteredBody.email !== oldEmail) {
@@ -311,6 +321,53 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
   return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se envió un correo para crear la contraseña.', 201);
 });
 
+// Subir/actualizar o eliminar imagen de perfil del usuario autenticado
+// Acepta multipart/form-data con campo 'profileImage'. Si se envía profileImage vacío en body, elimina la imagen.
+exports.updateMyProfileImage = catchAsync(async (req, res, next) => {
+  const DEBUG = process.env.NODE_ENV !== 'production';
+  const dlog = (...args) => { try { if (DEBUG) console.log('[updateMyProfileImage]', ...args); } catch(_) {} };
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    return next(new AppError('Usuario no encontrado', 404));
+  }
+
+  const filteredBody = {};
+  // Permitir eliminación explícita si llega un campo profileImage vacío
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'profileImage')) {
+    filteredBody.profileImage = req.body.profileImage;
+  }
+  dlog('accept', req.headers && req.headers.accept);
+  dlog('body keys', Object.keys(req.body || {}));
+  dlog('has file?', !!req.file, req.file && { mimetype: req.file.mimetype, size: req.file.size, originalname: req.file.originalname });
+
+  try {
+    await handleProfileImage(user, req, filteredBody);
+  } catch (e) {
+    if (e instanceof AppError) return next(e);
+    return next(new AppError('No se pudo procesar la imagen de perfil. ' + (e && e.message ? e.message : ''), 500));
+  }
+
+  Object.assign(user, filteredBody);
+  try {
+    await user.save();
+  } catch (err) {
+    return handleDuplicateKeyError(err, res, next);
+  }
+
+  // Eliminar imagen anterior post-guardado si aplica
+  if (req._oldProfileImagePublicId && req._oldProfileImagePublicId !== user.profileImagePublicId) {
+    deleteImage(req._oldProfileImagePublicId).catch(() => {});
+  }
+  dlog('saved user image', { profileImage: user.profileImage, profileImagePublicId: user.profileImagePublicId, removedOld: !!req._oldProfileImagePublicId });
+
+  // Si la petición no es JSON (fallback de formularios), redirigir a la vista
+  const acceptHeader = req.headers.accept || '';
+  if (!acceptHeader.includes('application/json')) {
+    return res.redirect(303, '/edit-profile?tab=foto&status=foto-actualizada');
+  }
+  sendResponse(res, user, 'Imagen de perfil actualizada');
+});
+
 // ADMIN: Subir/actualizar o eliminar imagen de perfil del usuario
 // Acepta multipart/form-data con campo 'profileImage'. Si se envía profileImage vacío en body, elimina la imagen.
 exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
@@ -337,6 +394,11 @@ exports.updateUserProfileImage = catchAsync(async (req, res, next) => {
     await user.save();
   } catch (err) {
     return handleDuplicateKeyError(err, res, next);
+  }
+
+  // Eliminar imagen anterior post-guardado si aplica
+  if (req._oldProfileImagePublicId && req._oldProfileImagePublicId !== user.profileImagePublicId) {
+    deleteImage(req._oldProfileImagePublicId).catch(() => {});
   }
 
   sendResponse(res, user, 'Imagen de perfil actualizada');

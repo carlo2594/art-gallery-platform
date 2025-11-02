@@ -2,13 +2,22 @@
  * Utilidad para gestionar la imagen de perfil de un usuario.
  * Permite subir, actualizar o eliminar la imagen de perfil en Cloudinary y sincronizar los datos del usuario.
  */
-const { upload, uploadBuffer, deleteImage } = require('@utils/cloudinaryImage');
+const { upload, uploadBuffer } = require('@utils/cloudinaryImage');
+const DEBUG = process.env.NODE_ENV !== 'production';
+const dlog = (...args) => { try { if (DEBUG) console.log('[handleProfileImage]', ...args); } catch(_) {} };
 const AppError = require('@utils/appError');
 const sizeOf = require('image-size');
 
 async function handleProfileImage(user, req, filteredBody) {
-  // Si viene una nueva imagen, elimina la anterior y sube la nueva
+  // Si viene una nueva imagen, sube la nueva y registra la anterior para eliminarla tras guardar
   if (req.file) {
+    dlog('req.file present', {
+      hasPath: !!req.file.path,
+      hasBuffer: !!req.file.buffer,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      originalname: req.file.originalname
+    });
     let source = null;
     if (req.file.path) {
       source = req.file.path;
@@ -22,7 +31,9 @@ async function handleProfileImage(user, req, filteredBody) {
     let dimensions;
     try {
       dimensions = sizeOf(source);
+      dlog('image dimensions', dimensions);
     } catch (err) {
+      dlog('sizeOf failed', err && err.message);
       throw new AppError('No se pudo validar la imagen seleccionada.', 400);
     }
 
@@ -34,17 +45,25 @@ async function handleProfileImage(user, req, filteredBody) {
       throw new AppError('La foto de perfil debe ser horizontal (mas ancha que alta).', 400);
     }
 
+    // Registrar la imagen anterior (si existía) para eliminarla post-guardado
     if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
+      req._oldProfileImagePublicId = user.profileImagePublicId;
+      dlog('will remove old image after save', req._oldProfileImagePublicId);
     }
 
+    // Subir a Cloudinary solicitando una derivación optimizada (eager): WebP, ancho máx. 1600px, calidad auto
+    const eager = [{ width: 1600, crop: 'limit', format: 'webp', quality: 'auto' }];
     let imageResult;
     if (req.file.path) {
-      imageResult = await upload(req.file.path);
+      dlog('uploading via path (with eager transform)');
+      imageResult = await upload(req.file.path, 'galeria-del-ox', { eager });
     } else {
-      imageResult = await uploadBuffer(req.file.buffer);
+      dlog('uploading via buffer (with eager transform)');
+      imageResult = await uploadBuffer(req.file.buffer, 'galeria-del-ox', { eager });
     }
-    filteredBody.profileImage = imageResult.secure_url;
+    const eagerUrl = imageResult && imageResult.eager && imageResult.eager[0] && imageResult.eager[0].secure_url;
+    dlog('uploaded image public_id', imageResult && imageResult.public_id, 'eagerUrl', eagerUrl);
+    filteredBody.profileImage = eagerUrl || imageResult.secure_url;
     filteredBody.profileImagePublicId = imageResult.public_id;
   }
 
@@ -54,7 +73,8 @@ async function handleProfileImage(user, req, filteredBody) {
     (!filteredBody.profileImage || filteredBody.profileImage === 'null' || filteredBody.profileImage === '')
   ) {
     if (user.profileImagePublicId) {
-      await deleteImage(user.profileImagePublicId);
+      req._oldProfileImagePublicId = user.profileImagePublicId;
+      dlog('requested deletion of image; will remove old after save', req._oldProfileImagePublicId);
     }
     user.profileImage = undefined;
     user.profileImagePublicId = undefined;

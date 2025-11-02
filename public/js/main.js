@@ -1,7 +1,14 @@
 // --- Chips rápidos de exposiciones: siempre envía el parámetro type ---
 'use strict';
+try { console.log('[App] main.js loaded; readyState=', document.readyState); } catch(_) {}
 
-document.addEventListener('DOMContentLoaded', function () {
+// Ejecuta el init incluso si DOMContentLoaded ya ocurrió (script al final del body)
+const __onReady = (cb) => {
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', cb);
+  else cb();
+};
+
+__onReady(function () {
   // Exhibitions-only: enable vertical scroll snap (Lenis will handle smoothness)
   (function enableExhibitionsScrollSnap() {
     const sections = document.querySelectorAll('section.exhibition-section');
@@ -88,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const ensureHorizontalImage = (file) => {
     return new Promise((resolve, reject) => {
+      try { console.debug('[AccountPhoto] ensureHorizontalImage: type=%s size=%s name=%s', file && file.type, file && file.size, file && file.name); } catch(_) {}
       if (!file) {
         return reject(new Error('Selecciona una imagen.'));
       }
@@ -101,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
         URL.revokeObjectURL(url);
         const width = img.naturalWidth || img.width;
         const height = img.naturalHeight || img.height;
+        try { console.debug('[AccountPhoto] ensureHorizontalImage: dimensions=%sx%s', width, height); } catch(_) {}
         if (width > height) {
           resolve();
         } else {
@@ -272,13 +281,33 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    if (photoForm) {
+    if (false && photoForm) {
+      try { console.log('[AccountPhoto] Hooked photoForm submit handler'); } catch(_) {}
       photoForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = photoForm.querySelector('button[type=submit]');
+        const progWrap = photoForm.querySelector('[data-progress-wrap]');
+        const progBar = photoForm.querySelector('[data-progress-bar]');
+        const useAxios = typeof window.axios !== 'undefined' && typeof window.axios.post === 'function';
+        try { console.log('[AccountPhoto] Submit: using axios=%s', useAxios); } catch(_) {}
+        try { console.log('[AccountPhoto] Submit: start for action %s', photoForm && photoForm.action); } catch(_) {}
+        setBtnState(btn, true, 'Validando...');
+
+        const showProgress = (show) => {
+          if (!progWrap) return;
+          progWrap.style.display = show ? '' : 'none';
+        };
+        const updateProgress = (pct) => {
+          if (!progBar) return;
+          const val = Math.max(0, Math.min(100, Math.round(pct)));
+          progBar.style.width = val + '%';
+          progBar.setAttribute('aria-valuenow', String(val));
+          progBar.textContent = val + '%';
+        };
         try {
           const fileInput = photoForm.querySelector('input[name="profileImage"][type="file"]');
           const file = fileInput && fileInput.files && fileInput.files[0];
+          try { console.log('[AccountPhoto] Submit: file selected=%s type=%s size=%s', !!file, file && file.type, file && file.size); } catch(_) {}
           if (!file) {
             showAccountAlert('warning', 'Selecciona una imagen antes de actualizar la foto.');
             return;
@@ -286,59 +315,156 @@ document.addEventListener('DOMContentLoaded', function () {
 
           await ensureHorizontalImage(file);
           setBtnState(btn, true, 'Subiendo...');
-
-          const res = await fetch(photoForm.action, {
-            method: 'POST',
-            body: new FormData(photoForm)
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(data.message || 'No se pudo actualizar la foto');
+          // Importante: construir FormData ANTES de deshabilitar el input file
+          const formData = new FormData(photoForm);
+          try { console.log('[AccountPhoto] Submit: formData keys=%o', Array.from(formData.keys())); } catch(_) {}
+          if (fileInput) fileInput.disabled = true;
+          showProgress(true);
+          updateProgress(0);
+          let data;
+          if (useAxios) {
+            try {
+              const res = await axios.post(photoForm.action, formData, {
+                headers: { Accept: 'application/json' },
+                withCredentials: true,
+                onUploadProgress: (evt) => {
+                  if (evt && evt.total) {
+                    const pct = (evt.loaded / evt.total) * 100;
+                    updateProgress(pct);
+                    try { console.debug('[AccountPhoto] Upload progress: %d/%d (%.2f%)', evt.loaded, evt.total, pct); } catch(_) {}
+                  }
+                }
+              });
+              data = res && res.data ? res.data : {};
+              try { console.log('[AccountPhoto] Upload response (axios): %o', data); } catch(_) {}
+            } catch (err) {
+              try { console.error('[AccountPhoto] Upload error (axios):', err); } catch(_) {}
+              const msg = (err && err.response && err.response.data && err.response.data.message) || err.message || 'No se pudo actualizar la foto';
+              throw new Error(msg);
+            }
+          } else {
+            const res = await fetch(photoForm.action, {
+              method: 'POST',
+              headers: { Accept: 'application/json' },
+              body: formData,
+              credentials: 'same-origin'
+            });
+            data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.message || 'No se pudo actualizar la foto');
+            try { console.log('[AccountPhoto] Upload response (fetch): %o', data); } catch(_) {}
+          }
 
           showAccountAlert('success', (data && data.message) || 'Foto actualizada');
 
           if (data && data.data && data.data.profileImage) {
-            const img = document.querySelector('#tab-foto img');
-            if (img) img.src = data.data.profileImage;
+            const container = document.querySelector('.account-photo-preview-group');
+            if (container) {
+              let img = container.querySelector('img.account-photo-preview');
+              if (!img) {
+                // Reemplaza placeholder por imagen
+                container.innerHTML = '';
+                img = document.createElement('img');
+                img.className = 'img-fluid rounded account-photo-preview';
+                img.style.maxWidth = '220px';
+                img.style.width = '100%';
+                img.style.height = 'auto';
+                img.style.objectFit = 'contain';
+                img.alt = 'Foto de perfil';
+                container.appendChild(img);
+              }
+              img.src = data.data.profileImage;
+            } else {
+              const img = document.querySelector('#tab-foto img');
+              if (img) img.src = data.data.profileImage;
+            }
           }
-
-          setTimeout(() => location.reload(), 600);
         } catch (err) {
-          console.error(err);
+          try { console.error('[AccountPhoto] Submit error:', err); } catch(_) {}
           showAccountAlert('danger', err.message || 'Ocurrió un error');
         } finally {
+          try { console.debug('[AccountPhoto] Submit finally: resetting UI'); } catch(_) {}
           setBtnState(btn, false, 'Actualizar foto');
           photoForm.reset();
+          if (progBar) updateProgress(0);
+          showProgress(false);
+          const fileInput = photoForm.querySelector('input[name="profileImage"][type="file"]');
+          if (fileInput) fileInput.disabled = false;
         }
       });
     }
 
-    if (photoDeleteForm) {
+    if (false && photoDeleteForm) {
+      try { console.log('[AccountPhoto] Hooked photoDeleteForm submit handler'); } catch(_) {}
       photoDeleteForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = photoDeleteForm.querySelector('button[type=submit]');
-        setBtnState(btn, true, 'Eliminando...');
+        const useAxios = typeof window.axios !== 'undefined' && typeof window.axios.post === 'function';
+        const prevHtml = btn ? btn.innerHTML : '';
+        const prevDisabled = btn ? btn.disabled : false;
+        const showSpinner = () => { if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Eliminando...'; } };
+        const restoreBtn = () => { if (btn) { btn.disabled = prevDisabled; btn.innerHTML = prevHtml || 'Eliminar foto'; } };
+        showSpinner();
         try {
+          try { console.log('[AccountPhoto] Delete submit: using axios=%s', useAxios); } catch(_) {}
           const body = new URLSearchParams();
           body.set('profileImage', '');
 
-          const res = await fetch(photoDeleteForm.action, {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-            },
-            body
-          });
-          const data = await res.json().catch(() => ({}));
-          if (!res.ok) throw new Error(data.message || 'No se pudo eliminar la foto');
+          let data;
+          if (useAxios) {
+            try {
+              const res = await axios.post(photoDeleteForm.action, body, {
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                },
+                withCredentials: true
+              });
+              data = (res && res.data) || {};
+              try { console.log('[AccountPhoto] Delete response (axios): %o', data); } catch(_) {}
+            } catch (err) {
+              try { console.error('[AccountPhoto] Delete error (axios):', err); } catch(_) {}
+              const msg = (err && err.response && err.response.data && err.response.data.message) || err.message || 'No se pudo eliminar la foto';
+              throw new Error(msg);
+            }
+          } else {
+            const res = await fetch(photoDeleteForm.action, {
+              method: 'POST',
+              headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+              },
+              body,
+              credentials: 'same-origin'
+            });
+            data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.message || 'No se pudo eliminar la foto');
+            try { console.log('[AccountPhoto] Delete response (fetch): %o', data); } catch(_) {}
+          }
 
           showAccountAlert('success', data.message || 'Foto eliminada');
-          setTimeout(() => location.reload(), 600);
+          // Actualiza el preview a placeholder
+          const container = document.querySelector('.account-photo-preview-group');
+          if (container) {
+            container.innerHTML = '';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'd-inline-flex align-items-center justify-content-center bg-light rounded account-photo-placeholder';
+            placeholder.style.width = '220px';
+            placeholder.style.height = '220px';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-user fa-3x text-muted account-photo-placeholder-icon';
+            placeholder.appendChild(icon);
+            container.appendChild(placeholder);
+          } else {
+            const img = document.querySelector('#tab-foto img');
+            if (img && img.parentNode) {
+              img.parentNode.removeChild(img);
+            }
+          }
         } catch (err) {
-          console.error(err);
+          try { console.error('[AccountPhoto] Delete submit error:', err); } catch(_) {}
           showAccountAlert('danger', err.message || 'Ocurrió un error');
         } finally {
-          setBtnState(btn, false, 'Eliminar foto');
+          restoreBtn();
         }
       });
     }

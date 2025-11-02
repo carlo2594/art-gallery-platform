@@ -5,17 +5,38 @@ const restrictTo       = require('@middlewares/restrictTo');
 const isOwner          = require('@middlewares/isOwner');
 const favoriteController = require('@controllers/favoriteController');
 const authController    = require('@controllers/authController');
+const AppError          = require('@utils/appError');
 
 const router = express.Router();
 const multer = require('multer');
-// Usar memoria para evitar problemas de filesystem en Windows
-const upload = multer({ storage: multer.memoryStorage() });
+// Usar memoria + límites y filtro de tipo para imágenes
+const upload = multer({
+  storage: multer.memoryStorage(),
+  // Subimos el límite a 50MB para permitir archivos grandes
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB máx.
+  fileFilter: (req, file, cb) => {
+    try {
+      const ok = file && file.mimetype && file.mimetype.toLowerCase().startsWith('image/');
+      if (!ok) {
+        try { console.warn('[multer:fileFilter] Rechazado', { mimetype: file && file.mimetype, originalname: file && file.originalname }); } catch(_) {}
+        return cb(new AppError('Solo se permiten archivos de imagen (máx. 50MB).', 400));
+      }
+      cb(null, true);
+    } catch (e) {
+      try { console.warn('[multer:fileFilter] Error', e && e.message); } catch(_) {}
+      cb(new AppError('Archivo de imagen inválido.', 400));
+    }
+  }
+});
 
 /* ---- Perfil propio ---- */
 router.get('/me',           requireUser, userController.getMe);
 router.patch('/update-me',  requireUser, upload.single('profileImage'), userController.updateMe);
 // Alias para formularios HTML (POST)
 router.post('/update-me',   requireUser, upload.single('profileImage'), userController.updateMe);
+// Imagen de perfil (propio): subir/actualizar o eliminar
+router.patch('/me/profile-image', requireUser, upload.single('profileImage'), userController.updateMyProfileImage);
+router.post('/me/profile-image',  requireUser, upload.single('profileImage'), userController.updateMyProfileImage);
 router.patch('/update-password', requireUser, userController.updatePassword);
 // Alias POST para formularios HTML
 router.post('/update-password', requireUser, userController.updatePassword);
