@@ -27,6 +27,7 @@ module.exports = app => {
   app.use('/api/v1/artwork-views', artworkViewRoutes);
   app.use('/api/v1/newsletter',  require('@routes/api/newsletterRoutes')); 
   app.use('/api/v1/contact',     require('@routes/api/contactRoutes'));
+  app.use('/api/v1/artist-applications', require('@routes/api/artistApplicationRoutes'));
   // Media endpoints (upload/public/original)
   app.use('/', mediaRoutes);
 

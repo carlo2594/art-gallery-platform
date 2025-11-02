@@ -12,6 +12,7 @@ const Artwork = require('@models/artworkModel');
 const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
 const Favorite = require('@models/favoriteModel');
+const ArtistApplication = require('@models/artistApplicationModel');
 
 // Utilities optimizadas
 const { viewsCache } = require('@utils/cache');
@@ -868,4 +869,34 @@ exports.getContact = (req, res) => {
     formData
   });
 };
+
+// Página informativa: Convertirse en artista / Vender mi arte
+exports.getBecomeArtist = catchAsync(async (req, res) => {
+  const currentUser = res.locals && res.locals.currentUser;
+  const success = !!req.query.success;
+  const error = req.query.error;
+
+  let application = null;
+  try {
+    if (currentUser && currentUser.role !== 'artist') {
+      const uid = currentUser.id || currentUser._id;
+      // Preferir solicitudes abiertas; si no hay, mostrar la más reciente
+      application = await ArtistApplication.findOne({
+        user: uid,
+        status: { $in: ['pending', 'under_review'] }
+      }).sort({ createdAt: -1 }).lean();
+      if (!application) {
+        application = await ArtistApplication.findOne({ user: uid }).sort({ createdAt: -1 }).lean();
+      }
+    }
+  } catch (_) {}
+
+  return res.status(200).render('public/static/become-artist', {
+    title: 'Vender mi arte · Galería del Ox',
+    currentUser,
+    success,
+    error,
+    application
+  });
+});
 

@@ -1,0 +1,190 @@
+extends /layouts/public
+
+block content
+  section.py-5
+    .container
+      .row.justify-content-center
+        .col-lg-8
+          h1.display-5.fw-bold.mb-3 Vender mi arte
+          p.lead.text-muted.mb-4
+            | ¿Eres artista y quieres vender tus obras en Galería del Ox?
+            |  Comienza creando tu cuenta y comparte tu portfolio con nuestra comunidad.
+          if success
+            .alert.alert-success(role='alert') Tu solicitud fue enviada correctamente. Te contactaremos pronto.
+          if error
+            .alert.alert-danger(role='alert')= error
+
+          // Beneficios rápidos
+          .row.g-3.mb-4
+            .col-12.col-md-6
+              .p-3.bg-white.rounded-3.shadow-sm
+                i.fas.fa-palette.me-2.text-primary
+                span Exhibe y vende tus obras
+            .col-12.col-md-6
+              .p-3.bg-white.rounded-3.shadow-sm
+                i.fas.fa-user-group.me-2.text-primary
+                span Llega a coleccionistas reales
+            .col-12.col-md-6
+              .p-3.bg-white.rounded-3.shadow-sm
+                i.fas.fa-shield-halved.me-2.text-primary
+                span Curaduría y revisión de calidad
+            .col-12.col-md-6
+              .p-3.bg-white.rounded-3.shadow-sm
+                i.fas.fa-money-bill-wave.me-2.text-primary
+                span Gestión de reservas y ventas
+
+          // CTAs según estado de sesión
+          if !currentUser
+            a.btn.btn-primary.btn-lg.rounded-pill.fw-bold.mb-3(href='/signup?intent=artist' aria-label='Crear cuenta de artista')
+              i.fas.fa-user-plus.me-2
+              | Crear cuenta de artista
+            p.small.text-muted
+              | ¿Ya tienes cuenta? Inicia sesión y completa tu solicitud.
+          else if currentUser.role === 'artist'
+            .alert.alert-success(role='status')
+              i.fas.fa-circle-check.me-2
+              | Ya eres artista en la galería. ¡Bienvenido!
+            a.btn.btn-outline-primary.rounded-pill.fw-bold(href='/artworks' aria-label='Explorar obras')
+              i.fas.fa-images.me-2
+              | Explorar obras
+          else if application
+            // Estado de solicitud existente
+            - var st = application && application.status
+            - var isRejected = (st === 'rejected')
+            - var percent = (st === 'pending') ? 33 : ((st === 'under_review') ? 66 : 100)
+            - var step3 = isRejected ? 'Rechazada' : 'Aprobada'
+            .card.mb-4
+              .card-body
+                h2.h5.fw-bold.mb-3 Estado de tu solicitud
+                p.mb-2
+                  | Estado actual:
+                  if st === 'pending'
+                    span.badge.text-bg-warning.ms-2 Recibida
+                  else if st === 'under_review'
+                    span.badge.text-bg-info.ms-2 En revisión
+                  else if st === 'approved'
+                    span.badge.text-bg-success.ms-2 Aprobada
+                  else if st === 'rejected'
+                    span.badge.text-bg-danger.ms-2 Rechazada
+                .progress.mb-3(style='height: 10px;')
+                  if isRejected
+                    .progress-bar.bg-danger(role='progressbar', style=`width: ${percent}%`, aria-valuenow=percent aria-valuemin='0' aria-valuemax='100')
+                  else
+                    .progress-bar.bg-success(role='progressbar', style=`width: ${percent}%`, aria-valuenow=percent aria-valuemin='0' aria-valuemax='100')
+                .d-flex.justify-content-between.text-center.mb-2
+                  .flex-fill
+                    if st === 'pending'
+                      i.fas.fa-hourglass-half.text-warning
+                      div.small.fw-bold Recibida
+                    else
+                      i.fas.fa-check.text-success
+                      div.small.text-success Recibida
+                  .flex-fill
+                    if st === 'under_review'
+                      i.fas.fa-magnifying-glass.text-info
+                      div.small.fw-bold En revisión
+                    else if st === 'approved' || st === 'rejected'
+                      i.fas.fa-check.text-success
+                      div.small.text-success En revisión
+                    else
+                      i.fas.fa-circle.text-muted
+                      div.small.text-muted En revisión
+                  .flex-fill
+                    if st === 'approved'
+                      i.fas.fa-circle-check.text-success
+                      div.small.fw-bold Aprobada
+                    else if st === 'rejected'
+                      i.fas.fa-circle-xmark.text-danger
+                      div.small.fw-bold Rechazada
+                    else
+                      i.fas.fa-circle.text-muted
+                      div.small.text-muted= step3
+                - var updated = application && application.updatedAt ? new Date(application.updatedAt) : null
+                if application && application.createdAt
+                  - var created = new Date(application.createdAt)
+                  p.small.text-muted.mb-0
+                    | Enviada: #{created.toLocaleString('es-ES')}
+                if updated
+                  p.small.text-muted.mt-0
+                    | Última actualización: #{updated.toLocaleString('es-ES')}
+                if isRejected
+                  p.mt-2
+                    | Si tienes dudas, contáctanos para más información. 
+                    a(href='/contact') Contacto
+          else
+            // Formulario de solicitud de artista
+            form#artistAppForm(action='/api/v1/artist-applications' method='POST' enctype='multipart/form-data')
+              //- Honeypot anti-spam
+              input(type='text' name='company' tabindex='-1' autocomplete='off' aria-hidden='true' style='position:absolute;left:-9999px;height:1px;width:1px;padding:0;margin:0;border:0;')
+
+              .mb-3
+                label.form-label Redes sociales, páginas web y links de interés
+                // Lista dinámica de enlaces
+                .links-list
+                  .input-group.mb-2.links-item
+                    span.input-group-text
+                      i.fas.fa-link
+                    input.form-control(type='url' name='links' placeholder='https://tuweb.com o https://instagram.com/usuario' required)
+                    button.btn.btn-outline-secondary(type='button' data-action='remove-link' aria-label='Eliminar enlace' title='Eliminar' disabled)
+                      i.fas.fa-xmark
+                button.btn.btn-outline-primary.btn-sm(type='button' id='addLinkBtn')
+                  i.fas.fa-plus.me-1
+                  | Agregar enlace
+                .form-text Puedes añadir hasta 5 enlaces (redes sociales, páginas web, portafolios, links de interés).
+
+              .mb-3
+                label.form-label(for='resume') CV (PDF)
+                input#resume.form-control(type='file' name='resume' accept='.pdf,application/pdf' required)
+                .form-text Solo PDF. Máximo 10 MB.
+
+              .mb-3
+                label.form-label(for='statement') Sobre tu trabajo (opcional)
+                textarea#statement.form-control(name='statement' rows='5' maxlength='1500' placeholder='Cuéntanos brevemente sobre tu obra, técnica y experiencia (máx. 1500 caracteres).')
+
+              button.btn.btn-primary.rounded-pill.fw-bold(type='submit')
+                i.fas.fa-paper-plane.me-2
+                | Enviar solicitud
+
+block scriptsExtra
+  script.
+    (function(){
+      var addBtn = document.getElementById('addLinkBtn');
+      var list = document.querySelector('.links-list');
+      var MAX_LINKS = 5;
+      function updateStates(){
+        var items = list.querySelectorAll('.links-item');
+        items.forEach(function(item, idx){
+          var btn = item.querySelector('[data-action="remove-link"]');
+          if (btn) btn.disabled = (items.length <= 1);
+        });
+        if (addBtn) {
+          var count = items.length;
+          addBtn.disabled = (count >= MAX_LINKS);
+          addBtn.setAttribute('aria-disabled', addBtn.disabled ? 'true' : 'false');
+          addBtn.title = addBtn.disabled ? 'Máximo de enlaces alcanzado' : 'Agregar enlace';
+        }
+      }
+      function addLink(value){
+        var current = list.querySelectorAll('.links-item').length;
+        if (current >= MAX_LINKS) { updateStates(); return; }
+        var group = document.createElement('div');
+        group.className = 'input-group mb-2 links-item';
+        group.innerHTML = '<span class="input-group-text"><i class="fas fa-link"></i></span>' +
+                          '<input class="form-control" type="url" name="links" placeholder="https://tuweb.com o https://instagram.com/usuario" ' + (value? ('value="'+String(value).replace(/"/g,'&quot;')+'"') : '') + ' required>' +
+                          '<button class="btn btn-outline-secondary" type="button" data-action="remove-link" aria-label="Eliminar enlace" title="Eliminar"><i class="fas fa-xmark"></i></button>';
+        list.appendChild(group);
+        updateStates();
+      }
+      if (addBtn && list){
+        addBtn.addEventListener('click', function(){ addLink(''); });
+        list.addEventListener('click', function(e){
+          var t = e.target;
+          if (t && (t.getAttribute('data-action')==='remove-link' || (t.closest && t.closest('[data-action="remove-link"]')))){
+            var btn = t.getAttribute('data-action')==='remove-link' ? t : t.closest('[data-action="remove-link"]');
+            var item = btn && btn.closest('.links-item');
+            if (item && list.querySelectorAll('.links-item').length > 1){ item.remove(); updateStates(); }
+          }
+        });
+        updateStates();
+      }
+    })();

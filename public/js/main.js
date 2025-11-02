@@ -1641,6 +1641,35 @@ document.addEventListener('DOMContentLoaded', function(){
       }
     });
   })();
+
+  // Artist application: auto-prefix http(s) for link inputs
+  (function normalizeArtistApplicationLinks(){
+    try {
+      var form = document.getElementById('artistAppForm');
+      if (!form) return;
+      function normalize(el){
+        try {
+          var v = (el && el.value || '').trim();
+          if (!v) return;
+          if (/^https?:\/\//i.test(v)) { el.value = v; return; }
+          if (/^\/\//.test(v)) { el.value = 'https:' + v; return; }
+          el.value = 'https://' + v;
+        } catch(_){ }
+      }
+      form.addEventListener('submit', function(){
+        var inputs = form.querySelectorAll('input[name="links"]');
+        inputs.forEach(normalize);
+      });
+      form.addEventListener('blur', function(e){
+        var t = e && e.target;
+        if (t && t.name === 'links' && t.tagName === 'INPUT') normalize(t);
+      }, true);
+      form.addEventListener('change', function(e){
+        var t = e && e.target;
+        if (t && t.name === 'links' && t.tagName === 'INPUT') normalize(t);
+      });
+    } catch(_){ }
+  })();
 });
   // Home: letter reveal for home-exhibitions title
   (function homeHeadingReveal(){

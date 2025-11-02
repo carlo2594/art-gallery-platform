@@ -76,6 +76,8 @@ html.no-js(lang='es')
                   ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenu')
                     li
                       a.dropdown-item.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+                    li
+                      a.dropdown-item.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
                     if currentUser && currentUser.role === 'admin'
                       li
                         a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador

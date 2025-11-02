@@ -2705,3 +2705,18 @@ body.noscroll {
 .account-tab-pane--password {
   position: relative;
 }
+
+/* Navbar: CTA "Vender mi arte" */
+.navbar .nav-link-artist-cta {
+  background: var(--ox-yellow);
+  color: var(--ox-blue);
+  border-radius: 2rem;
+  padding: .6rem 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.navbar .nav-link-artist-cta:hover,
+.navbar .nav-link-artist-cta:focus {
+  background: var(--ox-orange);
+  color: var(--ox-beige);
+}
