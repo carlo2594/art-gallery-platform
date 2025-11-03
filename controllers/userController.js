@@ -13,6 +13,7 @@ const { sendMail } = require('@services/mailer');
 
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
+const handleCoverImage = require('@utils/handleCoverImage');
 const handleDuplicateKeyError = require('@utils/handleDuplicateKeyError');
 
 // CRUD estándar
@@ -368,6 +369,69 @@ exports.updateMyProfileImage = catchAsync(async (req, res, next) => {
   sendResponse(res, user, 'Imagen de perfil actualizada');
 });
 
+// Subir/actualizar o eliminar imagen de portada (cover) del usuario autenticado
+// Campo multipart: 'coverImage'; si se envía coverImage vacío en body, elimina la portada
+exports.updateMyCoverImage = catchAsync(async (req, res, next) => {
+  const DEBUG = process.env.NODE_ENV !== 'production';
+  const dlog = (...args) => { try { if (DEBUG) console.log('[updateMyCoverImage]', ...args); } catch(_) {} };
+  const user = await User.findById(req.user.id);
+  if (!user) return next(new AppError('Usuario no encontrado', 404));
+
+  const filteredBody = {};
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'coverImage')) {
+    filteredBody.coverImage = req.body.coverImage;
+  }
+  dlog('has file?', !!req.file, req.file && { mimetype: req.file.mimetype, size: req.file.size, originalname: req.file.originalname });
+
+  try {
+    await handleCoverImage(user, req, filteredBody);
+  } catch (e) {
+    if (e instanceof AppError) return next(e);
+    return next(new AppError('No se pudo procesar la portada. ' + (e && e.message ? e.message : ''), 500));
+  }
+
+  Object.assign(user, filteredBody);
+  await user.save();
+
+  if (req._oldCoverImagePublicId && req._oldCoverImagePublicId !== user.coverImagePublicId) {
+    deleteImage(req._oldCoverImagePublicId).catch(() => {});
+  }
+  dlog('saved cover', { coverImage: user.coverImage, coverImagePublicId: user.coverImagePublicId, removedOld: !!req._oldCoverImagePublicId });
+
+  const acceptHeader = req.headers.accept || '';
+  if (!acceptHeader.includes('application/json')) {
+    return res.redirect(303, '/edit-profile?tab=foto&status=portada-actualizada');
+  }
+  sendResponse(res, user, 'Portada actualizada');
+});
+
+// ADMIN: Subir/actualizar o eliminar imagen de portada (cover) de un usuario
+// Campo multipart: 'coverImage'; si se envía coverImage vacío en body, elimina la portada
+exports.updateUserCoverImage = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id).select('+active');
+  if (!user) return next(new AppError('Usuario no encontrado', 404));
+
+  const filteredBody = {};
+  if (req.body && Object.prototype.hasOwnProperty.call(req.body, 'coverImage')) {
+    filteredBody.coverImage = req.body.coverImage;
+  }
+
+  try {
+    await handleCoverImage(user, req, filteredBody);
+  } catch (e) {
+    if (e instanceof AppError) return next(e);
+    return next(new AppError('No se pudo procesar la portada. ' + (e && e.message ? e.message : ''), 500));
+  }
+
+  Object.assign(user, filteredBody);
+  await user.save();
+
+  if (req._oldCoverImagePublicId && req._oldCoverImagePublicId !== user.coverImagePublicId) {
+    deleteImage(req._oldCoverImagePublicId).catch(() => {});
+  }
+
+  sendResponse(res, user, 'Portada actualizada');
+});
 // ADMIN: Subir/actualizar o eliminar imagen de perfil del usuario
 // Acepta multipart/form-data con campo 'profileImage'. Si se envía profileImage vacío en body, elimina la imagen.
 exports.updateUserProfileImage = catchAsync(async (req, res, next) => {

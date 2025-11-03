@@ -18,6 +18,18 @@
               input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
               button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
               button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
+        // Bloque de imagen de portada (cover)
+        .mb-3.admin-users-cover-block
+          label.form-label Imagen de portada
+          .d-flex.align-items-center.gap-3
+            if u.coverImage
+              img.admin-users-cover-preview.img-thumbnail(src=u.coverImage alt=`Portada de ${u.name}` style='width:120px;height:64px;object-fit:cover;')
+            else
+              img.admin-users-cover-preview.img-thumbnail(src='' alt=`Portada de ${u.name}` style='width:120px;height:64px;object-fit:cover;display:none;')
+            .d-flex.flex-wrap.gap-2
+              input.form-control.form-control-sm.admin-users-cover-input(type='file' accept='image/*')
+              button.btn.btn-sm.btn-primary.admin-users-cover-upload-btn(type='button') Subir
+              button.btn.btn-sm.btn-outline-danger.admin-users-cover-remove-btn(type='button') Quitar
         // Formulario de datos
         form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
           .mb-3

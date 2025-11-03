@@ -108,6 +108,10 @@ block content
                   p.small.text-muted.mt-0
                     | Última actualización: #{updated.toLocaleString('es-ES')}
                 if isRejected
+                  if application && application.adminNotes
+                    .alert.alert-warning.mt-2
+                      strong Motivo del rechazo:
+                      div.mt-1(style='white-space: pre-wrap')= application.adminNotes
                   p.mt-2
                     | Si tienes dudas, contáctanos para más información. 
                     a(href='/contact') Contacto

@@ -29,6 +29,8 @@ const userSchema = new mongoose.Schema({
   },
   profileImage: { type: String, trim: true },
   profileImagePublicId: { type: String, trim: true },
+  coverImage: { type: String, trim: true },
+  coverImagePublicId: { type: String, trim: true },
   bio: { type: String, trim: true, maxlength: 1200 },
   headline: { type: String, trim: true, maxlength: 80 },
   location: { type: String, trim: true, maxlength: 100 },

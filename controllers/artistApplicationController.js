@@ -4,6 +4,7 @@ const AppError = require('@utils/appError');
 const { uploadBuffer } = require('@utils/cloudinaryImage');
 const { sendMail } = require('@services/mailer');
 const ArtistApplication = require('@models/artistApplicationModel');
+const cloudinary = require('@services/cloudinary');
 
 function wantsHTML(req) {
   try { return req.accepts(['html','json']) === 'html'; } catch (_) { return false; }
@@ -61,15 +62,21 @@ exports.create = catchAsync(async (req, res, next) => {
     return next(new AppError(msg, 400));
   }
 
-  // Subir a Cloudinary como recurso "raw" (PDF)
+  // Subir a Cloudinary como recurso "raw" (PDF), privado
   const options = {
     folder: 'artist-applications/resumes',
     resource_type: 'raw',
+    type: 'private',
     use_filename: true,
     unique_filename: true,
     overwrite: false
   };
   const uploadRes = await uploadBuffer(file.buffer, options.folder, options);
+
+  // Capturar y sanitizar el nombre original, asegurando extensión .pdf
+  let originalName = String(file.originalname || (uploadRes && uploadRes.original_filename) || 'cv').trim();
+  try { originalName = originalName.replace(/[\\/\:\*\?\"\<\>\|]+/g, ''); } catch(_) {}
+  if (!/\.pdf$/i.test(originalName)) originalName = originalName + '.pdf';
 
   const appDoc = await ArtistApplication.create({
     user: user._id,
@@ -77,20 +84,32 @@ exports.create = catchAsync(async (req, res, next) => {
     links: valid,
     statement,
     resumePublicId: uploadRes.public_id,
-    resumeUrl: uploadRes.secure_url,
+    resumeUrl: uploadRes.secure_url || '',
+    resumeOriginalName: originalName,
     status: 'pending'
   });
 
   // Notificar a soporte
   const to = process.env.CONTACT_EMAIL_TO || process.env.SUPPORT_EMAIL || 'soporte@galeriadelox.com';
   const subject = `Nueva solicitud de artista – ${user.name || user.email || user._id}`;
+  // Generar URL de descarga privada (forzar nombre y descarga como PDF)
+  let downloadUrl = '';
+  try {
+    downloadUrl = cloudinary.utils.private_download_url(uploadRes.public_id, 'pdf', {
+      resource_type: 'raw',
+      type: 'private',
+      attachment: originalName
+    });
+  } catch(_) {}
+
   const text = `Usuario: ${user.name || ''} (${user.email || ''})\n` +
                (valid.length ? `Enlaces:\n- ${valid.join('\n- ')}\n` : '') +
                (statement ? `Statement:\n${statement}\n\n` : '') +
-               `CV (PDF): ${uploadRes.secure_url}\n` +
+               `CV (descarga privada): ${downloadUrl || '(no disponible)'}\n` +
                `Aplicación ID: ${appDoc._id}`;
   try { await sendMail({ to, subject, text }); } catch (_) {}
 
   if (wantsHTML(req)) return res.redirect(303, '/become-artist?success=1');
   return res.status(201).json({ ok: true, data: { id: appDoc._id } });
 });
+

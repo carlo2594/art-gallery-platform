@@ -5,6 +5,10 @@ const statsService = require('@services/statsService');
 const Exhibition   = require('@models/exhibitionModel');
 const Artwork      = require('@models/artworkModel');
 const User         = require('@models/userModel');
+const ArtistApplication = require('@models/artistApplicationModel');
+const cloudinary = require('@services/cloudinary');
+const https = require('https');
+const http = require('http');
 const { getPaginationParams } = require('@utils/pagination');
 const { buildUserAdminFilter, getUserAdminSort } = require('@utils/userAdminSearch');
 
@@ -353,5 +357,127 @@ exports.getExhibitionPreview = catchAsync(async (req, res, next) => {
     artworks,
     totalArtworks
   });
+});
+
+/* Solicitudes de Artista */
+exports.getArtistApplications = catchAsync(async (req, res) => {
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
+
+  const q = (req.query.q || '').trim();
+  const status = (req.query.status || '').trim(); // pending | under_review | approved | rejected
+  const sortParam = (req.query.sort || 'recent').trim(); // recent | oldest
+
+  const filter = {};
+  const STATUS_ENUM = ['pending', 'under_review', 'approved', 'rejected'];
+  if (STATUS_ENUM.includes(status)) filter.status = status;
+
+  if (q) {
+    // Buscar por nombre o email del usuario (case-insensitive, tolerante)
+    const smart = buildDiacriticRegex(q);
+    const userIds = await User.find({
+      $or: [
+        { name: { $regex: smart } },
+        // email está select:false, pero para filtrar sí aplica
+        { email: { $regex: smart } }
+      ]
+    }).select('_id').distinct('_id');
+    filter.user = { $in: userIds };
+  }
+
+  let sort = { createdAt: -1 };
+  if (sortParam === 'oldest') sort = { createdAt: 1 };
+
+  const [total, applications] = await Promise.all([
+    ArtistApplication.countDocuments(filter),
+    ArtistApplication.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage)
+      .populate({ path: 'user', select: 'name +email +role profileImage' })
+      .lean()
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+  return res.status(200).render('admin/artist-applications/index', {
+    title: 'Solicitudes de artista',
+    applications,
+    page,
+    totalPages,
+    qsPrefix: buildQsPrefix(req.query),
+    q,
+    status,
+    sort: sortParam
+  });
+});
+
+exports.postArtistApplicationStatus = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  const nextStatus = String(req.body.status || '').trim();
+  const adminNotes = String(req.body.adminNotes || '').trim();
+  const redirectTo = req.body.redirect || '/admin/artist-applications';
+
+  const ALLOWED = ['pending', 'under_review', 'approved', 'rejected'];
+  if (!ALLOWED.includes(nextStatus)) return next(new AppError('Estado inválido', 400));
+
+  const appDoc = await ArtistApplication.findById(id);
+  if (!appDoc) return next(new AppError('Solicitud no encontrada', 404));
+
+  appDoc.status = nextStatus;
+  if (adminNotes) appDoc.adminNotes = adminNotes;
+  await appDoc.save();
+
+  // Si se aprueba, promover al usuario a artista (si no lo es ya)
+  if (nextStatus === 'approved' && appDoc.user) {
+    try {
+      await User.findByIdAndUpdate(appDoc.user, { role: 'artist' });
+    } catch (_) {}
+  }
+
+  // Volver a la lista conservando filtros
+  return res.redirect(303, redirectTo);
+});
+
+exports.downloadArtistApplicationResume = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  const appDoc = await ArtistApplication.findById(id).populate({ path: 'user', select: 'name +email' });
+  if (!appDoc) return next(new AppError('Solicitud no encontrada', 404));
+  if (!appDoc.resumePublicId) return next(new AppError('Esta solicitud no tiene CV adjunto', 404));
+
+  // Nombre de archivo preferente: original subido; fallback al nombre del usuario
+  let filename = appDoc.resumeOriginalName || ((appDoc.user && appDoc.user.name) || 'cv');
+  try { filename = String(filename).replace(/[^a-zA-Z0-9_\-\. ]+/g, '').trim(); } catch(_) {}
+  if (!/\.pdf$/i.test(filename)) filename = `${filename}.pdf`;
+
+  // Generar URL firmada para recurso privado RAW (PDF)
+  const signedUrl = cloudinary.utils.private_download_url(appDoc.resumePublicId, 'pdf', {
+    resource_type: 'raw',
+    type: 'private',
+    attachment: filename
+  });
+
+  // Forzar descarga como PDF con nombre consistente haciendo proxy de la respuesta
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.status(200);
+
+  const fetchAndPipe = (u) => {
+    try {
+      const urlObj = new URL(u);
+      const client = urlObj.protocol === 'https:' ? https : http;
+      client.get(u, (up) => {
+        if ([301,302,303,307,308].includes(up.statusCode) && up.headers && up.headers.location) {
+          const nextUrl = new URL(up.headers.location, u).toString();
+          return fetchAndPipe(nextUrl);
+        }
+        up.on('error', () => { try { res.end(); } catch(_){}; });
+        up.pipe(res);
+      }).on('error', () => {
+        return next(new AppError('No se pudo descargar el CV', 502));
+      });
+    } catch (e) {
+      return next(new AppError('Enlace de descarga inválido', 400));
+    }
+  };
+  return fetchAndPipe(signedUrl);
 });
 

@@ -25,4 +25,9 @@ router.get('/users',              viewsAdminController.getUsers);
 router.get('/collectors',         viewsAdminController.getCollectors);
 router.get('/users/:id',          viewsAdminController.getUser);
 
+// Solicitudes de Artista
+router.get('/artist-applications',            viewsAdminController.getArtistApplications);
+router.post('/artist-applications/:id/status', viewsAdminController.postArtistApplicationStatus);
+router.get('/artist-applications/:id/download', viewsAdminController.downloadArtistApplicationResume);
+
 module.exports = router;

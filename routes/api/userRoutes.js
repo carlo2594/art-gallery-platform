@@ -37,6 +37,9 @@ router.post('/update-me',   requireUser, upload.single('profileImage'), userCont
 // Imagen de perfil (propio): subir/actualizar o eliminar
 router.patch('/me/profile-image', requireUser, upload.single('profileImage'), userController.updateMyProfileImage);
 router.post('/me/profile-image',  requireUser, upload.single('profileImage'), userController.updateMyProfileImage);
+// Imagen de portada (propio)
+router.patch('/me/cover-image', requireUser, upload.single('coverImage'), userController.updateMyCoverImage);
+router.post('/me/cover-image',  requireUser, upload.single('coverImage'), userController.updateMyCoverImage);
 router.patch('/update-password', requireUser, userController.updatePassword);
 // Alias POST para formularios HTML
 router.post('/update-password', requireUser, userController.updatePassword);
@@ -65,6 +68,14 @@ router.patch(
   restrictTo('admin'),
   upload.single('profileImage'),
   userController.updateUserProfileImage
+);
+// Admin: portada de usuario
+router.patch(
+  '/:id/cover-image',
+  requireUser,
+  restrictTo('admin'),
+  upload.single('coverImage'),
+  userController.updateUserCoverImage
 );
 
 // Admin: lookup por email para prevalidación en UI

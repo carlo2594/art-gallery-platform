@@ -1429,6 +1429,14 @@ document.addEventListener('DOMContentLoaded', function(){
         }
       } catch(_){}
     }
+    function setCoverPreview(modalEl, url){
+      try {
+        var img = modalEl.querySelector('.admin-users-cover-preview');
+        if (!img) return;
+        if (url) { img.src = url; img.style.display = ''; }
+        else { img.removeAttribute('src'); img.style.display = 'none'; }
+      } catch(_){}
+    }
     function fillFormFromData(form, data){
       if (!form || !data) return;
       var q = function(s){ return form.querySelector(s); };
@@ -1465,7 +1473,7 @@ document.addEventListener('DOMContentLoaded', function(){
           try {
             var data = (payload && payload.data) || payload;
             var user = data && (data.data || data.user || data);
-            if (user) { fillFormFromData(form, user); setAvatarPreview(modalEl, user.profileImage || ''); try { var link=modalEl && modalEl.querySelector('.admin-users-public-link'); if (link) link.href = '/artists/' + (user.slug || user._id || user.id); } catch(_){} }
+            if (user) { fillFormFromData(form, user); setAvatarPreview(modalEl, user.profileImage || ''); setCoverPreview(modalEl, user.coverImage || ''); try { var link=modalEl && modalEl.querySelector('.admin-users-public-link'); if (link) link.href = '/artists/' + (user.slug || user._id || user.id); } catch(_){} }
           } catch (e) { console.warn('No se pudo parsear detalle de usuario', e); }
         };
         if (window.axios) {
@@ -1524,6 +1532,45 @@ document.addEventListener('DOMContentLoaded', function(){
           .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d && d.message) || 'Failed'); }); return res.json(); })
           .then(onSuccess).catch(onError).finally(done);
       }
+    });
+
+    // Subir imagen de portada (delegado)
+    document.addEventListener('click', async function(e){
+      var btn = e.target.closest && e.target.closest('.admin-users-cover-upload-btn');
+      if (!btn) return;
+      var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!modalEl) return;
+      var id = modalEl.getAttribute('data-user-id');
+      var fileInput = modalEl.querySelector('.admin-users-cover-input');
+      if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
+      var file = fileInput.files[0];
+      try { await ensureHorizontalImage(file); } catch (err) { var msgV=(err && err.message)||'La imagen debe ser horizontal.'; if(window.showAdminToast) showAdminToast(msgV,'warning'); else alert(msgV); return; }
+      var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Subiendo...';
+      var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
+      var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
+      var fd = new FormData(); fd.append('coverImage', file);
+      var onSuccess = function(resp){ try { var data=(resp&&resp.data)||resp; var user=data&&(data.data||data.user||data); var newUrl=user&&user.coverImage; setCoverPreview(modalEl, newUrl||''); fileInput.value=''; } catch(_){ } if(window.showAdminToast) showAdminToast('Portada actualizada','success'); };
+      var onError = function(err){ console.error(err); var msg=(err&&err.response&&err.response.data&&(err.response.data.message||err.response.data.error||err.response.data.err))||err&&err.message||'No se pudo subir la portada'; if(window.showAdminToast) showAdminToast(msg,'danger'); };
+      if (window.axios) axios.patch(url, fd).then(onSuccess).catch(onError).finally(done);
+      else fetch(url, { method:'PATCH', body: fd }).then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d&&d.message)||'Failed');}); return res.json(); }).then(onSuccess).catch(onError).finally(done);
+    });
+
+    // Quitar imagen de portada (delegado)
+    document.addEventListener('click', function(e){
+      var btn = e.target.closest && e.target.closest('.admin-users-cover-remove-btn');
+      if (!btn) return;
+      var modalEl = btn.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!modalEl) return;
+      var id = modalEl.getAttribute('data-user-id');
+      if (!id) return;
+      if (!confirm('¿Quitar imagen de portada?')) return;
+      var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Quitando...';
+      var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
+      var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
+      var onSuccess = function(resp){ setCoverPreview(modalEl, ''); if (window.showAdminToast) showAdminToast('Portada eliminada','success'); };
+      var onError = function(err){ console.error(err); var msg=(err&&err.response&&err.response.data&&(err.response.data.message||err.response.data.error||err.response.data.err))||err&&err.message||'No se pudo eliminar la portada'; if(window.showAdminToast) showAdminToast(msg,'danger'); };
+      if (window.axios) axios.patch(url, { coverImage: '' }).then(onSuccess).catch(onError).finally(done);
+      else fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ coverImage: '' })}).then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d&&d.message)||'Failed');}); return res.json(); }).then(onSuccess).catch(onError).finally(done);
     });
 
     // Quitar imagen de perfil (delegado)

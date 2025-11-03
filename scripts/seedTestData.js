@@ -25,6 +25,7 @@ const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA L�
 const Comment = require('../models/commentModel');
 const PasswordResetToken = require('../models/passwordResetTokenModel');
 const Newsletter = require('../models/newsletterModel');
+const ArtistApplication = require('../models/artistApplicationModel');
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
@@ -111,6 +112,7 @@ async function seed() {
     await Comment.syncIndexes();
     await PasswordResetToken.syncIndexes();
     await Newsletter.syncIndexes();
+    await ArtistApplication.syncIndexes();
     console.log('✅ Índices sincronizados');
   } catch (error) {
     console.log('⚠️  Advertencia sincronizando índices:', error.message);
@@ -126,7 +128,8 @@ async function seed() {
     ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÍNEA
     Comment.deleteMany({}),
     PasswordResetToken.deleteMany({}),
-    Newsletter.deleteMany({})
+    Newsletter.deleteMany({}),
+    ArtistApplication.deleteMany({})
   ]);
   console.log('✅ Datos eliminados');
 
@@ -139,8 +142,23 @@ async function seed() {
     password: '123456', 
     role: 'admin', 
     profileImage: randomFromArray(randomImages),
+    coverImage: randomFromArray(randomImages),
     slug: 'admin'
   });
+
+  // Crear 5 coleccionistas (para solicitudes de artista)
+  for (let i = 1; i <= 5; i++) {
+    userData.push({
+      name: `Collector ${i}`,
+      email: `collector${i}@test.com`,
+      password: '123456',
+      role: 'collector',
+      bio: `Coleccionista de arte ${i}`,
+      profileImage: randomFromArray(randomImages),
+      coverImage: randomFromArray(randomImages),
+      slug: `collector-${i}`
+    });
+  }
   userData.push({ 
     name: 'UsuarioExtra', 
     email: 'usuarioextra@test.com', 
@@ -148,6 +166,7 @@ async function seed() {
     role: 'admin', 
     bio: 'Bio de usuario extra', 
     profileImage: randomFromArray(randomImages),
+    coverImage: randomFromArray(randomImages),
     slug: 'usuario-extra'
   });
   
@@ -166,6 +185,7 @@ async function seed() {
       facebook: 'leonardo.martinez.artist'
     },
     profileImage: randomFromArray(randomImages),
+    coverImage: randomFromArray(randomImages),
     slug: 'leonardo-martinez'
   });
   
@@ -177,6 +197,7 @@ async function seed() {
       role: 'artist',
       bio: `Bio de Artista ${i}`,
       profileImage: randomFromArray(randomImages),
+      coverImage: randomFromArray(randomImages),
       slug: `artista-${i}`
     });
   }
@@ -187,6 +208,36 @@ async function seed() {
     const created = await User.create(data);
     users.push(created);
   }
+
+  // Crear al menos 5 solicitudes de artista con distintos estados
+  const collectors = users.filter(u => u.role === 'collector');
+  const owner = collectors.length ? collectors : users; // fallback si no hubiese collectors
+  const pickUser = (idx) => owner[idx % owner.length];
+  const appSeed = [
+    { status: 'pending', links: ['https://portfolio.example.com/alfa', 'https://instagram.com/alfa'] },
+    { status: 'under_review', links: ['https://portfolio.example.com/bravo'] },
+    { status: 'approved', links: ['https://site.example.com/charlie'] },
+    { status: 'rejected', links: ['https://portfolio.example.com/delta'] },
+    { status: 'under_review', links: ['https://behance.net/echo'] }
+  ];
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'demo';
+  const fakeResumeUrl = (publicId) => `https://res.cloudinary.com/${cloudName}/raw/upload/v1720000000/${publicId}.pdf`;
+  const applicationsToInsert = appSeed.map((cfg, i) => {
+    const u = pickUser(i);
+    const publicId = `artist-applications/resumes/seed-cv-${i+1}`;
+    return {
+      user: u._id,
+      links: cfg.links,
+      statement: `Mi statement de prueba ${i+1}. Me interesa formar parte de la galería y aportar obras en pequeño y mediano formato.`,
+      resumePublicId: publicId,
+      resumeUrl: fakeResumeUrl(publicId),
+      resumeOriginalName: `cv-${(u.name || 'user').toString().toLowerCase().replace(/\s+/g,'-')}.pdf`,
+      status: cfg.status,
+      adminNotes: cfg.status === 'rejected' ? 'Perfil no encaja en esta convocatoria.' : (cfg.status === 'under_review' ? 'Pendiente ampliar info de trayectoria.' : '')
+    };
+  });
+  await ArtistApplication.insertMany(applicationsToInsert);
+  console.log(`✅ ${applicationsToInsert.length} solicitudes de artista creadas`);
 
   // Tamaños reales de canvas (en cm)
   const canvasSizes = [
@@ -520,6 +571,7 @@ async function seed() {
     password: '123456',
     role: 'artist',
     profileImage: randomFromArray(randomImages),
+    coverImage: randomFromArray(randomImages),
     bio: `Artista contemporánea argentina. Su práctica se centra en la pintura y el dibujo expandido,
     con un fuerte énfasis en la relación entre color, luz y materia. Explora series de procesos largos en
     las que alterna capas de veladuras con zonas de alto empaste, permitiendo que la huella del gesto y

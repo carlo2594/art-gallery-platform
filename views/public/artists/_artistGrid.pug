@@ -8,9 +8,10 @@
           // Usar ID para que el backend canonicé al slug actual
           a.stretched-link(href=`/artists/${artist._id}` aria-label=`Ver perfil de ${artist.name}`)
           .artist-image-container.position-relative
-            if artist.profileImage
+            - const artistCover = artist.coverImage || artist.profileImage
+            if artistCover
               img.artist-image(
-                src=artist.profileImage,
+                src=artistCover,
                 alt=artist.name,
                 loading=eager ? 'eager' : 'lazy',
                 fetchpriority=eager ? 'high' : 'low',

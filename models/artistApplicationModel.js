@@ -25,6 +25,7 @@ const artistApplicationSchema = new mongoose.Schema({
   statement: { type: String, trim: true, maxlength: 1500 },
   resumePublicId: { type: String, required: true, trim: true },
   resumeUrl: { type: String, required: true, trim: true },
+  resumeOriginalName: { type: String, trim: true },
   status: { type: String, enum: ['pending','under_review','approved','rejected'], default: 'pending', index: true },
   adminNotes: { type: String, trim: true, maxlength: 1500 }
 }, { timestamps: true });

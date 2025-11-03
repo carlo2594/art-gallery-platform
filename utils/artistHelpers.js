@@ -12,7 +12,7 @@ const findArtistByIdOrSlug = async (UserModel, artistId) => {
   if (isValidObjectId(artistId)) {
     // Buscar por ID con orden que coincide con índice
     artist = await UserModel.findById(artistId)
-      .select('name bio profileImage createdAt slug email location website social followersCount +role');
+      .select('name bio profileImage coverImage createdAt slug email location website social followersCount +role');
     
     // Si se encontró por ID y tiene slug, retornar redirección
     if (artist && artist.slug) {
@@ -25,7 +25,7 @@ const findArtistByIdOrSlug = async (UserModel, artistId) => {
   } else {
     // Buscar por slug - usar índice optimizado
     artist = await UserModel.findOne({ slug: artistId })
-      .select('name bio profileImage createdAt slug email location website social followersCount +role');
+      .select('name bio profileImage coverImage createdAt slug email location website social followersCount +role');
   }
 
   if (!artist) {
