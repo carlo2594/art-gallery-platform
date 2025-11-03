@@ -15,7 +15,7 @@ const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
-    title: { type: String, required: true, trim: true },
+    title: { type: String, required: function(){ return this.status !== 'draft'; }, trim: true },
     slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
     description: { type: String, trim: true },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
@@ -36,7 +36,7 @@ const artworkSchema = new mongoose.Schema(
 
     /* ------ Media & meta ------ */
     // Campos para imagen en Cloudinary
-    imageUrl: { type: String, required: true },      // URL pública
+    imageUrl: { type: String, required: function(){ return this.status !== 'draft'; } },      // URL pública
     imagePublicId: { type: String }, // ID de Cloudinary
     imageWidth_px: { type: Number }, // opcional
     imageHeight_px: { type: Number }, // opcional
@@ -48,12 +48,12 @@ const artworkSchema = new mongoose.Schema(
     size: { type: String }, // texto derivado de width_cm/height_cm
     technique: { type: String },
     // (1) Validaciones adicionales para dimensiones y precio
-    width_cm: { type: Number, required: true, min: 1 },
-    height_cm: { type: Number, required: true, min: 1 },
+    width_cm: { type: Number, required: function(){ return this.status !== 'draft'; }, min: 1 },
+    height_cm: { type: Number, required: function(){ return this.status !== 'draft'; }, min: 1 },
 
     // --- Precio en USD (centavos) ---
     // Guarda siempre en centavos para evitar flotantes (ej. $3499.50 -> 349950)
-    price_cents: { type: Number, required: true, min: 0, index: true },
+    price_cents: { type: Number, required: function(){ return this.status !== 'draft'; }, min: 0, index: true },
 
     // --- Disponibilidad y venta ---
     availability: { type: String, enum: AVAILABILITY, default: 'not_for_sale', index: true },

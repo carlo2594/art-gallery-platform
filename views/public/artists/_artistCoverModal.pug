@@ -1,0 +1,17 @@
+// Modal: Editar portada
+.modal.fade#artistCoverModal(tabindex='-1' aria-labelledby='artistCoverModalLabel' aria-hidden='true')
+  .modal-dialog
+    .modal-content
+      .modal-header
+        h5.modal-title#artistCoverModalLabel Editar imagen de portada
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+      .modal-body
+        form#artistPanelCoverForm(action='/api/v1/users/me/cover-image' method='POST' enctype='multipart/form-data')
+          .mb-3
+            label.form-label Nueva portada
+            input.form-control(type='file', name='coverImage', accept='image/*', required)
+          small.text-muted La imagen debe ser horizontal para verse mejor en el encabezado.
+      .modal-footer
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
+        button.btn.btn-primary(type='submit' form='artistPanelCoverForm') Actualizar portada
+

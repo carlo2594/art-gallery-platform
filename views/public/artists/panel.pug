@@ -59,15 +59,27 @@ block content
                       a.text-warning.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
                         i.fab.fa-facebook.me-2
                         span Facebook
-                .hero-actions.artist-actions-desktop.d-flex.gap-3
-                  // BotÃ³n Seguir/Siguiendo
-                  - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
-                  button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
-                    i.fas.fa-heart.me-2
-                    | #{following ? 'Siguiendo' : 'Seguir'}
-                  button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
-                    i.fas.fa-share.me-2
-                    | Compartir
+                if !isMyPanel
+                  .hero-actions.artist-actions-desktop.d-flex.gap-3
+                    // BotÃ³n Seguir/Siguiendo
+                    - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
+                    button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
+                      i.fas.fa-heart.me-2
+                      | #{following ? 'Siguiendo' : 'Seguir'}
+                    button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
+                      i.fas.fa-share.me-2
+                      | Compartir
+                if isMyPanel
+                  .hero-actions.artist-actions-desktop.mt-3.d-flex.flex-wrap.gap-2
+                    button.btn.btn-warning.btn-sm(data-bs-toggle='modal', data-bs-target='#artistAddArtworkModal')
+                      i.fas.fa-plus.me-2
+                      | Agregar obra
+                    button.btn.btn-outline-light.btn-sm(data-bs-toggle='modal', data-bs-target='#artistCoverModal')
+                      i.fas.fa-image.me-2
+                      | Editar portada
+                    a.btn.btn-outline-light.btn-sm(href='/edit-profile')
+                      i.fas.fa-user-edit.me-2
+                      | Editar perfil
 
     // Obras del artista
     if artworks && artworks.length > 0
@@ -85,7 +97,7 @@ block content
               - var techniques = typeof techniques !== 'undefined' ? techniques : [];
               - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
               - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
-              - var actionUrl = `/artists/${artist.slug || artist._id}`;
+              - var actionUrl = `/artists/panel`;
               include /public/artworks/_artworkFilters.pug
         .container-xxl.artworks-flex.artist-artworks-grid.artist-container-padding
           if artworks && artworks.length
@@ -106,7 +118,7 @@ block content
                 - var techniques = typeof techniques !== 'undefined' ? techniques : [];
                 - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
                 - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
-                - var actionUrl = `/artists/${artist.slug || artist._id}`;
+                - var actionUrl = `/artists/panel`;
                 include /public/artworks/_artworkFilters.pug
           .row.justify-content-center
             .col-lg-6
@@ -122,7 +134,40 @@ block content
                 p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
               else
                 h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
-                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                 p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+
+    if isMyPanel
+      // Gestión de obras del artista (borradores y enviadas)
+      section.artist-manage-section.py-5
+        .container
+          .row
+            .col-12
+              h2.h4.mb-3 Gestión de mis obras
+              p.text-muted.small Administra tus obras en borrador y envíalas a revisión.
+              #artistPanelAlerts
+          .row.g-4
+            .col-12.col-lg-6
+              .card.shadow-sm
+                .card-header.bg-light.d-flex.align-items-center.justify-content-between
+                  span.fw-semibold Borradores
+                    span#countDrafts.badge.bg-secondary.ms-2 0
+                  button.btn.btn-sm.btn-outline-primary#reloadDrafts(type='button')
+                    i.fas.fa-rotate-right.me-1
+                    | Actualizar
+                .card-body
+                  ul.list-group.list-group-flush#artistDraftsList
+                    li.list-group-item.text-muted.small No hay borradores.
+            .col-12.col-lg-6
+              .card.shadow-sm
+                .card-header.bg-light.d-flex.align-items-center.justify-content-between
+                  span.fw-semibold Enviadas
+                    span#countSubmitted.badge.bg-secondary.ms-2 0
+                  button.btn.btn-sm.btn-outline-primary#reloadSubmitted(type='button')
+                    i.fas.fa-rotate-right.me-1
+                    | Actualizar
+                .card-body
+                  ul.list-group.list-group-flush#artistSubmittedList
+                    li.list-group-item.text-muted.small No hay obras enviadas.
 
     // BotÃ³n de volver
   section.back-navigation.py-4
@@ -206,4 +251,12 @@ block content
         document.addEventListener('DOMContentLoaded', setup);
       } else { setup(); }
     })();
+  
+  if isMyPanel
+    // Modales para crear obra y editar portada
+    include ./_artistAddArtworkModal.pug
+    include ./_artistCoverModal.pug
 
+block scriptsExtra
+  if isMyPanel
+    script(src='/js/artist-panel.js')

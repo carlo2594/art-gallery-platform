@@ -79,6 +79,9 @@ html.no-js(lang='es')
                     if currentUser && currentUser.role !== 'artist'
                       li
                         a.dropdown-item.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+                    if currentUser && currentUser.role === 'artist'
+                      li
+                        a.dropdown-item.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
                     if currentUser && currentUser.role === 'admin'
                       li
                         a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador

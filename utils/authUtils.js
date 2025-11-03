@@ -17,6 +17,7 @@ function getJwtCookieOptions({ rememberMe, daysIfRemember = 30, daysIfNotRemembe
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
+    path: '/',
     maxAge: days * 24 * 60 * 60 * 1000
   };
 }

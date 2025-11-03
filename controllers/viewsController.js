@@ -834,6 +834,130 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
   });
 });
 
+// Panel de artista: muestra el propio perfil del artista autenticado
+exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
+  const { buildArtistArtworkFilter, getArtworkSort } = require('@utils/artworkSearch');
+  const { getPaginationParams } = require('@utils/pagination');
+  const { getPriceRanges } = require('@utils/priceUtils');
+  const Follow = require('@models/followModel');
+
+  const currentUser = (res.locals && res.locals.currentUser) || null;
+  if (!currentUser) {
+    const returnTo = encodeURIComponent(req.originalUrl || '/artists/panel');
+    return res.redirect(`/login?returnTo=${returnTo}`);
+  }
+  if (currentUser.role !== 'artist') {
+    return res.status(403).render('public/auth/unauthorized', {
+      title: 'Acceso no autorizado · Galería del Ox',
+      message: 'Debes ser artista para acceder a tu panel.'
+    });
+  }
+
+  const q = req.query || {};
+
+  // Buscar el artista por ID del usuario autenticado (sin lanzar 404 si no hay slug)
+  let artistDoc = await User.findById(currentUser.id)
+    .select('name bio profileImage coverImage createdAt slug email location website social followersCount +role')
+    .lean();
+  if (!artistDoc) {
+    // Fallback a los datos mínimos del usuario en sesión para no romper el panel
+    artistDoc = {
+      _id: currentUser.id,
+      name: currentUser.name,
+      role: currentUser.role,
+      profileImage: currentUser.profileImage,
+      coverImage: currentUser.coverImage,
+      bio: currentUser.bio,
+      website: currentUser.website,
+      location: currentUser.country,
+      social: currentUser.social,
+      createdAt: new Date()
+    };
+  }
+  const artist = artistDoc;
+
+  // Filtro base: obras del artista aprobadas y no borradas
+  const baseFilter = {
+    artist: artist._id,
+    status: 'approved',
+    deletedAt: null
+  };
+
+  // Aplicar filtros adicionales (técnica, precio, etc.)
+  const artworkFilter = buildArtistArtworkFilter(q);
+  const combinedFilter = { ...baseFilter, ...artworkFilter };
+
+  // Paginación (máximo 9 obras por página)
+  const { page, perPage, skip } = getPaginationParams(req.query, 9, 9);
+
+  // Ordenamiento
+  const sort = getArtworkSort(q.sort) || { createdAt: -1 };
+
+  // Consultas paralelas
+  const [
+    totalArtworks,
+    artworksRaw,
+    allArtworks, // Para estadísticas generales
+    techniques,
+    bounds
+  ] = await Promise.all([
+    Artwork.countDocuments(combinedFilter),
+    Artwork.find(combinedFilter)
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents createdAt')
+      .populate({ path: 'artist', select: 'name' })
+      .sort(sort)
+      .skip(skip)
+      .limit(perPage)
+      .lean(),
+    Artwork.find(baseFilter).populate({ path: 'artist', select: 'name' }),
+    getArtistTechniques(Artwork, artist._id),
+    getArtistPriceBounds(Artwork, artist._id)
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
+  const { buildPublicSrcSet } = require('@utils/media');
+  const artworksMapped = artworksRaw.map(a => {
+    try {
+      if (a.imagePublicId) {
+        a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+      } else if (a.imageUrl) {
+        a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+      }
+    } catch(_) {}
+    return a;
+  });
+  const { appliedPrice, priceBounds } = getPriceRanges(q, bounds);
+
+  // Estado de seguimiento del usuario actual: en panel siempre es propio, pero mantenemos consistencia
+  let isFollowing = false;
+  try {
+    if (currentUser && currentUser.id) {
+      isFollowing = !!(await Follow.exists({ follower: currentUser.id, artist: artist._id }));
+    }
+  } catch (_) {}
+
+  const stats = buildArtistStats(allArtworks);
+
+  return res.status(200).render('public/artists/panel', {
+    title: `${artist.name} · Galería del Ox`,
+    artist,
+    artworks: artworksMapped,
+    stats,
+    techniques,
+    priceBounds,
+    appliedPrice,
+    page,
+    perPage,
+    totalPages,
+    totalArtworks,
+    q,
+    // En el panel, las acciones de filtro y paginación deben permanecer en esta ruta
+    actionUrl: `/artists/panel`,
+    isFollowing,
+    isMyPanel: true
+  });
+});
+
 
 // Vista: exposicion privada o no publicada
 exports.getExhibitionUnpublished = (req, res) => {

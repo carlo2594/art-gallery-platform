@@ -40,7 +40,19 @@ router.get('/about', viewsController.getAbout);
 router.get('/contact', viewsController.getContact);
 
 // =================== ARTISTAS ==========================
+// Guard helper: requiere rol artista
+const ensureArtistRoleView = (req, res, next) => {
+  const cu = res.locals && res.locals.currentUser;
+  if (cu && cu.role === 'artist') return next();
+  return res.status(403).render('public/auth/unauthorized', {
+    title: 'Acceso no autorizado · Galería del Ox',
+    message: 'Debes ser artista para acceder a esta página.'
+  });
+};
+
 router.get('/artists', viewsController.getArtistsView);
+// IMPORTANTE: declarar rutas específicas antes del comodín ':id'
+router.get('/artists/panel', ensureLoggedInView, ensureArtistRoleView, viewsController.getMyArtistPanel);
 router.get('/artists/:id', viewsController.getArtistDetail);
 // Alias canónico: redirige de singular a plural (previene 404 por enlaces viejos)
 router.get('/artist/:id', (req, res) => {

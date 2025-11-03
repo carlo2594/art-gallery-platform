@@ -339,6 +339,13 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 
 exports.createArtwork = catchAsync(async (req, res, next) => {
   req.body.status = 'draft'; // fuerza borrador
+  const draftOnly = (() => {
+    try {
+      const raw = String(req.body._draftOnly || req.body.mode || '').toLowerCase();
+      return raw === '1' || raw === 'true' || raw === 'draft';
+    } catch (_) { return false; }
+  })();
+  try { delete req.body._draftOnly; delete req.body.mode; } catch (_) {}
 
   // Permitimos amount (USD) o price_cents (entero)
   const allowed = [
@@ -348,7 +355,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Permitir que admin indique el artista destino
   if (req.user && req.user.role === 'admin') allowed.push('artist');
 
-  if (isEmptyBody(req.body)) {
+  if (!draftOnly && isEmptyBody(req.body)) {
     return res.status(400).json({
       status: 'fail',
       error: { code: 'INVALID_BODY', message: 'El cuerpo de la solicitud no puede estar vacío.' }
@@ -363,20 +370,25 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     });
   }
 
-  if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
-    return res.status(400).json({
-      status: 'fail',
-      error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio.' }
-    });
+  if (!draftOnly) {
+    if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
+      return res.status(400).json({
+        status: 'fail',
+        error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio.' }
+      });
+    }
   }
 
-  if (!req.file && (!req.body.images || req.body.images.length === 0)) {
-    return res.status(400).json({
-      status: 'fail',
-      error: { code: 'NO_IMAGE', message: 'Debes subir al menos una imagen.' }
-    });
+  if (!draftOnly) {
+    if (!req.file && (!req.body.images || req.body.images.length === 0)) {
+      return res.status(400).json({
+        status: 'fail',
+        error: { code: 'NO_IMAGE', message: 'Debes subir al menos una imagen.' }
+      });
+    }
   }
 
+  if (!draftOnly) {
   // Precio: primero intentamos amount (USD), si no viene usamos price_cents
   let priceCents;
   if (req.body.amount !== undefined && req.body.amount !== null && req.body.amount !== '') {
@@ -390,6 +402,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   } else {
     return next(new AppError('Debes especificar el precio (amount en USD o price_cents).', 400));
   }
+  }
 
   // Sube la imagen principal a Cloudinary
   let imageResult = null;
@@ -401,17 +414,19 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
       imageResult = await uploadBuffer(req.file.buffer);
     }
   }
-  const widthCm = Number(req.body.width_cm);
-  const heightCm = Number(req.body.height_cm);
+  const widthCm = (req.body.width_cm !== undefined && req.body.width_cm !== '') ? Number(req.body.width_cm) : undefined;
+  const heightCm = (req.body.height_cm !== undefined && req.body.height_cm !== '') ? Number(req.body.height_cm) : undefined;
   const imgW = imageResult ? imageResult.width : undefined;
   const imgH = imageResult ? imageResult.height : undefined;
 
-  // Validar dimensiones
-  if (!isFinite(widthCm) || !isFinite(heightCm) || widthCm <= 0 || heightCm <= 0) {
-    return res.status(400).json({
-      status: 'fail',
-      error: { code: 'INVALID_DIMENSIONS', message: 'Las dimensiones declaradas deben ser mayores a cero y finitas.' }
-    });
+  // Validar dimensiones (obligatorio solo si no es borrador)
+  if (!draftOnly) {
+    if (!isFinite(widthCm) || !isFinite(heightCm) || widthCm <= 0 || heightCm <= 0) {
+      return res.status(400).json({
+        status: 'fail',
+        error: { code: 'INVALID_DIMENSIONS', message: 'Las dimensiones declaradas deben ser mayores a cero y finitas.' }
+      });
+    }
   }
 
   let imageUrlToSave = imageResult ? imageResult.secure_url : (req.body.images && req.body.images[0]);
@@ -432,11 +447,11 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   } else {
     data.artist = req.user.id;
   }
-  data.imageUrl = imageUrlToSave;
-  data.imagePublicId = imagePublicId;
-  data.imageWidth_px = imageWidth_px;
-  data.imageHeight_px = imageHeight_px;
-  data.price_cents = priceCents; // <-- guarda el precio en centavos
+  if (imageUrlToSave) data.imageUrl = imageUrlToSave;
+  if (imagePublicId)  data.imagePublicId = imagePublicId;
+  if (imageWidth_px)  data.imageWidth_px = imageWidth_px;
+  if (imageHeight_px) data.imageHeight_px = imageHeight_px;
+  if (typeof priceCents === 'number') data.price_cents = priceCents; // <-- guarda el precio en centavos si vino
 
   // Si se subieron imágenes adicionales, guárdalas en el array images
   if (req.body.images && Array.isArray(req.body.images)) {
