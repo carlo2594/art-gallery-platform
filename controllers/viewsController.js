@@ -954,7 +954,8 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
     // En el panel, las acciones de filtro y paginación deben permanecer en esta ruta
     actionUrl: `/artists/panel`,
     isFollowing,
-    isMyPanel: true
+    isMyPanel: true,
+    maxDrafts: parseInt(process.env.MAX_DRAFTS_PER_ARTIST || '10', 10)
   });
 });
 

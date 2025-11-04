@@ -30,9 +30,16 @@
             .col-md-2
               label.form-label Alto (cm)
               input.form-control(type='number', name='height_cm', min='1', step='1', required)
+          .row.g-3
+            .col-md-4
+              label.form-label Fecha de la obra
+              input.form-control(type='date', name='completedAt')
           .mb-2
-            label.form-label Imagen principal
-            input.form-control(type='file', name='image', accept='image/*', required)
+            label.form-label Imagen de la obra
+            .d-flex.align-items-center.gap-3
+              img.artist-artworks-image-preview.img-thumbnail(src='' alt='Preview' style='width:64px;height:64px;object-fit:cover;' hidden)
+              //- required se maneja por JS: exigimos imagen solo si enviará a aprobación y no hay previa en DB
+              input.form-control(type='file', name='image', accept='image/*')
             small.text-muted Sube una imagen de buena calidad.
           //- Flag que marcamos desde JS cuando es guardado como borrador
           input(type='hidden', name='_draftOnly', value='0')
@@ -40,5 +47,5 @@
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
         //- Guardar borrador: omite validación HTML5 con formnovalidate
         button.btn.btn-outline-secondary(type='submit' form='artistCreateArtworkForm' formnovalidate data-mode='draft') Guardar borrador
-        //- Enviar a revisión: valida campos requeridos
-        button.btn.btn-primary(type='submit' form='artistCreateArtworkForm' data-mode='send') Enviar
+        //- Solicitar aprobación: valida campos (requiere imagen si no hay previa)
+        button.btn.btn-primary(type='submit' form='artistCreateArtworkForm' data-mode='send') Solicitar aprobación

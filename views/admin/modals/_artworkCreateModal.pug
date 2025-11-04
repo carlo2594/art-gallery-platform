@@ -31,7 +31,7 @@
             .mt-2.admin-artworks-artist-selected.text-muted
           // Imagen principal
           .mb-3
-            label.form-label Imagen principal
+            label.form-label Imagen de la obra
             .d-flex.align-items-center.gap-3
               img.admin-artworks-image-preview.img-thumbnail(src='' alt='Preview' style='width:64px;height:64px;object-fit:cover;' hidden)
               .d-flex.flex-wrap.gap-2
@@ -56,6 +56,10 @@
               label.form-label Alto (cm)
               input.form-control(type='number', name='height_cm', min='1', step='1', required)
               .invalid-feedback.admin-artworks-height-error Ingresa un valor mayor a 0
+          .row.g-3
+            .col-md-4
+              label.form-label Fecha de la obra
+              input.form-control(type='date', name='completedAt')
       .modal-footer
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
         button.btn.btn-primary.admin-artworks-create-submit(type='submit' form='adminCreateArtworkForm') Crear

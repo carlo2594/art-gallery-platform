@@ -21,14 +21,14 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     async function lookup(email){
       try {
-        if (window.axios) {
-          var resp = await axios.get('/api/v1/users/lookup', { params: { email: email } });
+        var client = (window.api || window.axios);
+        if (client && typeof client.get === 'function') {
+          var resp = await client.get('/api/v1/users/lookup', { params: { email: email } });
           return resp && resp.data && resp.data.data;
-        } else {
-          var res = await fetch('/api/v1/users/lookup?email=' + encodeURIComponent(email));
-          var json = await res.json();
-          return json && json.data;
         }
+        var res = await fetch('/api/v1/users/lookup?email=' + encodeURIComponent(email));
+        var json = await res.json();
+        return json && json.data;
       } catch (e) { console.warn('lookup failed', e); return null; }
     }
     async function check(){
@@ -83,14 +83,14 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     async function lookup(email){
       try {
-        if (window.axios) {
-          var resp = await axios.get('/api/v1/users/lookup', { params: { email: email } });
+        var client = (window.api || window.axios);
+        if (client && typeof client.get === 'function') {
+          var resp = await client.get('/api/v1/users/lookup', { params: { email: email } });
           return resp && resp.data && resp.data.data;
-        } else {
-          var res = await fetch('/api/v1/users/lookup?email=' + encodeURIComponent(email));
-          var json = await res.json();
-          return json && json.data;
         }
+        var res = await fetch('/api/v1/users/lookup?email=' + encodeURIComponent(email));
+        var json = await res.json();
+        return json && json.data;
       } catch (e) { console.warn('lookup failed', e); return null; }
     }
     async function check(input){
@@ -341,7 +341,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var pick = function (n) { return form.querySelector('[name="' + n + '"]'); };
 
       // Whitelisted fields for updateArtwork
-      ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique'].forEach(function (name) {
+      ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'completedAt'].forEach(function (name) {
         var el = pick(name);
         if (el && el.value !== '') fd.append(name, el.value);
       });
@@ -406,7 +406,10 @@ document.addEventListener('DOMContentLoaded', function () {
             options.headers = { 'Content-Type': 'application/json' };
             options.body = JSON.stringify({});
           } else if (newStatus === 'under_review') {
-            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review';
+            // Estado removido: trata como 'submitted'
+            endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit';
+            options.headers = { 'Content-Type': 'application/json' };
+            options.body = JSON.stringify({});
           } else if (newStatus === 'approved') {
             endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve';
           } else if (newStatus === 'rejected') {
@@ -448,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
           var badge = row && row.querySelector('td:nth-child(3) .badge');
           if (badge) {
             badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
-            var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+            var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'submitted') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
             badge.classList.add(cls);
             badge.textContent = newStatus || 'draft';
           }
@@ -727,9 +730,12 @@ document.addEventListener('DOMContentLoaded', function () {
       endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit';
       options.headers = { 'Content-Type': 'application/json' };
       options.body = JSON.stringify({});
-    } else if (newStatus === 'under_review') {
-      endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review';
-    } else if (newStatus === 'approved') {
+      } else if (newStatus === 'under_review') {
+        // Estado removido: usa 'submitted'
+        endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit';
+        options.headers = { 'Content-Type': 'application/json' };
+        options.body = JSON.stringify({});
+      } else if (newStatus === 'approved') {
       endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve';
     } else if (newStatus === 'rejected') {
       if (!reason) { if (window.showAdminToast) showAdminToast('Indica el motivo de rechazo', 'warning'); return; }
@@ -773,7 +779,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var badge = row && row.querySelector('td:nth-child(3) .badge');
       if (badge) {
         badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
-        var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+        var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'submitted') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
         badge.classList.add(cls);
         badge.textContent = newStatus || 'draft';
       }
@@ -1559,7 +1565,7 @@ document.addEventListener('DOMContentLoaded', function(){
           var endpoint = null, options = { method:'PATCH', credentials:'include' };
           if (newStatus === 'draft') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/draft'; }
           else if (newStatus === 'submitted') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit'; options.headers={ 'Content-Type':'application/json' }; options.body=JSON.stringify({}); }
-          else if (newStatus === 'under_review') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/start-review'; }
+          else if (newStatus === 'under_review') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/submit'; options.headers={ 'Content-Type':'application/json' }; options.body=JSON.stringify({}); }
           else if (newStatus === 'approved') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/approve'; }
           else if (newStatus === 'rejected') { endpoint = '/api/v1/artworks/' + encodeURIComponent(id) + '/reject'; options.headers={ 'Content-Type':'application/json' }; options.body=JSON.stringify({ reason: reason }); }
           if (!endpoint) return;
@@ -1579,7 +1585,7 @@ document.addEventListener('DOMContentLoaded', function(){
             var badge = row.querySelector('td:nth-child(3) .badge');
             if (badge){
               badge.classList.remove('text-bg-success','text-bg-warning','text-bg-danger','text-bg-secondary');
-              var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'under_review') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
+        var cls = (newStatus === 'approved') ? 'text-bg-success' : (newStatus === 'submitted') ? 'text-bg-warning' : (newStatus === 'rejected') ? 'text-bg-danger' : 'text-bg-secondary';
               badge.classList.add(cls); badge.textContent = newStatus || 'draft';
             }
           }

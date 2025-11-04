@@ -217,7 +217,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
   }
 
   // Filtro por estado (status)
-  const STATUS_ENUM = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+  const STATUS_ENUM = ['draft', 'submitted', 'approved', 'rejected', 'trashed'];
   if (STATUS_ENUM.includes(statusFilter)) {
     filter.status = statusFilter;
   }

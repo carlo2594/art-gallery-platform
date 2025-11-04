@@ -11,7 +11,7 @@
             small.text-muted Estado actual:
             - const _st = a.status || 'draft'
             div
-              span.badge(class=(_st === 'approved' ? 'text-bg-success' : (_st === 'under_review' ? 'text-bg-warning' : (_st === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= _st
+              span.badge(class=(_st === 'approved' ? 'text-bg-success' : (_st === 'submitted' ? 'text-bg-warning' : (_st === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= _st
           .mt-3
             label.form-label Nuevo estado
             .list-group
@@ -21,9 +21,7 @@
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='submitted', checked=_st==='submitted')
                 | Enviado
-              label.list-group-item
-                input.form-check-input.me-1(type='radio', name='status', value='under_review', checked=_st==='under_review')
-                | En revisión
+              //- Estado "En revisión" removido del flujo
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='approved', checked=_st==='approved')
                 | Aprobado

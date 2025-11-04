@@ -18,7 +18,7 @@ const buildTransformedUrl = (secureUrl) => secureUrl;
 const getAspectPolicy = () => 'none';
 const buildAspectErrorPayload = () => ({ code: 'ASPECT_VALIDATION_DISABLED' });
 
-const ALLOWED_STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
+const ALLOWED_STATUS = ['draft', 'submitted', 'approved', 'rejected'];
 
 
 // =======================
@@ -33,7 +33,7 @@ function checkAlreadyInStatus(res, art, status, mensaje) {
 
 
 // =======================
-// PATCH /:id/start-review  submitted → under_review (admin)
+// PATCH /:id/start-review  submitted → (no-op, solo marca revisor)
 // =======================
 exports.startReview = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
@@ -42,24 +42,20 @@ exports.startReview = catchAsync(async (req, res, next) => {
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
-  if (art.status === 'under_review') {
-    return res.status(400).json({ status: 'fail', message: 'La obra ya está en revisión.' });
-  }
-
-  art.status = 'under_review';
+  // Mantener estado "submitted"; solo marca quién inicia revisión
   art.review = { reviewedBy: req.user.id };
   await art.save();
-
-  // Notificar al artista que su obra está en revisión
+  
+  // Notificar al artista que su obra fue tomada para revisión
   if (art.artist && art.artist.email) {
     const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
     await sendMail({
       to: art.artist.email,
-      subject: artworkStatusSubject('under_review'),
-      text: artworkStatusText({ status: 'under_review', artistName: art.artist.name, artworkTitle: art.title })
+      subject: artworkStatusSubject('submitted'),
+      text: artworkStatusText({ status: 'submitted', artistName: art.artist.name, artworkTitle: art.title })
     });
   }
-
+  
   sendResponse(res, art, 'La revisión de la obra ha iniciado.');
 });
 
@@ -75,6 +71,20 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 
   if (art.status === 'approved') {
     return res.status(400).json({ status: 'fail', message: 'La obra ya está aprobada.' });
+  }
+
+  // Validar que tenga campos mínimos antes de aprobar
+  const missing = [];
+  if (!art.imageUrl) missing.push('imageUrl');
+  if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
+  if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
+  if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
+  if (missing.length) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Faltan campos requeridos para aprobar la obra.',
+      missing
+    });
   }
 
   art.status = 'approved';
@@ -350,7 +360,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Permitimos amount (USD) o price_cents (entero)
   const allowed = [
     'title', 'description', 'type', 'width_cm', 'height_cm', 'technique',
-    'exhibitions', 'status', 'amount', 'price_cents', 'images'
+    'exhibitions', 'status', 'amount', 'price_cents', 'images', 'completedAt'
   ];
   // Permitir que admin indique el artista destino
   if (req.user && req.user.role === 'admin') allowed.push('artist');
@@ -370,13 +380,11 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     });
   }
 
-  if (!draftOnly) {
-    if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
-      return res.status(400).json({
-        status: 'fail',
-        error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio.' }
-      });
-    }
+  if (!('title' in req.body) || typeof req.body.title !== 'string' || req.body.title.trim() === '') {
+    return res.status(400).json({
+      status: 'fail',
+      error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio.' }
+    });
   }
 
   if (!draftOnly) {
@@ -437,6 +445,19 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   // Sin validación de aspecto: usamos secure_url tal cual
 
   const data = filterObject(req.body, ...allowed);
+  // Normalizar completedAt si viene como string (YYYY-MM-DD)
+  if (typeof data.completedAt === 'string') {
+    if (data.completedAt.trim() === '') {
+      delete data.completedAt;
+    } else {
+      const d = new Date(data.completedAt);
+      if (isNaN(d.getTime())) {
+        delete data.completedAt;
+      } else {
+        data.completedAt = d;
+      }
+    }
+  }
   // Asignar artista: si es admin y envía artist válido, usarlo; si no, usar el propio
   if (req.user && req.user.role === 'admin' && req.body && req.body.artist) {
     const isValidObjectId = require('@utils/isValidObjectId');
@@ -447,6 +468,17 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
   } else {
     data.artist = req.user.id;
   }
+  // Límite de borradores por artista
+  try {
+    const MAX_DRAFTS = parseInt(process.env.MAX_DRAFTS_PER_ARTIST || '10', 10);
+    const draftsCount = await Artwork.countDocuments({ artist: data.artist, status: 'draft', deletedAt: null });
+    if (Number.isFinite(MAX_DRAFTS) && draftsCount >= MAX_DRAFTS) {
+      return res.status(429).json({
+        status: 'fail',
+        error: { code: 'MAX_DRAFTS_REACHED', message: `Has alcanzado el límite de ${MAX_DRAFTS} borradores. Elimina algún borrador o edita uno existente.` }
+      });
+    }
+  } catch (_) {}
   if (imageUrlToSave) data.imageUrl = imageUrlToSave;
   if (imagePublicId)  data.imagePublicId = imagePublicId;
   if (imageWidth_px)  data.imageWidth_px = imageWidth_px;
@@ -474,9 +506,13 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   }
 
   // El artista puede editar campos básicos; admin además exhibitions e images.
-  const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'amount', 'price_cents'];
-  const adminAllowed  = [...artistAllowed, 'exhibitions', 'images'];
+  const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'amount', 'price_cents', 'completedAt'];
+  // Admin también puede cambiar estado y motivo de rechazo
+  const adminAllowed  = [...artistAllowed, 'exhibitions', 'images', 'status', 'reason', 'rejectReason'];
   const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
+
+  // Limpiar flags/meta que puedan venir del formulario
+  try { delete req.body._draftOnly; delete req.body.mode; } catch (_) {}
 
   if (Object.keys(req.body).some(key => !allowedFields.includes(key))) {
     return res.status(400).json({
@@ -486,6 +522,35 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   }
 
   const dataToUpdate = filterObject(req.body, ...allowedFields);
+  const requestedStatus = Object.prototype.hasOwnProperty.call(dataToUpdate, 'status') ? String(dataToUpdate.status) : undefined;
+  const rejectionReason = (dataToUpdate.rejectReason ?? dataToUpdate.reason);
+  if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'status')) delete dataToUpdate.status;
+  if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'rejectReason')) delete dataToUpdate.rejectReason;
+  if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'reason')) delete dataToUpdate.reason;
+  // Validar título si viene en actualización
+  if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'title')) {
+    if (typeof dataToUpdate.title !== 'string' || dataToUpdate.title.trim() === '') {
+      return res.status(400).json({
+        status: 'fail',
+        error: { code: 'INVALID_TITLE', message: 'El campo "title" es obligatorio y no puede estar vacío.' }
+      });
+    }
+  }
+  // Normalizar completedAt si viene en actualización (solo admin)
+  if ('completedAt' in dataToUpdate) {
+    if (typeof dataToUpdate.completedAt === 'string') {
+      if (dataToUpdate.completedAt.trim() === '') {
+        delete dataToUpdate.completedAt;
+      } else {
+        const d = new Date(dataToUpdate.completedAt);
+        if (isNaN(d.getTime())) {
+          delete dataToUpdate.completedAt;
+        } else {
+          dataToUpdate.completedAt = d;
+        }
+      }
+    }
+  }
   const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
   if (!art) return next(new AppError('Obra no encontrada o está en la papelera.', 404));
 
@@ -547,9 +612,97 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     delete dataToUpdate.images;
   }
 
-
+  // Asignar el resto de cambios primero (sin status)
   Object.assign(art, dataToUpdate);
-  await art.save({ validateModifiedOnly: true });
+
+  // Si el admin solicitó cambio de estado, manejar transiciones
+  let alreadySaved = false;
+  if (req.user.role === 'admin' && requestedStatus) {
+    // Estados permitidos según el esquema (incluye 'trashed')
+    const allowedStatuses = (Artwork.schema && Artwork.schema.path('status') && Artwork.schema.path('status').enumValues) || ['draft','submitted','approved','rejected','trashed'];
+    if (!allowedStatuses.includes(requestedStatus)) {
+      return next(new AppError('Estado solicitado inválido.', 400));
+    }
+
+    // Manejar cada transición específicamente
+    if (requestedStatus === 'trashed') {
+      await art.moveToTrash(req.user._id);
+      alreadySaved = true;
+    } else if (requestedStatus === 'draft') {
+      if (art.deletedAt) {
+        await art.restore();
+        alreadySaved = true;
+      } else {
+        art.status = 'draft';
+      }
+    } else if (requestedStatus === 'submitted') {
+      // Requiere los mismos campos mínimos que una obra no-borrador
+      const missing = [];
+      if (!art.imageUrl) missing.push('imageUrl');
+      if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
+      if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
+      if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
+      if (missing.length) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Completa los campos requeridos antes de enviar a revisión.',
+          missing
+        });
+      }
+      art.status = 'submitted';
+      // limpiar metadata de rechazo si hubiera
+      if (art.review) art.review.rejectReason = undefined;
+    } else if (requestedStatus === 'approved') {
+      // Validaciones mínimas para aprobación (misma lógica que approveArtwork)
+      const missing = [];
+      if (!art.imageUrl) missing.push('imageUrl');
+      if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
+      if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
+      if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
+      if (missing.length) {
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Faltan campos requeridos para aprobar la obra.',
+          missing
+        });
+      }
+      art.status = 'approved';
+      art.review = { reviewedBy: req.user.id, reviewedAt: new Date() };
+    } else if (requestedStatus === 'rejected') {
+      const reasonStr = (typeof rejectionReason === 'string') ? rejectionReason.trim() : '';
+      if (!reasonStr) {
+        return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+      }
+      art.status = 'rejected';
+      art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: reasonStr };
+    }
+  }
+
+  // Guardar si no se guardó ya dentro de una transición especial
+  if (!alreadySaved) {
+    await art.save({ validateModifiedOnly: true });
+  }
+
+  // Notificaciones por email si el admin cambió a approved/rejected
+  if (req.user.role === 'admin' && requestedStatus && art.artist) {
+    try {
+      const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
+      if (requestedStatus === 'approved' && art.artist.email) {
+        await sendMail({
+          to: art.artist.email,
+          subject: artworkStatusSubject('approved'),
+          text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title })
+        });
+      }
+      if (requestedStatus === 'rejected' && art.artist.email) {
+        await sendMail({
+          to: art.artist.email,
+          subject: artworkStatusSubject('rejected'),
+          text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason: art?.review?.rejectReason || '' })
+        });
+      }
+    } catch (_) {}
+  }
 
   sendResponse(res, art, 'Obra actualizada correctamente.');
 });
@@ -559,7 +712,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 /* ------------------------------------------------------------------ */
 
 /** PATCH /:id/trash  → mueve a papelera (TTL 30 días) */
-exports.moveToTrash = async (req, res) => {
+exports.moveToTrash = catchAsync(async (req, res, next) => {
   const artwork = await Artwork.findById(req.params.id);
   if (!artwork) return res.status(404).json({ message: 'Obra no encontrada.' });
 
@@ -568,7 +721,7 @@ exports.moveToTrash = async (req, res) => {
   await artwork.moveToTrash(req.user._id);
 
   sendResponse(res, artwork, 'La obra fue movida a la papelera correctamente.');
-};
+});
 
 exports.restoreArtwork = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
@@ -597,6 +750,32 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'submitted', 'La obra ya fue enviada a revisión.')) return;
+
+  // Límite de obras enviadas por artista
+  try {
+    const MAX_SUBMITTED = parseInt(process.env.MAX_SUBMITTED_PER_ARTIST || '10', 10);
+    const submittedCount = await Artwork.countDocuments({ artist: art.artist._id || art.artist, status: 'submitted', deletedAt: null });
+    if (Number.isFinite(MAX_SUBMITTED) && submittedCount >= MAX_SUBMITTED) {
+      return res.status(429).json({
+        status: 'fail',
+        error: { code: 'MAX_SUBMITTED_REACHED', message: `Has alcanzado el límite de ${MAX_SUBMITTED} obras enviadas a aprobación. Espera a que se revisen o elimina alguna solicitud.` }
+      });
+    }
+  } catch (_) {}
+
+  // Validaciones mínimas antes de permitir envío a revisión
+  const missing = [];
+  if (!art.imageUrl) missing.push('imageUrl');
+  if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
+  if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
+  if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
+  if (missing.length) {
+    return res.status(400).json({
+      status: 'fail',
+      message: 'Completa los campos requeridos antes de enviar a revisión.',
+      missing
+    });
+  }
 
   await art.submit();
 

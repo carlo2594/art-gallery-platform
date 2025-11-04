@@ -8,6 +8,9 @@ html(lang='es')
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet', href='/css/style.css')
+    //- Cargar axios y shim temprano para que inline scripts lo usen
+    script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
+    script(src='/js/http.js')
   body
     .d-flex.min-vh-100
       //- Sidebar
@@ -54,7 +57,6 @@ html(lang='es')
     .toast-container.position-fixed.top-0.end-0.p-3#admin-toast-container
 
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
-    script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/main.js')
     script(src='/js/admin.js')
     // Confirm-delete modal handler

@@ -8,14 +8,14 @@ const norm = (s) =>
     .toLowerCase()
     .trim();
 
-const STATUS = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+const STATUS = ['draft', 'submitted', 'approved', 'rejected', 'trashed'];
 const AVAILABILITY = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 
 const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
-    title: { type: String, required: function(){ return this.status !== 'draft'; }, trim: true },
+    title: { type: String, required: true, trim: true },
     slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
     description: { type: String, trim: true },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
@@ -195,25 +195,22 @@ artworkSchema.methods.submit = function () {
   return this.save();
 };
 
-// admin: submitted â†’ under_review
+// admin: iniciar revisión (sin estado intermedio)
 artworkSchema.methods.startReview = function (adminId) {
   if (this.status !== 'submitted') return this;
-  this.status = 'under_review';
   this.review = { reviewedBy: adminId };
   return this.save();
 };
 
-// admin: under_review â†’ approved
+// admin: aprobar (desde submitted)
 artworkSchema.methods.approve = function (adminId) {
-  if (this.status !== 'under_review') return this;
   this.status = 'approved';
   this.review = { reviewedBy: adminId, reviewedAt: new Date() };
   return this.save();
 };
 
-// admin: under_review â†’ rejected
+// admin: rechazar (desde submitted)
 artworkSchema.methods.reject = function (adminId, reason = '') {
-  if (this.status !== 'under_review') return this;
   this.status = 'rejected';
   this.review = { reviewedBy: adminId, reviewedAt: new Date(), rejectReason: reason };
   return this.save();
@@ -227,7 +224,8 @@ artworkSchema.methods.moveToTrash = function (userId) {
   this.deletedAt = new Date();
   this.deletedBy = userId;
   this.status = 'trashed';
-  return this.save();
+  // Evitar validaciones de campos requeridos (imagen, dimensiones, precio) al mandar a papelera
+  return this.save({ validateBeforeSave: false });
 };
 
 // restaurar desde papelera

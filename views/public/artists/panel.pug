@@ -71,7 +71,8 @@ block content
                       | Compartir
                 if isMyPanel
                   .hero-actions.artist-actions-desktop.mt-3.d-flex.flex-wrap.gap-2
-                    button.btn.btn-warning.btn-sm(data-bs-toggle='modal', data-bs-target='#artistAddArtworkModal')
+                    // Botón controlado por JS: abre modal de crear o el modal de límite
+                    button#btnOpenAddArtwork.btn.btn-warning.btn-sm(data-max-drafts=maxDrafts type='button')
                       i.fas.fa-plus.me-2
                       | Agregar obra
                     button.btn.btn-outline-light.btn-sm(data-bs-toggle='modal', data-bs-target='#artistCoverModal')
@@ -146,7 +147,7 @@ block content
               p.text-muted.small Administra tus obras en borrador y envíalas a revisión.
               #artistPanelAlerts
           .row.g-4
-            .col-12.col-lg-6
+            .col-12.col-lg-4
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
                   span.fw-semibold Borradores
@@ -157,7 +158,7 @@ block content
                 .card-body
                   ul.list-group.list-group-flush#artistDraftsList
                     li.list-group-item.text-muted.small No hay borradores.
-            .col-12.col-lg-6
+            .col-12.col-lg-4
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
                   span.fw-semibold Enviadas
@@ -168,6 +169,20 @@ block content
                 .card-body
                   ul.list-group.list-group-flush#artistSubmittedList
                     li.list-group-item.text-muted.small No hay obras enviadas.
+            //- Columna de rechazadas: visible solo si hay elementos (la muestra JS)
+            .col-12.col-lg-4#rejectedColumn(style='display:none')
+              .card.shadow-sm
+                .card-header.bg-light.d-flex.align-items-center.justify-content-between
+                  span.fw-semibold Rechazadas
+                    span#countRejected.badge.bg-secondary.ms-2 0
+                  button.btn.btn-sm.btn-outline-primary#reloadRejected(type='button')
+                    i.fas.fa-rotate-right.me-1
+                    | Actualizar
+                .card-body
+                  p.text-muted.small.mb-2 Motivo del rechazo (si aplica)
+                  p.text-muted.small.mb-3 Para intentarlo de nuevo, crea una nueva solicitud desde cero. Esta obra permanecerá en estado rechazado.
+                  ul.list-group.list-group-flush#artistRejectedList
+                    li.list-group-item.text-muted.small No hay obras rechazadas recientes.
 
     // BotÃ³n de volver
   section.back-navigation.py-4
@@ -256,6 +271,18 @@ block content
     // Modales para crear obra y editar portada
     include ./_artistAddArtworkModal.pug
     include ./_artistCoverModal.pug
+    // Modal de límite de borradores alcanzado
+    .modal.fade#artistDraftLimitModal(tabindex='-1' aria-labelledby='artistDraftLimitLabel' aria-hidden='true')
+      .modal-dialog
+        .modal-content
+          .modal-header
+            h5.modal-title#artistDraftLimitLabel Límite de borradores alcanzado
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+          .modal-body
+            p.mb-2 Has alcanzado el número máximo de obras en borrador.
+            p.small.text-muted Para agregar nuevas obras, envía algunas a aprobación o elimina borradores existentes.
+          .modal-footer
+            button.btn.btn-primary(type='button' data-bs-dismiss='modal') Entendido
 
 block scriptsExtra
   if isMyPanel

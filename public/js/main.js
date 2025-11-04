@@ -1403,8 +1403,9 @@ document.addEventListener('DOMContentLoaded', function(){
         form.reset();
       };
       var failure = function(msg){ if (window.showAdminToast) showAdminToast(msg || 'No se pudo crear el usuario','danger'); };
-      if (window.axios) {
-        axios.post('/api/v1/users', payload).then(function(){ success(); }).catch(function(err){ console.error(err); var m=(err && err.response && err.response.data && err.response.data.message)||null; failure(m); }).finally(done);
+      var client = (window.api || window.axios);
+      if (client && typeof client.post === 'function') {
+        client.post('/api/v1/users', payload).then(function(){ success(); }).catch(function(err){ console.error(err); var m=(err && err.response && err.response.data && err.response.data.message)||null; failure(m); }).finally(done);
       } else {
         fetch('/api/v1/users', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
           .then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error(d && d.message || 'Failed') }); success(); })
@@ -1476,8 +1477,9 @@ document.addEventListener('DOMContentLoaded', function(){
             if (user) { fillFormFromData(form, user); setAvatarPreview(modalEl, user.profileImage || ''); setCoverPreview(modalEl, user.coverImage || ''); try { var link=modalEl && modalEl.querySelector('.admin-users-public-link'); if (link) link.href = '/artists/' + (user.slug || user._id || user.id); } catch(_){} }
           } catch (e) { console.warn('No se pudo parsear detalle de usuario', e); }
         };
-        if (window.axios) {
-          axios.get(url).then(function(resp){ handle(resp); }).catch(function(err){ console.error(err); });
+        var client2 = (window.api || window.axios);
+        if (client2 && typeof client2.get === 'function') {
+          client2.get(url).then(function(resp){ handle(resp); }).catch(function(err){ console.error(err); });
         } else {
           fetch(url).then(function(res){ return res.json(); }).then(handle).catch(function(err){ console.error(err); });
         }

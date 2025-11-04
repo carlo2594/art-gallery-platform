@@ -64,21 +64,24 @@ block content
 
           .artwork-details.mb-3.artwork-meta.artwork-detail__meta
             if artwork.description
-            .mb-1.artwork-description-wrap.artwork-detail__description-wrap
-              p.fs-5.text-muted.lh-base.mb-0.artwork-description.artwork-detail__description= artwork.description
+              .mb-1.artwork-description-wrap.artwork-detail__description-wrap
+                p.fs-5.text-muted.lh-base.mb-0.artwork-description.artwork-detail__description= artwork.description
 
             .details-list.mt-0.artwork-detail__details
               if artwork.technique
-              .detail-item.mb-1.artwork-technique.artwork-detail__technique
-                span.text-muted.artwork-technique-text.artwork-detail__technique-text= artwork.technique
+                .detail-item.mb-1.artwork-technique.artwork-detail__technique
+                  span.text-muted.artwork-technique-text.artwork-detail__technique-text= artwork.technique
 
-              if artwork.completedAt
-              .detail-item.mb-1.artwork-year.artwork-detail__year
-                span.text-muted.artwork-year-text.artwork-detail__year-text= new Date(artwork.completedAt).getFullYear()
+              - var __dt = artwork.completedAt || artwork.createdAt
+              if __dt
+                - var __y = (function(v){ try { var d = new Date(v); var y = d.getFullYear(); return Number.isFinite(y) ? y : null; } catch(_) { return null; } })(__dt)
+                if __y
+                  .detail-item.mb-1.artwork-year.artwork-detail__year
+                    span.text-muted.artwork-year-text.artwork-detail__year-text= __y
 
               if artwork.width_cm && artwork.height_cm
-              .detail-item.mb-1.artwork-dimensions.artwork-detail__dimensions
-                span.text-muted.artwork-dimensions-text.artwork-detail__dimensions-text #{artwork.width_cm} - #{artwork.height_cm} cm / #{Math.round(artwork.width_cm / 2.54)} - #{Math.round(artwork.height_cm / 2.54)} in
+                .detail-item.mb-1.artwork-dimensions.artwork-detail__dimensions
+                  span.text-muted.artwork-dimensions-text.artwork-detail__dimensions-text #{artwork.width_cm} - #{artwork.height_cm} cm / #{Math.round(artwork.width_cm / 2.54)} - #{Math.round(artwork.height_cm / 2.54)} in
 
           if artwork.price_cents && artwork.price_cents > 0
             .mb-3.artwork-price-wrap.artwork-detail__price-wrap

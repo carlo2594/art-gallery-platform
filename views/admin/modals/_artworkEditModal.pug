@@ -15,13 +15,13 @@
             .col-md-4
               label.form-label Estado
               .form-control-plaintext
-                span.badge(class=(status === 'approved' ? 'text-bg-success' : (status === 'under_review' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= status || 'draft'
+                span.badge(class=(status === 'approved' ? 'text-bg-success' : (status === 'submitted' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= status || 'draft'
           .mb-3
             label.form-label Descripción
             textarea.form-control(name='description' rows='3')= a.description || ''
           // Imagen principal
           .mb-3
-            label.form-label Imagen principal
+            label.form-label Imagen de la obra
             .d-flex.align-items-center.gap-3
               - const imgSrc = a.imageUrl || ''
               img.admin-artworks-image-preview.img-thumbnail(src=imgSrc, alt=`Imagen de ${a.title}` style='width:64px;height:64px;object-fit:cover;' hidden=!a.imageUrl)
@@ -36,8 +36,9 @@
               label.form-label Artista
               input.form-control(type='text', value=(a.artist && a.artist.name) || '""', readonly)
             .col-md-6
-              label.form-label Fecha de finalización
-              - const completedVal = a.completedAt ? new Date(a.completedAt).toISOString().slice(0,10) : ''
+              label.form-label Fecha de la obra
+              - const _d = a.completedAt ? new Date(a.completedAt) : null
+              - const completedVal = (_d && !isNaN(_d.getTime())) ? _d.toISOString().slice(0,10) : ''
               input.form-control(type='date', name='completedAt', value=completedVal, disabled=!isAdmin)
           // Técnica y medidas
           .row.g-3

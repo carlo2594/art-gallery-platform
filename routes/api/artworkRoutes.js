@@ -86,7 +86,7 @@ router.patch(
   artworkController.submitArtwork
 );
 
-// submitted → under_review  (solo admin)
+// submitted → (sin estado intermedio) (solo admin)
 router.patch(
   '/:id/start-review',
   requireUser,

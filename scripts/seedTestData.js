@@ -91,7 +91,7 @@ function norm(s) {
 }
 
 // Agrega el arreglo de statuses permitidos
-const ARTWORK_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected', 'trashed'];
+const ARTWORK_STATUSES = ['draft', 'submitted', 'approved', 'rejected', 'trashed'];
 const AVAILABILITY_STATUSES = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 
 /**
@@ -134,7 +134,7 @@ async function seed() {
   console.log('✅ Datos eliminados');
 
 
-  // Crea 20 artistas de prueba y 2 admins
+  // Crea artistas/usuarios de prueba reducidos (máximo 10 usuarios en total)
   const userData = [];
   userData.push({ 
     name: 'Admin', 
@@ -146,8 +146,8 @@ async function seed() {
     slug: 'admin'
   });
 
-  // Crear 5 coleccionistas (para solicitudes de artista)
-  for (let i = 1; i <= 5; i++) {
+  // Crear 2 coleccionistas (para solicitudes de artista)
+  for (let i = 1; i <= 2; i++) {
     userData.push({
       name: `Collector ${i}`,
       email: `collector${i}@test.com`,
@@ -170,7 +170,7 @@ async function seed() {
     slug: 'usuario-extra'
   });
   
-  // Artista especial con 20 obras
+  // Artista especial (tendrá pocas obras en este seed reducido)
   userData.push({
     name: 'Leonardo Martinez',
     email: 'leonardo.martinez@test.com',
@@ -189,7 +189,8 @@ async function seed() {
     slug: 'leonardo-martinez'
   });
   
-  for (let i = 1; i <= 20; i++) {
+  // Agregar 3 artistas adicionales
+  for (let i = 1; i <= 3; i++) {
     userData.push({
       name: `Artista ${i}`,
       email: `artista${i}@test.com`,
@@ -255,10 +256,12 @@ async function seed() {
   const artworkData = [];
   const slugsUsed = new Set(); // Para asegurar slugs únicos
   
-  // Encontrar a Leonardo Martinez (será el índice 2 después de Admin y UsuarioExtra)
-  const leonardoUser = users[2]; // Leonardo Martinez
+  // Encontrar a Leonardo Martinez por slug o email para evitar dependencias del índice
+  const leonardoUser = users.find(u => u.slug === 'leonardo-martinez') 
+    || users.find(u => (u.email || '').toLowerCase() === 'leonardo.martinez@test.com')
+    || users[0];
   
-  // Crear 20 obras específicamente para Leonardo Martinez
+  // Crear 3 obras específicamente para Leonardo Martinez
   const leonardoArtworks = [
     'Sinfonía Urbana', 'Reflejos del Alma', 'Danza Cósmica', 'Laberinto Interior',
     'Susurros de Color', 'Geometría Emocional', 'Ritmos de la Naturaleza', 'Fragmentos de Luz',
@@ -267,7 +270,7 @@ async function seed() {
     'Construcción Etérea', 'Paisaje Mental', 'Forma y Vacío', 'Energía Pura'
   ];
   
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 3; i++) {
     const canvas = randomFromArray(canvasSizes);
     const scaleOptions = [0.8, 1, 1.2, 1.5];
     const scale = randomFromArray(scaleOptions);
@@ -341,8 +344,8 @@ async function seed() {
     'Azul', 'Luz', 'Estrellas', 'Oro', 'Plata'
   ];
   
-  // Crear obras para el resto de artistas (100 obras adicionales)
-  for (let i = 1; i <= 100; i++) {
+  // Crear obras para el resto de artistas (6 obras adicionales)
+  for (let i = 1; i <= 6; i++) {
     // Excluir a Leonardo Martinez (índice 2) para que las obras se distribuyan entre otros artistas
     const availableUsers = users.filter((user, index) => index !== 2);
     const user = randomFromArray(availableUsers);
@@ -397,7 +400,7 @@ async function seed() {
   }
   const artworks = await Artwork.insertMany(artworkData);
 
-  // Verificar que Leonardo tiene exactamente 20 obras
+  // Verificar cuántas obras tiene Leonardo en este seed reducido
   const leonardoArtworkCount = artworks.filter(artwork => 
     artwork.artist.toString() === leonardoUser._id.toString()
   ).length;
@@ -405,7 +408,7 @@ async function seed() {
   console.log('\n[SHOWCASE] Artista especial creado');
   console.log('[SHOWCASE] Nombre:', leonardoUser.name);
   console.log('[SHOWCASE] Email:', leonardoUser.email);
-  console.log('[SHOWCASE] Obras creadas:', leonardoArtworkCount);
+  console.log('[SHOWCASE] Obras creadas (Leonardo):', leonardoArtworkCount);
   console.log('[SHOWCASE] Slug:', 'leonardo-martinez');
   console.log('[SHOWCASE] Ubicación:', leonardoUser.location || 'Barcelona, España');
   console.log('[SHOWCASE] Sitio web:', leonardoUser.website || 'https://leonardo-martinez-art.com');
@@ -435,10 +438,10 @@ async function seed() {
   console.log(`   PATCH /api/v1/artworks/:id/reserve`);
   console.log(`   PATCH /api/v1/artworks/:id/unreserve\n`);
 
-  // Crea 10 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
+  // Crea 9 exposiciones de prueba (mitad físicas y mitad virtuales, con status y participantes con rol)
   const exhibitionData = [];
   const participantRoles = ['artista', 'curador', 'coordinador', 'invitado'];
-  for (let i = 1; i <= 10; i++) {
+  for (let i = 1; i <= 9; i++) {
     // Hasta 10 artworks y 10 participantes por exposición
     const artworksSet = new Set();
     while (artworksSet.size < 10) {
@@ -528,37 +531,30 @@ async function seed() {
 
   // Ratings eliminados
 
-  // Crea favoritos de prueba para cada obra (entre 0-15 favoritos por obra)
-  const favoriteData = [];
-  const favoriteCountMap = new Map(); // Para llevar el conteo por artwork
-  
+  // Crea favoritos de prueba (máximo 10 favoritos en total)
+  let favoriteData = [];
   for (const artwork of artworks) {
-    // Cada obra tendrá entre 0-15 favoritos
-    const numFavorites = randomInt(0, 15);
+    if (favoriteData.length >= 10) break;
     const usersWhoFavorited = new Set();
-    
-    // Seleccionar usuarios únicos para esta obra
-    while (usersWhoFavorited.size < numFavorites && usersWhoFavorited.size < users.length) {
+    const targetForThisArtwork = randomInt(0, 2); // 0-2 favoritos por obra
+    while (usersWhoFavorited.size < targetForThisArtwork && favoriteData.length < 10) {
       const user = randomFromArray(users);
-      if (!usersWhoFavorited.has(user._id.toString())) {
-        usersWhoFavorited.add(user._id.toString());
-        favoriteData.push({
-          artwork: artwork._id,
-          user: user._id
-        });
+      const key = `${artwork._id}:${user._id}`;
+      if (!usersWhoFavorited.has(key)) {
+        usersWhoFavorited.add(key);
+        favoriteData.push({ artwork: artwork._id, user: user._id });
       }
     }
-    
-    // Actualizar el contador en el mapa
-    favoriteCountMap.set(artwork._id.toString(), usersWhoFavorited.size);
   }
-  
-  // Insertar todos los favoritos
   await Favorite.insertMany(favoriteData);
-  
-  // Actualizar favoritesCount en cada artwork
+  // Recalcular favoritos por obra con base en lo insertado
+  const favCountByArtwork = favoriteData.reduce((acc, f) => {
+    const k = String(f.artwork);
+    acc[k] = (acc[k] || 0) + 1;
+    return acc;
+  }, {});
   for (const artwork of artworks) {
-    const count = favoriteCountMap.get(artwork._id.toString()) || 0;
+    const count = favCountByArtwork[String(artwork._id)] || 0;
     artwork.favoritesCount = count;
     await artwork.save();
   }

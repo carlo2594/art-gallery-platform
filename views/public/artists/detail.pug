@@ -75,9 +75,11 @@ block content
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-1.artist-section-title= `Obras de ${artist.name}`
               - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
-              p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
+              - var approvedLabel = (totalArtworks === 1 ? 'aprobada' : 'aprobadas')
+              p.lead.text-muted.artist-artworks-subtitle.mb-0= `${displayText} ${approvedLabel} de este talentoso artista`
+              small.text-muted.d-block.mt-1 Solo se muestran obras aprobadas
         if totalArtworks > 1
           section.filters-toolbar.artist-filters-section.py-2
             .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding

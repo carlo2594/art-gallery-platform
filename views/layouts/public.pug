@@ -20,6 +20,9 @@ html.no-js(lang='es')
     link(rel='stylesheet' href='/css/component.css')
     link(rel='stylesheet' href='/css/style.css')
     script(src='/js/modernizr.custom.js')
+    //- Cargar axios y shim temprano para que inline scripts lo usen
+    script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
+    script(src='/js/http.js')
 
     //- Permite que las vistas inyecten CSS/JS extra en <head>
     block headExtra
@@ -99,7 +102,6 @@ html.no-js(lang='es')
 
     //- JS al final del body (orden importante)
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
-    script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/masonry.pkgd.min.js')
     script(src='/js/imagesloaded.js')
     script(src='/js/classie.js')
