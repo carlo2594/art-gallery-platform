@@ -62,10 +62,11 @@
         // Muestra el grid tras aplicar layout
         requestAnimationFrame(function () {
           try { grid.style.opacity = '1'; } catch (_) {}
+          try { grid.classList.add('is-ready'); } catch (_) {}
+          try { grid.dispatchEvent(new CustomEvent('ox:masonry:ready')); } catch (_) {}
           if (window.__oxRelayoutGrid) setTimeout(window.__oxRelayoutGrid, 50);
         });
       });
     });
   }
 })();
-

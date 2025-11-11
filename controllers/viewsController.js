@@ -337,7 +337,7 @@ exports.getPersonalHome = catchAsync(async (req, res) => {
   const now = new Date();
 
   // Cargar datasets en paralelo
-  const [recentWorks, popularWorks, upcomingExhibitions, featuredArtists] = await Promise.all([
+  let [recentWorks, popularWorks, upcomingExhibitions, featuredArtists] = await Promise.all([
     (async () => {
       const { getRecentArtworks } = require('@utils/artworkHelpers');
       const list = await getRecentArtworks(Artwork, 12);
@@ -351,7 +351,8 @@ exports.getPersonalHome = catchAsync(async (req, res) => {
     (async () => {
       try {
         return await Exhibition.find({ status: 'published', deletedAt: null, startDate: { $gte: now } })
-          .select('title slug startDate endDate coverImage location')
+          .select('title slug description startDate endDate coverImage location participants')
+          .populate({ path: 'participants.user', select: 'name slug' })
           .sort({ startDate: 1 })
           .limit(6)
           .lean();
@@ -371,6 +372,18 @@ exports.getPersonalHome = catchAsync(async (req, res) => {
       }
     })()
   ]);
+
+  // Fallback: si no hay próximas exposiciones, mostrar las más recientes publicadas
+  try {
+    if (!upcomingExhibitions || upcomingExhibitions.length === 0) {
+      upcomingExhibitions = await Exhibition.find({ status: 'published', deletedAt: null })
+        .select('title slug description startDate endDate coverImage location participants')
+        .populate({ path: 'participants.user', select: 'name slug' })
+        .sort({ startDate: -1 })
+        .limit(3)
+        .lean();
+    }
+  } catch (_) {}
 
   res.status(200).render('personal/home', {
     title: 'Tu inicio · Galería del Ox',

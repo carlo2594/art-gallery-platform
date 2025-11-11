@@ -2,45 +2,78 @@ extends /layouts/public
 
 block headExtra
   style.
-    .page-loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.96); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; transition: opacity 200ms ease, visibility 200ms ease; }
-    .page-loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loading-spinner { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #e5e7eb; border-top-color: #5022c3; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #555; font-weight: 600; }
+    /* Exposiciones: altura consistente del carrusel */
+    .home-exhibitions-carousel { --carousel-h: 440px; }
+    @media (max-width: 576px) { .home-exhibitions-carousel { --carousel-h: 300px; } }
+    .home-exhibitions-carousel .carousel-item,
+    .home-exhibitions-carousel .carousel-item img { height: var(--carousel-h); }
+    .home-exhibitions-carousel .carousel-item img { width: 100%; object-fit: cover; }
+    /* Card estilo hero con texto blanco y líneas claras */
+    .home-exhibitions-carousel .carousel-caption {
+      text-align: left;
+      padding: 1rem 1.25rem;
+      left: 0; right: 0;
+      top: 50%; bottom: auto;
+      transform: translateY(-50%);
+      z-index: 3;
+    }
+    /* Ajustes móviles: nunca ocultar y evitar que quede fuera de pantalla */
+    @media (max-width: 576px) {
+      .home-exhibitions-carousel .carousel-caption {
+        top: auto; bottom: 0; transform: none; padding: .75rem .75rem 1rem;
+      }
+      .home-exhibitions-carousel .exhibition-hero-card { padding: .75rem !important; }
+      .home-exhibitions-carousel .exhibition-hero-card h3 { font-size: 1.25rem; margin-bottom: .5rem; }
+      .home-exhibitions-carousel .exhibition-hero-card .exhibition-description-style { display: none; }
+      .home-exhibitions-carousel .exhibition-hero-card .row.g-3 { row-gap: .5rem; }
+    }
+    .home-exhibitions-carousel .carousel-caption hr { border-color: rgba(255,255,255,0.35); opacity: .55; }
+    .home-exhibitions-carousel .exhibition-hero-card {
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 12px;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    .home-exhibitions-carousel .exhibition-hero-card h3,
+    .home-exhibitions-carousel .exhibition-hero-card p,
+    .home-exhibitions-carousel .exhibition-hero-card .small,
+    .home-exhibitions-carousel .exhibition-hero-card .h6 { color: #fff; }
 
 block scriptsExtra
+  //- Asegura que el overlay no quede colgado en esta página
   script.
     (function(){
-      function hideOverlay(){
+      function clearOverlay(){
         try {
           var ov = document.getElementById('page-loading-overlay');
+          try { document.body.classList.remove('loading'); } catch(_) {}
           if (!ov) return;
           if (!ov.classList.contains('hidden')) ov.classList.add('hidden');
-          setTimeout(function(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 400);
+          setTimeout(function(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 250);
         } catch(_) {}
       }
-      function waitForGrids(){
+      function bind(){
         var grids = document.querySelectorAll('.artwork-grid');
-        if (!grids || grids.length === 0) { hideOverlay(); return; }
-        var remaining = grids.length;
-        function done(){ remaining--; if (remaining <= 0) hideOverlay(); }
-        for (var i = 0; i < grids.length; i++) {
+        if (!grids || !grids.length) { setTimeout(clearOverlay, 400); return; }
+        var left = grids.length;
+        function done(){ if (--left <= 0) clearOverlay(); }
+        for (var i=0;i<grids.length;i++){
           var g = grids[i];
-          if (typeof window.imagesLoaded === 'function') {
-            try { window.imagesLoaded(g, function(){ done(); }); } catch(_) { done(); }
-          } else { done(); }
+          if (g.classList && g.classList.contains('is-ready')) { done(); continue; }
+          try { g.addEventListener('ox:masonry:ready', done, { once:true }); } catch(_) { setTimeout(done, 600); }
         }
-        setTimeout(hideOverlay, 2500);
-        window.addEventListener('load', hideOverlay, { once: true });
+        setTimeout(clearOverlay, 1800);
       }
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', waitForGrids);
-      else waitForGrids();
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+      else bind();
+      window.addEventListener('load', clearOverlay, { once: true });
     })();
 
+
 block content
-  #page-loading-overlay.page-loading-overlay
-    .loading-spinner
-    .loading-text Cargando…
   .container.py-4
     // Saludo simple
     .d-flex.align-items-center.mb-4.gap-3
@@ -81,19 +114,55 @@ block content
         h3.mb-0 Próximas exposiciones
         a.btn.btn-sm.btn-outline-secondary(href="/exhibitions") Ver todo
       if upcomingExhibitions && upcomingExhibitions.length
-        .row.row-cols-1.row-cols-md-2.row-cols-lg-3.g-3
-          each ex in upcomingExhibitions
-            .col
-              a.card.h-100.text-decoration-none(href=`/exhibitions/${ex.slug || ex._id}`)
-                if ex.coverImage
-                  img.card-img-top(src=ex.coverImage, alt=ex.title, loading='lazy')
-                .card-body
-                  h5.card-title.mb-1= ex.title
-                  - const sD = ex.startDate ? new Date(ex.startDate) : null
-                  - const eD = ex.endDate ? new Date(ex.endDate) : null
-                  - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
-                  if dateText
-                    p.card-text.text-muted.mb-0= dateText
+        - var exs = upcomingExhibitions.slice(0, 3)
+        - var carouselId = 'carouselExhibitions'
+        .position-relative
+          .carousel.slide.carousel-fade.home-exhibitions-carousel(id=carouselId data-bs-ride='carousel')
+            if exs.length > 1
+              .carousel-indicators
+                each ex, idx in exs
+                  button(type='button', data-bs-target=`#${carouselId}`, data-bs-slide-to=idx, class=(idx === 0 ? 'active' : null), aria-current=(idx === 0 ? 'true' : null), aria-label=`Slide ${idx + 1}`)
+            .carousel-inner
+              each ex, idx in exs
+                .carousel-item(class=(idx === 0 ? 'active' : null))
+                  a.d-block.text-decoration-none(href=`/exhibitions/${ex.slug || ex._id}`)
+                    if ex.coverImage
+                      img.d-block.w-100(src=ex.coverImage, alt=ex.title, loading='lazy')
+                    else
+                      .d-flex.align-items-center.justify-content-center(style='height: var(--carousel-h); background:#EEE; color:#666;')= ex.title
+                    .carousel-caption
+                      .container
+                        .row
+                          .col-12.col-lg-10.col-xl-8.mx-auto
+                            .exhibition-hero-info.text-white.pb-3.pb-lg-4.exhibition-hero-card.p-3.p-lg-4
+                              h3.h2.fw-bold.mb-2.exhibition-title-font= ex.title
+                              if ex.description
+                                p.lead.mb-3.text-white-75.exhibition-description-style= ex.description
+                              hr.my-2.opacity-50
+                              .row.g-3
+                                .col-12.col-lg-6
+                                  .small.text-white-75.mb-1 Fechas
+                                  - const sD = ex.startDate ? new Date(ex.startDate) : null
+                                  - const eD = ex.endDate ? new Date(ex.endDate) : null
+                                  - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
+                                  .h6.mb-0= dateText || 'Por definir'
+                                .col-12.col-lg-6
+                                  .small.text-white-75.mb-1 Lugar
+                                  .h6.mb-0.exhibition-detail__venue
+                                    if ex.location && (ex.location.address || ex.location.url)
+                                      span.text-white= ex.location.address || 'Exposición virtual'
+                                    else if ex.location && ex.location.type
+                                      span.text-white= ex.location.type === 'virtual' ? 'Exposición virtual' : 'Por definir'
+                                    else
+                                      span.text-white Por definir
+                        //- Se omite la lista de artistas en el carrusel de home para simplificar
+            if exs.length > 1
+              button.carousel-control-prev(type='button', data-bs-target=`#${carouselId}`, data-bs-slide='prev')
+                span.carousel-control-prev-icon(aria-hidden='true')
+                span.visually-hidden Anterior
+              button.carousel-control-next(type='button', data-bs-target=`#${carouselId}`, data-bs-slide='next')
+                span.carousel-control-next-icon(aria-hidden='true')
+                span.visually-hidden Siguiente
       else
         p.text-muted No hay exposiciones próximas.
 
