@@ -9,9 +9,13 @@
         form#artistPanelCoverForm(action='/api/v1/users/me/cover-image' method='POST' enctype='multipart/form-data')
           .mb-3
             label.form-label Nueva portada
-            input.form-control(type='file', name='coverImage', accept='image/*', required)
-          small.text-muted La imagen debe ser horizontal para verse mejor en el encabezado.
+            input#artistCoverInput.form-control(type='file', name='coverImage', accept='image/*', required)
+            // Inline error message for invalid orientation
+            small#artistCoverError.text-danger.mt-1.d-none La imagen debe ser horizontal (más ancha que alta).
+          small.text-muted.d-block.mb-2 Solo se permiten imágenes horizontales para la portada.
+          // Upload progress
+          .progress#artistCoverProgressWrap(style='height: 6px; display: none;')
+            .progress-bar#artistCoverProgressBar(role='progressbar' style='width: 0%;' aria-valuemin='0' aria-valuemax='100')
       .modal-footer
         button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
         button.btn.btn-primary(type='submit' form='artistPanelCoverForm') Actualizar portada
-

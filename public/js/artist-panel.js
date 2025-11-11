@@ -482,13 +482,105 @@
   function hookCoverForm(){
     const form = qs('#artistPanelCoverForm');
     if (!form) return;
+    const fileInput = qs('#artistCoverInput', form) || qs('input[type="file"][name="coverImage"]', form);
+    const submitBtn = document.querySelector("button[form='artistPanelCoverForm'][type='submit']");
+    const errorEl = qs('#artistCoverError');
+    const progressWrap = qs('#artistCoverProgressWrap');
+    const progressBar = qs('#artistCoverProgressBar');
+    let isHorizontal = false;
+    let lastObjectUrl = null;
+
+    function setError(msg){
+      if (!errorEl) return;
+      errorEl.textContent = msg || '';
+      errorEl.classList.toggle('d-none', !msg);
+    }
+    function setSubmitEnabled(enabled){
+      if (submitBtn) submitBtn.disabled = !enabled;
+    }
+    function resetProgress(){
+      if (progressWrap) progressWrap.style.display = 'none';
+      if (progressBar){ progressBar.style.width = '0%'; progressBar.setAttribute('aria-valuenow', '0'); }
+    }
+    function showProgress(percent){
+      if (!progressWrap || !progressBar) return;
+      progressWrap.style.display = '';
+      const pct = Math.max(0, Math.min(100, Math.round(percent || 0)));
+      progressBar.style.width = pct + '%';
+      progressBar.setAttribute('aria-valuenow', String(pct));
+    }
+
+    // Validate orientation on file change
+    if (fileInput){
+      fileInput.addEventListener('change', function(){
+        setError('');
+        isHorizontal = false;
+        resetProgress();
+        try { if (lastObjectUrl) { URL.revokeObjectURL(lastObjectUrl); lastObjectUrl = null; } } catch(_){}
+        const f = fileInput.files && fileInput.files[0];
+        if (!f){ setSubmitEnabled(true); return; }
+        const url = URL.createObjectURL(f); lastObjectUrl = url;
+        const img = new Image();
+        img.onload = function(){
+          isHorizontal = img.width > img.height;
+          if (!isHorizontal){
+            setError('La imagen debe ser horizontal (más ancha que alta).');
+            setSubmitEnabled(false);
+          } else {
+            setError('');
+            setSubmitEnabled(true);
+          }
+          try { URL.revokeObjectURL(url); } catch(_){}
+        };
+        img.onerror = function(){
+          setError('No se pudo leer la imagen seleccionada.');
+          setSubmitEnabled(false);
+          try { URL.revokeObjectURL(url); } catch(_){}
+        };
+        img.src = url;
+      });
+    }
+
+    // Reset state when modal closes
+    try {
+      const modalEl = qs('#artistCoverModal');
+      if (modalEl) modalEl.addEventListener('hidden.bs.modal', function(){
+        setError('');
+        resetProgress();
+        setSubmitEnabled(true);
+        if (form) form.reset();
+      });
+    } catch(_){}
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
+      const f = fileInput && fileInput.files && fileInput.files[0];
+      if (!f){ setError('Selecciona una imagen.'); return; }
+      if (!isHorizontal){ setError('La imagen debe ser horizontal (más ancha que alta).'); return; }
+
       const fd = new FormData(form);
       const url = form.action || '/api/v1/users/me/cover-image';
-      const req = window.axios ? axios.post(url, fd, { headers: { Accept: 'application/json' }, withCredentials: true }) : fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' }).then(r=>r.json());
-      req.then((res) => {
-        alertToast('success', (res && res.message) || 'Portada actualizada');
+      const http = (window.api || window.axios);
+
+      setSubmitEnabled(false);
+      showProgress(0);
+
+      const req = http && http.post ?
+        http.post(url, fd, {
+          headers: { Accept: 'application/json' },
+          withCredentials: true,
+          onUploadProgress: function(evt){
+            if (evt && evt.total) {
+              const pct = Math.round((evt.loaded / evt.total) * 100);
+              showProgress(pct);
+            }
+          }
+        })
+        : fetch(url, { method: 'POST', body: fd, credentials: 'same-origin' }).then(r=>r.json());
+
+      Promise.resolve(req).then((res) => {
+        const successMsg = (res && res.data && res.data.message) || (res && res.message) || 'Portada actualizada';
+        alertToast('success', successMsg);
         try {
           const modalEl = qs('#artistCoverModal');
           if (modalEl && window.bootstrap) {
@@ -496,12 +588,18 @@
             modal.hide();
           }
         } catch(_){}
-        form.reset();
-        // opcional: recargar para ver cambio inmediato en el hero
-        setTimeout(() => { window.location.reload(); }, 600);
+        try { resetProgress(); } catch(_){}
+        if (form) form.reset();
+        setTimeout(() => { window.location.reload(); }, 400);
       }).catch(err => {
-        const msg = (err && err.response && err.response.data && err.response.data.message) || err.message || 'No se pudo actualizar la portada';
+        resetProgress();
+        setSubmitEnabled(true);
+        const msg = (err && err.response && err.response.data && err.response.data.message) || (err && err.normalized && err.normalized.message) || err.message || 'No se pudo actualizar la portada';
         alertToast('danger', msg);
+        // If server rejected due to orientation, reflect it inline too
+        if (msg && msg.toLowerCase().indexOf('horizontal') !== -1) {
+          setError('La imagen debe ser horizontal (más ancha que alta).');
+        }
       });
     });
   }

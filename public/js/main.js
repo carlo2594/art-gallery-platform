@@ -592,6 +592,8 @@ __onReady(function () {
       }
     };
     backLinks.forEach(a => {
+      // Do NOT override admin sidebar back button; it should always use its href
+      if (a.closest('.admin-sidebar')) return;
       a.addEventListener('click', (ev) => {
         if (!canGoBack()) return; // default navigation to href
         ev.preventDefault();
