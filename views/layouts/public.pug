@@ -205,6 +205,58 @@ html.no-js(lang='es')
 
     //- Tu JS global
     script(src='/js/main.js')
+    //- Override global para compartir: siempre usar rutas por ID
+    script.
+      (function(){
+        function findSharePath(){
+          try {
+            var art = document.querySelector('#artwork-thumb[data-artwork-id]');
+            if (art && art.dataset && art.dataset.artworkId) return '/artworks/' + art.dataset.artworkId;
+            var artistBtn = document.querySelector('[data-artist-id]');
+            if (artistBtn && artistBtn.getAttribute) return '/artists/' + artistBtn.getAttribute('data-artist-id');
+          } catch(_) {}
+          try { return window.location.pathname || '/'; } catch(_) { return '/'; }
+        }
+        function copyTextFallback(text){
+          try {
+            var ta = document.createElement('textarea');
+            ta.value = text; ta.setAttribute('readonly', '');
+            ta.style.position = 'absolute'; ta.style.left = '-9999px';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); } catch(_) {}
+            document.body.removeChild(ta); return true;
+          } catch(_) { return false; }
+        }
+        function copyToClipboard(text){
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){ return copyTextFallback(text); });
+          }
+          return Promise.resolve(copyTextFallback(text));
+        }
+        function toast(msg){
+          try {
+            var live = document.getElementById('sr-live');
+            if (live) live.textContent = msg;
+          } catch(_) {}
+        }
+        function onClick(e){
+          var btn = e.target && e.target.closest ? e.target.closest('.ox-share-btn') : null;
+          if (!btn) return;
+          // Interceptar y cancelar cualquier otro manejador
+          try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
+          var path = findSharePath();
+          var url = (window.location && window.location.origin ? window.location.origin : '') + path;
+          var title = document.title || 'Galería del Ox';
+          var sharePromise = Promise.resolve();
+          if (navigator.share) {
+            sharePromise = navigator.share({ title: title, url: url }).catch(function(){ /* cancelado */ });
+          }
+          Promise.resolve(sharePromise).then(function(){
+            return copyToClipboard(url);
+          }).then(function(){ toast('Enlace copiado al portapapeles'); }).catch(function(){ toast('Listo para compartir'); });
+        }
+        try { document.addEventListener('click', onClick, true); } catch(_) {}
+      })();
     //- Región aria-live para confirmaciones accesibles
     #sr-live.visually-hidden(aria-live='polite' aria-atomic='true')
 

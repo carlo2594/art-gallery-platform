@@ -59,13 +59,27 @@
           try { grid.querySelectorAll('li').forEach(function (li) { li.classList.add('shown'); }); } catch (_) {}
         }
 
-        // Muestra el grid tras aplicar layout
+        // Muestra el grid tras aplicar layout y programa re-layouts defensivos
         requestAnimationFrame(function () {
           try { grid.style.opacity = '1'; } catch (_) {}
           try { grid.classList.add('is-ready'); } catch (_) {}
           try { grid.dispatchEvent(new CustomEvent('ox:masonry:ready')); } catch (_) {}
-          if (window.__oxRelayoutGrid) setTimeout(window.__oxRelayoutGrid, 50);
+          // Re-layouts extra para cubrir cambios tardíos (fuentes web, precios, etc.)
+          try {
+            if (window.__oxRelayoutGrid) {
+              setTimeout(window.__oxRelayoutGrid, 50);
+              setTimeout(window.__oxRelayoutGrid, 200);
+              setTimeout(window.__oxRelayoutGrid, 600);
+              setTimeout(window.__oxRelayoutGrid, 1200);
+            }
+          } catch (_) {}
         });
+        // Re-layout cuando carguen fuentes web (si el navegador lo soporta)
+        try {
+          if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
+            document.fonts.ready.then(function(){ try { msnry.layout(); } catch(_) {} });
+          }
+        } catch(_) {}
         // Relayout cuando cambie el tamaño del contenedor (e.g., fuentes/carrusel/tabs)
         try {
           if ('ResizeObserver' in window) {
