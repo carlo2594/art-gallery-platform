@@ -116,6 +116,7 @@ block content
               p.lead.text-muted= displayText
         .container-xxl.artworks-flex.artist-container-padding
           .artworks-grid-paginate
+            - var gridId = 'grid-exhibition'
             include /public/artworks/_artworkGrid.pug
             if typeof totalPages !== 'undefined' && totalPages > 1
               include /public/artworks/_artworkPagination.pug

@@ -66,6 +66,18 @@
           try { grid.dispatchEvent(new CustomEvent('ox:masonry:ready')); } catch (_) {}
           if (window.__oxRelayoutGrid) setTimeout(window.__oxRelayoutGrid, 50);
         });
+        // Relayout cuando cambie el tamaño del contenedor (e.g., fuentes/carrusel/tabs)
+        try {
+          if ('ResizeObserver' in window) {
+            var ro = new ResizeObserver(function(){ try { msnry.layout(); } catch(_) {} });
+            ro.observe(grid);
+            grid.__oxMasonryRO = ro;
+          } else {
+            var relayoutOnResize = function(){ try { msnry.layout(); } catch(_) {} };
+            window.addEventListener('resize', relayoutOnResize);
+            grid.__oxRelayoutOnResize = relayoutOnResize;
+          }
+        } catch(_) {}
       });
     });
   }
