@@ -1315,6 +1315,33 @@ section.join-artists { position: relative; margin-top: 5rem; }
   }
 }
 
+/* Botón de compartir consistente en todo el sitio */
+.ox-share-btn {
+  border-radius: 2rem;
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  font-weight: 600;
+}
+
+/* Favorito: usa var(--ox-blue) para borde y texto en outline,
+   y relleno azul al estar activo (btn-dark) */
+.artwork-detail__fav-btn.btn-outline-dark {
+  color: var(--ox-blue);
+  border-color: var(--ox-blue);
+}
+.artwork-detail__fav-btn.btn-outline-dark:hover,
+.artwork-detail__fav-btn.btn-outline-dark:focus {
+  color: #fff;
+  background-color: var(--ox-blue);
+  border-color: var(--ox-blue);
+}
+.artwork-detail__fav-btn.btn-dark {
+  color: #fff;
+  background-color: var(--ox-blue);
+  border-color: var(--ox-blue);
+}
+
 .artist-follow-btn-mobile:hover,
 .artist-follow-btn-mobile:focus,
 .artist-follow-btn-mobile:active {

@@ -37,22 +37,6 @@ block content
         .artwork-info.ps-xl-4.px-4.text-xl-start.text-center.mx-auto.artwork-info-container.artwork-detail__info
           .d-flex.align-items-center.justify-content-center.justify-content-xl-start.gap-3.mb-3.artwork-title-wrap.artwork-detail__title-wrap
             h1.display-4.fw-bold.mb-0.artwork-title.artwork-detail__title= artwork.title
-            if currentUser
-              button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn.artwork-detail__fav-btn(
-                type='button'
-                aria-label='Agregar a favoritos'
-                data-artwork-id=artwork._id
-                data-favorited='false'
-              )
-                i.far.fa-heart.artwork-detail__fav-icon
-            else
-              button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn.artwork-detail__fav-btn(
-                type='button'
-                aria-label='Inicia sesión para agregar a favoritos'
-                data-bs-toggle='modal'
-                data-bs-target='#favAuthModal'
-              )
-                i.far.fa-heart.artwork-detail__fav-icon
 
           if artwork.artist
             .mb-3.artwork-artist-info.artwork-detail__artist
@@ -91,16 +75,40 @@ block content
             .action-buttons.mb-3.artwork-action-buttons.artwork-detail__action-buttons
               - const av = artwork.availability || 'not_for_sale'
               if av === 'for_sale'
-                if user
-                  button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
-                    type="button"
-                    onclick=`toggleFavorite('${artwork._id}')`
-                    aria-label="Consultar compra"
+                // Acción primaria separada para mejor jerarquía visual
+                .mb-3
+                  if user
+                    button.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
+                      type="button"
+                      aria-label="Consultar compra"
+                    )
+                      span CONSULTAR COMPRA
+                  else
+                    a.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link.artwork-detail__cta-link(href='/login' aria-label='Inicia sesión para consultar')
+                      span CONSULTAR COMPRA
+              // Acciones secundarias agrupadas (favorito y compartir)
+              .d-flex.flex-wrap.align-items-center.gap-3.justify-content-center.justify-content-xl-start.mt-3
+                if currentUser
+                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-fav-btn.artwork-detail__fav-btn.ox-share-btn(
+                    type='button'
+                    aria-label='Agregar a favoritos'
+                    data-artwork-id=artwork._id
+                    data-favorited='false'
                   )
-                    span CONSULTAR COMPRA
+                    i.far.fa-heart.me-2.artwork-detail__fav-icon
+                    span Favorito
                 else
-                  a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link.artwork-detail__cta-link(href='/login' aria-label='Inicia sesión para consultar')
-                    span CONSULTAR COMPRA
+                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-fav-btn.artwork-detail__fav-btn.ox-share-btn(
+                    type='button'
+                    aria-label='Inicia sesión para agregar a favoritos'
+                    data-bs-toggle='modal'
+                    data-bs-target='#favAuthModal'
+                  )
+                    i.far.fa-heart.me-2.artwork-detail__fav-icon
+                    span Favorito
+                button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-share-btn.artwork-detail__share-btn.ox-share-btn(type='button' aria-label='Compartir esta obra')
+                  i.fas.fa-share.me-2
+                  span Compartir
 
     if relatedArtworks && relatedArtworks.length > 0
       section.related-artworks.py-5.px-3.px-md-4.px-lg-5.related-artworks-section.artwork-detail__related-artworks
@@ -138,3 +146,113 @@ block content
     - var message = 'Para agregar esta obra a tus favoritos, inicia sesión o regístrate.'
     - var returnTo = `/artworks/${artwork.slug || artwork._id}`
     include /public/common/_authRequiredModal.pug
+
+  // Inline script: compartir/copiar enlace de la obra
+  script.
+    (function(){
+      function copyTextFallback(text){
+        try {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          var selected = (document.getSelection().rangeCount > 0) && document.getSelection().getRangeAt(0);
+          ta.select();
+          try { document.execCommand('copy'); } catch(_) {}
+          document.body.removeChild(ta);
+          if (selected) {
+            document.getSelection().removeAllRanges();
+            document.getSelection().addRange(selected);
+          }
+          return true;
+        } catch(_) { return false; }
+      }
+      function copyToClipboard(text){
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){
+            return copyTextFallback(text);
+          });
+        }
+        return Promise.resolve(copyTextFallback(text));
+      }
+      function announce(msg){
+        try {
+          var live = document.getElementById('sr-live');
+          if (live) { live.textContent = msg; }
+        } catch(_) {}
+      }
+      function showToast(msg){
+        try {
+          var container = document.getElementById('toast-container');
+          if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'position-fixed bottom-0 start-50 translate-middle-x p-3';
+            container.style.zIndex = 1080;
+            document.body.appendChild(container);
+          }
+          var toast = document.createElement('div');
+          toast.className = 'toast align-items-center text-bg-dark border-0';
+          toast.setAttribute('role', 'status');
+          toast.setAttribute('aria-live', 'polite');
+          toast.setAttribute('aria-atomic', 'true');
+          toast.innerHTML = '<div class="d-flex"><div class="toast-body">' + msg + '</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Cerrar"></button></div>';
+          container.appendChild(toast);
+          var useBs = typeof window.bootstrap !== 'undefined' && window.bootstrap.Toast;
+          if (useBs) {
+            var t = new window.bootstrap.Toast(toast, { autohide: true, delay: 1600 });
+            t.show();
+            toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
+          } else {
+            toast.classList.add('show');
+            setTimeout(function(){ toast.classList.remove('show'); toast.remove(); }, 1600);
+          }
+        } catch(_) {}
+      }
+      function visualClick(btn, ev){
+        try {
+          var rect = btn.getBoundingClientRect();
+          var size = Math.max(rect.width, rect.height);
+          var x = (ev.clientX - rect.left) - size / 2;
+          var y = (ev.clientY - rect.top) - size / 2;
+          var ripple = document.createElement('span');
+          ripple.className = 'btn-ripple';
+          ripple.style.width = size + 'px';
+          ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          btn.appendChild(ripple);
+          ripple.addEventListener('animationend', function(){ ripple.remove(); });
+          btn.classList.add('btn-pop');
+          btn.addEventListener('animationend', function handler(){ btn.classList.remove('btn-pop'); btn.removeEventListener('animationend', handler); });
+        } catch(_) {}
+      }
+      function setupShare(){
+        var btn = document.querySelector('.artwork-share-btn');
+        if (!btn) return;
+        btn.addEventListener('click', function(ev){
+          visualClick(btn, ev);
+          var url = window.location.href;
+          var title = document.title || 'Galería del Ox';
+          var sharePromise = Promise.resolve();
+          if (navigator.share) {
+            sharePromise = navigator.share({ title: title, url: url }).catch(function(){ /* cancelado */ });
+          }
+          Promise.resolve(sharePromise).then(function(){
+            return copyToClipboard(url);
+          }).then(function(copied){
+            var msg = copied ? 'Enlace copiado al portapapeles' : 'Listo para compartir';
+            showToast(msg);
+            announce(msg);
+          }).catch(function(){
+            var msg = 'No se pudo copiar el enlace';
+            showToast(msg);
+            announce(msg);
+          });
+        });
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupShare);
+      else setupShare();
+    })();
