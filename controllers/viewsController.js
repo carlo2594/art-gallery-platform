@@ -332,6 +332,55 @@ exports.getMyAccount = (req, res) => {
   });
 };
 
+// -------------------- Home Personalizada --------------------
+exports.getPersonalHome = catchAsync(async (req, res) => {
+  const now = new Date();
+
+  // Cargar datasets en paralelo
+  const [recentWorks, popularWorks, upcomingExhibitions, featuredArtists] = await Promise.all([
+    (async () => {
+      const { getRecentArtworks } = require('@utils/artworkHelpers');
+      const list = await getRecentArtworks(Artwork, 12);
+      return list || [];
+    })(),
+    (async () => {
+      const { getPopularArtworks } = require('@utils/artworkHelpers');
+      const list = await getPopularArtworks(Artwork, 12);
+      return list || [];
+    })(),
+    (async () => {
+      try {
+        return await Exhibition.find({ status: 'published', deletedAt: null, startDate: { $gte: now } })
+          .select('title slug startDate endDate coverImage location')
+          .sort({ startDate: 1 })
+          .limit(6)
+          .lean();
+      } catch (_) {
+        return [];
+      }
+    })(),
+    (async () => {
+      try {
+        return await User.find({ role: 'artist', active: { $ne: false } })
+          .select('name slug profileImage followersCount')
+          .sort({ followersCount: -1, createdAt: -1 })
+          .limit(8)
+          .lean();
+      } catch (_) {
+        return [];
+      }
+    })()
+  ]);
+
+  res.status(200).render('personal/home', {
+    title: 'Tu inicio · Galería del Ox',
+    recentWorks,
+    popularWorks,
+    upcomingExhibitions,
+    featuredArtists
+  });
+});
+
 // Vista para reset password (prevalida el enlace)
 exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;

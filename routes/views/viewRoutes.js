@@ -15,7 +15,13 @@ const ensureLoggedInView = (req, res, next) => {
 const Exhibition = require('@models/exhibitionModel');
 
 // =================== PÁGINA DE INICIO ===================
-router.get('/', viewsController.getHome);
+// Si el usuario está logueado, redirigir a la home personalizada
+router.get('/', (req, res, next) => {
+  if (res.locals && res.locals.currentUser) {
+    return res.redirect(302, '/personal/home');
+  }
+  return next();
+}, viewsController.getHome);
 
 // =================== AUTENTICACIÓN =====================
 router.get('/login', viewsController.getLogin);
@@ -38,6 +44,9 @@ router.get('/about', viewsController.getAbout);
 
 // =================== CONTACTO ==========================
 router.get('/contact', viewsController.getContact);
+
+// =================== HOME PERSONAL (USUARIO LOGUEADO) =
+router.get('/personal/home', ensureLoggedInView, viewsController.getPersonalHome);
 
 // =================== ARTISTAS ==========================
 // Guard helper: requiere rol artista

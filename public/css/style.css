@@ -498,7 +498,7 @@ section.join-artists { position: relative; margin-top: 5rem; }
   ========================================== */
 .artworks-flex { display: flex; flex-direction: column; min-height: 48rem; }
 .artworks-grid-paginate { display: flex; flex-direction: column; flex: 1 1 auto; }
-#grid { min-height: 24rem; }
+.artwork-grid { min-height: 24rem; }
 #pager-obras { margin-top: auto; }
 .pager-hidden { display: none !important; }
 

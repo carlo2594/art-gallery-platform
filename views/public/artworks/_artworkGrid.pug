@@ -1,5 +1,6 @@
 //- Grid de obras (reutilizable)
-ul.grid.effect-2.artwork-grid#grid
+- var __gridId = (typeof gridId !== 'undefined' && gridId) ? gridId : 'grid'
+ul.grid.effect-2.artwork-grid(id=__gridId)
   each a in artworks
     - const _sizes = '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw'
     - const hasMedia = a && a._media && a._media.src
