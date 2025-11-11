@@ -142,10 +142,27 @@ block content
                               .row.g-3
                                 .col-12.col-lg-6
                                   .small.text-white-75.mb-1 Fechas
-                                  - const sD = ex.startDate ? new Date(ex.startDate) : null
-                                  - const eD = ex.endDate ? new Date(ex.endDate) : null
-                                  - const dateText = (sD && eD) ? `Del ${sD.toLocaleDateString('es-ES')} al ${eD.toLocaleDateString('es-ES')}` : (sD ? `Desde ${sD.toLocaleDateString('es-ES')}` : (eD ? `Hasta ${eD.toLocaleDateString('es-ES')}` : ''))
-                                  .h6.mb-0= dateText || 'Por definir'
+                                  - let sD = ex.startDate ? new Date(ex.startDate) : null
+                                  - let eD = ex.endDate ? new Date(ex.endDate) : null
+                                  - if (sD && isNaN(sD.getTime())) sD = null
+                                  - if (eD && isNaN(eD.getTime())) eD = null
+                                  - const months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic']
+                                  - const fmt = (d) => `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`
+                                  - const rangeText = (function(){
+                                  -   if (sD && eD) {
+                                  -     const sameYear = sD.getFullYear() === eD.getFullYear()
+                                  -     const sameMonth = sameYear && sD.getMonth() === eD.getMonth()
+                                  -     if (sameMonth) return `${sD.getDate()}–${eD.getDate()} ${months[sD.getMonth()]} ${sD.getFullYear()}`
+                                  -     if (sameYear) return `${sD.getDate()} ${months[sD.getMonth()]}–${eD.getDate()} ${months[eD.getMonth()]} ${sD.getFullYear()}`
+                                  -     return `${fmt(sD)}–${fmt(eD)}`
+                                  -   } else if (sD) {
+                                  -     return fmt(sD)
+                                  -   } else if (eD) {
+                                  -     return fmt(eD)
+                                  -   }
+                                  -   return ''
+                                  - })()
+                                  .h6.mb-0= rangeText || 'Por definir'
                                 .col-12.col-lg-6
                                   .small.text-white-75.mb-1 Lugar
                                   .h6.mb-0.exhibition-detail__venue
