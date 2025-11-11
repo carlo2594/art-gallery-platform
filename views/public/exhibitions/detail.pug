@@ -30,7 +30,7 @@ block content
             .col-12.col-lg-10.col-xl-8
               // Card unificado: título, descripción, fechas, lugar y artistas invitados
               .exhibition-hero-info.text-white.pb-4.pb-lg-5.exhibition-hero-card.p-4.p-lg-5
-                // Título y descripción
+                // Título
                 h1.display-4.fw-bold.mb-3.exhibition-title-font.exhibition-detail__title= title
                 if exhibition && exhibition.description
                   p.lead.mb-4.text-white-75.exhibition-description-style.exhibition-detail__description= exhibition.description
@@ -95,6 +95,11 @@ block content
                           a.text-decoration-none.exhibition-artist-link.exhibition-detail__guest-link(href=`/artists/${p.user._id}`)= p.user.name
                         else
                           span.exhibition-detail__guest-name #{p.user && p.user.name}
+                // Acciones: compartir exposición por ID (con texto)
+                .hero-actions.exhibition-actions-desktop.d-flex.flex-wrap.gap-3.justify-content-center.justify-content-lg-start.mt-3
+                  button.btn.btn-outline-light.btn-lg.px-4.py-3.exhibition-share-btn.ox-share-btn(type="button" data-exhibition-id=exhibition && exhibition._id)
+                    i.fas.fa-share.me-2
+                    | Compartir
 
     section.exhibition-mobile.d-lg-none.py-5.exhibition-mobile-bg
       .container
@@ -105,6 +110,10 @@ block content
               h2.h5.mb-3.text-muted.exhibition-mobile-date= dateText
             if exhibition && exhibition.description
               p.lead.mb-0.text-dark.exhibition-mobile-description= exhibition.description
+            // Botón compartir en mobile (con texto)
+            button.btn.btn-outline-primary.btn-lg.mt-4.exhibition-share-btn-mobile.ox-share-btn(type='button' data-exhibition-id=exhibition && exhibition._id)
+              i.fas.fa-share.me-2
+              | Compartir
 
     if artworks && artworks.length > 0
       section.exhibition-artworks.py-5.exhibition-artworks-bg

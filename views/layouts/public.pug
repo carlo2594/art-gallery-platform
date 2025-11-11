@@ -212,6 +212,9 @@ html.no-js(lang='es')
           try {
             var art = document.querySelector('#artwork-thumb[data-artwork-id]');
             if (art && art.dataset && art.dataset.artworkId) return '/artworks/' + art.dataset.artworkId;
+            // Exhibición por ID
+            var exhibitionBtn = document.querySelector('[data-exhibition-id]');
+            if (exhibitionBtn && exhibitionBtn.getAttribute) return '/exhibitions/' + exhibitionBtn.getAttribute('data-exhibition-id');
             var artistBtn = document.querySelector('[data-artist-id]');
             if (artistBtn && artistBtn.getAttribute) return '/artists/' + artistBtn.getAttribute('data-artist-id');
           } catch(_) {}
@@ -260,4 +263,4 @@ html.no-js(lang='es')
     //- Región aria-live para confirmaciones accesibles
     #sr-live.visually-hidden(aria-live='polite' aria-atomic='true')
 
-
+    //- Nota: sin inyecciones — la vista de artista controla su propio botón Compartir
