@@ -2829,9 +2829,22 @@ body.noscroll {
 .activity-exhibition-placeholder { display: flex; align-items: center; justify-content: center; color: #666; height: 160px; }
 .activity-exhibition-title { padding: 0.75rem 0.9rem; font-weight: 600; font-size: 0.95rem; line-height: 1.2; }
 
-@media (max-width: 992px) {
-  .activity-max { max-width: 100%; }
-  .activity-inline-grid ul.artwork-grid > li { flex-basis: 45%; max-width: 45%; }
-  .activity-inline-artists .artist-card { flex-basis: 30%; max-width: 30%; }
-  .activity-exhibition-card { flex-basis: 60%; max-width: 60%; }
-}
+  @media (max-width: 992px) {
+    .activity-max { max-width: 100%; }
+    .activity-inline-grid ul.artwork-grid > li { flex-basis: 45%; max-width: 45%; }
+    .activity-inline-artists .artist-card { flex-basis: 30%; max-width: 30%; }
+    .activity-exhibition-card { flex-basis: 60%; max-width: 60%; }
+  }
+
+  /* Hide scrollbars on activity rows (keep scrollability) */
+  .activity-inline-grid ul.artwork-grid,
+  .activity-inline-artists,
+  .activity-inline-exhibitions {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none;    /* Firefox */
+  }
+  .activity-inline-grid ul.artwork-grid::-webkit-scrollbar,
+  .activity-inline-artists::-webkit-scrollbar,
+  .activity-inline-exhibitions::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
