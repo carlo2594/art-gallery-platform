@@ -40,7 +40,7 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             height=a.imageHeight_px,
             onerror=(a.imageUrl ? "this.onerror=null; this.removeAttribute('srcset'); this.removeAttribute('sizes'); this.src='" + a.imageUrl + "';" : "this.style.display='none';")
           )
-        .artwork-grid__body
+        .artwork-grid__body.artwork-info-glass
           .artwork-grid__content
             .artwork-grid__info
               if a.title

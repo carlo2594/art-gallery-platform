@@ -7,17 +7,7 @@ block content
       a.btn.btn-outline-secondary(href='/artists') Explorar artistas
 
     if artists && artists.length
-      .row.row-cols-2.row-cols-md-4.row-cols-lg-6.g-3
-        each a in artists
-          .col
-            a.text-decoration-none.d-block.text-center.artist-card(href=`/artists/${a.slug || a._id}`)
-              if a.profileImage
-                img.rounded-circle.mb-2(src=a.profileImage, alt=a.name, loading='lazy', decoding='async', fetchpriority='low', style='width:80px;height:80px;object-fit:cover;')
-              else
-                .rounded-circle.mb-2.d-inline-flex.align-items-center.justify-content-center(style='width:80px;height:80px;background:#EEE;color:#666;font-weight:700')= (a.name||'A').charAt(0).toUpperCase()
-              div.fw-semibold= a.name
-              if typeof a.followersCount !== 'undefined'
-                div.text-muted.small #{a.followersCount} seguidores
+      - var artists = artists
+      include /public/artists/_artistGrid.pug
     else
       p.text-muted Aún no sigues a ningún artista.
-
