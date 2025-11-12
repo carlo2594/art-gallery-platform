@@ -1,18 +1,7 @@
 ﻿extends /layouts/public
 
-//- Estilos específicos de la Home (migrados a /css/style.css)
+//- Estilos de la Home migrados a /css/style.css
 block headExtra
-  //- Animaciones Z-Pattern (slide-in izquierda/derecha)
-  style.
-    .home-exhibitions .z-anim { opacity: 0; transform: translateX(0); transition: transform 700ms ease, opacity 700ms ease; will-change: transform, opacity; }
-    .home-exhibitions .z-left { transform: translateX(-40px); }
-    .home-exhibitions .z-right { transform: translateX(40px); }
-    .home-exhibitions .featurette.in-view .z-anim { opacity: 1; transform: translateX(0); }
-    /* Sutil escalonado: la columna derecha entra un poco después */
-    .home-exhibitions .featurette.in-view .z-anim.z-right { transition-delay: 120ms; }
-    @media (prefers-reduced-motion: reduce) {
-      .home-exhibitions .z-anim { transition: none; transform: none; opacity: 1; }
-    }
 
 block content
   section.hero.home-hero

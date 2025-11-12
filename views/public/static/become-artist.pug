@@ -149,46 +149,5 @@ block content
                 i.fas.fa-paper-plane.me-2
                 | Enviar solicitud
 
-block scriptsExtra
-  script.
-    (function(){
-      var addBtn = document.getElementById('addLinkBtn');
-      var list = document.querySelector('.links-list');
-      var MAX_LINKS = 5;
-      function updateStates(){
-        var items = list.querySelectorAll('.links-item');
-        items.forEach(function(item, idx){
-          var btn = item.querySelector('[data-action="remove-link"]');
-          if (btn) btn.disabled = (items.length <= 1);
-        });
-        if (addBtn) {
-          var count = items.length;
-          addBtn.disabled = (count >= MAX_LINKS);
-          addBtn.setAttribute('aria-disabled', addBtn.disabled ? 'true' : 'false');
-          addBtn.title = addBtn.disabled ? 'Máximo de enlaces alcanzado' : 'Agregar enlace';
-        }
-      }
-      function addLink(value){
-        var current = list.querySelectorAll('.links-item').length;
-        if (current >= MAX_LINKS) { updateStates(); return; }
-        var group = document.createElement('div');
-        group.className = 'input-group mb-2 links-item';
-        group.innerHTML = '<span class="input-group-text"><i class="fas fa-link"></i></span>' +
-                          '<input class="form-control" type="url" name="links" placeholder="https://tuweb.com o https://instagram.com/usuario" ' + (value? ('value="'+String(value).replace(/"/g,'&quot;')+'"') : '') + ' required>' +
-                          '<button class="btn btn-outline-secondary" type="button" data-action="remove-link" aria-label="Eliminar enlace" title="Eliminar"><i class="fas fa-xmark"></i></button>';
-        list.appendChild(group);
-        updateStates();
-      }
-      if (addBtn && list){
-        addBtn.addEventListener('click', function(){ addLink(''); });
-        list.addEventListener('click', function(e){
-          var t = e.target;
-          if (t && (t.getAttribute('data-action')==='remove-link' || (t.closest && t.closest('[data-action="remove-link"]')))){
-            var btn = t.getAttribute('data-action')==='remove-link' ? t : t.closest('[data-action="remove-link"]');
-            var item = btn && btn.closest('.links-item');
-            if (item && list.querySelectorAll('.links-item').length > 1){ item.remove(); updateStates(); }
-          }
-        });
-        updateStates();
-      }
-    })();
+          block scriptsExtra
+            // JS de lista dinámica movido a /js/main.js

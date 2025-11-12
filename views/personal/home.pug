@@ -1,76 +1,6 @@
 extends /layouts/public
 
-block headExtra
-  style.
-    /* Exposiciones: altura consistente del carrusel */
-    .home-exhibitions-carousel { --carousel-h: 440px; }
-    @media (max-width: 576px) { .home-exhibitions-carousel { --carousel-h: 300px; } }
-    .home-exhibitions-carousel .carousel-item,
-    .home-exhibitions-carousel .carousel-item img { height: var(--carousel-h); }
-    .home-exhibitions-carousel .carousel-item img { width: 100%; object-fit: cover; }
-    /* Card estilo hero con texto blanco y líneas claras */
-    .home-exhibitions-carousel .carousel-caption {
-      text-align: left;
-      padding: 1rem 1.25rem;
-      left: 0; right: 0;
-      top: 50%; bottom: auto;
-      transform: translateY(-50%);
-      z-index: 3;
-    }
-    /* Ajustes móviles: nunca ocultar y evitar que quede fuera de pantalla */
-    @media (max-width: 576px) {
-      .home-exhibitions-carousel .carousel-caption {
-        top: auto; bottom: 0; transform: none; padding: .75rem .75rem 1rem;
-      }
-      .home-exhibitions-carousel .exhibition-hero-card { padding: .75rem !important; }
-      .home-exhibitions-carousel .exhibition-hero-card h3 { font-size: 1.25rem; margin-bottom: .5rem; }
-      .home-exhibitions-carousel .exhibition-hero-card .exhibition-description-style { display: none; }
-      .home-exhibitions-carousel .exhibition-hero-card .row.g-3 { row-gap: .5rem; }
-    }
-    .home-exhibitions-carousel .carousel-caption hr { border-color: rgba(255,255,255,0.35); opacity: .55; }
-    .home-exhibitions-carousel .exhibition-hero-card {
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 12px;
-      color: #fff;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-    }
-    .home-exhibitions-carousel .exhibition-hero-card h3,
-    .home-exhibitions-carousel .exhibition-hero-card p,
-    .home-exhibitions-carousel .exhibition-hero-card .small,
-    .home-exhibitions-carousel .exhibition-hero-card .h6 { color: #fff; }
 
-block scriptsExtra
-  //- Asegura que el overlay no quede colgado en esta página
-  script.
-    (function(){
-      function clearOverlay(){
-        try {
-          var ov = document.getElementById('page-loading-overlay');
-          try { document.body.classList.remove('loading'); } catch(_) {}
-          if (!ov) return;
-          if (!ov.classList.contains('hidden')) ov.classList.add('hidden');
-          setTimeout(function(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 250);
-        } catch(_) {}
-      }
-      function bind(){
-        var grids = document.querySelectorAll('.artwork-grid');
-        if (!grids || !grids.length) { setTimeout(clearOverlay, 400); return; }
-        var left = grids.length;
-        function done(){ if (--left <= 0) clearOverlay(); }
-        for (var i=0;i<grids.length;i++){
-          var g = grids[i];
-          if (g.classList && g.classList.contains('is-ready')) { done(); continue; }
-          try { g.addEventListener('ox:masonry:ready', done, { once:true }); } catch(_) { setTimeout(done, 600); }
-        }
-        setTimeout(clearOverlay, 1800);
-      }
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
-      else bind();
-      window.addEventListener('load', clearOverlay, { once: true });
-    })();
 
 
 block content
@@ -84,7 +14,7 @@ block content
         h2.mb-0 Bienvenido de nuevo, #{uname}
         p.text-muted.mb-0 Explora novedades y retoma donde lo dejaste
 
-    // Obras recientes
+    // Obras recientes (prioridad alta)
     section.mb-5
       .d-flex.align-items-center.justify-content-between.mb-2
         h3.mb-0 Obras recientes
@@ -92,11 +22,12 @@ block content
       if recentWorks && recentWorks.length
         - var artworks = recentWorks.slice(0, 6)
         - var gridId = 'grid-recent'
+        - var firstEagerCount = 2
         include /public/artworks/_artworkGrid.pug
       else
         p.text-muted Aún no hay obras recientes.
 
-    // Populares
+    // Populares (prioridad media/baja)
     section.mb-5
       .d-flex.align-items-center.justify-content-between.mb-2
         h3.mb-0 Populares esta semana
@@ -104,6 +35,7 @@ block content
       if popularWorks && popularWorks.length
         - var artworks = popularWorks.slice(0, 6)
         - var gridId = 'grid-popular'
+        - var firstEagerCount = 0
         include /public/artworks/_artworkGrid.pug
       else
         p.text-muted Sin datos populares por ahora.
@@ -127,7 +59,7 @@ block content
                 .carousel-item(class=(idx === 0 ? 'active' : null))
                   a.d-block.text-decoration-none(href=`/exhibitions/${ex.slug || ex._id}`)
                     if ex.coverImage
-                      img.d-block.w-100(src=ex.coverImage, alt=ex.title, loading='lazy')
+                      img.d-block.w-100(src=ex.coverImage, alt=ex.title, loading='lazy', decoding='async', fetchpriority='low')
                     else
                       .d-flex.align-items-center.justify-content-center(style='height: var(--carousel-h); background:#EEE; color:#666;')= ex.title
                     .carousel-caption
@@ -194,7 +126,7 @@ block content
             .col
               a.text-decoration-none.d-block.text-center(href=`/artists/${a.slug || a._id}`)
                 if a.profileImage
-                  img.rounded-circle.mb-2(src=a.profileImage, alt=a.name, loading='lazy', style='width:80px;height:80px;object-fit:cover;')
+                  img.rounded-circle.mb-2(src=a.profileImage, alt=a.name, loading='lazy', decoding='async', fetchpriority='low', style='width:80px;height:80px;object-fit:cover;')
                 else
                   .rounded-circle.mb-2.d-inline-flex.align-items-center.justify-content-center(style='width:80px;height:80px;background:#EEE;color:#666;font-weight:700')= (a.name||'A').charAt(0).toUpperCase()
                 div.fw-semibold= a.name

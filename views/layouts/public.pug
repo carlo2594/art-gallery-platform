@@ -19,16 +19,6 @@ html.no-js(lang='es')
     link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet' href='/css/component.css')
     link(rel='stylesheet' href='/css/style.css')
-    style.
-      /* Overlay de carga global estilos */
-      .page-loading-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; transition: opacity 200ms ease, visibility 200ms ease; }
-      .page-loading-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-      .loading-spinner { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #e5e7eb; border-top-color: #5022c3; animation: spin 1s linear infinite; }
-      @keyframes spin { to { transform: rotate(360deg); } }
-      .loading-text { color: #555; font-weight: 600; }
-      /* Evitar FOUC: ocultar contenido principal y evitar scroll mientras carga */
-      body.loading { overflow: hidden; }
-      body.loading .main-content { visibility: hidden; }
     script(src='/js/modernizr.custom.js')
     //- Cargar axios y shim temprano para que inline scripts lo usen
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
@@ -125,141 +115,11 @@ html.no-js(lang='es')
     //- Permite que vistas inyecten JS (por ejemplo, inicializaciones específicas) ANTES de main.js
     block scriptsExtra
     
-    if !hideGlobalOverlay
-      //- Overlay global: estilos y lógica para ocultarlo cuando
-      //- cargan imágenes clave (grids) o cuando termina el load
-      script.
-        (function(){
-          function hideOverlay(){
-          function hideOverlay(){
-            try {
-              var ov = document.getElementById('page-loading-overlay');
-              try { document.body.classList.remove('loading'); } catch(_) {}
-              if (!ov) return;
-              if (!ov.classList.contains('hidden')) ov.classList.add('hidden');
-              setTimeout(function(){
-          function hideOverlay(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 400);
-            } catch(_) {}
-          }
-          function waitForImportantImages(){
-            // Espera a grillas de obras si existen
-            var grids = document.querySelectorAll('.artwork-grid');
-            var pending = 0;
-            function done(){ if (--pending <= 0) hideOverlay(); }
-            if (grids && grids.length && typeof window.imagesLoaded === 'function') {
-              pending = grids.length;
-              for (var i=0;i<grids.length;i++) {
-                try { window.imagesLoaded(grids[i], done); } catch(_) { done(); }
-              }
-            } else if (grids && grids.length) {
-              // Sin imagesLoaded, esperar a onload de cada img en cada grid
-              var imgs = document.querySelectorAll('.artwork-grid img');
-              if (!imgs.length) return hideOverlay();
-              pending = imgs.length;
-              imgs.forEach(function(img){
-                if (img.complete) done();
-                else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
-              });
-            } else {
-              // Si no hay grids, usar fallback por tiempo y window load
-              setTimeout(hideOverlay, 600);
-            }
-            // Fallbacks generales
-            setTimeout(hideOverlay, 3000);
-            window.addEventListener('load', hideOverlay, { once: true });
-          }
-          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', waitForImportantImages);
-          else waitForImportantImages();
-        })();
-    
     script(src='/js/masonry-init.js')
-    if !hideGlobalOverlay
-      //- Refuerzo: cerrar overlay cuando Masonry avise readiness (y con fallback)
-      script.
-        (function(){
-          function clearOverlay(){
-            try {
-              var ov = document.getElementById('page-loading-overlay');
-              try { document.body.classList.remove('loading'); } catch(_) {}
-              if (!ov) return;
-              if (!ov.classList.contains('hidden')) ov.classList.add('hidden');
-              setTimeout(function(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 300);
-            } catch(_) {}
-          }
-          function bind(){
-            var grids = document.querySelectorAll('.artwork-grid');
-            if (!grids || !grids.length) { setTimeout(clearOverlay, 400); return; }
-            var left = grids.length;
-            function done(){ if (--left <= 0) clearOverlay(); }
-            for (var i=0;i<grids.length;i++) {
-              var g = grids[i];
-              if (g.classList && g.classList.contains('is-ready')) { done(); continue; }
-              try { g.addEventListener('ox:masonry:ready', done, { once: true }); } catch(_) { setTimeout(done, 600); }
-            }
-            setTimeout(clearOverlay, 2200);
-          }
-          if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
-          else bind();
-          window.addEventListener('load', clearOverlay, { once: true });
-        })();
 
     //- Tu JS global
     script(src='/js/main.js')
-    //- Override global para compartir: siempre usar rutas por ID
-    script.
-      (function(){
-        function findSharePath(){
-          try {
-            var art = document.querySelector('#artwork-thumb[data-artwork-id]');
-            if (art && art.dataset && art.dataset.artworkId) return '/artworks/' + art.dataset.artworkId;
-            // Exhibición por ID
-            var exhibitionBtn = document.querySelector('[data-exhibition-id]');
-            if (exhibitionBtn && exhibitionBtn.getAttribute) return '/exhibitions/' + exhibitionBtn.getAttribute('data-exhibition-id');
-            var artistBtn = document.querySelector('[data-artist-id]');
-            if (artistBtn && artistBtn.getAttribute) return '/artists/' + artistBtn.getAttribute('data-artist-id');
-          } catch(_) {}
-          try { return window.location.pathname || '/'; } catch(_) { return '/'; }
-        }
-        function copyTextFallback(text){
-          try {
-            var ta = document.createElement('textarea');
-            ta.value = text; ta.setAttribute('readonly', '');
-            ta.style.position = 'absolute'; ta.style.left = '-9999px';
-            document.body.appendChild(ta); ta.select();
-            try { document.execCommand('copy'); } catch(_) {}
-            document.body.removeChild(ta); return true;
-          } catch(_) { return false; }
-        }
-        function copyToClipboard(text){
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){ return copyTextFallback(text); });
-          }
-          return Promise.resolve(copyTextFallback(text));
-        }
-        function toast(msg){
-          try {
-            var live = document.getElementById('sr-live');
-            if (live) live.textContent = msg;
-          } catch(_) {}
-        }
-        function onClick(e){
-          var btn = e.target && e.target.closest ? e.target.closest('.ox-share-btn') : null;
-          if (!btn) return;
-          // Interceptar y cancelar cualquier otro manejador
-          try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
-          var path = findSharePath();
-          var url = (window.location && window.location.origin ? window.location.origin : '') + path;
-          var title = document.title || 'Galería del Ox';
-          var sharePromise = Promise.resolve();
-          if (navigator.share) {
-            sharePromise = navigator.share({ title: title, url: url }).catch(function(){ /* cancelado */ });
-          }
-          Promise.resolve(sharePromise).then(function(){
-            return copyToClipboard(url);
-          }).then(function(){ toast('Enlace copiado al portapapeles'); }).catch(function(){ toast('Listo para compartir'); });
-        }
-        try { document.addEventListener('click', onClick, true); } catch(_) {}
-      })();
+    //- Lógica de overlay y compartir movida a /js/main.js
     //- Región aria-live para confirmaciones accesibles
     #sr-live.visually-hidden(aria-live='polite' aria-atomic='true')
 

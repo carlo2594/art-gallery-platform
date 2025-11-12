@@ -1,7 +1,9 @@
 //- Grid de obras (reutilizable)
 - var __gridId = (typeof gridId !== 'undefined' && gridId) ? gridId : 'grid'
 ul.grid.effect-2.artwork-grid(id=__gridId)
-  each a in artworks
+  //- Permite priorizar carga: define cuántas primeras imágenes van eager/high
+  - const eagerCount = (typeof firstEagerCount !== 'undefined' && firstEagerCount) ? firstEagerCount : 0
+  each a, idx in artworks
     - const _sizes = '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw'
     - const hasMedia = a && a._media && a._media.src
     - const _url = a.imageUrl || ''
@@ -18,7 +20,8 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             srcset=a._media.srcset,
             sizes=a._media.sizes || _sizes,
             alt=a.title,
-            loading='lazy',
+            loading=(idx < eagerCount ? 'eager' : 'lazy'),
+            fetchpriority=(idx < eagerCount ? 'high' : 'auto'),
             decoding='async',
             width=a._media.width || a.imageWidth_px,
             height=a._media.height || a.imageHeight_px,
@@ -30,7 +33,8 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             srcset=srcsetFallback,
             sizes=_sizes,
             alt=a.title,
-            loading='lazy',
+            loading=(idx < eagerCount ? 'eager' : 'lazy'),
+            fetchpriority=(idx < eagerCount ? 'high' : 'auto'),
             decoding='async',
             width=a.imageWidth_px,
             height=a.imageHeight_px,

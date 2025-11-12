@@ -1755,3 +1755,344 @@ document.addEventListener('DOMContentLoaded', function(){
     }, { threshold: 0.4 });
     io.observe(heading);
   })();
+
+// ==========================
+// Overlay de carga global
+// (migrado desde layouts/public.pug)
+// ==========================
+(function overlayHandler(){
+  var overlayBound = false;
+  function getOverlay(){ return document.getElementById('page-loading-overlay'); }
+  function clearOverlay(){
+    try {
+      var ov = getOverlay();
+      try { document.body.classList.remove('loading'); } catch(_) {}
+      if (!ov) return;
+      if (!ov.classList.contains('hidden')) ov.classList.add('hidden');
+      setTimeout(function(){ if (ov && ov.parentNode) try{ ov.remove(); }catch(_){} }, 400);
+    } catch(_) {}
+  }
+  function waitForImportantImages(){
+    // Espera a grillas de obras si existen
+    var grids = document.querySelectorAll('.artwork-grid');
+    var pending = 0;
+    function done(){ if (--pending <= 0) clearOverlay(); }
+    if (grids && grids.length && typeof window.imagesLoaded === 'function') {
+      pending = grids.length;
+      for (var i=0;i<grids.length;i++) {
+        try { window.imagesLoaded(grids[i], done); } catch(_) { done(); }
+      }
+    } else if (grids && grids.length) {
+      var imgs = document.querySelectorAll('.artwork-grid img');
+      if (!imgs.length) return clearOverlay();
+      pending = imgs.length;
+      imgs.forEach(function(img){
+        if (img.complete) done();
+        else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+      });
+    } else {
+      setTimeout(clearOverlay, 600);
+    }
+    setTimeout(clearOverlay, 3000);
+    window.addEventListener('load', clearOverlay, { once: true });
+  }
+  function bindMasonryReady(){
+    var grids = document.querySelectorAll('.artwork-grid');
+    if (!grids || !grids.length) { setTimeout(clearOverlay, 400); return; }
+    var left = grids.length;
+    function done(){ if (--left <= 0) clearOverlay(); }
+    for (var i=0;i<grids.length;i++) {
+      var g = grids[i];
+      if (g.classList && g.classList.contains('is-ready')) { done(); continue; }
+      try { g.addEventListener('ox:masonry:ready', done, { once: true }); } catch(_) { setTimeout(done, 600); }
+    }
+    setTimeout(clearOverlay, 2200);
+  }
+  function init(){
+    if (overlayBound) return; overlayBound = true;
+    var ov = getOverlay();
+    var bodyLoading = document.body && document.body.classList.contains('loading');
+    if (!ov && !bodyLoading) return; // overlay desactivado
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', waitForImportantImages);
+    else waitForImportantImages();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bindMasonryReady);
+    else bindMasonryReady();
+  }
+  try { init(); } catch(_) {}
+})();
+
+// ==========================
+// Compartir / Copiar enlace
+// (migrado desde layouts/public y vistas)
+// ==========================
+(function shareHandler(){
+  function copyTextFallback(text){
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute'; ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      var selected = (document.getSelection().rangeCount > 0) && document.getSelection().getRangeAt(0);
+      ta.select();
+      try { document.execCommand('copy'); } catch(_) {}
+      document.body.removeChild(ta);
+      if (selected) {
+        document.getSelection().removeAllRanges();
+        document.getSelection().addRange(selected);
+      }
+      return true;
+    } catch(_) { return false; }
+  }
+  function copyToClipboard(text){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){ return copyTextFallback(text); });
+    }
+    return Promise.resolve(copyTextFallback(text));
+  }
+  function announce(msg){
+    try { var live = document.getElementById('sr-live'); if (live) live.textContent = msg; } catch(_) {}
+  }
+  function showToast(msg){
+    try {
+      var container = document.getElementById('toast-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'position-fixed bottom-0 start-50 translate-middle-x p-3';
+        container.style.zIndex = 1080;
+        document.body.appendChild(container);
+      }
+      var toast = document.createElement('div');
+      toast.className = 'toast align-items-center text-bg-dark border-0';
+      toast.setAttribute('role', 'status');
+      toast.setAttribute('aria-live', 'polite');
+      toast.setAttribute('aria-atomic', 'true');
+      toast.innerHTML = "<div class='d-flex'><div class='toast-body'></div><button type='button' class='btn-close btn-close-white me-2 m-auto' data-bs-dismiss='toast' aria-label='Cerrar'></button></div>";
+      toast.querySelector('.toast-body').textContent = msg;
+      container.appendChild(toast);
+      var useBs = typeof window.bootstrap !== 'undefined' && window.bootstrap.Toast;
+      if (useBs) {
+        var t = new window.bootstrap.Toast(toast, { autohide: true, delay: 1600 });
+        t.show();
+        toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
+      } else {
+        toast.classList.add('show');
+        setTimeout(function(){ toast.classList.remove('show'); toast.remove(); }, 1600);
+      }
+    } catch(_) {}
+  }
+  function ripple(btn, ev){
+    try {
+      var rect = btn.getBoundingClientRect();
+      var size = Math.max(rect.width, rect.height);
+      var x = (ev.clientX - rect.left) - size / 2;
+      var y = (ev.clientY - rect.top) - size / 2;
+      var r = document.createElement('span');
+      r.className = 'btn-ripple';
+      r.style.width = size + 'px'; r.style.height = size + 'px'; r.style.left = x + 'px'; r.style.top = y + 'px';
+      btn.appendChild(r); r.addEventListener('animationend', function(){ r.remove(); });
+      btn.classList.add('btn-pop');
+      btn.addEventListener('animationend', function handler(){ btn.classList.remove('btn-pop'); btn.removeEventListener('animationend', handler); });
+    } catch(_) {}
+  }
+  function findSharePath(){
+    try {
+      var art = document.querySelector('#artwork-thumb[data-artwork-id]');
+      if (art && art.dataset && art.dataset.artworkId) return '/artworks/' + art.dataset.artworkId;
+      var exhibitionBtn = document.querySelector('[data-exhibition-id]');
+      if (exhibitionBtn && exhibitionBtn.getAttribute) return '/exhibitions/' + exhibitionBtn.getAttribute('data-exhibition-id');
+      var artistBtn = document.querySelector('[data-artist-id]');
+      if (artistBtn && artistBtn.getAttribute) return '/artists/' + artistBtn.getAttribute('data-artist-id');
+    } catch(_) {}
+    try { return window.location.pathname || '/'; } catch(_) { return '/'; }
+  }
+  document.addEventListener('click', function(e){
+    var oxBtn = e.target && e.target.closest && e.target.closest('.ox-share-btn');
+    if (oxBtn) {
+      try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
+      var path = findSharePath();
+      var url = (window.location && window.location.origin ? window.location.origin : '') + path;
+      var title = document.title || 'Galería del Ox';
+      var sharePromise = navigator.share ? navigator.share({ title: title, url: url }).catch(function(){}) : Promise.resolve();
+      Promise.resolve(sharePromise).then(function(){ return copyToClipboard(url); }).then(function(){ showToast('Enlace copiado al portapapeles'); }).catch(function(){ showToast('Listo para compartir'); });
+      return;
+    }
+    var artistBtn = e.target && e.target.closest && e.target.closest('.artist-share-btn, .artist-share-btn-mobile');
+    var artworkBtn = e.target && e.target.closest && e.target.closest('.artwork-share-btn');
+    var shareBtn = artistBtn || artworkBtn;
+    if (shareBtn) {
+      ripple(shareBtn, e);
+      var url = window.location && window.location.href || '';
+      var title2 = document.title || 'Galería del Ox';
+      var p = navigator.share ? navigator.share({ title: title2, url: url }).catch(function(){}) : Promise.resolve();
+      Promise.resolve(p).then(function(){ return copyToClipboard(url); }).then(function(copied){ showToast(copied ? 'Enlace copiado al portapapeles' : 'Listo para compartir'); announce(copied ? 'Enlace copiado al portapapeles' : 'Listo para compartir'); }).catch(function(){ showToast('No se pudo copiar el enlace'); announce('No se pudo copiar el enlace'); });
+    }
+  }, true);
+})();
+
+// ==========================
+// Seguir / dejar de seguir artista
+// (migrado desde vistas de artista)
+// ==========================
+(function followHandler(){
+  function toggleFollow(artistId, desired){
+    var useAxios = typeof window.axios !== 'undefined';
+    if (desired) {
+      if (useAxios) return axios.post('/api/v1/follows', { artistId: artistId }).then(function(){ return { ok: true, following: true }; }).catch(function(e){ return { ok: false, error: e }; });
+      return fetch('/api/v1/follows', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: JSON.stringify({ artistId: artistId }) })
+        .then(function(res){ if (!res.ok && res.status !== 200 && res.status !== 201) throw res; return { ok: true, following: true }; })
+        .catch(function(e){ return { ok: false, error: e }; });
+    } else {
+      if (useAxios) return axios.delete('/api/v1/follows/' + artistId).then(function(){ return { ok: true, following: false }; }).catch(function(e){ return { ok: false, error: e }; });
+      return fetch('/api/v1/follows/' + artistId, { method: 'DELETE', credentials: 'same-origin' })
+        .then(function(res){ if (!res.ok && res.status !== 204 && res.status !== 404) throw res; return { ok: true, following: false }; })
+        .catch(function(e){ return { ok: false, error: e }; });
+    }
+  }
+  function setup(){
+    var btns = document.querySelectorAll('.artist-follow-btn, .artist-follow-btn-mobile');
+    if (!btns || !btns.length) return;
+    btns.forEach(function(btn){
+      var artistId = btn.getAttribute('data-artist-id');
+      if (!artistId) return;
+      function getState(){ return btn.getAttribute('aria-pressed') === 'true'; }
+      function setState(following){
+        btn.setAttribute('aria-pressed', following ? 'true' : 'false');
+        btn.classList.toggle('active', !!following);
+        var label = following ? 'Siguiendo' : 'Seguir';
+        btn.innerHTML = '<i class="fas fa-heart me-2"></i>' + label;
+      }
+      btn.addEventListener('click', function(e){
+        if (btn.disabled) return;
+        // efecto visual
+        try {
+          var rect = btn.getBoundingClientRect();
+          var size = Math.max(rect.width, rect.height);
+          var x = (e.clientX - rect.left) - size / 2;
+          var y = (e.clientY - rect.top) - size / 2;
+          var ripple = document.createElement('span');
+          ripple.className = 'btn-ripple'; ripple.style.width = size + 'px'; ripple.style.height = size + 'px'; ripple.style.left = x + 'px'; ripple.style.top = y + 'px';
+          btn.appendChild(ripple); ripple.addEventListener('animationend', function(){ ripple.remove(); });
+          btn.classList.add('btn-pop'); btn.addEventListener('animationend', function handler(){ btn.classList.remove('btn-pop'); btn.removeEventListener('animationend', handler); });
+        } catch(_) {}
+        var desired = !getState();
+        btn.disabled = true; btn.classList.add('disabled');
+        Promise.resolve(toggleFollow(artistId, desired)).then(function(res){
+          btn.disabled = false; btn.classList.remove('disabled');
+          if (res && res.ok) setState(!!res.following);
+          else {
+            var status = (res && res.error && (res.error.status || (res.error.response && res.error.response.status))) || 0;
+            if (status === 401 || status === 403) {
+              var returnTo = window.location.pathname + window.location.search;
+              window.location.assign('/login?returnTo=' + encodeURIComponent(returnTo));
+            } else {
+              try { console.error('No se pudo actualizar seguimiento', res && res.error); } catch(_) {}
+            }
+          }
+        });
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
+})();
+
+// ==========================
+// Auth: Forgot password y Reset password
+// ==========================
+(function authForms(){
+  function setupForgot(){
+    var form = document.getElementById('forgotForm');
+    if(!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var email = form.email && form.email.value;
+      var existingAlert = form.querySelector('.alert');
+      if(existingAlert){ existingAlert.parentNode.removeChild(existingAlert); }
+      var info = document.createElement('div');
+      info.className = 'alert alert-info mb-3';
+      info.textContent = 'Enviando…';
+      form.insertBefore(info, form.querySelector('.form-floating'));
+      fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
+        .then(function(res){ return res.json().catch(function(){return {};}).then(function(json){return { ok: res.ok, json: json };}); })
+        .then(function(result){
+          info.className = 'alert ' + (result.ok ? 'alert-success' : 'alert-warning') + ' mb-3';
+          info.textContent = (result.json && result.json.message) || 'Si el email existe, te enviaremos un enlace para restablecer tu contraseña.';
+        })
+        .catch(function(){
+          info.className = 'alert alert-danger mb-3';
+          info.textContent = 'No se pudo procesar la solicitud. Intenta de nuevo.';
+        });
+    });
+  }
+  function setupReset(){
+    var form = document.querySelector('form.reset-password-form');
+    if(!form) return;
+    var newPass = document.getElementById('newPassword');
+    var confirm = document.getElementById('confirmPassword');
+    var existing = document.querySelector('.reset-password-error');
+    var makeAlert = function(msg){
+      var el = document.createElement('div');
+      el.className = 'alert alert-danger reset-password-error mb-3';
+      el.textContent = msg; return el;
+    };
+    form.addEventListener('submit', function(e){
+      if(!newPass || !confirm) return;
+      if(newPass.value !== confirm.value){
+        e.preventDefault();
+        if(existing && existing.parentNode) existing.parentNode.removeChild(existing);
+        existing = makeAlert('Las contraseñas no coinciden.');
+        form.insertBefore(existing, form.firstChild.nextSibling);
+      }
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setupForgot(); setupReset(); });
+  else { setupForgot(); setupReset(); }
+})();
+
+// ==========================
+// Become-artist: lista dinámica de enlaces
+// ==========================
+(function becomeArtist(){
+  function updateStates(list, addBtn, MAX_LINKS){
+    if (!list) return;
+    var items = list.querySelectorAll('.links-item');
+    items.forEach(function(item){
+      var btn = item.querySelector('[data-action="remove-link"]');
+      if (btn) btn.disabled = (items.length <= 1);
+    });
+    if (addBtn) {
+      var count = items.length;
+      addBtn.disabled = (count >= MAX_LINKS);
+      addBtn.setAttribute('aria-disabled', addBtn.disabled ? 'true' : 'false');
+      addBtn.title = addBtn.disabled ? 'Máximo de enlaces alcanzado' : 'Agregar enlace';
+    }
+  }
+  function addLink(list, MAX_LINKS, value){
+    var current = list.querySelectorAll('.links-item').length;
+    if (current >= MAX_LINKS) { updateStates(list, document.getElementById('addLinkBtn'), MAX_LINKS); return; }
+    var group = document.createElement('div');
+    group.className = 'input-group mb-2 links-item';
+    group.innerHTML = '<span class="input-group-text"><i class="fas fa-link"></i></span>' +
+                      '<input class="form-control" type="url" name="links" placeholder="https://tuweb.com o https://instagram.com/usuario" ' + (value? ('value="'+String(value).replace(/"/g,'&quot;')+'"') : '') + ' required>' +
+                      '<button class="btn btn-outline-secondary" type="button" data-action="remove-link" aria-label="Eliminar enlace" title="Eliminar"><i class="fas fa-xmark"></i></button>';
+    list.appendChild(group);
+    updateStates(list, document.getElementById('addLinkBtn'), MAX_LINKS);
+  }
+  function setup(){
+    var addBtn = document.getElementById('addLinkBtn');
+    var list = document.querySelector('.links-list');
+    var MAX_LINKS = 5;
+    if (!list || !addBtn) return;
+    addBtn.addEventListener('click', function(){ addLink(list, MAX_LINKS, ''); });
+    list.addEventListener('click', function(e){
+      var t = e.target;
+      var isBtn = t && (t.getAttribute('data-action')==='remove-link' || (t.closest && t.closest('[data-action="remove-link"]')));
+      if (!isBtn) return;
+      var btn = t.getAttribute('data-action')==='remove-link' ? t : t.closest('[data-action="remove-link"]');
+      var item = btn && btn.closest('.links-item');
+      if (item && list.querySelectorAll('.links-item').length > 1){ item.remove(); updateStates(list, addBtn, MAX_LINKS); }
+    });
+    updateStates(list, addBtn, MAX_LINKS);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
+})();
