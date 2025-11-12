@@ -1,0 +1,14 @@
+extends /layouts/public
+
+block content
+  .container.py-4
+    .d-flex.align-items-center.justify-content-between.mb-4
+      h2.mb-0 Exposiciones vistas recientemente
+      a.btn.btn-outline-secondary(href='/exhibitions') Explorar exposiciones
+
+    if exhibitions && exhibitions.length
+      - var exhibitions = exhibitions
+      include /public/exhibitions/_exhibitionGrid.pug
+    else
+      p.text-muted No hay exposiciones recientes para mostrar.
+

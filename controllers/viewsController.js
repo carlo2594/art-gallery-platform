@@ -508,6 +508,102 @@ exports.getActivity = catchAsync(async (req, res) => {
   });
 });
 
+// Listado completo: Obras (vistas o me gusta)
+exports.getActivityWorks = catchAsync(async (req, res) => {
+  const currentUser = res.locals && res.locals.currentUser;
+  const uid = currentUser && (currentUser.id || currentUser._id);
+  const tab = (req.query.tab === 'likes') ? 'likes' : 'views';
+
+  const ArtworkView = require('@models/artworkViewModel');
+  let artworks = [];
+
+  if (tab === 'likes') {
+    const likes = await Favorite.find({ user: uid })
+      .sort({ createdAt: -1 })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents status deletedAt', populate: { path: 'artist', select: 'name' } })
+      .lean();
+    artworks = likes.map(l => l.artwork).filter(a => a && a.status === 'approved' && a.deletedAt == null);
+  } else {
+    const views = await ArtworkView.find({ user: uid })
+      .sort({ createdAt: -1 })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents', populate: { path: 'artist', select: 'name' } })
+      .lean();
+    const seen = new Set();
+    artworks = [];
+    for (const v of views) {
+      const a = v && v.artwork; if (!a) continue;
+      const key = String(a._id || ''); if (seen.has(key)) continue; seen.add(key);
+      artworks.push(a);
+    }
+  }
+
+  const { buildPublicSrcSet } = require('@utils/media');
+  artworks = artworks.map(a => {
+    try {
+      if (a.imagePublicId) a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+      else if (a.imageUrl) a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+    } catch (_) {}
+    return a;
+  });
+
+  return res.status(200).render('personal/activityWorks', {
+    title: `Obras · ${tab === 'likes' ? 'Tus me gusta' : 'Vistas recientemente'} · Galería del Ox`,
+    tab,
+    artworks
+  });
+});
+
+// Listado completo: Artistas seguidos
+exports.getActivityArtists = catchAsync(async (req, res) => {
+  const currentUser = res.locals && res.locals.currentUser;
+  const uid = currentUser && (currentUser.id || currentUser._id);
+  const Follow = require('@models/followModel');
+  const follows = await Follow.find({ follower: uid })
+    .sort({ createdAt: -1 })
+    .populate({ path: 'artist', select: 'name slug profileImage followersCount' })
+    .lean();
+  const artists = follows.map(f => f.artist).filter(Boolean);
+  return res.status(200).render('personal/activityArtists', {
+    title: 'Artistas que sigues · Galería del Ox',
+    artists
+  });
+});
+
+// Listado completo: Exposiciones recientes relacionadas
+exports.getActivityExhibitions = catchAsync(async (req, res) => {
+  const currentUser = res.locals && res.locals.currentUser;
+  const uid = currentUser && (currentUser.id || currentUser._id);
+  const ArtworkView = require('@models/artworkViewModel');
+
+  const views = await ArtworkView.find({ user: uid })
+    .sort({ createdAt: -1 })
+    .populate({ path: 'artwork', select: 'exhibitions' })
+    .lean();
+
+  const exSet = new Set();
+  const exOrder = [];
+  for (const v of views) {
+    const a = v && v.artwork; if (!a || !Array.isArray(a.exhibitions)) continue;
+    for (const ex of a.exhibitions) {
+      const id = String(ex);
+      if (!exSet.has(id)) { exSet.add(id); exOrder.push(id); }
+    }
+  }
+  let exhibitions = [];
+  if (exOrder.length) {
+    const exDocs = await Exhibition.find({ _id: { $in: exOrder }, status: 'published', deletedAt: null })
+      .select('title slug description startDate endDate coverImage location')
+      .lean();
+    const map = new Map(exDocs.map(e => [String(e._id), e]));
+    exhibitions = exOrder.map(id => map.get(id)).filter(Boolean);
+  }
+
+  return res.status(200).render('personal/activityExhibitions', {
+    title: 'Exposiciones vistas recientemente · Galería del Ox',
+    exhibitions
+  });
+});
+
 // Vista para reset password (prevalida el enlace)
 exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;

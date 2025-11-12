@@ -50,6 +50,10 @@ router.get('/personal/home', ensureLoggedInView, viewsController.getPersonalHome
 // =================== ACTIVIDAD (USUARIO LOGUEADO) =====
 router.get('/activity', ensureLoggedInView, viewsController.getActivity);
 router.get('/actividad', (req, res) => res.redirect(301, '/activity'));
+// Listados completos por sección
+router.get('/activity/works', ensureLoggedInView, viewsController.getActivityWorks);
+router.get('/activity/artists', ensureLoggedInView, viewsController.getActivityArtists);
+router.get('/activity/exhibitions', ensureLoggedInView, viewsController.getActivityExhibitions);
 
 // =================== ARTISTAS ==========================
 // Guard helper: requiere rol artista

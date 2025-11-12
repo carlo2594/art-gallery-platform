@@ -15,7 +15,7 @@ block content
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
         h3.mb-0 Obras vistas recientemente
-        a.btn.btn-sm.btn-outline-secondary(href='/artworks') Ver todas las obras
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=views') Ver más
       if recentViewedArtworks && recentViewedArtworks.length
         .activity-max.activity-inline-grid
           - var artworks = recentViewedArtworks.slice(0, 3)
@@ -29,7 +29,7 @@ block content
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
         h3.mb-0 Tus me gusta
-        a.btn.btn-sm.btn-outline-secondary(href='/artworks?sort=popular') Explorar más obras
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=likes') Ver más
       if likedArtworks && likedArtworks.length
         .activity-max.activity-inline-grid
           - var artworks = likedArtworks.slice(0, 3)
@@ -43,7 +43,7 @@ block content
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
         h3.mb-0 Artistas que sigues
-        a.btn.btn-sm.btn-outline-secondary(href='/artists') Ver todos
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/artists') Ver más
       if followedArtists && followedArtists.length
         .activity-max
           - var artists = followedArtists.slice(0, 5)
@@ -64,7 +64,7 @@ block content
     section.mb-3.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
         h3.mb-0 Exposiciones vistas recientemente
-        a.btn.btn-sm.btn-outline-secondary(href='/exhibitions') Ver todas
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/exhibitions') Ver más
       if recentExhibitions && recentExhibitions.length
         .activity-max
           - var exs = recentExhibitions.slice(0, 3)

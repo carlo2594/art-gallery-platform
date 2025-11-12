@@ -1,0 +1,17 @@
+extends /layouts/public
+
+block content
+  .container.py-4
+    .d-flex.align-items-center.justify-content-between.mb-4
+      h2.mb-0 Obras
+      .btn-group( role='group' aria-label='Filtro de obras')
+        a.btn.btn-outline-secondary(href='/activity/works?tab=views' class= tab === 'views' ? 'active' : '') Vistas recientemente
+        a.btn.btn-outline-secondary(href='/activity/works?tab=likes' class= tab === 'likes' ? 'active' : '') Tus me gusta
+
+    if artworks && artworks.length
+      - var gridId = 'grid-activity-works'
+      - var firstEagerCount = 2
+      include /public/artworks/_artworkGrid.pug
+    else
+      p.text-muted No hay obras para mostrar en esta sección.
+
