@@ -50,9 +50,23 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
               .artwork-grid__details
                 if a.technique
                   .artwork-grid__detail-item= a.technique
-                if a.width_cm && a.height_cm
+                // Preferir size textual; si no, fallback a WxH
+                if a.size
+                  .artwork-grid__detail-item= a.size
+                else if a.width_cm && a.height_cm
                   .artwork-grid__detail-item #{a.width_cm} x #{a.height_cm} cm
+                if a.completedAt
+                  - const __y = (function(v){ try { var d = new Date(v); var y = d.getFullYear(); return Number.isFinite(y) ? y : null; } catch(_) { return null; } })(a.completedAt)
+                  if __y
+                    .artwork-grid__detail-item= __y
             .artwork-grid__stats
               if a.price_cents && a.price_cents > 0
                 .artwork-grid__price
                   | $#{(a.price_cents / 100).toLocaleString('en-US')} USD
+              .artwork-grid__meta
+                .artwork-grid__stat
+                  i.fas.fa-eye.me-1
+                  span= (typeof a.views === 'number' ? a.views.toLocaleString('en-US') : '—')
+                .artwork-grid__stat.ms-3
+                  i.fas.fa-heart.me-1
+                  span= (typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString('en-US') : '—')
