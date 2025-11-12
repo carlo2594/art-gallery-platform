@@ -14,8 +14,11 @@ exports.createView = catchAsync(async (req, res, next) => {
 
   const ip = getClientIp(req);
   const viewDoc = { artwork, ip };
+  // Adjuntar usuario si está disponible (opcional)
   if (req.user && (req.user._id || req.user.id)) {
     viewDoc.user = req.user._id || req.user.id;
+  } else if (res.locals && res.locals.currentUser && (res.locals.currentUser.id || res.locals.currentUser._id)) {
+    viewDoc.user = res.locals.currentUser.id || res.locals.currentUser._id;
   }
 
   // Idempotencia diaria por usuario/IP: una vista por día (UTC)

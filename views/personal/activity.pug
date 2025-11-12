@@ -1,0 +1,81 @@
+extends /layouts/public
+
+block content
+  .container.py-4
+    // Encabezado
+    .d-flex.align-items-center.mb-4.gap-3
+      - const uname = (locals.currentUser && (locals.currentUser.firstName || locals.currentUser.name)) || 'Artista'
+      .avatar-circle.d-flex.align-items-center.justify-content-center(style="width:64px;height:64px;border-radius:50%;background:#EEE;color:#555;font-weight:700")
+        = uname.charAt(0).toUpperCase()
+      .flex-grow-1
+        h2.mb-0 Tu actividad
+        p.text-muted.mb-0 Un vistazo a lo que viste, te gustó y a quién sigues
+
+    // Obras vistas recientemente
+    section.mb-5.activity-section
+      .d-flex.align-items-center.justify-content-between.mb-4
+        h3.mb-0 Obras vistas recientemente
+        a.btn.btn-sm.btn-outline-secondary(href='/artworks') Ver todas las obras
+      if recentViewedArtworks && recentViewedArtworks.length
+        .activity-max.activity-inline-grid
+          - var artworks = recentViewedArtworks.slice(0, 3)
+          - var gridId = 'grid-recent-views'
+          - var firstEagerCount = 2
+          include /public/artworks/_artworkGrid.pug
+      else
+        p.text-muted Aún no hay actividad de vistas recientes.
+
+    // Tus me gusta
+    section.mb-5.activity-section
+      .d-flex.align-items-center.justify-content-between.mb-4
+        h3.mb-0 Tus me gusta
+        a.btn.btn-sm.btn-outline-secondary(href='/artworks?sort=popular') Explorar más obras
+      if likedArtworks && likedArtworks.length
+        .activity-max.activity-inline-grid
+          - var artworks = likedArtworks.slice(0, 3)
+          - var gridId = 'grid-liked'
+          - var firstEagerCount = 0
+          include /public/artworks/_artworkGrid.pug
+      else
+        p.text-muted Todavía no marcaste obras como favoritas.
+
+    // Artistas que sigues
+    section.mb-5.activity-section
+      .d-flex.align-items-center.justify-content-between.mb-4
+        h3.mb-0 Artistas que sigues
+        a.btn.btn-sm.btn-outline-secondary(href='/artists') Ver todos
+      if followedArtists && followedArtists.length
+        .activity-max
+          - var artists = followedArtists.slice(0, 5)
+          .activity-inline-artists
+            each a in artists
+              a.artist-card.text-decoration-none.d-block.text-center(href=`/artists/${a.slug || a._id}`)
+                if a.profileImage
+                  img.rounded-circle.mb-2(src=a.profileImage, alt=a.name, loading='lazy', decoding='async', fetchpriority='low', width='80', height='80', style='object-fit:cover;')
+                else
+                  .rounded-circle.mb-2.d-inline-flex.align-items-center.justify-content-center(style='width:80px;height:80px;background:#EEE;color:#666;font-weight:700')= (a.name||'A').charAt(0).toUpperCase()
+                div.fw-semibold= a.name
+                if typeof a.followersCount !== 'undefined'
+                  div.text-muted.small #{a.followersCount} seguidores
+      else
+        p.text-muted Aún no sigues a ningún artista.
+
+    // Exposiciones relacionadas a tus vistas
+    section.mb-3.activity-section
+      .d-flex.align-items-center.justify-content-between.mb-4
+        h3.mb-0 Exposiciones vistas recientemente
+        a.btn.btn-sm.btn-outline-secondary(href='/exhibitions') Ver todas
+      if recentExhibitions && recentExhibitions.length
+        .activity-max
+          - var exs = recentExhibitions.slice(0, 3)
+          .activity-inline-exhibitions
+            each ex in exs
+              a.activity-exhibition-card.text-decoration-none(href=`/exhibitions/${ex.slug || ex._id}`)
+                if ex.coverImage
+                  img.activity-exhibition-img(src=ex.coverImage, alt=ex.title, loading='lazy', decoding='async')
+                else
+                  .activity-exhibition-img.activity-exhibition-placeholder
+                    i.fas.fa-image
+                .activity-exhibition-title= ex.title
+      else
+        p.text-muted Aún no hay exposiciones recientes para mostrar.

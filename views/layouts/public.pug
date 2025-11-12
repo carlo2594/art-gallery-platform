@@ -67,6 +67,9 @@ html.no-js(lang='es')
                 a.nav-link.me-lg-3(href='/artists') Artistas
               li.nav-item
                 a.nav-link.me-lg-3(href='/exhibitions') Exposiciones
+              if currentUser
+                li.nav-item
+                  a.nav-link.me-lg-3(href='/activity') Actividad
 
               if !currentUser
                 li.nav-item

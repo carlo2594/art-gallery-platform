@@ -89,7 +89,7 @@ block content
               // Acciones secundarias agrupadas (favorito y compartir)
               .d-flex.flex-wrap.align-items-center.gap-3.justify-content-center.justify-content-xl-start.mt-3
                 if currentUser
-                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-fav-btn.artwork-detail__fav-btn.ox-share-btn(
+                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.rounded-pill.artwork-fav-btn.artwork-detail__fav-btn(
                     type='button'
                     aria-label='Agregar a favoritos'
                     data-artwork-id=artwork._id
@@ -98,7 +98,7 @@ block content
                     i.far.fa-heart.me-2.artwork-detail__fav-icon
                     span Favorito
                 else
-                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-fav-btn.artwork-detail__fav-btn.ox-share-btn(
+                  button.btn.btn-outline-dark.btn-lg.px-4.py-3.rounded-pill.artwork-fav-btn.artwork-detail__fav-btn(
                     type='button'
                     aria-label='Inicia sesión para agregar a favoritos'
                     data-bs-toggle='modal'

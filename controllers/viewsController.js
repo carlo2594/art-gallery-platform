@@ -394,6 +394,120 @@ exports.getPersonalHome = catchAsync(async (req, res) => {
   });
 });
 
+// -------------------- Actividad del usuario --------------------
+exports.getActivity = catchAsync(async (req, res) => {
+  const currentUser = res.locals && res.locals.currentUser;
+  if (!currentUser) {
+    const returnTo = encodeURIComponent(req.originalUrl || '/activity');
+    return res.redirect(`/login?returnTo=${returnTo}`);
+  }
+
+  const uid = currentUser.id || currentUser._id;
+  const ArtworkView = require('@models/artworkViewModel');
+  const Follow = require('@models/followModel');
+
+  // 1) Obras vistas recientemente (según ArtworkView)
+  let recentViewedArtworks = [];
+  let recentViews = [];
+  try {
+    recentViews = await ArtworkView.find({ user: uid })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate({
+        path: 'artwork',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents exhibitions',
+        populate: { path: 'artist', select: 'name' }
+      })
+      .lean();
+
+    const seen = new Set();
+    for (const v of recentViews) {
+      const a = v && v.artwork;
+      if (!a) continue;
+      const key = String(a._id || '');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      recentViewedArtworks.push(a);
+    }
+  } catch (_) {}
+
+  // 2) Obras con like
+  let likedArtworks = [];
+  try {
+    const likes = await Favorite.find({ user: uid })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate({
+        path: 'artwork',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents status deletedAt',
+        populate: { path: 'artist', select: 'name' }
+      })
+      .lean();
+    likedArtworks = likes
+      .map(l => l && l.artwork)
+      .filter(a => a && a.status === 'approved' && a.deletedAt == null);
+  } catch (_) {}
+
+  // 3) Artistas seguidos
+  let followedArtists = [];
+  try {
+    const follows = await Follow.find({ follower: uid })
+      .sort({ createdAt: -1 })
+      .limit(48)
+      .populate({ path: 'artist', select: 'name slug profileImage followersCount' })
+      .lean();
+    followedArtists = follows.map(f => f && f.artist).filter(Boolean);
+  } catch (_) {}
+
+  // 4) Exposiciones relacionadas a tus obras vistas recientemente
+  let recentExhibitions = [];
+  try {
+    const exIds = [];
+    const exSet = new Set();
+    for (const v of recentViews) {
+      const a = v && v.artwork;
+      if (!a || !Array.isArray(a.exhibitions)) continue;
+      for (const exId of a.exhibitions) {
+        const idStr = String(exId);
+        if (!exSet.has(idStr)) {
+          exSet.add(idStr);
+          exIds.push(idStr);
+        }
+      }
+    }
+    if (exIds.length) {
+      const exDocs = await Exhibition.find({ _id: { $in: exIds }, status: 'published', deletedAt: null })
+        .select('title slug description startDate endDate coverImage location')
+        .lean();
+      const map = new Map(exDocs.map(e => [String(e._id), e]));
+      recentExhibitions = exIds.map(id => map.get(String(id))).filter(Boolean);
+    }
+  } catch (_) {}
+
+  // Preparar media responsiva para obras
+  const { buildPublicSrcSet } = require('@utils/media');
+  const mapArtMedia = a => {
+    try {
+      if (a && a.imagePublicId) {
+        a._media = buildPublicSrcSet(a.imagePublicId, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'upload' });
+      } else if (a && a.imageUrl) {
+        a._media = buildPublicSrcSet(a.imageUrl, { widths: [400,800,1200], sizes: '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw', type: 'fetch' });
+      }
+    } catch (_) {}
+    return a;
+  };
+  recentViewedArtworks = (recentViewedArtworks || []).map(mapArtMedia);
+  likedArtworks = (likedArtworks || []).map(mapArtMedia);
+
+  return res.status(200).render('personal/activity', {
+    title: 'Tu actividad · Galería del Ox',
+    recentViewedArtworks,
+    likedArtworks,
+    followedArtists,
+    recentExhibitions
+  });
+});
+
 // Vista para reset password (prevalida el enlace)
 exports.getResetPassword = catchAsync(async (req, res) => {
   const { uid, token, type } = req.query;

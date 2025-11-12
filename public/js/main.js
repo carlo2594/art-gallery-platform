@@ -813,9 +813,7 @@ function setupArtworkFavoriteButton() {
     btn.setAttribute('data-favorited', fav ? 'true' : 'false');
     btn.setAttribute('aria-pressed', fav ? 'true' : 'false');
     btn.classList.toggle('favorited', !!fav);
-    // Alterna estilos Bootstrap para feedback visual
-    btn.classList.toggle('btn-dark', !!fav);
-    btn.classList.toggle('btn-outline-dark', !fav);
+    // Mantener diseño original: no alternar entre btn-dark/btn-outline-dark
     if (icon) {
       icon.classList.toggle('far', !fav);
       icon.classList.toggle('fas', fav);

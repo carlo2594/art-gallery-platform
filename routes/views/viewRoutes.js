@@ -47,6 +47,9 @@ router.get('/contact', viewsController.getContact);
 
 // =================== HOME PERSONAL (USUARIO LOGUEADO) =
 router.get('/personal/home', ensureLoggedInView, viewsController.getPersonalHome);
+// =================== ACTIVIDAD (USUARIO LOGUEADO) =====
+router.get('/activity', ensureLoggedInView, viewsController.getActivity);
+router.get('/actividad', (req, res) => res.redirect(301, '/activity'));
 
 // =================== ARTISTAS ==========================
 // Guard helper: requiere rol artista
