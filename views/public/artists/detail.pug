@@ -1,11 +1,11 @@
-extends /layouts/public
+ï»¿extends /layouts/public
 
 //- overlay global se maneja desde el layout
 
 block content
   #page-loading-overlay.page-loading-overlay
     .loading-spinner
-    .loading-text Cargando…
+    .loading-text Cargandoâ€¦
   main.main-content.artist-detail-page
     // Hero Section
     section.artist-profile-hero.artist-hero-section.position-relative.artist-hero-fullscreen
@@ -41,6 +41,10 @@ block content
                 if artist.bio
                   p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75.artist-bio-style= artist.bio
                 .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
+                  if typeof artist.followersCount !== 'undefined'
+                    .meta-item.artist-followers-item.d-flex.align-items-center
+                      i.fas.fa-users.me-2.text-warning
+                      span.text-white-75 #{artist.followersCount} seguidores
                   if artist.location
                     .meta-item.artist-location-item.d-flex.align-items-center
                       i.fas.fa-map-marker-alt.me-2.text-warning
@@ -65,7 +69,7 @@ block content
                         i.fab.fa-facebook.me-2
                         span Facebook
                 .hero-actions.artist-actions-desktop.d-flex.flex-wrap.gap-3.justify-content-center.justify-content-lg-start.mt-3
-                  // BotÃ³n Seguir/Siguiendo
+                  // BotÃƒÂ³n Seguir/Siguiendo
                   - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
                   button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
                     i.fas.fa-heart.me-2
@@ -81,10 +85,7 @@ block content
           .row.mb-5
             .col-12.text-center
               h2.section-title.artist-artworks-title.display-5.fw-bold.mb-1.artist-section-title= `Obras de ${artist.name}`
-              - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
-              - var approvedLabel = (totalArtworks === 1 ? 'aprobada' : 'aprobadas')
-              p.lead.text-muted.artist-artworks-subtitle.mb-0= `${displayText} ${approvedLabel} de este talentoso artista`
-              small.text-muted.d-block.mt-1 Solo se muestran obras aprobadas
+              
         if totalArtworks > 1
           section.filters-toolbar.artist-filters-section.py-2
             .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
@@ -126,12 +127,12 @@ block content
                   |  para ver todas las obras de #{artist.name}
               else if stats.totalArtworks === 1
                 h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
-                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
+                p.text-muted.artist-single-work-message Esta es la Ãºnica obra disponible de este talentoso artista. Â¡Vuelve pronto para ver mÃ¡s creaciones!
               else
-                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
-                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aÃºn no tiene obras publicadas`
+                p.text-muted.artist-portfolio-message Este artista estÃ¡ preparando su portfolio. Â¡Vuelve pronto para ver sus creaciones!
 
-    // BotÃ³n de volver
+    // BotÃƒÂ³n de volver
   section.back-navigation.py-4
     .container
       .row
@@ -274,7 +275,7 @@ block content
             t.show();
             toast.addEventListener('hidden.bs.toast', function(){ toast.remove(); });
           } else {
-            // Fallback si no está Bootstrap: mostrar y ocultar manualmente
+            // Fallback si no estÃ¡ Bootstrap: mostrar y ocultar manualmente
             toast.classList.add('show');
             setTimeout(function(){
               toast.classList.remove('show');
@@ -308,9 +309,9 @@ block content
           btn.addEventListener('click', function(ev){
             visualClick(btn, ev);
             var url = window.location.href;
-            var title = document.title || 'Galería del Ox';
+            var title = document.title || 'GalerÃ­a del Ox';
             var hasNativeShare = !!(navigator.share);
-            // Intenta compartir nativamente; siempre intentamos copiar también para cumplir con la expectativa
+            // Intenta compartir nativamente; siempre intentamos copiar tambiÃ©n para cumplir con la expectativa
             var sharePromise = Promise.resolve();
             if (hasNativeShare) {
               sharePromise = navigator.share({ title: title, url: url }).catch(function(){ /* ignora cancelaciones */ });
@@ -332,4 +333,5 @@ block content
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupShare);
       else setupShare();
     })();
+
 
