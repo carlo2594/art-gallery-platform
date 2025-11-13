@@ -29,7 +29,7 @@ function generateSlug(name) {
 
 async function generateUserSlugs() {
   try {
-    await mongoose.connect(DB);
+    await mongoose.connect(DB, { dbName: process.env.DB_NAME });
     console.log('Conectado a la base de datos');
 
     // Buscar usuarios sin slug

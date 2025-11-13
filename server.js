@@ -21,6 +21,7 @@ const mongooseOpts = {
   serverSelectionTimeoutMS: 8000, // 8 s para encontrar un nodo
   socketTimeoutMS: 45000,         // 45 s para operaciones largas
   maxPoolSize: 20,                // pool de conexiones
+  dbName: process.env.DB_NAME,    // seleccionar BD por entorno (dev/prod)
 };
 
 /* 🔄 Función recursiva de conexión con reintentos */

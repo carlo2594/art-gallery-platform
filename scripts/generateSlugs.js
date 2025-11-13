@@ -33,7 +33,7 @@ function generateSlug(title) {
 async function generateSlugsForExistingArtworks() {
   try {
     console.log('🔌 Conectando a MongoDB...');
-    await mongoose.connect(DB);
+    await mongoose.connect(DB, { dbName: process.env.DB_NAME });
     console.log('✅ Conectado a MongoDB');
 
     // Obtener todas las obras que no tienen slug

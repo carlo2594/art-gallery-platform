@@ -17,7 +17,7 @@ const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PA
 async function cleanDatabase() {
   try {
     console.log('🔌 Conectando a MongoDB...');
-    await mongoose.connect(DB);
+    await mongoose.connect(DB, { dbName: process.env.DB_NAME });
     console.log('✅ Conectado a MongoDB');
 
     const db = mongoose.connection.db;

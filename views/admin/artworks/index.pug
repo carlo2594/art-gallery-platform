@@ -15,9 +15,10 @@ block content
         input.form-control(type='text', name='q', placeholder='Buscar por título o slug', value=q || '')
       .col-sm-6.col-md-3
         select.form-select(name='avail')
-          option(value='') Disponibilidad: Todas
+          // Por defecto, mostrar todas las disponibilidades si no hay filtro
+          option(value='' selected=!avail) Disponibilidad: Todas
           // Agrupaciones convenientes
-          option(value='available' selected=!avail || avail === 'available') Disponibles (en venta o reservadas)
+          option(value='available' selected=avail === 'available') Disponibles (en venta o reservadas)
           option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en préstamo)
           // Estados específicos
           option(value='for_sale' selected=avail === 'for_sale') En venta
@@ -43,7 +44,7 @@ block content
           option(value='price_desc' selected=sort === 'price_desc') Precio: mayor a menor
       .col-auto
         button.btn.btn-primary(type='submit') Buscar
-      if q || avail || sort
+      if q || avail || sort || statusFilter
         .col-auto
           a.btn.btn-outline-secondary(href='?') Limpiar
 

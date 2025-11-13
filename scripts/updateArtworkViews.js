@@ -17,7 +17,7 @@ const ArtworkView = require('../models/artworkViewModel');
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
 
 async function updateArtworkViews() {
-  await mongoose.connect(DB);
+  await mongoose.connect(DB, { dbName: process.env.DB_NAME });
 
   // Fecha límite: últimas 24 horas
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
