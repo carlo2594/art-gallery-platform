@@ -915,7 +915,9 @@ exports.getArtworkDetail = catchAsync(async (req, res, next) => {
   res.status(200).render('public/artworks/detail', {
     title: `${artwork.title} · Galería del Ox`,
     artwork,
-    relatedArtworks
+    relatedArtworks,
+    // Evita overlay global en la vista de detalle para prevenir pantallas en blanco si el JS tarda
+    hideGlobalOverlay: true
   });
 });
 

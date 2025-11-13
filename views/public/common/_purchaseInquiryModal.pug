@@ -1,0 +1,25 @@
+//- Purchase inquiry modal (shown only if currentUser exists)
+.modal.fade#purchaseInquiryModal(tabindex='-1' aria-labelledby='purchaseInquiryLabel' aria-hidden='true' data-bs-backdrop='static' data-bs-keyboard='false')
+  .modal-dialog.modal-dialog-centered
+    .modal-content
+      .modal-header
+        h1.modal-title.fs-5#purchaseInquiryLabel Consultar compra
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+      form#purchaseInquiryForm
+        .modal-body
+          p.mb-3
+            | Se enviará un correo al artista con copia para ti. Podrán continuar la conversación por email para concretar detalles (precio final, envío y métodos de pago).
+          input(type='hidden' name='artworkId' value=artwork._id)
+          .mb-3
+            label.form-label(for='purchaseMessage') Mensaje opcional
+            textarea.form-control#purchaseMessage(name='message' rows='4' maxlength='800' placeholder='Mensaje para el artista (opcional)')
+          .alert.alert-success.d-none#purchaseInquirySuccess(role='alert')
+            i.fas.fa-circle-check.me-2
+            | Consulta enviada. Revisa tu correo.
+          .alert.alert-danger.d-none#purchaseInquiryError(role='alert')
+            i.fas.fa-triangle-exclamation.me-2
+            | Ocurrió un error al enviar. Intenta de nuevo.
+        .modal-footer
+          button.btn.btn-light(type='button' data-bs-dismiss='modal') Cancelar
+          button.btn.btn-primary#purchaseInquirySubmit(type='submit') Enviar consulta
+

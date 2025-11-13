@@ -103,7 +103,6 @@ block content
                     data-favorited='false'
                   )
                     i.far.fa-heart.me-2.artwork-detail__fav-icon
-                    span Favorito
                 else
                   button.btn.btn-outline-dark.btn-lg.px-4.py-3.rounded-pill.artwork-fav-btn.artwork-detail__fav-btn(
                     type='button'
@@ -112,10 +111,8 @@ block content
                     data-bs-target='#favAuthModal'
                   )
                     i.far.fa-heart.me-2.artwork-detail__fav-icon
-                    span Favorito
                 button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-share-btn.artwork-detail__share-btn.ox-share-btn(type='button' aria-label='Compartir esta obra')
                   i.fas.fa-share.me-2
-                  span Compartir
 
     if relatedArtworks && relatedArtworks.length > 0
       section.related-artworks.py-5.px-3.px-md-4.px-lg-5.related-artworks-section.artwork-detail__related-artworks
