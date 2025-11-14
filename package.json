@@ -8,7 +8,8 @@
     "start": "node server.js",
     "db:clean": "node scripts/cleanDatabase.js",
     "db:seed": "node scripts/seedTestData.js",
-    "db:reset": "npm run db:clean && npm run db:seed"
+    "db:reset": "npm run db:clean && npm run db:seed",
+    "views:refresh": "node scripts/refreshArtworkViews.js"
   },
   "keywords": [
     "galeria",
