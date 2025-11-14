@@ -1,7 +1,7 @@
 //- Grid de obras (reutilizable)
 - var __gridId = (typeof gridId !== 'undefined' && gridId) ? gridId : 'grid'
 ul.grid.effect-2.artwork-grid(id=__gridId)
-  //- Permite priorizar carga: define cu√°ntas primeras im√°genes van eager/high
+  //- Permite priorizar carga: define cu·ntas primeras im·genes van eager/high
   - const eagerCount = (typeof firstEagerCount !== 'undefined' && firstEagerCount) ? firstEagerCount : 0
   each a, idx in artworks
     - const _sizes = '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw'
@@ -20,7 +20,7 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             srcset=a._media.srcset,
             sizes=a._media.sizes || _sizes,
             alt=a.title,
-            loading=(idx < eagerCount ? 'eager' : 'lazy'),
+            loading='eager',
             fetchpriority=(idx < eagerCount ? 'high' : 'auto'),
             decoding='async',
             width=a._media.width || a.imageWidth_px,
@@ -33,7 +33,7 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             srcset=srcsetFallback,
             sizes=_sizes,
             alt=a.title,
-            loading=(idx < eagerCount ? 'eager' : 'lazy'),
+            loading='eager',
             fetchpriority=(idx < eagerCount ? 'high' : 'auto'),
             decoding='async',
             width=a.imageWidth_px,
@@ -66,7 +66,7 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
               .artwork-grid__meta
                 .artwork-grid__stat
                   i.fas.fa-eye.me-1
-                  span= (typeof a.views === 'number' ? a.views.toLocaleString('en-US') : '‚Äî')
+                  span= (typeof a.views === 'number' ? a.views.toLocaleString('en-US') : 'ó')
                 .artwork-grid__stat.ms-3
                   i.fas.fa-heart.me-1
-                  span= (typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString('en-US') : '‚Äî')
+                  span= (typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString('en-US') : 'ó')
