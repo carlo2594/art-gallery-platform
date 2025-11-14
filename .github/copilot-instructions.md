@@ -20,7 +20,7 @@ This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB),
 ## Developer Workflows
 - **Start (dev):** `npm run dev` (uses nodemon)
 - **Start (prod):** `npm start`
-- **Database scripts:** See `scripts/` for seeding, cleaning, and slug generation (e.g., `seedTestData.js`, `cleanDatabase.js`).
+- **Database scripts:** See `scripts/` for seeding and cleaning (e.g., `seedTestData.js`, `cleanDatabase.js`).
 - **No built-in test suite** (as of this writing).
 
 ## Conventions & Patterns
@@ -33,7 +33,7 @@ This is a Node.js backend for an art gallery, using Express, Mongoose (MongoDB),
 - **Pricing:** Store as `price_cents` (int). Accept either `amount` (USD string) or `price_cents` in requests; convert with `utils/priceInput.toCentsOrThrow`.
 - **Image upload:** Use `utils/cloudinaryImage.upload`. Aspect ratio checks via `utils/aspectUtils.verifyAspect`. Behavior controlled by `getAspectPolicy()` and env vars (`ASPECT_TOLERANCE`, `CLOUDINARY_PAD`).
 - **Pagination:** Use helpers in `utils/pagination.js` for consistent API pagination.
-- **Slug generation:** Use scripts in `scripts/` (e.g., `generateSlugs.js`) to update slugs for models.
+ 
 
 ## Auth Flow
 - **Signup:** Creates user with temp password, emails create-password link (`/reset-password?uid=...&token=...&type=new`).

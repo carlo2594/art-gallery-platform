@@ -175,43 +175,29 @@ block content
 
               - const av = artwork.availability || 'not_for_sale'
 
-              if av === 'for_sale'
-
-                // AcciÃ³n primaria separada para mejor jerarquÃ­a visual
-
-                .mb-3
-
+              // Acción primaria: siempre mostrar botón; si no está en venta, deshabilitado y gris
+              .mb-3
+                if av === 'for_sale'
                   if currentUser
-
                     button.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
-
                       type='button'
-
                       aria-label='Consultar compra'
-
                       data-bs-toggle='modal'
-
                       data-bs-target='#purchaseInquiryModal'
-
                     )
-
                       span CONSULTAR COMPRA
-
                   else
-
                     button.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
-
                       type='button'
-
                       aria-label='Inicia sesión para consultar'
-
                       data-bs-toggle='modal'
-
                       data-bs-target='#purchaseAuthModal'
-
                     )
-
                       span CONSULTAR COMPRA
+                else
+                  // Botón mostrado pero deshabilitado cuando no está a la venta
+                  button.btn.btn-secondary.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(disabled aria-disabled='true' type='button' title='No está a la venta')
+                    span NO ESTÁ A LA VENTA
 
               // Acciones secundarias agrupadas (favorito y compartir)
 
@@ -269,7 +255,7 @@ block content
 
           .col-12
 
-            h3.mb-4.related-artworks-title MÃ¡s obras de 
+            h3.mb-4.related-artworks-title Más obras de 
 
               // Siempre usar ID para que redirija al slug vigente
 
