@@ -1399,6 +1399,11 @@ body.loading .main-content { visibility: hidden; }
   border-color: var(--ox-orange) !important;
 }
 
+/* Artwork detail: stats icons use ox-blue on white background */
+.artwork-detail__stat-icon {
+  color: var(--ox-blue) !important;
+}
+
 /* Artist back button specific styling */
 .artist-back-btn {
   color: var(--ox-blue) !important;

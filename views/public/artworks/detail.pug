@@ -76,6 +76,15 @@ block content
 
             h1.display-4.fw-bold.mb-0.artwork-title.artwork-detail__title= artwork.title
 
+          // Meta: vistas y favoritos (debajo del título)
+          .artwork-detail__stats.d-flex.align-items-center.justify-content-center.justify-content-xl-start.mb-3
+            .artwork-detail__stat.me-3
+              i.fas.fa-eye.me-1.artwork-detail__stat-icon
+              span= (typeof artwork.views === 'number' ? artwork.views.toLocaleString('en-US') : '—')
+            .artwork-detail__stat
+              i.fas.fa-heart.me-1.artwork-detail__stat-icon
+              span= (typeof artwork.favoritesCount === 'number' ? artwork.favoritesCount.toLocaleString('en-US') : '—')
+
 
 
           if artwork.artist
