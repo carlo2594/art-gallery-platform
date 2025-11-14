@@ -42,6 +42,18 @@ app.use(attachUserToViews);
 app.use(xss());
 app.use(sanitize);
 
+// Meta/URL helpers disponibles en todas las vistas
+app.use((req, res, next) => {
+  try {
+    const envUrl = process.env.FRONTEND_URL;
+    const hostUrl = `${req.protocol}://${req.get('host')}`;
+    res.locals.siteUrlPrefix = (envUrl && /^https?:\/\//i.test(envUrl)) ? envUrl : hostUrl;
+  } catch (_) {
+    // noop
+  }
+  next();
+});
+
 // ⛔️ Bloquear peticiones hasta que la BD esté conectada
 app.use(ensureDbReady);
 

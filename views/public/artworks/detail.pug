@@ -1,5 +1,13 @@
 extends /layouts/public
 
+block headExtra
+  - var _artistName = (artwork && artwork.artist && artwork.artist.name) ? artwork.artist.name : ''
+  - var metaTitle = artwork && artwork.title ? `${artwork.title}${_artistName ? ' – ' + _artistName : ''} · Galería del Ox` : 'Obra · Galería del Ox'
+  - var __desc = (artwork && artwork.description) ? artwork.description : (_artistName ? `Obra de ${_artistName} en Galería del Ox.` : 'Obra en Galería del Ox.')
+  - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
+  - var metaImage = (artwork && (artwork._mediaFull || (artwork._media && artwork._media.src) || artwork.imageUrl)) || '/img/Ox-hero-image-landing.jpg'
+  - var metaType = 'article'
+
 
 
 block content

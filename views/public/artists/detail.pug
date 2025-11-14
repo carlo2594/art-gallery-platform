@@ -1,5 +1,12 @@
 ﻿extends /layouts/public
 
+block headExtra
+  - var metaTitle = artist && artist.name ? `${artist.name} · Galería del Ox` : 'Artista · Galería del Ox'
+  - var __desc = (artist && artist.bio) ? artist.bio : (artist && artist.name ? `Perfil de ${artist.name} en Galería del Ox.` : 'Perfil de artista en Galería del Ox.')
+  - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
+  - var metaImage = (artist && artist.profileImage) ? artist.profileImage : '/img/Ox-hero-image-landing.jpg'
+  - var metaType = 'profile'
+
 //- overlay global se maneja desde el layout
 
 block content

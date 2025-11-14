@@ -1,5 +1,12 @@
 extends /layouts/public
 
+block headExtra
+  - var metaTitle = exhibition && exhibition.title ? `${exhibition.title} · Galería del Ox` : 'Exposición · Galería del Ox'
+  - var __desc = (exhibition && exhibition.description) ? exhibition.description : 'Exposición en Galería del Ox.'
+  - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
+  - var metaImage = (exhibition && exhibition.coverImage) ? exhibition.coverImage : '/img/Ox-hero-image-landing.jpg'
+  - var metaType = 'article'
+
 block content
   - var dateText = '';
   - var visibleArtistIds = Array.isArray(artworks) ? artworks.map(function(a){ try { return String(a && a.artist && a.artist._id); } catch(e) { return null; } }).filter(Boolean) : [];
