@@ -38,7 +38,9 @@
       } catch (_) {}
 
       // Espera a que carguen las imágenes antes de inicializar el layout
-      window.imagesLoaded(grid, function () {
+      var imgLoader = window.imagesLoaded(grid);
+
+      imgLoader.on('always', function () {
         try {
           var msnry = new window.Masonry(grid, {
             itemSelector: 'li',
@@ -74,12 +76,14 @@
             }
           } catch (_) {}
         });
+
         // Re-layout cuando carguen fuentes web (si el navegador lo soporta)
         try {
           if (document.fonts && document.fonts.ready && typeof document.fonts.ready.then === 'function') {
             document.fonts.ready.then(function(){ try { msnry.layout(); } catch(_) {} });
           }
         } catch(_) {}
+
         // Relayout cuando cambie el tamaño del contenedor (e.g., fuentes/carrusel/tabs)
         try {
           if ('ResizeObserver' in window) {
@@ -93,6 +97,16 @@
           }
         } catch(_) {}
       });
+
+      // Re-layout en cada imagen que vaya cargando (importante en móviles con loading='lazy')
+      imgLoader.on('progress', function () {
+        try {
+          if (grid.__oxMasonry && typeof grid.__oxMasonry.layout === 'function') {
+            grid.__oxMasonry.layout();
+          }
+        } catch (_) {}
+      });
     });
   }
 })();
+
