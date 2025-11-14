@@ -28,34 +28,24 @@ function signedWatermarkedUrl(publicId, width, opts = {}) {
 
   const deliveryType = opts.type || 'upload';
 
-  const base = [{ fetch_format: 'auto', quality: 'auto' }];
-  const wm = [
-    { overlay: 'Logos:GOX_LOGO_09', flags: 'relative', width: 0.2, opacity: 60 },
-    { flags: 'layer_apply', gravity: 'south_east', x: 12, y: 12 }
+  const transformation = [
+    { fetch_format: 'auto', quality: 'auto' },
+    { crop: 'fill', width: width }
   ];
-  const size = [{ crop: 'fill', width: width }];
-  const transformation = (deliveryType === 'fetch') ? [...base, ...size] : [...base, ...wm, ...size];
 
   // Firmar solo cuando el tipo de entrega lo requiere (private/authenticated)
-
   const shouldSign = (deliveryType === 'private' || deliveryType === 'authenticated');
 
   const url = cloudinary.url(publicId, {
-
     type: deliveryType,
-
     secure: true,
-
     sign_url: shouldSign,
-
     transformation
-
   });
 
   return url;
 
 }
-
 
 
 async function uploadOriginal(filePath) {
@@ -79,27 +69,28 @@ async function uploadOriginal(filePath) {
 
 
 function buildPublicSrcSet(publicId, opts = {}) {
-
   const widths = Array.isArray(opts.widths) && opts.widths.length ? opts.widths : [400, 800, 1200];
-
   const sizes = opts.sizes || '(max-width: 800px) 100vw, 800px';
+  const deliveryType = opts.type || 'upload';
 
+  // Para imágenes remotas (fetch), evita pasar por Cloudinary: usa la URL original sin transformaciones
+  if (deliveryType === 'fetch') {
+    const src = publicId; // ya es una URL remota completa
+    const srcset = undefined; // sin variantes generadas
+    const width = opts.widthAttr; // si la vista quiere fijar width/height lo hará, si no, se omiten
+    const height = opts.heightAttr;
+    return { src, srcset, sizes, width, height };
+  }
+
+  // Para imágenes subidas a Cloudinary (upload), generar variantes optimizadas
   const srcWidth = widths.includes(800) ? 800 : widths[Math.floor(widths.length / 2)];
-
-  const src = signedWatermarkedUrl(publicId, srcWidth, { type: opts.type || 'upload' });
-
+  const src = signedWatermarkedUrl(publicId, srcWidth, { type: 'upload' });
   const srcset = widths
-
-    .map((w) => `${signedWatermarkedUrl(publicId, w, { type: opts.type || 'upload' })} ${w}w`)
-
+    .map((w) => `${signedWatermarkedUrl(publicId, w, { type: 'upload' })} ${w}w`)
     .join(', ');
-
   const width = opts.widthAttr || (widths.includes(800) ? 800 : undefined);
-
   const height = opts.heightAttr; // opcional
-
   return { src, srcset, sizes, width, height };
-
 }
 
 
