@@ -2848,3 +2848,13 @@ body.noscroll {
   .activity-inline-exhibitions::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
   }
+
+/* --- Auth Required Modal: icon color --- */
+.auth-required-modal .modal-header .fas,
+.auth-required-modal .modal-header .far,
+.auth-required-modal .modal-body .fas,
+.auth-required-modal .modal-body .far,
+.auth-required-modal .modal-footer .fas,
+.auth-required-modal .modal-footer .far {
+  color: var(--ox-blue) !important;
+}

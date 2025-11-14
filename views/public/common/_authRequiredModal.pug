@@ -1,15 +1,15 @@
 //- views/public/common/_authRequiredModal.pug
-//- Modal reutilizable para exigir autenticación en acciones (e.g., favoritos)
-//- Parámetros opcionales: modalId, title, message, returnTo, loginHref, signupHref
+//- Modal reutilizable para exigir autenticaciÃ³n en acciones (e.g., favoritos)
+//- ParÃ¡metros opcionales: modalId, title, message, returnTo, loginHref, signupHref
 
-- const _id        = typeof modalId !== 'undefined' ? modalId : 'authRequiredModal'
-- const _title     = typeof title !== 'undefined' ? title : 'Necesitas iniciar sesión'
-- const _message   = typeof message !== 'undefined' ? message : 'Para continuar, inicia sesión o regístrate.'
-- const _returnTo  = typeof returnTo !== 'undefined' ? returnTo : '/'
-- const _loginHref = typeof loginHref !== 'undefined' ? loginHref : '/login'
-- const _signupHref= typeof signupHref !== 'undefined' ? signupHref : '/signup'
+- var _id        = typeof modalId !== 'undefined' ? modalId : 'authRequiredModal'
+- var _title     = typeof title !== 'undefined' ? title : 'Necesitas iniciar sesión'
+- var _message   = typeof message !== 'undefined' ? message : 'Para continuar, inicia sesión o regístrate.'
+- var _returnTo  = typeof returnTo !== 'undefined' ? returnTo : '/'
+- var _loginHref = typeof loginHref !== 'undefined' ? loginHref : '/login'
+- var _signupHref= typeof signupHref !== 'undefined' ? signupHref : '/signup'
 
-.modal.fade(id=_id tabindex='-1' aria-labelledby=`${_id}Label` aria-hidden='true' data-bs-backdrop='static' data-bs-keyboard='false')
+.modal.fade.auth-required-modal(id=_id tabindex='-1' aria-labelledby=`${_id}Label` aria-hidden='true' data-bs-backdrop='static' data-bs-keyboard='false')
   .modal-dialog
     .modal-content
       .modal-header
@@ -26,4 +26,10 @@
           | Iniciar sesión
         button.btn.btn-light(type='button' data-bs-dismiss='modal')
           | Cancelar
+
+
+
+
+
+
 
