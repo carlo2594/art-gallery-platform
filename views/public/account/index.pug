@@ -301,31 +301,7 @@ block content
                 input.account-form-hidden(type='hidden' name='profileImage' value='')
                 button.btn.btn-outline-danger.account-form-delete(type='submit') Eliminar foto
 
-          hr.my-5
-
-          // Portada (cover)
-          .row.account-photo-row
-            .col-12.col-md-6.account-form-column
-              .mb-3.account-form-group.account-cover-preview-group
-                if currentUser && currentUser.coverImage
-                  img.img-fluid.rounded.account-cover-preview(src=currentUser.coverImage alt='Imagen de portada' style='max-width: 420px; width: 100%; height: auto; object-fit: contain;')
-                else
-                  .d-inline-flex.align-items-center.justify-content-center.bg-light.rounded.account-cover-placeholder(style='width:420px;height:160px;')
-                    i.fas.fa-image.fa-3x.text-muted
-            .col-12.col-md-6.account-form-column
-              form#accountCoverForm.account-form.account-form-photo(action='/api/v1/users/me/cover-image' method='POST' enctype='multipart/form-data')
-                .mb-3.account-form-group
-                  label.form-label.account-form-label(for='coverImage') Subir imagen de portada
-                  input#coverImage.form-control.account-form-control(type='file' name='coverImage' accept='image/*' required)
-                  small.form-text.text-muted.account-form-hint Se optimiza automáticamente (WebP, ancho máx. 1920px). Hasta 50MB.
-                  small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info(style='color: var(--ox-blue);')
-                    i.fas.fa-info-circle.account-form-info-icon
-                    span.account-form-hint-copy Usa una imagen horizontal para encajar como portada.
-                button.btn.btn-primary.account-form-submit(type='submit') Actualizar portada
-              hr.my-4.account-form-divider
-              form#accountCoverDeleteForm.account-form.account-form-photo-delete(action='/api/v1/users/me/cover-image' method='POST')
-                input.account-form-hidden(type='hidden' name='coverImage' value='')
-                button.btn.btn-outline-danger.account-form-delete(type='submit') Eliminar portada
+          //- Se ha ocultado la sección de portada para dejar solo foto de perfil
 
         .tab-pane.account-tab-pane.account-tab-pane--password.fade#tab-password(role='tabpanel' aria-labelledby='tab-password')
           form#accountPasswordForm.account-form.account-form-password(action='/api/v1/users/update-password' method='POST')
