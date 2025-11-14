@@ -970,7 +970,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     Artwork.countDocuments(combinedFilter),
     // Obras paginadas con filtros
     Artwork.find(combinedFilter)
-      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents createdAt')
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents createdAt')
       .populate({ path: 'artist', select: 'name' })
       .sort(sort)
       .skip(skip)
