@@ -1947,10 +1947,9 @@ document.addEventListener('DOMContentLoaded', function(){
     if (oxBtn) {
       try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
       var path = findSharePath();
-      var url = window.location && window.location.href || path;
+      var url = buildShareUrl(path);
       var title = document.title || 'Galería del Ox';
-      var sharePromise = navigator.share ? navigator.share({ title: title, url: url }).catch(function(){}) : Promise.resolve();
-      Promise.resolve(sharePromise).then(function(){ return copyToClipboard(url); }).then(function(){ showToast('Enlace copiado al portapapeles'); }).catch(function(){ showToast('Listo para compartir'); });
+      handleShare(url, title);
       return;
     }
     var artistBtn = e.target && e.target.closest && e.target.closest('.artist-share-btn, .artist-share-btn-mobile');
@@ -1958,10 +1957,9 @@ document.addEventListener('DOMContentLoaded', function(){
     var shareBtn = artistBtn || artworkBtn;
     if (shareBtn) {
       ripple(shareBtn, e);
-      var url = window.location && window.location.href || '';
+      var urlDirect = window.location && window.location.href || '';
       var title2 = document.title || 'Galería del Ox';
-      var p = navigator.share ? navigator.share({ title: title2, url: url }).catch(function(){}) : Promise.resolve();
-      Promise.resolve(p).then(function(){ return copyToClipboard(url); }).then(function(copied){ showToast(copied ? 'Enlace copiado al portapapeles' : 'Listo para compartir'); announce(copied ? 'Enlace copiado al portapapeles' : 'Listo para compartir'); }).catch(function(){ showToast('No se pudo copiar el enlace'); announce('No se pudo copiar el enlace'); });
+      handleShare(urlDirect, title2);
     }
   }, true);
 })();
