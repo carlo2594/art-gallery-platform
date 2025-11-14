@@ -513,6 +513,7 @@ exports.getActivityWorks = catchAsync(async (req, res) => {
   const currentUser = res.locals && res.locals.currentUser;
   const uid = currentUser && (currentUser.id || currentUser._id);
   const tab = (req.query.tab === 'likes') ? 'likes' : 'views';
+  const { page, perPage, skip } = getPaginationParams(req.query, 15, 15);
 
   const ArtworkView = require('@models/artworkViewModel');
   let artworks = [];
@@ -520,13 +521,13 @@ exports.getActivityWorks = catchAsync(async (req, res) => {
   if (tab === 'likes') {
     const likes = await Favorite.find({ user: uid })
       .sort({ createdAt: -1 })
-      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents status deletedAt', populate: { path: 'artist', select: 'name' } })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents status deletedAt', populate: { path: 'artist', select: 'name' } })
       .lean();
     artworks = likes.map(l => l.artwork).filter(a => a && a.status === 'approved' && a.deletedAt == null);
   } else {
     const views = await ArtworkView.find({ user: uid })
       .sort({ createdAt: -1 })
-      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents', populate: { path: 'artist', select: 'name' } })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents', populate: { path: 'artist', select: 'name' } })
       .lean();
     const seen = new Set();
     artworks = [];
@@ -545,6 +546,21 @@ exports.getActivityWorks = catchAsync(async (req, res) => {
     } catch (_) {}
     return a;
   });
+
+  // Paginación en memoria para actividad: 15 por página
+  const totalArtworks = artworks.length;
+  const totalPages = Math.max(1, Math.ceil(totalArtworks / perPage));
+  artworks = artworks.slice(skip, skip + perPage);
+  // Exponer variables a la vista (mantener firma de render existente)
+  try {
+    res.locals.page = page;
+    res.locals.perPage = perPage;
+    res.locals.totalPages = totalPages;
+    res.locals.totalArtworks = totalArtworks;
+    // Para el partial de paginación reutilizado
+    res.locals.search = '';
+    res.locals.q = {};
+  } catch (_) {}
 
   return res.status(200).render('personal/activityWorks', {
     title: `Obras · ${tab === 'likes' ? 'Tus me gusta' : 'Vistas recientemente'} · Galería del Ox`,

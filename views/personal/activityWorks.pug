@@ -9,9 +9,12 @@ block content
         a.btn.btn-outline-secondary(href='/activity/works?tab=likes' class= tab === 'likes' ? 'active' : '') Tus me gusta
 
     if artworks && artworks.length
-      - var gridId = 'grid-activity-works'
-      - var firstEagerCount = 2
-      include /public/artworks/_artworkGrid.pug
+      .container-xxl.artworks-flex
+        .artworks-grid-paginate
+          - var gridId = 'grid-activity-works'
+          - var firstEagerCount = 2
+          include /public/artworks/_artworkGrid.pug
+          // Paginación consistente con artworks/index
+          include /public/artworks/_artworkPagination.pug
     else
       p.text-muted No hay obras para mostrar en esta sección.
-
