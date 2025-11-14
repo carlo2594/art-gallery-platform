@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var hidden = container.querySelector('input[name="artist"]');
     var selectedBox = container.querySelector('.admin-artworks-artist-selected');
     function clearList(){ if (list){ list.innerHTML=''; list.style.display='none'; } }
-    function selectArtist(u){ if (!hidden) return; hidden.value = u._id; if (selectedBox){ selectedBox.innerHTML = '<span class="badge text-bg-light">' + (u.name||u.email) + ' Â· ' + (u.email||'') + '</span>'; } if (input) input.value = ''; clearList(); }
+    function selectArtist(u){ if (!hidden) return; hidden.value = u._id; if (selectedBox){ selectedBox.innerHTML = '<span class="badge text-bg-light">' + (u.name||u.email) + ' &middot; ' + (u.email||'') + '</span>'; } if (input) input.value = ''; clearList(); }
     var lastController = null;
     function search(q){
       if (!q || q.length < 2) { clearList(); return; }
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', function () {
       fetch(url, options).then(function(res){ if(!res.ok) throw new Error('search failed'); return res.json(); }).then(function(data){
         var users = (data && data.data && data.data.users) || [];
         if (!Array.isArray(users) || users.length === 0) { clearList(); return; }
-        list.innerHTML = users.map(function(u){ return '<button type="button" class="list-group-item list-group-item-action" data-id="'+u._id+'" data-name="'+(u.name||'')+'" data-email="'+(u.email||'')+'">' + (u.name || u.email) + (u.email ? ' <small class="text-muted">Â· ' + u.email + '</small>' : '') + '</button>'; }).join('');
+        list.innerHTML = users.map(function(u){ return '<button type="button" class="list-group-item list-group-item-action" data-id="'+u._id+'" data-name="'+(u.name||'')+'" data-email="'+(u.email||'')+'">' + (u.name || u.email) + (u.email ? ' <small class="text-muted">&middot; ' + u.email + '</small>' : '') + '</button>'; }).join('');
         list.style.display = 'block';
       }).catch(function(err){ console.error(err); clearList(); });
     }
