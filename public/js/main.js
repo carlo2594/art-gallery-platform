@@ -1904,12 +1904,50 @@ document.addEventListener('DOMContentLoaded', function(){
     } catch(_) {}
     try { return window.location.pathname || '/'; } catch(_) { return '/'; }
   }
+  function buildShareUrl(path){
+    try {
+      if (!path) {
+        if (window.location && window.location.href) return window.location.href;
+        return '/';
+      }
+      if (window.location && window.location.origin) {
+        return window.location.origin + path;
+      }
+      if (window.location && window.location.href) {
+        var a = document.createElement('a');
+        a.href = path;
+        return a.href;
+      }
+    } catch(_) {}
+    return path || '/';
+  }
+  function handleShare(url, title){
+    var shareSupported = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+    var sharePromise = shareSupported ? navigator.share({ title: title, url: url }) : Promise.resolve();
+    return Promise.resolve(sharePromise)
+      .catch(function(){
+        // Si share falla (por restricciones del navegador), continuamos al fallback de copia
+      })
+      .then(function(){ return copyToClipboard(url); })
+      .then(function(copied){
+        var ok = !!copied;
+        var msg = ok ? 'Enlace copiado al portapapeles' : 'Listo para compartir';
+        showToast(msg);
+        announce(msg);
+        if (!ok) {
+          try { window.prompt('Copia este enlace para compartir:', url); } catch(_) {}
+        }
+      })
+      .catch(function(){
+        try { window.prompt('Copia este enlace para compartir:', url); } catch(_) {}
+      });
+  }
   document.addEventListener('click', function(e){
     var oxBtn = e.target && e.target.closest && e.target.closest('.ox-share-btn');
     if (oxBtn) {
       try { e.preventDefault(); e.stopPropagation(); if (e.stopImmediatePropagation) e.stopImmediatePropagation(); } catch(_) {}
       var path = findSharePath();
-      var url = (window.location && window.location.origin ? window.location.origin : '') + path;
+      var url = window.location && window.location.href || path;
       var title = document.title || 'Galería del Ox';
       var sharePromise = navigator.share ? navigator.share({ title: title, url: url }).catch(function(){}) : Promise.resolve();
       Promise.resolve(sharePromise).then(function(){ return copyToClipboard(url); }).then(function(){ showToast('Enlace copiado al portapapeles'); }).catch(function(){ showToast('Listo para compartir'); });
