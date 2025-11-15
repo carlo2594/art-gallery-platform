@@ -72,9 +72,51 @@ footer, .footer { flex-shrink: 0; }
 .navbar-light .navbar-toggler { border: none; }
 .logo-navbar { max-height: 5rem; width: auto; display: block; }
 .navbar-title { color: var(--ox-blue); font-family: var(--font-title); font-weight: 700; letter-spacing: 0.1em; font-size: 1.6rem; text-transform: uppercase; }
-.navbar .nav-link { color: var(--ox-blue); text-transform: uppercase; font-size: 1.4rem; font-weight: 500; }
+.navbar .nav-link {
+  color: var(--ox-blue);
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  min-height: 3.6rem;
+}
 .navbar .nav-link:hover, .navbar .nav-link:focus { background-color: var(--ox-yellow); color: var(--ox-blue); border-radius: 2rem; }
+.nav-user-avatar-img {
+  width: 3.6rem;
+  height: 3.6rem;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--ox-yellow);
+}
+.nav-user-avatar-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  background-color: var(--ox-blue);
+  color: var(--ox-beige);
+  border: 2px solid var(--ox-yellow);
+  font-size: 1.6rem;
+}
+.navbar .nav-link.nav-user-avatar {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+.nav-user-avatar.dropdown-toggle::after {
+  display: none;
+}
 .main-navbar .navbar-collapse { width: 100%; padding: .5rem 0; }
+@media (min-width: 992px) {
+  .main-navbar .navbar-container {
+    justify-content: flex-start;
+  }
+  .main-navbar .navbar-collapse {
+    flex-grow: 1;
+  }
+}
 /* Searchbar */
 .searchbar-navbar { position: relative; width: 100%; }
 .searchbar-input { height: 4.2rem; font-size: 1.6rem; padding-right: 3rem; border-radius: 2rem; border: 2px solid var(--ox-yellow); width: 100%; }
