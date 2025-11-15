@@ -64,7 +64,8 @@ html.no-js(lang='es')
       //- Navbar: Expande a partir de lg (colapsa < 992px)
       nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Navbar principal')
         .container-fluid.navbar-container
-          a.navbar-brand.d-flex.align-items-center.navbar-logo-link.order-1(href="/")
+          //- Marca (logo + título)
+          a.navbar-brand.d-flex.align-items-center.navbar-logo-link.order-1(href='/')
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-1.text-uppercase.fw-bold.navbar-title Galería del Ox
 
@@ -74,7 +75,7 @@ html.no-js(lang='es')
             form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(action='/search' method='GET' role='search' aria-label='Buscar')
               input.form-control.searchbar-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
 
-            //- Links principales — al extremo derecho en lg+ con ms-lg-auto; centrados en mobile
+            //- Links principales — centrados en mobile, a la derecha en desktop
             ul.navbar-nav.navbar-links.mx-auto.mx-lg-0.ms-lg-auto.mb-2.mb-lg-0.fs-5
               li.nav-item
                 a.nav-link.me-lg-3(href='/artworks') Obras
@@ -92,44 +93,65 @@ html.no-js(lang='es')
                 li.nav-item
                   a.nav-link.nav-link-registrarse(href='/signup' aria-label='Registrarse') Registrarse
 
+          //- Iconos (avatar + hamburguesa) agrupados a la derecha
           .navbar-icons.d-flex.align-items-center.ms-auto.order-2.order-lg-3
             if currentUser
-              ul.navbar-nav.navbar-user-nav.me-2
-                li.nav-item.dropdown
-                  a.nav-link.dropdown-toggle.nav-user-avatar#userMenu(
-                    href='#'
-                    role='button'
-                    data-bs-toggle='dropdown'
-                    aria-expanded='false'
-                    aria-label='Menú de usuario')
-                    if currentUser && currentUser.profileImage
-                      img.nav-user-avatar-img.rounded-circle(
-                        src=currentUser.profileImage
-                        alt=currentUser.name || 'Foto de perfil'
-                        width='40'
-                        height='40'
-                        loading='lazy'
-                        decoding='async')
-                    else
-                      span.nav-user-avatar-fallback.rounded-circle
-                        i.fas.fa-user
-                  ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenu')
+              //- Desktop: dropdown clásico
+              .dropdown.d-none.d-lg-block
+                a.nav-link.dropdown-toggle.nav-user-avatar#userMenuDesktop(
+                  href='#'
+                  role='button'
+                  data-bs-toggle='dropdown'
+                  aria-expanded='false'
+                  aria-label='Menú de usuario')
+                  if currentUser && currentUser.profileImage
+                    img.nav-user-avatar-img.rounded-circle(
+                      src=currentUser.profileImage
+                      alt=currentUser.name || 'Foto de perfil'
+                      width='40'
+                      height='40'
+                      loading='lazy'
+                      decoding='async')
+                  else
+                    span.nav-user-avatar-fallback.rounded-circle
+                      i.fas.fa-user
+                ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenuDesktop')
+                  li
+                    a.dropdown-item.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+                  if currentUser && currentUser.role !== 'artist'
                     li
-                      a.dropdown-item.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
-                    if currentUser && currentUser.role !== 'artist'
-                      li
-                        a.dropdown-item.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
-                    if currentUser && currentUser.role === 'artist'
-                      li
-                        a.dropdown-item.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
-                    if currentUser && currentUser.role === 'admin'
-                      li
-                        a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                      a.dropdown-item.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+                  if currentUser && currentUser.role === 'artist'
                     li
-                      hr.dropdown-divider.my-2
+                      a.dropdown-item.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                  if currentUser && currentUser.role === 'admin'
                     li
-                      form(action='/api/v1/auth/logout' method='POST')
-                        button.dropdown-item(type='submit' aria-label='Cerrar sesión') Cerrar sesión
+                      a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                  li
+                    hr.dropdown-divider.my-2
+                  li
+                    form(action='/api/v1/auth/logout' method='POST')
+                      button.dropdown-item(type='submit' aria-label='Cerrar sesión') Cerrar sesión
+
+              //- Mobile: menú tipo hamburguesa con las opciones de usuario
+              button.nav-link.nav-user-avatar.nav-user-avatar-btn.d-flex.d-lg-none.border-0.bg-transparent.p-0#userMenuMobileToggle(
+                type='button'
+                data-bs-toggle='collapse'
+                data-bs-target='#navUserMobile'
+                aria-controls='navUserMobile'
+                aria-expanded='false'
+                aria-label='Menú de usuario')
+                if currentUser && currentUser.profileImage
+                  img.nav-user-avatar-img.rounded-circle(
+                    src=currentUser.profileImage
+                    alt=currentUser.name || 'Foto de perfil'
+                    width='40'
+                    height='40'
+                    loading='lazy'
+                    decoding='async')
+                else
+                  span.nav-user-avatar-fallback.rounded-circle
+                    i.fas.fa-user
 
             //- Botón hamburguesa (visible solo en pantallas pequeñas)
             button.navbar-toggler.ms-2(
@@ -140,6 +162,25 @@ html.no-js(lang='es')
               aria-expanded='false'
               aria-label='Abrir menú')
               span.navbar-toggler-icon
+
+      //- Menú de usuario mobile (estilo hamburguesa)
+      if currentUser
+        .collapse.navbar-collapse.d-lg-none#navUserMobile
+          ul.navbar-nav.flex-column.ms-auto.mb-2.fs-5
+            li.nav-item
+              a.nav-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+            if currentUser && currentUser.role !== 'artist'
+              li.nav-item
+                a.nav-link(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+            if currentUser && currentUser.role === 'artist'
+              li.nav-item
+                a.nav-link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+            if currentUser && currentUser.role === 'admin'
+              li.nav-item
+                a.nav-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
+            li.nav-item.mt-2
+              form(action='/api/v1/auth/logout' method='POST')
+                button.btn.btn-outline-danger.w-100(type='submit' aria-label='Cerrar sesión') Cerrar sesión
 
     .main-content
       block content
