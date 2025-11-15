@@ -64,14 +64,12 @@ html.no-js(lang='es')
       //- Navbar: Expande a partir de lg (colapsa < 992px)
       nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Navbar principal')
         .container-fluid.navbar-container
-          //- Brand (logo + título) — queda a la izquierda
-          a.navbar-brand.d-flex.align-items-center.navbar-logo-link(href='/')
+          a.navbar-brand.d-flex.align-items-center.navbar-logo-link.order-1(href="/")
             img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
             h1.ms-1.text-uppercase.fw-bold.navbar-title Galería del Ox
 
           //- Contenido colapsable (buscador + links)
-          //- En mobile se muestra debajo; en desktop ocupa el espacio central
-          .collapse.navbar-collapse#navbarsExample05.text-center
+          .collapse.navbar-collapse#navbarsExample05.text-center.order-3.order-lg-2
             //- Buscador — centrado en mobile, centrado entre brand y links en desktop
             form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(action='/search' method='GET' role='search' aria-label='Buscar')
               input.form-control.searchbar-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
@@ -94,8 +92,7 @@ html.no-js(lang='es')
                 li.nav-item
                   a.nav-link.nav-link-registrarse(href='/signup' aria-label='Registrarse') Registrarse
 
-          //- Iconos (avatar + hamburguesa) agrupados a la derecha
-          .navbar-icons.d-flex.align-items-center.ms-auto
+          .navbar-icons.d-flex.align-items-center.ms-auto.order-2.order-lg-3
             if currentUser
               ul.navbar-nav.navbar-user-nav.me-2
                 li.nav-item.dropdown
