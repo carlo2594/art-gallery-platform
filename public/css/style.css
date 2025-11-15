@@ -120,6 +120,13 @@ footer, .footer { flex-shrink: 0; }
 .navbar-icons {
   position: relative;
 }
+.nav-user-logout-btn {
+  display: inline-block;
+  min-width: 16rem;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  border-radius: 999px;
+}
 /* Searchbar */
 .searchbar-navbar { position: relative; width: 100%; }
 .searchbar-input { height: 4.2rem; font-size: 1.6rem; padding-right: 3rem; border-radius: 2rem; border: 2px solid var(--ox-yellow); width: 100%; }

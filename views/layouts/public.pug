@@ -165,8 +165,8 @@ html.no-js(lang='es')
 
       //- Menú de usuario mobile (estilo hamburguesa)
       if currentUser
-        .collapse.navbar-collapse.d-lg-none#navUserMobile
-          ul.navbar-nav.flex-column.ms-auto.mb-2.fs-5
+        .collapse.navbar-collapse.d-lg-none#navUserMobile.text-center
+          ul.navbar-nav.flex-column.mx-auto.mb-2.fs-5
             li.nav-item
               a.nav-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
             if currentUser && currentUser.role !== 'artist'
@@ -180,9 +180,7 @@ html.no-js(lang='es')
                 a.nav-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
             li.nav-item.mt-2
               form(action='/api/v1/auth/logout' method='POST')
-                button.btn.btn-outline-danger.w-100(type='submit' aria-label='Cerrar sesión') Cerrar sesión
-
-    .main-content
+                button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
       block content
 
     if !hideFooter
