@@ -82,6 +82,19 @@ footer, .footer { flex-shrink: 0; }
   min-height: 3.6rem;
 }
 .navbar .nav-link:hover, .navbar .nav-link:focus { background-color: var(--ox-yellow); color: var(--ox-blue); border-radius: 2rem; }
+/* Usuario: usar misma tipografía que el menú principal */
+.nav-user-menu-link {
+  color: var(--ox-blue) !important;
+  text-transform: uppercase;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.nav-user-menu-link:hover,
+.nav-user-menu-link:focus {
+  background-color: var(--ox-yellow) !important;
+  color: var(--ox-blue) !important;
+}
 .nav-user-avatar-img {
   width: 3.6rem;
   height: 3.6rem;
@@ -100,6 +113,78 @@ footer, .footer { flex-shrink: 0; }
   color: var(--ox-beige);
   border: 2px solid var(--ox-yellow);
   font-size: 1.6rem;
+}
+/* Ocultar dropdown antiguo del usuario en el navbar (solo usamos overlay) */
+.navbar-icons .dropdown-menu.dropdown-menu-end {
+  display: none !important;
+}
+/* Desactivar antiguos menús colapsables del navbar */
+#navbarsExample05,
+#navUserMobile {
+  display: none !important;
+}
+@media (min-width: 1400px) {
+  #navbarsExample05 {
+    display: flex !important;
+  }
+}
+.nav-overlay .lightbox__inner {
+  width: min(100vw, 520px);
+  max-height: calc(100vh - 6rem);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.nav-overlay__content {
+  width: 100%;
+  text-align: center;
+}
+.nav-overlay__search-form {
+  margin-bottom: 2rem;
+}
+.nav-overlay__search-input {
+  height: 4.4rem;
+  font-size: 1.6rem;
+  border-radius: 999px;
+  border: 2px solid var(--ox-yellow);
+}
+.nav-overlay__list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+.nav-overlay__link {
+  display: block;
+  padding: .8rem 0;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--ox-blue);
+  text-decoration: none;
+}
+.nav-overlay__link:hover,
+.nav-overlay__link:focus {
+  background-color: var(--ox-yellow);
+  color: var(--ox-blue);
+}
+
+/* Override: mostrar links clásicos en desktop (>=1400px) y ocultar menú móvil antiguo */
+@media (min-width: 1400px) {
+  #navbarsExample05 {
+    display: flex !important;
+  }
+}
+@media (max-width: 1399.98px) {
+  #navbarsExample05 {
+    display: none !important;
+  }
+}
+#navUserMobile {
+  display: none !important;
 }
 .navbar .nav-link.nav-user-avatar {
   padding-top: 0.25rem;
@@ -146,6 +231,13 @@ footer, .footer { flex-shrink: 0; }
   /* Dar espacio al logo para que no quede debajo de los iconos */
   .main-navbar .navbar-brand {
     padding-right: 6rem;
+  }
+}
+@media (min-width: 1400px) {
+  #navbarsExample05 .navbar-nav {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none;
   }
 }
 .nav-user-logout-btn {

@@ -2031,6 +2031,80 @@ document.addEventListener('DOMContentLoaded', function(){
 })();
 
 // ==========================
+// Navbar overlays (menú principal y usuario)
+// ==========================
+__onReady(function () {
+  try {
+    var body = document.body;
+
+    function setupOverlay(triggerSelectors, overlayId) {
+      var overlay = document.getElementById(overlayId);
+      if (!overlay) return;
+
+      var triggers = [];
+      triggerSelectors.forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el) triggers.push(el);
+      });
+      if (!triggers.length) return;
+
+      var closeBtn = overlay.querySelector('.nav-overlay__close') || overlay.querySelector('.lightbox__close');
+
+      function openOverlay() {
+        overlay.classList.add('open');
+        body.classList.add('noscroll');
+        if (closeBtn) {
+          setTimeout(function () { try { closeBtn.focus(); } catch (_) {} }, 10);
+        }
+      }
+
+      function closeOverlay() {
+        overlay.classList.remove('open');
+        body.classList.remove('noscroll');
+      }
+
+      triggers.forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          // Cerrar cualquier otro overlay de navbar abierto
+          document.querySelectorAll('.nav-overlay.open').forEach(function (openEl) {
+            if (openEl !== overlay) openEl.classList.remove('open');
+          });
+          openOverlay();
+        }, true);
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          closeOverlay();
+        });
+      }
+
+      // Cerrar haciendo click en el fondo
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) {
+          closeOverlay();
+        }
+      });
+
+      // Cerrar con ESC
+      window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+          closeOverlay();
+        }
+      });
+    }
+
+    // Menú principal (hamburguesa)
+    setupOverlay(['#mainMenuToggle'], 'navMainOverlay');
+    // Menú de usuario (avatar desktop + mobile)
+    setupOverlay(['#userMenuDesktopToggle', '#userMenuMobileToggle'], 'navUserOverlay');
+  } catch (_) {}
+});
+
+// ==========================
 // Auth: Forgot password y Reset password
 // ==========================
 (function authForms(){
@@ -2136,15 +2210,35 @@ document.addEventListener('DOMContentLoaded', function(){
 // ==========================
 __onReady(function () {
   try {
+    // Navbar collapse logic deshabilitado (reemplazado por overlays)
+    return;
     var userToggle = document.getElementById('userMenuMobileToggle');
     var userMenu = document.getElementById('navUserMobile');
     var mainToggler = document.querySelector('[data-bs-target="#navbarsExample05"]');
     var mainMenu = document.getElementById('navbarsExample05');
 
-    if (!window.bootstrap || (!userToggle && !mainToggler)) return;
+    if (!window.bootstrap) return;
 
-    var userCollapse = userMenu ? bootstrap.Collapse.getOrCreateInstance(userMenu) : null;
-    var mainCollapse = mainMenu ? bootstrap.Collapse.getOrCreateInstance(mainMenu) : null;
+    // Crear instancias sin auto-toggle y forzar estado cerrado por defecto
+    var userCollapse = userMenu ? bootstrap.Collapse.getOrCreateInstance(userMenu, { toggle: false }) : null;
+    var mainCollapse = mainMenu ? bootstrap.Collapse.getOrCreateInstance(mainMenu, { toggle: false }) : null;
+
+    if (mainCollapse) {
+      try { mainCollapse.hide(); } catch (_) {}
+      if (mainToggler) {
+        mainToggler.classList.add('collapsed');
+        mainToggler.setAttribute('aria-expanded', 'false');
+      }
+    }
+    if (userCollapse) {
+      try { userCollapse.hide(); } catch (_) {}
+      if (userToggle) {
+        userToggle.classList.add('collapsed');
+        userToggle.setAttribute('aria-expanded', 'false');
+      }
+    }
+
+    if (!userToggle && !mainToggler) return;
 
     if (userToggle && mainCollapse) {
       userToggle.addEventListener('click', function () {

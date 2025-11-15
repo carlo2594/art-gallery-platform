@@ -98,7 +98,7 @@ html.no-js(lang='es')
             if currentUser
               //- Desktop: dropdown clásico
               .dropdown.d-none.d-xxl-block
-                a.nav-link.dropdown-toggle.nav-user-avatar#userMenuDesktop(
+                a.nav-link.dropdown-toggle.nav-user-avatar#userMenuDesktopToggle(
                   href='#'
                   role='button'
                   data-bs-toggle='dropdown'
@@ -117,16 +117,16 @@ html.no-js(lang='es')
                       i.fas.fa-user
                 ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenuDesktop')
                   li
-                    a.dropdown-item.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+                    a.dropdown-item.nav-user-menu-link.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
                   if currentUser && currentUser.role !== 'artist'
                     li
-                      a.dropdown-item.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+                      a.dropdown-item.nav-user-menu-link.mb-2(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
                   if currentUser && currentUser.role === 'artist'
                     li
-                      a.dropdown-item.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                      a.dropdown-item.nav-user-menu-link.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
                   if currentUser && currentUser.role === 'admin'
                     li
-                      a.dropdown-item.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                      a.dropdown-item.nav-user-menu-link.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
                   li
                     hr.dropdown-divider.my-2
                   li
@@ -154,7 +154,7 @@ html.no-js(lang='es')
                     i.fas.fa-user
 
             //- Botón hamburguesa (visible solo en pantallas pequeñas)
-            button.navbar-toggler.ms-2(
+            button.navbar-toggler.ms-2#mainMenuToggle(
               type='button'
               data-bs-toggle='collapse'
               data-bs-target='#navbarsExample05'
@@ -168,22 +168,78 @@ html.no-js(lang='es')
         .collapse.navbar-collapse.d-xxl-none#navUserMobile.text-center
           ul.navbar-nav.flex-column.mx-auto.mb-2.fs-5
             li.nav-item
-              a.nav-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+              a.nav-link.nav-user-menu-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
             if currentUser && currentUser.role !== 'artist'
               li.nav-item
-                a.nav-link(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+                a.nav-link.nav-user-menu-link(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
             if currentUser && currentUser.role === 'artist'
               li.nav-item
-                a.nav-link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                a.nav-link.nav-user-menu-link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
             if currentUser && currentUser.role === 'admin'
               li.nav-item
-                a.nav-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                a.nav-link.nav-user-menu-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
             li.nav-item.mt-2
               form(action='/api/v1/auth/logout' method='POST')
                 button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
 
       .main-content
         block content
+
+    //- Overlays de navbar (menA�s principal y de usuario)
+    #navMainOverlay.lightbox.nav-overlay(
+      role='dialog'
+      aria-modal='true'
+      aria-label='MenA� de navegaciA3n')
+      button.lightbox__close.nav-overlay__close(type='button' aria-label='Cerrar menA� de navegaciA3n')
+        svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
+          path(d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z' fill='currentColor')
+        span.sr-only Cerrar
+      .lightbox__inner.nav-overlay__inner
+        .nav-overlay__content
+          form.nav-overlay__search-form(action='/search' method='GET' role='search' aria-label='Buscar')
+            input.form-control.nav-overlay__search-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
+          ul.nav-overlay__list
+            li
+              a.nav-overlay__link(href='/artworks') Obras
+            li
+              a.nav-overlay__link(href='/artists') Artistas
+            li
+              a.nav-overlay__link(href='/exhibitions') Exposiciones
+            if currentUser
+              li
+                a.nav-overlay__link(href='/activity') Actividad
+            if !currentUser
+              li
+                a.nav-overlay__link(href='/login' aria-label='Iniciar sesiA3n') Iniciar sesiA3n
+              li
+                a.nav-overlay__link(href='/signup' aria-label='Registrarse') Registrarse
+
+    if currentUser
+      #navUserOverlay.lightbox.nav-overlay(
+        role='dialog'
+        aria-modal='true'
+        aria-label='MenA� de usuario')
+        button.lightbox__close.nav-overlay__close(type='button' aria-label='Cerrar menA� de usuario')
+          svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
+            path(d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z' fill='currentColor')
+          span.sr-only Cerrar
+        .lightbox__inner.nav-overlay__inner
+          .nav-overlay__content
+            ul.nav-overlay__list
+              li
+                a.nav-overlay__link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
+              if currentUser && currentUser.role !== 'artist'
+                li
+                  a.nav-overlay__link(href='/become-artist' aria-label='Vender mi arte') Vender mi arte
+              if currentUser && currentUser.role === 'artist'
+                li
+                  a.nav-overlay__link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+              if currentUser && currentUser.role === 'admin'
+                li
+                  a.nav-overlay__link(href='/admin' aria-label='Panel de administrador') Panel de administrador
+              li
+                form(action='/api/v1/auth/logout' method='POST')
+                  button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
 
     if !hideFooter
       include ./footer.pug
