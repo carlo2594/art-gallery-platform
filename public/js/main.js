@@ -2130,3 +2130,55 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup); else setup();
 })();
+
+// ==========================
+// Navbar: cerrar un menú al abrir el otro
+// ==========================
+__onReady(function () {
+  try {
+    var userToggle = document.getElementById('userMenuMobileToggle');
+    var userMenu = document.getElementById('navUserMobile');
+    var mainToggler = document.querySelector('[data-bs-target="#navbarsExample05"]');
+    var mainMenu = document.getElementById('navbarsExample05');
+
+    if (!window.bootstrap || (!userToggle && !mainToggler)) return;
+
+    var userCollapse = userMenu ? bootstrap.Collapse.getOrCreateInstance(userMenu) : null;
+    var mainCollapse = mainMenu ? bootstrap.Collapse.getOrCreateInstance(mainMenu) : null;
+
+    if (userToggle && mainCollapse) {
+      userToggle.addEventListener('click', function () {
+        if (mainMenu && mainMenu.classList.contains('show')) {
+          try { mainCollapse.hide(); } catch (_) {}
+        }
+      });
+    }
+
+    if (mainToggler && userCollapse) {
+      mainToggler.addEventListener('click', function () {
+        if (userMenu && userMenu.classList.contains('show')) {
+          try { userCollapse.hide(); } catch (_) {}
+        }
+      });
+    }
+
+    // Desktop dropdown vs hamburguesa: cerrar dropdown al abrir hamburguesa
+    var desktopDropdownToggle = document.getElementById('userMenuDesktop');
+    if (desktopDropdownToggle && mainToggler) {
+      desktopDropdownToggle.addEventListener('click', function () {
+        if (mainMenu && mainMenu.classList.contains('show') && mainCollapse) {
+          try { mainCollapse.hide(); } catch (_) {}
+        }
+      });
+      mainToggler.addEventListener('click', function () {
+        var ddParent = desktopDropdownToggle.closest('.dropdown');
+        if (ddParent && ddParent.classList.contains('show')) {
+          // Bootstrap 5 cierra dropdown simulando click en el documento
+          try {
+            document.body.click();
+          } catch (_) {}
+        }
+      });
+    }
+  } catch (_) {}
+});

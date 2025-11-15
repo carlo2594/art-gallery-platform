@@ -97,7 +97,7 @@ html.no-js(lang='es')
           .navbar-icons.d-flex.align-items-center.ms-auto.order-2.order-lg-3
             if currentUser
               //- Desktop: dropdown clásico
-              .dropdown.d-none.d-lg-block
+              .dropdown.d-none.d-xxl-block
                 a.nav-link.dropdown-toggle.nav-user-avatar#userMenuDesktop(
                   href='#'
                   role='button'
@@ -134,7 +134,7 @@ html.no-js(lang='es')
                       button.dropdown-item(type='submit' aria-label='Cerrar sesión') Cerrar sesión
 
               //- Mobile: menú tipo hamburguesa con las opciones de usuario
-              button.nav-link.nav-user-avatar.nav-user-avatar-btn.d-flex.d-lg-none.border-0.bg-transparent.p-0#userMenuMobileToggle(
+              button.nav-link.nav-user-avatar.nav-user-avatar-btn.d-flex.d-xxl-none.border-0.bg-transparent.p-0#userMenuMobileToggle(
                 type='button'
                 data-bs-toggle='collapse'
                 data-bs-target='#navUserMobile'
@@ -165,7 +165,7 @@ html.no-js(lang='es')
 
       //- Menú de usuario mobile (estilo hamburguesa)
       if currentUser
-        .collapse.navbar-collapse.d-lg-none#navUserMobile.text-center
+        .collapse.navbar-collapse.d-xxl-none#navUserMobile.text-center
           ul.navbar-nav.flex-column.mx-auto.mb-2.fs-5
             li.nav-item
               a.nav-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta

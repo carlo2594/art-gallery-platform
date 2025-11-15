@@ -120,6 +120,34 @@ footer, .footer { flex-shrink: 0; }
 .navbar-icons {
   position: relative;
 }
+/* Suavizar aparición de menús colapsados (mobile) */
+#navbarsExample05 .navbar-nav,
+#navUserMobile .navbar-nav {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+#navbarsExample05.show .navbar-nav,
+#navUserMobile.show .navbar-nav {
+  opacity: 1;
+  transform: none;
+}
+/* Mantener avatar y hamburguesa fijos en mobile / vista colapsada */
+@media (max-width: 1399.98px) {
+  .main-navbar .navbar-container {
+    position: relative;
+  }
+  .main-navbar .navbar-icons {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    z-index: 10;
+  }
+  /* Dar espacio al logo para que no quede debajo de los iconos */
+  .main-navbar .navbar-brand {
+    padding-right: 6rem;
+  }
+}
 .nav-user-logout-btn {
   display: inline-block;
   min-width: 16rem;
