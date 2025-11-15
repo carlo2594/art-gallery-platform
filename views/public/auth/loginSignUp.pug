@@ -1,5 +1,12 @@
 extends /layouts/public
 
+block headExtra
+  style.
+    .main-navbar,
+    #navUserMobile,
+    #navMainOverlay,
+    #navUserOverlay { display: none !important; }
+
 block content
   .login-signin-container
     .row.g-0.align-items-stretch
@@ -63,4 +70,3 @@ block content
           src="/img/sabiduria-nocturna-login.jpg",
           alt="Sabiduría Nocturna"
         )
-

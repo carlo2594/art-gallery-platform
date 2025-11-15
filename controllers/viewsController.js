@@ -631,7 +631,6 @@ exports.getResetPassword = catchAsync(async (req, res) => {
       token,
       isNewPassword: type === 'new',
       error: 'El enlace no es válido o ya venció. Solicita uno nuevo.',
-      hideNavbar: true,
       hideFooter: true
     });
   }
@@ -654,7 +653,6 @@ exports.getResetPassword = catchAsync(async (req, res) => {
     uid,
     token,
     isNewPassword: type === 'new',
-    hideNavbar: true,
     hideFooter: true
   });
 });
@@ -671,7 +669,6 @@ exports.getResetLinkInvalid = (req, res) => {
 exports.getSignUp = (req, res) => {
   res.render('public/auth/loginSignUp', {
     title: 'Registrarse · Galería del Ox',
-    hideNavbar: true,
     hideFooter: true,
     mode: 'signUp',
     error: req.query.error,
@@ -684,7 +681,6 @@ exports.getSignUp = (req, res) => {
 exports.getLogin = (req, res) => {
   res.render('public/auth/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
-    hideNavbar: true,
     hideFooter: true,
     mode: 'login',
     error: req.query.error,
@@ -696,7 +692,6 @@ exports.getLogin = (req, res) => {
 exports.getForgotPassword = (req, res) => {
   res.render('public/auth/forgotPassword', {
     title: 'Recuperar contraseña · Galería del Ox',
-    hideNavbar: true,
     hideFooter: true,
     error: req.query.error,
     success: req.query.success
