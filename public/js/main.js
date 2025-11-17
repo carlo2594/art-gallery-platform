@@ -1201,7 +1201,23 @@ function initLoginBackLink(){
     const fallback = link.getAttribute('href') || '/';
 
     const sp = new URLSearchParams(window.location.search);
-    const rt = sp.get('returnTo');
+    const rtRaw = sp.get('returnTo');
+
+    // Si returnTo es exactamente "/", eliminarlo de la URL
+    // y dejar el botón de volver usando siempre el fallback (/).
+    if (rtRaw === '/') {
+      sp.delete('returnTo');
+      try {
+        const newSearch = sp.toString();
+        const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + (window.location.hash || '');
+        if (window.history && typeof window.history.replaceState === 'function') {
+          window.history.replaceState(null, '', newUrl);
+        }
+      } catch (_) {}
+      return;
+    }
+
+    const rt = rtRaw;
     if (rt) {
       try {
         const rtUrl = new URL(rt, window.location.origin);
@@ -1228,12 +1244,14 @@ function initLoginBackLink(){
   } catch (e) {}
 }
 
-// Agrega ?returnTo=<current> a los links de Login/Signup del navbar
-function initNavbarAuthReturnTo(){
-  try {
-    const here = window.location.pathname + window.location.search;
-    // No reescribir si estamos ya en login/signup
-    if (/^\/(login|signup|signUp)\b/i.test(window.location.pathname)) return;
+  // Agrega ?returnTo=<current> a los links de Login/Signup del navbar
+  function initNavbarAuthReturnTo(){
+    try {
+      const here = window.location.pathname + window.location.search;
+      // Evitar ?returnTo=%2F cuando estamos en el home limpio "/"
+      if (here === '/') return;
+      // No reescribir si estamos ya en login/signup
+      if (/^\/(login|signup|signUp)\b/i.test(window.location.pathname)) return;
 
     const addRt = (a) => {
       if (!a) return;

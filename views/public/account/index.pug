@@ -1,4 +1,4 @@
-ï»¿extends /layouts/public
+extends /layouts/public
 
 block content
   section.account-page-section.py-5
@@ -6,7 +6,7 @@ block content
       .row.mb-4.account-page-header-row
         .col.account-page-header-col
           h1.h3.mb-0.font-title.account-page-title Editar cuenta
-          p.text-muted.account-page-subtitle Actualiza tu perfil, foto y contrasena.
+          p.text-muted.account-page-subtitle Actualiza tu perfil, foto y contraseña.
 
       #accountAlerts.account-page-alerts
 
@@ -16,7 +16,7 @@ block content
         li.nav-item.account-tabs-item(role='presentation')
           button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') Foto de perfil
         li.nav-item.account-tabs-item(role='presentation')
-          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contrasena
+          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contraseña
 
       .tab-content.mt-4.account-tabs-content
         .tab-pane.account-tab-pane.account-tab-pane--profile.fade.show.active#tab-perfil(role='tabpanel' aria-labelledby='tab-perfil')
@@ -291,39 +291,40 @@ block content
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='profileImage') Subir nueva foto de perfil
                   input#profileImage.form-control.account-form-control(type='file' name='profileImage' accept='image/*' required)
-                  small.form-text.text-muted.account-form-hint Se optimiza automÃ¡ticamente (WebP, ancho mÃ¡x. 1600px). Hasta 50MB.
+                  small.form-text.text-muted.account-form-hint Se optimiza automáticamente (WebP, ancho máx. 1600px). Hasta 50MB.
                   small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info(style='color: var(--ox-blue);')
                     i.fas.fa-info-circle.account-form-info-icon
-                    span.account-form-hint-copy Usa una imagen horizontal (ancho mayor que alto) para mantener la composiciÃ³n del perfil.
+                    span.account-form-hint-copy Usa una imagen horizontal (ancho mayor que alto) para mantener la composición del perfil.
                 button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
               hr.my-4.account-form-divider
               form#accountPhotoDeleteForm.account-form.account-form-photo-delete(action='/api/v1/users/me/profile-image' method='POST')
                 input.account-form-hidden(type='hidden' name='profileImage' value='')
                 button.btn.btn-outline-danger.account-form-delete(type='submit') Eliminar foto
 
-          //- Se ha ocultado la secciÃ³n de portada para dejar solo foto de perfil
+          //- Se ha ocultado la sección de portada para dejar solo foto de perfil
 
         .tab-pane.account-tab-pane.account-tab-pane--password.fade#tab-password(role='tabpanel' aria-labelledby='tab-password')
           form#accountPasswordForm.account-form.account-form-password(action='/api/v1/users/update-password' method='POST')
             .row.g-3.account-form-row
               .col-12.col-md-6.account-form-column
-                label.form-label.account-form-label(for='currentPassword') Contrasena actual
+                label.form-label.account-form-label(for='currentPassword') contraseña actual
                 .input-group.account-form-input-group.account-form-input-group--append
                   input#currentPassword.form-control.account-form-control(type='password' name='currentPassword' required minlength='6')
                   button.btn.btn-outline-secondary.account-form-toggle(type='button' data-toggle-password='#currentPassword' aria-pressed='false' title='Mostrar/ocultar')
                     i.fas.fa-eye.account-form-toggle-icon
               .col-12.col-md-6.account-form-column
-                label.form-label.account-form-label(for='newPassword') Nueva contrasena
+                label.form-label.account-form-label(for='newPassword') Nueva contraseña
                 .input-group.account-form-input-group.account-form-input-group--append
                   input#newPassword.form-control.account-form-control(type='password' name='newPassword' required minlength='8')
                   button.btn.btn-outline-secondary.account-form-toggle(type='button' data-toggle-password='#newPassword' aria-pressed='false' title='Mostrar/ocultar')
                     i.fas.fa-eye.account-form-toggle-icon
             .mt-3.account-form-actions
-              button.btn.btn-primary.account-form-submit(type='submit') Cambiar contrasena
+              button.btn.btn-primary.account-form-submit(type='submit') Cambiar contraseña
 
 //- Scripts adicionales para esta vista
 block append scriptsExtra
   script(src='/js/account-photo.js')
+
 
 
 

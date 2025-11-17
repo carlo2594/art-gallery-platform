@@ -3042,3 +3042,5 @@ body.noscroll {
 .auth-required-modal .modal-footer .far {
   color: var(--ox-blue) !important;
 }
+
+.login-forgot-page { color: var(--ox-blue) !important; font-family: var(--font-title); font-size: 1.4rem; }
