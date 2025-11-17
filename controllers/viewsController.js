@@ -1245,6 +1245,32 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
 });
 
 
+// Flujo paso a paso para crear una nueva obra (artista autenticado)
+exports.getArtistCreateArtworkWizard = catchAsync(async (req, res, next) => {
+  const currentUser = (res.locals && res.locals.currentUser) || null;
+  if (!currentUser) {
+    const returnTo = encodeURIComponent(req.originalUrl || '/artists/panel');
+    return res.redirect(`/login?returnTo=${returnTo}`);
+  }
+  if (currentUser.role !== 'artist') {
+    return res.status(403).render('public/auth/unauthorized', {
+      title: 'Acceso no autorizado � Galer�a del Ox',
+      message: 'Debes ser artista para crear una obra.'
+    });
+  }
+
+  // Reutilizamos la informaci�n b�sica del artista para el encabezado del flujo
+  const artist = await User.findById(currentUser.id)
+    .select('name bio profileImage coverImage')
+    .lean();
+
+  return res.status(200).render('public/artists/artwork-wizard', {
+    title: 'Agregar nueva obra',
+    artist,
+    isMyPanel: true
+  });
+});
+
 // Vista: exposicion privada o no publicada
 exports.getExhibitionUnpublished = (req, res) => {
   return res.status(403).render('public/exhibitions/unpublished', {

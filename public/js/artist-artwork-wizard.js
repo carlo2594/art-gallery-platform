@@ -1,0 +1,362 @@
+'use strict';
+
+(function initArtistArtworkWizard(){
+  let currentArtworkId = null;
+  let isSaving = false;
+
+  function qs(sel, ctx){ return (ctx||document).querySelector(sel); }
+  function qsa(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
+
+  function alertToast(type, msg){
+    try { console.log('[ArtistArtworkWizard]', type, msg); } catch(_){}
+    const container = qs('#artistArtworkWizardAlerts') || qs('#artistPanelAlerts') || qs('#accountAlerts');
+    if (!container) return;
+    const el = document.createElement('div');
+    el.className = 'alert alert-' + (type || 'info') + ' alert-dismissible fade show';
+    el.setAttribute('role','alert');
+    el.textContent = msg || '';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-close';
+    btn.setAttribute('data-bs-dismiss','alert');
+    btn.setAttribute('aria-label','Cerrar');
+    el.appendChild(btn);
+    container.innerHTML = '';
+    container.appendChild(el);
+  }
+
+  function setStep(step){
+    const panes = qsa('.artist-wizard-pane');
+    panes.forEach(p => {
+      const s = p.getAttribute('data-step');
+      p.classList.toggle('d-none', String(s) !== String(step));
+    });
+    const steps = qsa('.artist-wizard-step');
+    steps.forEach(el => {
+      const s = el.getAttribute('data-step');
+      el.classList.toggle('active', String(s) === String(step));
+    });
+    const bar = qs('#artistWizardProgressBar');
+    const current = Number(step) || 1;
+    const total = 4;
+    if (bar){
+      const percent = Math.max(0, Math.min(100, (current / total) * 100));
+      bar.style.width = percent + '%';
+      bar.setAttribute('aria-valuenow', String(current));
+    }
+    const titleEl = qs('#artistWizardStepTitle');
+    if (titleEl){
+      const labels = {
+        1: 'Información básica',
+        2: 'Dimensiones',
+        3: 'Técnica y precio',
+        4: 'Imagen'
+      };
+      const label = labels[current] || '';
+      titleEl.textContent = `Paso ${current} de ${total} · ${label}`;
+    }
+  }
+
+  function isStepValid(step){
+    const form = qs('#artistArtworkWizardForm');
+    if (!form) return false;
+    const s = Number(step);
+    if (s === 1){
+      const titleEl = form.querySelector('input[name="title"]');
+      const val = titleEl && String(titleEl.value || '').trim();
+      return !!val;
+    }
+    if (s === 2){
+      const wEl = form.querySelector('input[name="width_cm"]');
+      const hEl = form.querySelector('input[name="height_cm"]');
+      const w = wEl ? Number(wEl.value) : NaN;
+      const h = hEl ? Number(hEl.value) : NaN;
+      return Number.isFinite(w) && w > 0 && Number.isFinite(h) && h > 0;
+    }
+    if (s === 3){
+      const amtEl = form.querySelector('input[name="amount"]');
+      if (!amtEl) return false;
+      if (amtEl.value === '') return false;
+      const amt = Number(amtEl.value);
+      return Number.isFinite(amt) && amt >= 0;
+    }
+    return true;
+  }
+
+  function updateNextButtonsState(){
+    const form = qs('#artistArtworkWizardForm');
+    if (!form) return;
+    const buttons = qsa('[data-wizard-next]');
+    buttons.forEach((btn) => {
+      const next = Number(btn.getAttribute('data-wizard-next') || '0');
+      const current = next > 1 ? next - 1 : 1;
+      btn.disabled = !isStepValid(current);
+    });
+  }
+
+  function collectPayload(){
+    const form = qs('#artistArtworkWizardForm');
+    if (!form) return {};
+    const getVal = (name) => {
+      const el = form.querySelector('[name="'+name+'"]');
+      if (!el) return undefined;
+      if (el.type === 'number') {
+        return el.value === '' ? undefined : el.value;
+      }
+      return el.value != null ? el.value : undefined;
+    };
+    const payload = {};
+    const title = getVal('title');
+    if (title) payload.title = title;
+    const description = getVal('description');
+    if (description) payload.description = description;
+    const width_cm = getVal('width_cm');
+    if (width_cm !== undefined) payload.width_cm = width_cm;
+    const height_cm = getVal('height_cm');
+    if (height_cm !== undefined) payload.height_cm = height_cm;
+    const type = getVal('type');
+    if (type) payload.type = type;
+    const technique = getVal('technique');
+    if (technique) payload.technique = technique;
+    const amount = getVal('amount');
+    if (amount !== undefined) payload.amount = amount;
+    const completedAt = getVal('completedAt');
+    if (completedAt) payload.completedAt = completedAt;
+    return payload;
+  }
+
+  async function createDraft(){
+    const payload = collectPayload();
+    if (!payload.title || String(payload.title).trim() === ''){
+      alertToast('warning', 'Agrega al menos un t\u00edtulo para crear el borrador.');
+      return null;
+    }
+    payload._draftOnly = '1';
+    isSaving = true;
+    try {
+      const res = await fetch('/api/v1/artworks', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || !data || !data.data){
+        const msg = (data && data.message) || (data && data.error && data.error.message) || 'No se pudo crear el borrador.';
+        alertToast('danger', msg);
+        return null;
+      }
+      currentArtworkId = data.data._id;
+      const hiddenId = qs('#artistArtworkId');
+      if (hiddenId) hiddenId.value = currentArtworkId;
+      alertToast('success', 'Borrador creado.');
+      return currentArtworkId;
+    } catch(err){
+      alertToast('danger', err && err.message ? err.message : 'Error al crear el borrador.');
+      return null;
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function updateDraft(showToast){
+    if (!currentArtworkId){
+      return await createDraft();
+    }
+    const payload = collectPayload();
+    if (Object.keys(payload).length === 0) return currentArtworkId;
+    isSaving = true;
+    try {
+      const res = await fetch('/api/v1/artworks/' + encodeURIComponent(currentArtworkId), {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!res.ok || !data || !data.data){
+        const msg = (data && data.message) || (data && data.error && data.error.message) || 'No se pudo actualizar el borrador.';
+        alertToast('danger', msg);
+        return null;
+      }
+      if (showToast) alertToast('success', 'Borrador guardado.');
+      return currentArtworkId;
+    } catch(err){
+      alertToast('danger', err && err.message ? err.message : 'Error al guardar el borrador.');
+      return null;
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function saveDraft(showToast){
+    if (isSaving) return currentArtworkId;
+    if (!currentArtworkId){
+      return await createDraft();
+    }
+    return await updateDraft(showToast);
+  }
+
+  async function uploadImageIfNeeded(){
+    const form = qs('#artistArtworkWizardForm');
+    if (!form || !currentArtworkId) return currentArtworkId;
+    const fileInput = qs('input[name=\"image\"]', form);
+    const file = fileInput && fileInput.files && fileInput.files[0];
+    if (!file) return currentArtworkId;
+    const fd = new FormData();
+    fd.append('image', file);
+    isSaving = true;
+    try {
+      const res = await fetch('/api/v1/artworks/' + encodeURIComponent(currentArtworkId), {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        body: fd
+      });
+      const data = await res.json();
+      if (!res.ok || !data || !data.data){
+        const msg = (data && data.message) || (data && data.error && data.error.message) || 'No se pudo guardar la imagen.';
+        alertToast('danger', msg);
+        return null;
+      }
+      alertToast('success', 'Imagen guardada en el borrador.');
+      return currentArtworkId;
+    } catch(err){
+      alertToast('danger', err && err.message ? err.message : 'Error al subir la imagen.');
+      return null;
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function submitArtwork(){
+    if (!currentArtworkId){
+      const id = await saveDraft(false);
+      if (!id) return;
+    } else {
+      const id = await updateDraft(false);
+      if (!id) return;
+    }
+    const imgId = await uploadImageIfNeeded();
+    if (!imgId) return;
+
+    try {
+      const res = await fetch('/api/v1/artworks/' + encodeURIComponent(currentArtworkId) + '/submit', {
+        method: 'PATCH',
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+      const data = await res.json();
+      if (!res.ok){
+        const msg = (data && data.message) || (data && data.error && data.error.message) || 'No se pudo enviar la obra a revisión.';
+        alertToast('danger', msg);
+        return;
+      }
+      alertToast('success', 'Obra enviada a revisión.');
+      setTimeout(() => {
+        window.location.href = '/artists/panel';
+      }, 800);
+    } catch(err){
+      alertToast('danger', err && err.message ? err.message : 'Error al enviar la obra.');
+    }
+  }
+
+  function hookSteps(){
+    const container = qs('.artist-artwork-wizard');
+    if (!container) return;
+    setStep(1);
+    updateNextButtonsState();
+
+    qsa('[data-wizard-next]').forEach(btn => {
+      btn.addEventListener('click', async function(){
+        const next = this.getAttribute('data-wizard-next');
+        const current = Number(next) - 1;
+        if (current === 1){
+          const titleEl = qs('input[name=\"title\"]');
+          const titleVal = titleEl && String(titleEl.value || '').trim();
+          if (!titleVal){
+            if (titleEl){
+              titleEl.classList.add('is-invalid');
+              titleEl.addEventListener('input', function onin(){ titleEl.classList.remove('is-invalid'); titleEl.removeEventListener('input', onin); }, { once: true });
+            }
+            alertToast('warning', 'El título es obligatorio para continuar.');
+            return;
+          }
+        }
+        await saveDraft(false);
+        if (next) {
+          setStep(next);
+          updateNextButtonsState();
+        }
+      });
+    });
+
+    qsa('[data-wizard-prev]').forEach(btn => {
+      btn.addEventListener('click', function(){
+        const prev = this.getAttribute('data-wizard-prev');
+        if (prev) setStep(prev);
+      });
+    });
+
+    const saveBtn = qs('#wizardSaveDraft');
+    if (saveBtn){
+      saveBtn.addEventListener('click', function(){
+        saveDraft(true);
+      });
+    }
+    const submitBtn = qs('#wizardSubmit');
+    if (submitBtn){
+      submitBtn.addEventListener('click', function(){
+        submitArtwork();
+      });
+    }
+
+    const imgInput = qs('#wizardImage');
+    const imgPrev = qs('#wizardImagePreview');
+    if (imgInput && imgPrev){
+      imgInput.addEventListener('change', function(){
+        const f = this.files && this.files[0];
+        if (!f){
+          imgPrev.hidden = true;
+          imgPrev.removeAttribute('src');
+          return;
+        }
+        const url = URL.createObjectURL(f);
+        imgPrev.src = url;
+        imgPrev.hidden = false;
+        imgPrev.onload = function(){
+          try { URL.revokeObjectURL(url); } catch(_){}
+        };
+      });
+    }
+
+    // Validacion en vivo para habilitar/deshabilitar "Siguiente"
+    const form = qs('#artistArtworkWizardForm');
+    if (form){
+      const fields = [
+        'input[name="title"]',
+        'input[name="width_cm"]',
+        'input[name="height_cm"]',
+        'input[name="amount"]'
+      ];
+      fields.forEach((sel) => {
+        const el = form.querySelector(sel);
+        if (!el) return;
+        el.addEventListener('input', () => {
+          updateNextButtonsState();
+        });
+      });
+    }
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', hookSteps);
+  } else {
+    hookSteps();
+  }
+})();

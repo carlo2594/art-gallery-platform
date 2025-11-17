@@ -69,6 +69,12 @@ const ensureArtistRoleView = (req, res, next) => {
 router.get('/artists', viewsController.getArtistsView);
 // IMPORTANTE: declarar rutas específicas antes del comodín ':id'
 router.get('/artists/panel', ensureLoggedInView, ensureArtistRoleView, viewsController.getMyArtistPanel);
+router.get(
+  '/artists/panel/artworks/new',
+  ensureLoggedInView,
+  ensureArtistRoleView,
+  viewsController.getArtistCreateArtworkWizard
+);
 router.get('/artists/:id', viewsController.getArtistDetail);
 // Alias canónico: redirige de singular a plural (previene 404 por enlaces viejos)
 router.get('/artist/:id', (req, res) => {

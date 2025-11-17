@@ -1,0 +1,46 @@
+.artist-artwork-wizard {
+  background-color: var(--ox-beige);
+}
+
+.artist-wizard-steps {
+  gap: 0.75rem;
+}
+
+.artist-wizard-step {
+  flex: 1;
+  text-align: center;
+  font-size: 0.9rem;
+  color: color-mix(in srgb, var(--ox-blue) 55%, transparent);
+}
+
+.artist-wizard-step-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--ox-blue) 28%, transparent);
+  margin-bottom: 0.35rem;
+  background: #fff;
+  color: color-mix(in srgb, var(--ox-blue) 75%, transparent);
+}
+
+.artist-wizard-step-label {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.artist-wizard-step.active .artist-wizard-step-icon {
+  background: var(--ox-blue);
+  color: var(--ox-beige);
+  border-color: var(--ox-blue);
+}
+
+.artist-wizard-step.active .artist-wizard-step-label {
+  color: var(--ox-blue);
+  font-weight: 600;
+}
+

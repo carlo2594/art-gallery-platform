@@ -5,7 +5,7 @@ block content
     // Hero Section
     section.artist-profile-hero.artist-hero-section.position-relative.artist-hero-fullscreen
       .hero-background.artist-hero-bg.position-absolute.w-100.h-100
-        - const heroCover = artist.coverImage || artist.profileImage
+        - const heroCover = artist.coverImage
         if heroCover
           img.hero-bg-image.artist-bg-image.w-100.h-100.artist-image-cover(
             src=heroCover,
@@ -72,9 +72,7 @@ block content
                 if isMyPanel
                   .hero-actions.artist-actions-desktop.mt-3.d-flex.flex-wrap.gap-2
                     // Botón controlado por JS: abre modal de crear o el modal de límite
-                    button#btnOpenAddArtwork.btn.btn-warning.btn-sm(data-max-drafts=maxDrafts type='button')
-                      i.fas.fa-plus.me-2
-                      | Agregar obra
+                    //- Botón \"Agregar obra\" eliminado
                     button.btn.btn-outline-light.btn-sm(data-bs-toggle='modal', data-bs-target='#artistCoverModal')
                       i.fas.fa-image.me-2
                       | Editar portada
@@ -111,7 +109,16 @@ block content
     else
       section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
-          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+          .d-flex.justify-content-between.align-items-center.mb-4
+            h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title(style='color: var(--ox-blue);')= `Obras de ${artist.name}`
+            if isMyPanel
+              a.btn.btn-primary.btn-lg.px-4.py-2(
+                href='/artists/panel/artworks/new'
+                aria-label='Agregar obras'
+                style='background: var(--ox-blue); border-color: var(--ox-blue); color: var(--ox-beige);'
+              )
+                i.fas.fa-plus.me-2(style='color: var(--ox-blue);')
+                | Agregar obras
           if stats.totalArtworks > 1
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
               .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
@@ -121,7 +128,7 @@ block content
                 - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
                 - var actionUrl = `/artists/panel`;
                 include /public/artworks/_artworkFilters.pug
-          .row.justify-content-center
+          .row.justify-content-center.mt-3
             .col-lg-6
               i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
               if stats.totalArtworks > 1
@@ -195,8 +202,8 @@ block content
 
   
   if isMyPanel
-    // Modales para crear obra y editar portada
-    include ./_artistAddArtworkModal.pug
+    // Modal para editar portada
+    //- include ./_artistAddArtworkModal.pug
     include ./_artistCoverModal.pug
     // Modal de límite de borradores alcanzado
     .modal.fade#artistDraftLimitModal(tabindex='-1' aria-labelledby='artistDraftLimitLabel' aria-hidden='true')

@@ -44,7 +44,6 @@ const artworkSchema = new mongoose.Schema(
     // (3) Galería de imágenes adicional
     images: [{ type: String }], // Opcional: URLs adicionales
 
-    type: { type: String },
     size: { type: String }, // texto derivado de width_cm/height_cm
     technique: { type: String },
     // (1) Validaciones adicionales para dimensiones y precio
