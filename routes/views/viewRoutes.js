@@ -77,7 +77,12 @@ router.get('/artist/:id', (req, res) => {
 
 // =================== APLICAR COMO ARTISTA ==============
 // Página informativa y CTA para que usuarios apliquen a vender su arte
-router.get('/become-artist', viewsController.getBecomeArtist);
+router.get('/become-artist', (req, res, next) => {
+  if (res.locals && res.locals.currentUser) {
+    return res.redirect(302, '/');
+  }
+  return viewsController.getBecomeArtist(req, res, next);
+});
 // Alias en español
 router.get('/vender-mi-arte', (req, res) => res.redirect(301, '/become-artist'));
 
