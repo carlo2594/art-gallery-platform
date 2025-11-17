@@ -83,6 +83,9 @@ html.no-js(lang='es')
                 a.nav-link.me-lg-3(href='/artists') Artistas
               li.nav-item
                 a.nav-link.me-lg-3(href='/exhibitions') Exposiciones
+              if currentUser && currentUser.role === 'artist'
+                li.nav-item
+                  a.nav-link.me-lg-3(href='/artists/panel' aria-label='Panel de artista') Panel de artista
               if currentUser
                 li.nav-item
                   a.nav-link.me-lg-3(href='/activity') Actividad
@@ -180,7 +183,7 @@ html.no-js(lang='es')
         block content
 
     //- Overlays de navbar (menA�s principal y de usuario)
-    #navMainOverlay.lightbox.nav-overlay(
+  #navMainOverlay.lightbox.nav-overlay(
       role='dialog'
       aria-modal='true'
       aria-label='MenA� de navegaciA3n')
@@ -199,6 +202,9 @@ html.no-js(lang='es')
               a.nav-overlay__link(href='/artists') Artistas
             li
               a.nav-overlay__link(href='/exhibitions') Exposiciones
+            if currentUser && currentUser.role === 'artist'
+              li
+                a.nav-overlay__link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
             if currentUser
               li
                 a.nav-overlay__link(href='/activity') Actividad
@@ -208,7 +214,7 @@ html.no-js(lang='es')
               li
                 a.nav-overlay__link(href='/signup' aria-label='Registrarse') Registrarse
 
-    if currentUser
+  if currentUser
       #navUserOverlay.lightbox.nav-overlay(
         role='dialog'
         aria-modal='true'
@@ -232,8 +238,8 @@ html.no-js(lang='es')
                 form(action='/api/v1/auth/logout' method='POST')
                   button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
 
-    if !hideFooter
-      include ./footer.pug
+  if !hideFooter
+    include ./footer.pug
 
     //- JS al final del body (orden importante)
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
