@@ -12,6 +12,12 @@
     const container = qs('#artistArtworkWizardAlerts') || qs('#artistPanelAlerts') || qs('#accountAlerts');
     if (!container) return;
     const level = type || 'info';
+    const text = (msg || '').trim();
+    if (level === 'danger') {
+      const normalized = text.toLowerCase();
+      // Ocultar errores genéricos de red para no generar desconfianza
+      if (!normalized || normalized === 'network error') return;
+    }
     container.innerHTML = '';
     if (level === 'success') {
       const el = document.createElement('div');
