@@ -3,6 +3,7 @@
 (function initArtistArtworkWizard(){
   let currentArtworkId = null;
   let isSaving = false;
+  let hasImage = false;
 
   function qs(sel, ctx){ return (ctx||document).querySelector(sel); }
   function qsa(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
@@ -113,6 +114,12 @@
     });
   }
 
+  function updateSubmitButtonState(){
+    const submitBtn = qs('#wizardSubmit');
+    if (!submitBtn) return;
+    submitBtn.disabled = !hasImage;
+  }
+
   function adjustPreviewAspect(img){
     try {
       if (!img) return;
@@ -197,10 +204,13 @@
                   };
                   imgPrev.src = art.imageUrl;
                   imgPrev.hidden = false;
+                  hasImage = true;
                 } else {
                   imgPrev.hidden = true;
                   imgPrev.removeAttribute('src');
+                  hasImage = false;
                 }
+                updateSubmitButtonState();
               }
             }
             return computeInitialStepFromArtwork(art);
@@ -279,10 +289,13 @@
           };
           imgPrev.src = art.imageUrl;
           imgPrev.hidden = false;
+          hasImage = true;
         } else {
           imgPrev.hidden = true;
           imgPrev.removeAttribute('src');
+          hasImage = false;
         }
+        updateSubmitButtonState();
       }
     }
 
@@ -466,6 +479,7 @@
     if (!container) return;
     setStep(1);
     updateNextButtonsState();
+    updateSubmitButtonState();
 
     // Si venimos desde el panel con un borrador existente, precargar datos
     // y mover al paso correspondiente segun los campos completos.
@@ -533,6 +547,8 @@
           imgPrev.hidden = true;
           imgPrev.removeAttribute('src');
           imgPrev.classList.remove('is-landscape', 'is-portrait', 'is-square');
+          hasImage = false;
+          updateSubmitButtonState();
           return;
         }
         const url = URL.createObjectURL(f);
@@ -542,6 +558,8 @@
           adjustPreviewAspect(imgPrev);
           try { URL.revokeObjectURL(url); } catch(_){}
         };
+        hasImage = true;
+        updateSubmitButtonState();
       });
       const dropzone = qs('#artistImageDropzone');
       const trigger = qs('#wizardImageTrigger');

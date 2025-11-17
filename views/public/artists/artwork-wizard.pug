@@ -29,7 +29,7 @@ block content
         .row
           .col-12.col-lg-8.mx-auto
             // Texto y barra de progreso del flujo
-            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1(style='color: var(--ox-blue);') Paso 1 de 4 · Información básica
+            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1(style='color: var(--ox-blue);') Paso 1 de 4 – Información básica
             .progress.mb-4
               .progress-bar.bg-primary#artistWizardProgressBar(
                 role='progressbar'
@@ -133,7 +133,7 @@ block content
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='3') Anterior
                   .d-flex.gap-2
                     button#wizardSaveDraft.btn.btn-outline-secondary(type='button') Guardar borrador
-                    button#wizardSubmit.btn.btn-success(type='button') Enviar obra para revisión
+                    button#wizardSubmit.btn.btn-success(type='button', disabled) Enviar obra para revisión
 
 block scriptsExtra
   script(src='/js/artist-artwork-wizard.js')
