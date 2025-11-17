@@ -1,5 +1,8 @@
 .artist-artwork-wizard {
   background-color: var(--ox-beige);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
 }
 
 .artist-wizard-steps {
@@ -43,4 +46,3 @@
   color: var(--ox-blue);
   font-weight: 600;
 }
-

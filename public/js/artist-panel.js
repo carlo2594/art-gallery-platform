@@ -8,15 +8,28 @@
     try { console.log('[ArtistPanel]', type, msg); } catch(_){}
     const container = qs('#artistPanelAlerts') || qs('#accountAlerts');
     if (!container) return;
+    const level = type || 'info';
+    container.innerHTML = '';
+    if (level === 'success') {
+      const el = document.createElement('div');
+      el.className = 'artist-soft-toast artist-soft-toast-success';
+      el.textContent = msg || '';
+      container.appendChild(el);
+      setTimeout(() => {
+        if (el.parentNode === container) {
+          container.removeChild(el);
+        }
+      }, 2500);
+      return;
+    }
     const el = document.createElement('div');
-    el.className = 'alert alert-' + (type||'info') + ' alert-dismissible fade show';
+    el.className = 'alert alert-' + level + ' alert-dismissible fade show';
     el.setAttribute('role','alert');
     el.textContent = msg || '';
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'btn-close';
     btn.setAttribute('data-bs-dismiss','alert'); btn.setAttribute('aria-label','Cerrar');
     el.appendChild(btn);
-    container.innerHTML = '';
     container.appendChild(el);
   }
 
