@@ -113,6 +113,24 @@
     });
   }
 
+  function adjustPreviewAspect(img){
+    try {
+      if (!img) return;
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+      img.classList.remove('is-landscape', 'is-portrait', 'is-square');
+      if (!w || !h) return;
+      const ratio = w / h;
+      if (Math.abs(ratio - 1) < 0.08) {
+        img.classList.add('is-square');
+      } else if (ratio > 1) {
+        img.classList.add('is-landscape');
+      } else {
+        img.classList.add('is-portrait');
+      }
+    } catch(_){}
+  }
+
   function computeInitialStepFromArtwork(art){
     try {
       if (!art || typeof art !== 'object') return 1;
@@ -174,6 +192,9 @@
               const imgPrev = qs('#wizardImagePreview', form);
               if (imgPrev){
                 if (art.imageUrl){
+                  imgPrev.onload = function(){
+                    adjustPreviewAspect(imgPrev);
+                  };
                   imgPrev.src = art.imageUrl;
                   imgPrev.hidden = false;
                 } else {
@@ -253,6 +274,9 @@
       const imgPrev = qs('#wizardImagePreview', form);
       if (imgPrev){
         if (art.imageUrl){
+          imgPrev.onload = function(){
+            adjustPreviewAspect(imgPrev);
+          };
           imgPrev.src = art.imageUrl;
           imgPrev.hidden = false;
         } else {
@@ -508,15 +532,54 @@
         if (!f){
           imgPrev.hidden = true;
           imgPrev.removeAttribute('src');
+          imgPrev.classList.remove('is-landscape', 'is-portrait', 'is-square');
           return;
         }
         const url = URL.createObjectURL(f);
         imgPrev.src = url;
         imgPrev.hidden = false;
         imgPrev.onload = function(){
+          adjustPreviewAspect(imgPrev);
           try { URL.revokeObjectURL(url); } catch(_){}
         };
       });
+      const dropzone = qs('#artistImageDropzone');
+      const trigger = qs('#wizardImageTrigger');
+      if (trigger){
+        trigger.addEventListener('click', function(){
+          try { imgInput.click(); } catch(_){}
+        });
+      }
+      if (dropzone){
+        ['dragenter','dragover'].forEach(function(ev){
+          dropzone.addEventListener(ev, function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.add('is-dragover');
+          });
+        });
+        ['dragleave','drop'].forEach(function(ev){
+          dropzone.addEventListener(ev, function(e){
+            e.preventDefault();
+            e.stopPropagation();
+            dropzone.classList.remove('is-dragover');
+          });
+        });
+        dropzone.addEventListener('drop', function(e){
+          const dt = e.dataTransfer;
+          if (!dt || !dt.files || !dt.files.length) return;
+          const file = dt.files[0];
+          try {
+            const dataTx = new DataTransfer();
+            dataTx.items.add(file);
+            imgInput.files = dataTx.files;
+          } catch(_){
+            // Fallback: asignar directamente si DataTransfer no existe
+            try { imgInput.files = dt.files; } catch(__){}
+          }
+          imgInput.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
     }
 
     // Validacion en vivo para habilitar/deshabilitar "Siguiente"

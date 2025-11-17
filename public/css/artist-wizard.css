@@ -46,3 +46,57 @@
   color: var(--ox-blue);
   font-weight: 600;
 }
+
+/* Paso de imagen: dropzone y preview */
+.artist-image-dropzone {
+  border: 2px dashed rgba(16, 46, 80, 0.25);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  background-color: #fff;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.artist-image-dropzone.is-dragover {
+  border-color: var(--ox-blue);
+  background-color: rgba(16, 46, 80, 0.03);
+  box-shadow: 0 0 0 2px rgba(16, 46, 80, 0.12);
+}
+
+.artist-image-preview {
+  display: block;
+  margin: 0 auto 1rem auto;
+  max-width: 420px;
+  max-height: 420px;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.artist-image-dropzone-instructions {
+  font-size: 0.95rem;
+  color: rgba(16, 46, 80, 0.8);
+}
+
+#wizardImageTrigger {
+  font-size: 0.95rem;
+}
+
+/* Ajustes según orientación de la imagen */
+.artist-image-preview.is-landscape {
+  max-width: 480px;
+  max-height: 320px;
+}
+
+.artist-image-preview.is-portrait {
+  max-width: 320px;
+  max-height: 480px;
+}
+
+.artist-image-preview.is-square {
+  max-width: 360px;
+  max-height: 360px;
+}
