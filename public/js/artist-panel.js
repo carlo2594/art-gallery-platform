@@ -55,7 +55,26 @@
         const btnEdit = document.createElement('button');
         btnEdit.className = 'btn btn-sm btn-outline-secondary';
         btnEdit.textContent = 'Editar';
-        btnEdit.addEventListener('click', () => openEditModal(a._id));
+        btnEdit.addEventListener('click', () => {
+          try {
+            if (window.sessionStorage) {
+              const payload = {
+                _id: a._id,
+                title: a.title,
+                description: a.description,
+                width_cm: a.width_cm,
+                height_cm: a.height_cm,
+                type: a.type,
+                technique: a.technique,
+                price_cents: a.price_cents,
+                completedAt: a.completedAt,
+                imageUrl: a.imageUrl
+              };
+              window.sessionStorage.setItem('artistDraftToEdit', JSON.stringify(payload));
+            }
+          } catch(_) {}
+          window.location.href = '/artists/panel/artworks/new?artworkId=' + encodeURIComponent(a._id);
+        });
         right.appendChild(btnEdit);
         const btnTrash = document.createElement('button');
         btnTrash.className = 'btn btn-sm btn-outline-danger';

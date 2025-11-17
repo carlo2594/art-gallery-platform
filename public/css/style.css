@@ -3044,3 +3044,8 @@ body.noscroll {
 }
 
 .login-forgot-page { color: var(--ox-blue) !important; font-family: var(--font-title); font-size: 1.4rem; }
+
+/* Artist panel: hide draft submit button */
+#artistDraftsList .btn.btn-primary {
+  display: none !important;
+}

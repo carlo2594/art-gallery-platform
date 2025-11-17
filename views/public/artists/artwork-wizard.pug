@@ -1,6 +1,13 @@
 extends /layouts/public
 
 block headExtra
+  style.
+    .main-navbar,
+    #navUserMobile,
+    #navMainOverlay,
+    #navUserOverlay,
+    footer,
+    .footer { display: none !important; }
   link(rel='stylesheet', href='/css/artist-wizard.css')
 
 block content
@@ -8,12 +15,17 @@ block content
     section.artist-artwork-wizard.py-5
       .container
         .row.mb-4
-          .col-12.col-lg-8.mx-auto
-            h1.display-4.fw-bold.mb-2(style='color: var(--ox-blue);') Nueva obra
-            if artist && artist.name
-              p.lead.mb-0.text-muted= `Crear una nueva obra para ${artist.name}`
-            else
-              p.lead.mb-0.text-muted Crea una nueva obra
+          .col-12.col-lg-8.mx-auto.d-flex.justify-content-between.align-items-start
+            .artist-wizard-header-text
+              h1.display-4.fw-bold.mb-2(style='color: var(--ox-blue);') Nueva obra
+              if artist && artist.name
+                p.lead.mb-0.text-muted= `Crear una nueva obra para ${artist.name}`
+              else
+                p.lead.mb-0.text-muted Crea una nueva obra
+            a.btn-close.btn-close-dark(
+              href='/artists/panel'
+              aria-label='Volver al panel de artista'
+            )
         .row
           .col-12.col-lg-8.mx-auto
             // Texto y barra de progreso del flujo
@@ -112,4 +124,3 @@ block content
 
 block scriptsExtra
   script(src='/js/artist-artwork-wizard.js')
-

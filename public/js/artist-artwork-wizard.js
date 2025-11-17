@@ -94,6 +94,158 @@
     });
   }
 
+  function computeInitialStepFromArtwork(art){
+    try {
+      if (!art || typeof art !== 'object') return 1;
+      const hasTitle = !!(art.title && String(art.title).trim());
+      if (!hasTitle) return 1;
+      const hasDims =
+        typeof art.width_cm === 'number' && isFinite(art.width_cm) && art.width_cm > 0 &&
+        typeof art.height_cm === 'number' && isFinite(art.height_cm) && art.height_cm > 0;
+      if (!hasDims) return 2;
+      const hasPrice =
+        typeof art.price_cents === 'number' && isFinite(art.price_cents) && art.price_cents >= 0;
+      if (!hasPrice) return 3;
+      const hasImage = !!art.imageUrl;
+      if (!hasImage) return 4;
+      return 4;
+    } catch(_){
+      return 1;
+    }
+  }
+
+  async function loadExistingArtworkFromQuery(){
+    // 1) Intentar primero con sessionStorage (flujo desde el panel)
+    try {
+      const raw = window.sessionStorage && window.sessionStorage.getItem('artistDraftToEdit');
+      if (raw) {
+        window.sessionStorage.removeItem('artistDraftToEdit');
+        try {
+          const stored = JSON.parse(raw);
+          if (stored && typeof stored === 'object' && stored._id) {
+            const art = stored;
+            currentArtworkId = art._id;
+            const form = qs('#artistArtworkWizardForm');
+            if (form){
+              const setVal = (selector, value) => {
+                const el = qs(selector, form);
+                if (!el) return;
+                el.value = value != null ? String(value) : '';
+              };
+              setVal('input[name="title"]', art.title || '');
+              setVal('textarea[name="description"]', art.description || '');
+              if (art.width_cm != null) setVal('input[name="width_cm"]', art.width_cm);
+              if (art.height_cm != null) setVal('input[name="height_cm"]', art.height_cm);
+              setVal('input[name="type"]', art.type || '');
+              setVal('input[name="technique"]', art.technique || '');
+              if (art.completedAt){
+                try {
+                  const d = new Date(art.completedAt);
+                  if (!isNaN(d.getTime())){
+                    setVal('input[name="completedAt"]', d.toISOString().slice(0,10));
+                  }
+                } catch(_) {}
+              }
+              if (typeof art.price_cents === 'number'){
+                const amount = (art.price_cents / 100).toFixed(2);
+                setVal('input[name="amount"]', amount);
+              }
+              const hiddenId = qs('#artistArtworkId', form);
+              if (hiddenId) hiddenId.value = art._id;
+              const imgPrev = qs('#wizardImagePreview', form);
+              if (imgPrev){
+                if (art.imageUrl){
+                  imgPrev.src = art.imageUrl;
+                  imgPrev.hidden = false;
+                } else {
+                  imgPrev.hidden = true;
+                  imgPrev.removeAttribute('src');
+                }
+              }
+            }
+            return computeInitialStepFromArtwork(art);
+          }
+        } catch(_) {}
+      }
+    } catch(_) {}
+
+    // 2) Fallback: cargar por querystring vía API
+    let search = '';
+    try { search = window.location.search || ''; } catch(_){ return null; }
+    if (!search) return null;
+    let artworkId = null;
+    try {
+      const params = new URLSearchParams(search);
+      artworkId = params.get('artworkId') || params.get('id');
+    } catch(_){
+      return null;
+    }
+    if (!artworkId) return null;
+
+    const url = '/api/v1/artworks/private/' + encodeURIComponent(artworkId);
+    let payload;
+    try {
+      if (window.api && window.api.get){
+        const r = await window.api.get(url, { headers: { Accept: 'application/json' }, withCredentials: true });
+        payload = r && r.data;
+      } else {
+        const res = await fetch(url, { credentials: 'same-origin' });
+        payload = await res.json();
+      }
+    } catch(err){
+      alertToast('danger', (err && err.message) || 'No se pudo cargar el borrador.');
+      return null;
+    }
+    const art = (payload && payload.data) || null;
+    if (!art){
+      alertToast('danger', 'No se encontro el borrador solicitado.');
+      return null;
+    }
+
+    currentArtworkId = art._id;
+
+    const form = qs('#artistArtworkWizardForm');
+    if (form){
+      const setVal = (selector, value) => {
+        const el = qs(selector, form);
+        if (!el) return;
+        el.value = value != null ? String(value) : '';
+      };
+      setVal('input[name="title"]', art.title || '');
+      setVal('textarea[name="description"]', art.description || '');
+      if (art.width_cm != null) setVal('input[name="width_cm"]', art.width_cm);
+      if (art.height_cm != null) setVal('input[name="height_cm"]', art.height_cm);
+      setVal('input[name="type"]', art.type || '');
+      setVal('input[name="technique"]', art.technique || '');
+      if (art.completedAt){
+        try {
+          const d = new Date(art.completedAt);
+          if (!isNaN(d.getTime())){
+            setVal('input[name="completedAt"]', d.toISOString().slice(0,10));
+          }
+        } catch(_) {}
+      }
+      if (typeof art.price_cents === 'number'){
+        const amount = (art.price_cents / 100).toFixed(2);
+        setVal('input[name="amount"]', amount);
+      }
+      const hiddenId = qs('#artistArtworkId', form);
+      if (hiddenId) hiddenId.value = art._id;
+      const imgPrev = qs('#wizardImagePreview', form);
+      if (imgPrev){
+        if (art.imageUrl){
+          imgPrev.src = art.imageUrl;
+          imgPrev.hidden = false;
+        } else {
+          imgPrev.hidden = true;
+          imgPrev.removeAttribute('src');
+        }
+      }
+    }
+
+    return computeInitialStepFromArtwork(art);
+  }
+
   function collectPayload(){
     const form = qs('#artistArtworkWizardForm');
     if (!form) return {};
@@ -271,6 +423,19 @@
     if (!container) return;
     setStep(1);
     updateNextButtonsState();
+
+    // Si venimos desde el panel con un borrador existente, precargar datos
+    // y mover al paso correspondiente segun los campos completos.
+    try {
+      const p = loadExistingArtworkFromQuery();
+      if (p && typeof p.then === 'function'){
+        p.then((step) => {
+          if (!step || step === 1) return;
+          setStep(step);
+          updateNextButtonsState();
+        }).catch(() => {});
+      }
+    } catch(_) {}
 
     qsa('[data-wizard-next]').forEach(btn => {
       btn.addEventListener('click', async function(){
