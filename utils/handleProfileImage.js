@@ -38,11 +38,22 @@ async function handleProfileImage(user, req, filteredBody) {
     }
 
     if (!dimensions || !dimensions.width || !dimensions.height) {
-      throw new AppError('No se pudo verificar el tamano de la imagen.', 400);
+      throw new AppError('No se pudo verificar el tamaño de la imagen.', 400);
     }
 
-    if (dimensions.width <= dimensions.height) {
-      throw new AppError('La foto de perfil debe ser horizontal (mas ancha que alta).', 400);
+    const width = dimensions.width;
+    const height = dimensions.height;
+    const minSide = Math.min(width, height);
+
+    // Reglas mínimas para evitar fotos de muy baja calidad
+    if (minSide < 250) {
+      throw new AppError('La foto de perfil debe tener al menos 250px de ancho y alto.', 400);
+    }
+
+    // Evitar proporciones extremadamente alargadas que se vean mal en el perfil
+    const ratio = width / height;
+    if (ratio < 0.25 || ratio > 4) {
+      throw new AppError('La foto de perfil no debe ser extremadamente alargada (demasiado alta o demasiado ancha).', 400);
     }
 
     // Registrar la imagen anterior (si existía) para eliminarla post-guardado

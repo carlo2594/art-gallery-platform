@@ -93,15 +93,18 @@ __onReady(function () {
     if (text != null) btn.textContent = text;
   };
 
-  const ensureHorizontalImage = (file) => {
+  const ensureHorizontalImage = (file, options) => {
+    const opts = options || {};
+    const kind = opts.type || 'profile'; // 'profile' o 'cover'
+
     return new Promise((resolve, reject) => {
-      try { console.debug('[AccountPhoto] ensureHorizontalImage: type=%s size=%s name=%s', file && file.type, file && file.size, file && file.name); } catch(_) {}
+      try { console.debug('[AccountPhoto] ensureHorizontalImage: kind=%s type=%s size=%s name=%s', kind, file && file.type, file && file.size, file && file.name); } catch(_) {}
       if (!file) {
         return reject(new Error('Selecciona una imagen.'));
       }
-      const type = (file.type || '').toLowerCase();
-      if (type && !type.startsWith('image/')) {
-        return reject(new Error('Selecciona un archivo de imagen valido.'));
+      const mime = (file.type || '').toLowerCase();
+      if (mime && !mime.startsWith('image/')) {
+        return reject(new Error('Selecciona un archivo de imagen válido.'));
       }
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -110,11 +113,28 @@ __onReady(function () {
         const width = img.naturalWidth || img.width;
         const height = img.naturalHeight || img.height;
         try { console.debug('[AccountPhoto] ensureHorizontalImage: dimensions=%sx%s', width, height); } catch(_) {}
-        if (width > height) {
-          resolve();
-        } else {
-          reject(new Error('La foto debe ser horizontal (mas ancha que alta).'));
+        if (!width || !height) {
+          return reject(new Error('No se pudieron leer las dimensiones de la imagen seleccionada.'));
         }
+
+        if (kind === 'cover') {
+          // Portada: mantener requisito horizontal
+          if (width <= height) {
+            return reject(new Error('La portada debe ser horizontal (más ancha que alta).'));
+          }
+          return resolve();
+        }
+
+        // Perfil: aceptar horizontal, cuadrada o vertical con reglas mínimas
+        const minSide = Math.min(width, height);
+        if (minSide < 250) {
+          return reject(new Error('La foto de perfil debe tener al menos 250px de ancho y alto.'));
+        }
+        const ratio = width / height;
+        if (ratio < 0.25 || ratio > 4) {
+          return reject(new Error('La foto de perfil no debe ser extremadamente alargada (demasiado alta o demasiado ancha).'));
+        }
+        return resolve();
       };
       img.onerror = function () {
         URL.revokeObjectURL(url);
@@ -1515,9 +1535,9 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
       var file = fileInput.files[0];
       try {
-        await ensureHorizontalImage(file);
+        await ensureHorizontalImage(file, { type: 'profile' });
       } catch (err) {
-        var msgValidate = (err && err.message) || 'La foto debe ser horizontal (mas ancha que alta).';
+        var msgValidate = (err && err.message) || 'La foto no cumple los requisitos mínimos de tamaño o proporción.';
         if (window.showAdminToast) {
           showAdminToast(msgValidate, 'warning');
         } else {
@@ -1564,7 +1584,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var fileInput = modalEl.querySelector('.admin-users-cover-input');
       if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
       var file = fileInput.files[0];
-      try { await ensureHorizontalImage(file); } catch (err) { var msgV=(err && err.message)||'La imagen debe ser horizontal.'; if(window.showAdminToast) showAdminToast(msgV,'warning'); else alert(msgV); return; }
+      try { await ensureHorizontalImage(file, { type: 'cover' }); } catch (err) { var msgV=(err && err.message)||'La portada debe ser horizontal (más ancha que alta).'; if(window.showAdminToast) showAdminToast(msgV,'warning'); else alert(msgV); return; }
       var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Subiendo...';
       var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
