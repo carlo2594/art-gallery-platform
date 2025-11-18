@@ -925,9 +925,9 @@
   }
 
   // Límite para el botón "Agregar obras" del estado vacío
-  function hookEmptyStateAddArtworkLimit() {
+  function hookArtworkPanelAddLimit() {
     try {
-      const btn = document.getElementById("artistAddArtworkEmptyBtn");
+      const btn = document.getElementById("artistAddArtworkBtn");
       if (!btn) return;
       btn.addEventListener(
         "click",
@@ -971,14 +971,14 @@
       hookCreateForm();
       hookCoverForm();
       hookReloadButtons();
-      hookEmptyStateAddArtworkLimit();
+      hookArtworkPanelAddLimit();
       loadLists();
     });
   } else {
     hookCreateForm();
     hookCoverForm();
     hookReloadButtons();
-    hookEmptyStateAddArtworkLimit();
+    hookArtworkPanelAddLimit();
     loadLists();
   }
 })();

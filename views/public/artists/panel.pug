@@ -85,8 +85,18 @@ block content
       section.artist-artworks.artist-artworks-section.py-5.artist-artworks-bg
         .container
           .row.mb-5
-            .col-12.text-center
-              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+            .col-12
+              .d-flex.justify-content-between.align-items-center.mb-4
+                h2.section-title.artist-artworks-title.display-5.fw-bold.mb-0.artist-section-title= `Obras de ${artist.name}`
+                if isMyPanel
+                  a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2(
+                    href='/artists/panel/artworks/new'
+                    aria-label='Agregar obras'
+                    data-max-artworks='10'
+                    style='background: var(--ox-blue); border-color: var(--ox-blue); color: var(--ox-beige);'
+                  )
+                    i.fas.fa-plus.me-2(style='color: var(--ox-blue);')
+                    | Agregar obras
               - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
               p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
         if totalArtworks > 1
@@ -112,7 +122,7 @@ block content
           .d-flex.justify-content-between.align-items-center.mb-4
             h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title(style='color: var(--ox-blue);')= `Obras de ${artist.name}`
             if isMyPanel
-              a#artistAddArtworkEmptyBtn.btn.btn-primary.btn-lg.px-4.py-2(
+              a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2(
                 href='/artists/panel/artworks/new'
                 aria-label='Agregar obras'
                 data-max-artworks='10'
