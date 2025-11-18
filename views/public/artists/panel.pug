@@ -112,9 +112,10 @@ block content
           .d-flex.justify-content-between.align-items-center.mb-4
             h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title(style='color: var(--ox-blue);')= `Obras de ${artist.name}`
             if isMyPanel
-              a.btn.btn-primary.btn-lg.px-4.py-2(
+              a#artistAddArtworkEmptyBtn.btn.btn-primary.btn-lg.px-4.py-2(
                 href='/artists/panel/artworks/new'
                 aria-label='Agregar obras'
+                data-max-artworks='10'
                 style='background: var(--ox-blue); border-color: var(--ox-blue); color: var(--ox-beige);'
               )
                 i.fas.fa-plus.me-2(style='color: var(--ox-blue);')

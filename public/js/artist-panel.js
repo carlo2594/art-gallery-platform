@@ -72,7 +72,7 @@
         right.appendChild(btnSubmit);
         const btnEdit = document.createElement('button');
         btnEdit.className = 'btn btn-sm btn-outline-secondary';
-        btnEdit.textContent = 'Editar';
+        btnEdit.textContent = 'Continuar editando';
         btnEdit.addEventListener('click', () => {
           try {
             if (window.sessionStorage) {
@@ -641,9 +641,46 @@
     });
   }
 
+  // Límite para el botón "Agregar obras" del estado vacío
+  function hookEmptyStateAddArtworkLimit(){
+    try {
+      const btn = document.getElementById('artistAddArtworkEmptyBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function(e){
+        const max = parseInt(btn.getAttribute('data-max-artworks') || '10', 10);
+        const badgeDrafts = document.getElementById('countDrafts');
+        const badgeSubmitted = document.getElementById('countSubmitted');
+        const drafts = parseInt((badgeDrafts && badgeDrafts.textContent) || '0', 10) || 0;
+        const submitted = parseInt((badgeSubmitted && badgeSubmitted.textContent) || '0', 10) || 0;
+        const overDrafts = Number.isFinite(max) && drafts >= max;
+        const overSubmitted = Number.isFinite(max) && submitted >= max;
+        if (!overDrafts && !overSubmitted) return;
+        e.preventDefault();
+        const detail =
+          (overDrafts && overSubmitted) ? 'Ya tienes el mA?ximo de obras en borrador y enviadas.' :
+          overDrafts ? 'Ya tienes el mA?ximo de obras en borrador.' :
+                       'Ya tienes el mA?ximo de obras enviadas a revisiA3n.';
+        alertToast(
+          'warning',
+          detail + ' Espera a que se aprueben o se rechacen algunas obras, o elimina las que no necesites, antes de agregar nuevas.'
+        );
+      }, true);
+    } catch(_) {}
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function(){ hookCreateForm(); hookCoverForm(); hookReloadButtons(); loadLists(); });
+    document.addEventListener('DOMContentLoaded', function(){
+      hookCreateForm();
+      hookCoverForm();
+      hookReloadButtons();
+      hookEmptyStateAddArtworkLimit();
+      loadLists();
+    });
   } else {
-    hookCreateForm(); hookCoverForm(); hookReloadButtons(); loadLists();
+    hookCreateForm();
+    hookCoverForm();
+    hookReloadButtons();
+    hookEmptyStateAddArtworkLimit();
+    loadLists();
   }
 })();

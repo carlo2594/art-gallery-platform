@@ -108,7 +108,6 @@ block content
 
               // Paso 4: imagen
               .artist-wizard-pane.d-none(data-step='4')
-                h2.h4.mb-3(style='color: var(--ox-blue);') Imagen de la obra
                 .mb-3
                   label.form-label(for='wizardImage') Imagen principal *
                   .artist-image-dropzone#artistImageDropzone
@@ -127,7 +126,6 @@ block content
                       accept='image/*'
                       hidden
                     )
-                  small.text-muted.mt-1 Sube una imagen horizontal y de buena calidad.
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='3') Anterior
@@ -135,5 +133,21 @@ block content
                     button#wizardSaveDraft.btn.btn-outline-secondary(type='button') Guardar borrador
                     button#wizardSubmit.btn.btn-success(type='button', disabled) Enviar obra para revisión
 
+    // Modal de confirmación de envío
+    #artistSubmitConfirmModal.modal.fade(tabindex='-1' aria-labelledby='artistSubmitConfirmLabel' aria-hidden='true')
+      .modal-dialog.modal-dialog-centered
+        .modal-content
+          .modal-header
+            h5#artistSubmitConfirmLabel.modal-title Confirmar envío
+            button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Cerrar')
+          .modal-body
+            p.mb-2 ¿Quieres enviar esta obra para revisión?
+            p.text-muted.small.mb-0 Una vez enviada, no podrás editar la obra ni la información que subiste. Si necesitas hacer cambios después, tendrás que eliminar esta solicitud y crear una nueva.
+          .modal-footer.d-flex.flex-column.flex-md-row.gap-2.justify-content-between
+            button#artistSubmitKeepEditingBtn.btn.btn-outline-secondary(type='button', data-bs-dismiss='modal') Seguir editando
+            button#artistSubmitSaveDraftBtn.btn.btn-outline-secondary(type='button') Guardar en borrador
+            button#artistSubmitConfirmBtn.btn.btn-success(type='button') Enviar obra
+
 block scriptsExtra
   script(src='/js/artist-artwork-wizard.js')
+  script(src='/js/artist-artwork-confirm-modal.js')

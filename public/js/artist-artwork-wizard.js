@@ -443,6 +443,59 @@
   }
 
   async function submitArtwork(){
+    const submitBtn = qs('#wizardSubmit');
+    let wizardOverlayTimeout = null;
+    if (submitBtn){
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML =
+          '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+          'Enviando obra...';
+      } catch (_) {}
+    }
+
+    let wizardOverlay = document.getElementById('artistWizardBlockingOverlay');
+    if (!wizardOverlay){
+      try {
+        wizardOverlay = document.createElement('div');
+        wizardOverlay.id = 'artistWizardBlockingOverlay';
+        wizardOverlay.style.position = 'fixed';
+        wizardOverlay.style.inset = '0';
+        wizardOverlay.style.background = 'rgba(0,0,0,0.45)';
+        wizardOverlay.style.zIndex = '10500';
+        wizardOverlay.style.display = 'flex';
+        wizardOverlay.style.alignItems = 'center';
+        wizardOverlay.style.justifyContent = 'center';
+        wizardOverlay.innerHTML =
+          '<div class="text-center text-white"><div class="spinner-border text-light mb-2" role="status"></div><div>Enviando obra...</div></div>';
+        document.body.appendChild(wizardOverlay);
+      } catch (_) {}
+    } else {
+      try { wizardOverlay.style.display = 'flex'; } catch (_) {}
+    }
+
+    if (wizardOverlay){
+      try {
+        wizardOverlayTimeout = setTimeout(function(){
+          try { wizardOverlay.style.display = 'none'; } catch (_){}
+          const btn = qs('#wizardSubmit');
+          if (btn){
+            try {
+              btn.disabled = false;
+              btn.innerHTML = 'Enviar obra para revisiA3n';
+            } catch (_){}
+          }
+        }, 15000);
+      } catch (_){}
+    }
+
+    const pageOverlay = document.getElementById('page-loading-overlay');
+    if (pageOverlay){
+      try {
+        document.body && document.body.classList && document.body.classList.add('loading');
+        pageOverlay.style.display = 'flex';
+      } catch (_) {}
+    }
     if (!currentArtworkId){
       const id = await saveDraft(false);
       if (!id) return;
@@ -534,6 +587,12 @@
     const submitBtn = qs('#wizardSubmit');
     if (submitBtn){
       submitBtn.addEventListener('click', function(){
+        const confirmed = window.confirm(
+          '¿Estás seguro de enviar la obra para revisión?\n\n' +
+          'Después de enviarla ya no podrás editar ni la obra ni la información que subiste. ' +
+          'Si quieres hacer cambios más adelante, tendrás que eliminar esta solicitud y crear una nueva.'
+        );
+        if (!confirmed) return;
         submitArtwork();
       });
     }
