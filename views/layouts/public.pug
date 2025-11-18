@@ -120,10 +120,7 @@ html.no-js(lang='es')
                       i.fas.fa-user
                 ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenuDesktop')
                   li
-                    a.dropdown-item.nav-user-menu-link.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
-                  if currentUser && currentUser.role === 'artist'
-                    li
-                      a.dropdown-item.nav-user-menu-link.mb-2(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                    a.dropdown-item.nav-user-menu-link.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta                  
                   if currentUser && currentUser.role === 'admin'
                     li
                       a.dropdown-item.nav-user-menu-link.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
@@ -168,10 +165,7 @@ html.no-js(lang='es')
         .collapse.navbar-collapse.d-xxl-none#navUserMobile.text-center
           ul.navbar-nav.flex-column.mx-auto.mb-2.fs-5
             li.nav-item
-              a.nav-link.nav-user-menu-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
-            if currentUser && currentUser.role === 'artist'
-              li.nav-item
-                a.nav-link.nav-user-menu-link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+              a.nav-link.nav-user-menu-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta    
             if currentUser && currentUser.role === 'admin'
               li.nav-item
                 a.nav-link.nav-user-menu-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
@@ -228,9 +222,7 @@ html.no-js(lang='es')
             ul.nav-overlay__list
               li
                 a.nav-overlay__link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
-              if currentUser && currentUser.role === 'artist'
-                li
-                  a.nav-overlay__link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+   
               if currentUser && currentUser.role === 'admin'
                 li
                   a.nav-overlay__link(href='/admin' aria-label='Panel de administrador') Panel de administrador
