@@ -6,6 +6,7 @@ html.no-js(lang='es')
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible' content='IE=edge,chrome=1')
     meta(name='viewport' content='width=device-width, initial-scale=1')
+
     //- SEO base
     - var __siteName = 'Galería del Ox'
     - var __metaTitle = (typeof metaTitle !== 'undefined' && metaTitle) ? metaTitle : (title || __siteName)
@@ -24,9 +25,13 @@ html.no-js(lang='es')
     link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet' href='/css/component.css')
     link(rel='stylesheet' href='/css/style.css')
+
     //- Favicon (evita 404 en /favicon.ico)
     link(rel='icon' type='image/png' href='/Logos/GOX_LOGO_06.png')
+
+    //- Modernizr
     script(src='/js/modernizr.custom.js')
+
     //- Cargar axios y shim temprano para que inline scripts lo usen
     script(src='https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js')
     script(src='/js/http.js')
@@ -41,6 +46,7 @@ html.no-js(lang='es')
     - var __rawImg = (typeof metaImage !== 'undefined' && metaImage) ? metaImage : '/img/Ox-hero-image-landing.jpg'
     - var __metaImage = (__rawImg && (__rawImg.startsWith('http://') || __rawImg.startsWith('https://'))) ? __rawImg : (__urlPrefix ? (__urlPrefix + __rawImg) : __rawImg)
     - var __metaType = (typeof metaType !== 'undefined' && metaType) ? metaType : 'website'
+
     meta(property='og:title' content=__metaTitle)
     meta(property='og:description' content=__metaDescription)
     meta(property='og:image' content=__metaImage)
@@ -48,18 +54,21 @@ html.no-js(lang='es')
     meta(property='og:type' content=__metaType)
     meta(property='og:site_name' content=__siteName)
     meta(property='og:locale' content='es_ES')
+
     meta(name='twitter:card' content='summary_large_image')
     meta(name='twitter:title' content=__metaTitle)
     meta(name='twitter:description' content=__metaDescription)
     meta(name='twitter:image' content=__metaImage)
+
     link(rel='canonical' href=__metaUrl)
 
   body(class=hideGlobalOverlay ? '' : 'loading')
-    // Overlay de carga global (opcional)
+    //- Overlay de carga global (opcional)
     if !hideGlobalOverlay
       #page-loading-overlay.page-loading-overlay
         .loading-spinner
         .loading-text Cargando…
+
     if !hideNavbar
       //- Navbar: Expande a partir de lg (colapsa < 992px)
       nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Navbar principal')
@@ -72,8 +81,16 @@ html.no-js(lang='es')
           //- Contenido colapsable (buscador + links)
           .collapse.navbar-collapse#navbarsExample05.text-center.order-3.order-lg-2
             //- Buscador — centrado en mobile, centrado entre brand y links en desktop
-            form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(action='/search' method='GET' role='search' aria-label='Buscar')
-              input.form-control.searchbar-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
+            form.d-flex.flex-grow-1.flex-lg-grow-0.mx-auto.mx-lg-auto.my-3.my-lg-0(
+              action='/search'
+              method='GET'
+              role='search'
+              aria-label='Buscar')
+              input.form-control.searchbar-input(
+                type='search'
+                name='q'
+                placeholder='Buscar'
+                aria-label='Buscar')
 
             //- Links principales — centrados en mobile, a la derecha en desktop
             ul.navbar-nav.navbar-links.mx-auto.mx-lg-0.ms-lg-auto.mb-2.mb-lg-0.fs-5
@@ -83,9 +100,11 @@ html.no-js(lang='es')
                 a.nav-link.me-lg-3(href='/artists') Artistas
               li.nav-item
                 a.nav-link.me-lg-3(href='/exhibitions') Exposiciones
+
               if currentUser && currentUser.role === 'artist'
                 li.nav-item
                   a.nav-link.me-lg-3(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+
               if currentUser
                 li.nav-item
                   a.nav-link.me-lg-3(href='/activity') Actividad
@@ -120,10 +139,14 @@ html.no-js(lang='es')
                       i.fas.fa-user
                 ul.dropdown-menu.dropdown-menu-end(aria-labelledby='userMenuDesktop')
                   li
-                    a.dropdown-item.nav-user-menu-link.mb-2(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta                  
+                    a.dropdown-item.nav-user-menu-link.mb-2(
+                      href='/edit-profile'
+                      aria-label='Editar cuenta') Editar cuenta
                   if currentUser && currentUser.role === 'admin'
                     li
-                      a.dropdown-item.nav-user-menu-link.mb-2(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                      a.dropdown-item.nav-user-menu-link.mb-2(
+                        href='/admin'
+                        aria-label='Panel de administrador') Panel de administrador
                   li
                     hr.dropdown-divider.my-2
                   li
@@ -165,30 +188,48 @@ html.no-js(lang='es')
         .collapse.navbar-collapse.d-xxl-none#navUserMobile.text-center
           ul.navbar-nav.flex-column.mx-auto.mb-2.fs-5
             li.nav-item
-              a.nav-link.nav-user-menu-link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta    
+              a.nav-link.nav-user-menu-link(
+                href='/edit-profile'
+                aria-label='Editar cuenta') Editar cuenta
             if currentUser && currentUser.role === 'admin'
               li.nav-item
-                a.nav-link.nav-user-menu-link(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                a.nav-link.nav-user-menu-link(
+                  href='/admin'
+                  aria-label='Panel de administrador') Panel de administrador
             li.nav-item.mt-2
               form(action='/api/v1/auth/logout' method='POST')
-                button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
+                button.btn.btn-outline-danger.nav-user-logout-btn(
+                  type='submit'
+                  aria-label='Cerrar sesión') Cerrar sesión
 
       .main-content
         block content
 
-    //- Overlays de navbar (menA�s principal y de usuario)
-  #navMainOverlay.lightbox.nav-overlay(
+    //- Overlays de navbar (menús principal y de usuario)
+    #navMainOverlay.lightbox.nav-overlay(
       role='dialog'
       aria-modal='true'
-      aria-label='MenA� de navegaciA3n')
-      button.lightbox__close.nav-overlay__close(type='button' aria-label='Cerrar menA� de navegaciA3n')
+      aria-label='Menú de navegación')
+      button.lightbox__close.nav-overlay__close(
+        type='button'
+        aria-label='Cerrar menú de navegación')
         svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
-          path(d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z' fill='currentColor')
+          path(
+            d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
+            fill='currentColor')
         span.sr-only Cerrar
       .lightbox__inner.nav-overlay__inner
         .nav-overlay__content
-          form.nav-overlay__search-form(action='/search' method='GET' role='search' aria-label='Buscar')
-            input.form-control.nav-overlay__search-input(type='search', name='q', placeholder='Buscar', aria-label='Buscar')
+          form.nav-overlay__search-form(
+            action='/search'
+            method='GET'
+            role='search'
+            aria-label='Buscar')
+            input.form-control.nav-overlay__search-input(
+              type='search'
+              name='q'
+              placeholder='Buscar'
+              aria-label='Buscar')
           ul.nav-overlay__list
             li
               a.nav-overlay__link(href='/artworks') Obras
@@ -198,42 +239,60 @@ html.no-js(lang='es')
               a.nav-overlay__link(href='/exhibitions') Exposiciones
             if currentUser && currentUser.role === 'artist'
               li
-                a.nav-overlay__link(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                a.nav-overlay__link(
+                  href='/artists/panel'
+                  aria-label='Panel de artista') Panel de artista
             if currentUser
               li
-                a.nav-overlay__link(href='/activity') Actividad
+                a.nav-overlay__link(
+                  href='/activity'
+                  aria-label='Actividad reciente') Actividad
             if !currentUser
               li
-                a.nav-overlay__link(href='/login' aria-label='Iniciar sesión') Iniciar sesión
+                a.nav-overlay__link(
+                  href='/login'
+                  aria-label='Iniciar sesión') Iniciar sesión
               li
-                a.nav-overlay__link(href='/signup' aria-label='Registrarse') Registrarse
+                a.nav-overlay__link(
+                  href='/signup'
+                  aria-label='Registrarse') Registrarse
 
-  if currentUser
+    if currentUser
       #navUserOverlay.lightbox.nav-overlay(
         role='dialog'
         aria-modal='true'
-        aria-label='MenA� de usuario')
-        button.lightbox__close.nav-overlay__close(type='button' aria-label='Cerrar menA� de usuario')
+        aria-label='Menú de usuario')
+        button.lightbox__close.nav-overlay__close(
+          type='button'
+          aria-label='Cerrar menú de usuario')
           svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
-            path(d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z' fill='currentColor')
+            path(
+              d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
+              fill='currentColor')
           span.sr-only Cerrar
         .lightbox__inner.nav-overlay__inner
           .nav-overlay__content
             ul.nav-overlay__list
               li
-                a.nav-overlay__link(href='/edit-profile' aria-label='Editar cuenta') Editar cuenta
-   
+                a.nav-overlay__link(
+                  href='/edit-profile'
+                  aria-label='Editar cuenta') Editar cuenta
               if currentUser && currentUser.role === 'admin'
                 li
-                  a.nav-overlay__link(href='/admin' aria-label='Panel de administrador') Panel de administrador
+                  a.nav-overlay__link(
+                    href='/admin'
+                    aria-label='Panel de administrador') Panel de administrador
               li
                 form(action='/api/v1/auth/logout' method='POST')
-                  button.btn.btn-outline-danger.nav-user-logout-btn(type='submit' aria-label='Cerrar sesion') Cerrar sesion
+                  button.btn.btn-outline-danger.nav-user-logout-btn(
+                    type='submit'
+                    aria-label='Cerrar sesión') Cerrar sesión
 
-  if !hideFooter
-    include ./footer.pug
+    //- Footer opcional
+    if !hideFooter
+      include ./footer.pug
 
-    //- JS al final del body (orden importante)
+    //- JS al final del body (orden importante) — SIEMPRE
     script(src='/bootstrap/js/bootstrap.bundle.min.js')
     script(src='/js/masonry.pkgd.min.js')
     script(src='/js/imagesloaded.js')
@@ -242,16 +301,13 @@ html.no-js(lang='es')
 
     //- Permite que vistas inyecten JS (por ejemplo, inicializaciones específicas) ANTES de main.js
     block scriptsExtra
-    
+
     script(src='/js/masonry-init.js?v=2')
 
     //- Tu JS global
     script(src='/js/main.js')
-    //- Lógica de overlay y compartir movida a /js/main.js
+
     //- Región aria-live para confirmaciones accesibles
     #sr-live.visually-hidden(aria-live='polite' aria-atomic='true')
 
     //- Nota: sin inyecciones — la vista de artista controla su propio botón Compartir
-
-
-
