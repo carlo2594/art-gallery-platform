@@ -63,10 +63,25 @@ block content
                 h2.h4.mb-3(style='color: var(--ox-blue);') Información básica
                 .mb-3
                   label.form-label(for='wizardTitle') Título de la obra *
-                  input#wizardTitle.form-control(type='text', name='title', required, placeholder='Título de la obra')
+                  .d-flex.align-items-center.justify-content-between.mb-1
+                    small.text-muted.mb-0#wizardTitleCounter 0/50
+                  input#wizardTitle.form-control(
+                    type='text',
+                    name='title',
+                    required,
+                    placeholder='Título de la obra',
+                    maxlength='50'
+                  )
                 .mb-3
                   label.form-label(for='wizardDescription') Descripción
-                  textarea#wizardDescription.form-control(name='description', rows='4', placeholder='Describe brevemente la obra (opcional)')
+                  .d-flex.align-items-center.justify-content-between.mb-1
+                    small.text-muted.mb-0#wizardDescriptionCounter 0/200
+                  textarea#wizardDescription.form-control(
+                    name='description',
+                    rows='4',
+                    placeholder='Describe brevemente la obra (opcional)',
+                    maxlength='200'
+                  )
 
                 .d-flex.justify-content-between.mt-4
                   a.btn.btn-outline-secondary(href='/artists/panel') Volver al panel

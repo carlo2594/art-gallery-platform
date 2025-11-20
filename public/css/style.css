@@ -3079,6 +3079,11 @@ body.noscroll {
   text-decoration: underline;
 }
 
+.artwork-detail__title {
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
 /* Exhibition card link: make entire hero tappable */
 .exhibition-card-link {
   display: block;

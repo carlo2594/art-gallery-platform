@@ -120,6 +120,27 @@
     submitBtn.disabled = !hasImage;
   }
 
+  function initCharacterCounters(){
+    const titleInput = qs('#wizardTitle');
+    const descInput = qs('#wizardDescription');
+    const titleCounter = qs('#wizardTitleCounter');
+    const descCounter = qs('#wizardDescriptionCounter');
+
+    const attachCounter = (input, counter, max) => {
+      if (!input || !counter) return;
+      const limit = max || Number(input.getAttribute('maxlength')) || 0;
+      const update = () => {
+        const len = input.value ? input.value.length : 0;
+        counter.textContent = `${len}/${limit || '∞'}`;
+      };
+      update();
+      input.addEventListener('input', update);
+    };
+
+    attachCounter(titleInput, titleCounter, 50);
+    attachCounter(descInput, descCounter, 200);
+  }
+
   function adjustPreviewAspect(img){
     try {
       if (!img) return;
@@ -175,6 +196,9 @@
                 const el = qs(selector, form);
                 if (!el) return;
                 el.value = value != null ? String(value) : '';
+                try {
+                  el.dispatchEvent(new Event('input', { bubbles: true }));
+                } catch(_){}
               };
               setVal('input[name="title"]', art.title || '');
               setVal('textarea[name="description"]', art.description || '');
@@ -260,6 +284,9 @@
         const el = qs(selector, form);
         if (!el) return;
         el.value = value != null ? String(value) : '';
+        try {
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        } catch(_){}
       };
       setVal('input[name="title"]', art.title || '');
       setVal('textarea[name="description"]', art.description || '');
@@ -614,6 +641,7 @@
       });
     }
 
+    initCharacterCounters();
     const imgInput = qs('#wizardImage');
     const imgPrev = qs('#wizardImagePreview');
     if (imgInput && imgPrev){

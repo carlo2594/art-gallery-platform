@@ -20,13 +20,13 @@ const artworkSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: [1, 'El título debe tener al menos 1 caracter.'],
-      maxlength: [120, 'El título no puede superar 120 caracteres.']
+      maxlength: [50, 'El título no puede superar 50 caracteres.']
     },
     slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
     description: {
       type: String,
       trim: true,
-      maxlength: [800, 'La descripción no puede superar 800 caracteres.']
+      maxlength: [200, 'La descripción no puede superar 200 caracteres.']
     },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
