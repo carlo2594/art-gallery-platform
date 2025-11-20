@@ -56,21 +56,35 @@
     }
 
     // Guardar en borrador y volver al panel
-    if (saveDraftModalBtn && saveDraftBtn){
-      saveDraftModalBtn.addEventListener('click', function(){
+    if (saveDraftModalBtn){
+      saveDraftModalBtn.addEventListener('click', async function(){
         const prevText = saveDraftModalBtn.textContent;
         saveDraftModalBtn.disabled = true;
         saveDraftModalBtn.textContent = 'Guardando...';
         try {
-          saveDraftBtn.click();
-        } catch(_) {}
-        // Dar un pequeño tiempo para que se guarde y luego ir al panel
-        setTimeout(function(){
-          try {
-            if (confirmModal) confirmModal.hide();
-          } catch(_) {}
-          window.location.href = '/artists/panel';
-        }, 900);
+          let ok = false;
+          const saveFn = (typeof window !== 'undefined' && window.artistWizardSaveDraftWithImage)
+            ? window.artistWizardSaveDraftWithImage
+            : null;
+          if (typeof saveFn === 'function') {
+            ok = await saveFn(true);
+          } else if (saveDraftBtn) {
+            saveDraftBtn.click();
+            ok = true;
+          }
+          if (ok) {
+            try {
+              if (confirmModal) confirmModal.hide();
+            } catch(_) {}
+            window.location.href = '/artists/panel';
+          } else {
+            saveDraftModalBtn.disabled = false;
+            saveDraftModalBtn.textContent = prevText;
+          }
+        } catch(err){
+          saveDraftModalBtn.disabled = false;
+          saveDraftModalBtn.textContent = prevText;
+        }
       });
     }
 
@@ -108,4 +122,3 @@
     }
   });
 })();
-

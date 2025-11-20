@@ -411,6 +411,14 @@
     return await updateDraft(showToast);
   }
 
+  async function saveDraftWithImage(showToast){
+    const id = await saveDraft(showToast);
+    if (!id) return false;
+    const imgResult = await uploadImageIfNeeded();
+    if (imgResult === null) return false;
+    return true;
+  }
+
   async function uploadImageIfNeeded(){
     const form = qs('#artistArtworkWizardForm');
     if (!form || !currentArtworkId) return currentArtworkId;
@@ -580,8 +588,17 @@
 
     const saveBtn = qs('#wizardSaveDraft');
     if (saveBtn){
-      saveBtn.addEventListener('click', function(){
-        saveDraft(true);
+      const originalLabel = saveBtn.textContent;
+      saveBtn.addEventListener('click', async function(){
+        if (saveBtn.disabled) return;
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Guardando...';
+        try {
+          await saveDraftWithImage(true);
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.textContent = originalLabel;
+        }
       });
     }
     const submitBtn = qs('#wizardSubmit');
@@ -683,4 +700,7 @@
   } else {
     hookSteps();
   }
+  try {
+    window.artistWizardSaveDraftWithImage = saveDraftWithImage;
+  } catch(_) {}
 })();
