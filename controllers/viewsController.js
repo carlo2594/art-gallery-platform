@@ -1087,7 +1087,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
     [totalArtworks, artworks] = await Promise.all([
       Artwork.countDocuments(baseFilter),
       Artwork.find(baseFilter)
-        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents')
+        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents views favoritesCount')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(perPage)
