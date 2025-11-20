@@ -15,9 +15,19 @@ const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
-    title: { type: String, required: true, trim: true },
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: [1, 'El título debe tener al menos 1 caracter.'],
+      maxlength: [120, 'El título no puede superar 120 caracteres.']
+    },
     slug: { type: String }, // URL-friendly version of title (índice único definido explícitamente abajo)
-    description: { type: String, trim: true },
+    description: {
+      type: String,
+      trim: true,
+      maxlength: [800, 'La descripción no puede superar 800 caracteres.']
+    },
     completedAt: { type: Date }, // Fecha en que el artista terminó la obra
 
     /* ------ Relations ------ */
