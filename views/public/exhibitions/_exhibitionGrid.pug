@@ -5,11 +5,12 @@ if Array.isArray(exhibitions)
   if exhibitions.length
     each expo, idx in exhibitions
       - const eager = idx < 2
+      - const detailUrl = `/exhibitions/${expo.slug || expo._id}`
       section.article-template.exhibition-section
-        .article-template__hero-container.exhibition-hero-container.position-relative.reveal-item
-          .article-template__hero-adapt.media.exhibition-hero-adapt
-            if expo.coverImage
-              a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
+        a.exhibition-card-link.d-block.text-decoration-none(href=detailUrl aria-label=`Ver detalles de ${expo.title}`)
+          .article-template__hero-container.exhibition-hero-container.position-relative.reveal-item
+            .article-template__hero-adapt.media.exhibition-hero-adapt
+              if expo.coverImage
                 img.exhibition-hero-image.exhibition-hero-img-absolute.shadow-lg(
                   src=expo.coverImage,
                   alt=expo.title,
@@ -18,8 +19,7 @@ if Array.isArray(exhibitions)
                   decoding='async',
                   style="width: 100%; height: 100%; object-fit: cover;"
                 )
-            else
-              a(href=`/exhibitions/${expo.slug || expo._id}` aria-label=`Ver detalles de ${expo.title}`)
+              else
                 .exhibition-placeholder.d-flex.align-items-center.justify-content-center(style="height: 50vh; background: linear-gradient(135deg, #343a40 0%, #495057 100%);")
                   .text-center
                     i.fas.fa-image.fa-4x.text-white.mb-3
@@ -54,4 +54,3 @@ if Array.isArray(exhibitions)
             .skeleton.skeleton-hero
             .skeleton.skeleton-hero
             .skeleton.skeleton-hero
-
