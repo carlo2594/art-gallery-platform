@@ -58,21 +58,21 @@ block content
                       span.text-white-75= artist.location
                   if artist.website
                     .meta-item.artist-website-item
-                      a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
+                      a.artist-social-link.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
                         i.fas.fa-globe.me-2
                         span Sitio web
                   if artist.social && artist.social.instagram
                     .meta-item.artist-social-instagram
-                      a.text-warning.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
+                      a.artist-social-link.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
                         i.fab.fa-instagram.me-2
                         span Instagram
                   if artist.social && artist.social.x
                     .meta-item.artist-social-x
-                      a.text-warning.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
+                      a.artist-social-link.text-decoration-none(href=`https://x.com/${artist.social.x}`, target="_blank", rel="noopener")
                         i.fab.fa-x.me-2
                   if artist.social && artist.social.facebook
                     .meta-item.artist-social-facebook
-                      a.text-warning.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
+                      a.artist-social-link.text-decoration-none(href=`https://facebook.com/${artist.social.facebook}`, target="_blank", rel="noopener")
                         i.fab.fa-facebook.me-2
                         span Facebook
                 .hero-actions.artist-actions-desktop.d-flex.flex-wrap.gap-3.justify-content-center.justify-content-lg-start.mt-3

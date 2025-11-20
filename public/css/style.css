@@ -1456,28 +1456,24 @@ body.loading .main-content { visibility: hidden; }
   color: inherit;
 }
 
-/* Social media links - responsive text colors, icons remain ox-yellow */
-.artist-meta-desktop a, .artist-meta-mobile a {
-  color: var(--ox-blue) !important;
+/* Social media links - keep text/icons white at all breakpoints */
+.artist-meta-desktop a,
+.artist-meta-mobile a {
+  color: #fff !important;
 }
 
-.artist-meta-desktop a .fas, .artist-meta-desktop a .fab,
-.artist-meta-mobile a .fas, .artist-meta-mobile a .fab {
+.artist-meta-desktop a .fas,
+.artist-meta-desktop a .fab,
+.artist-meta-mobile a .fas,
+.artist-meta-mobile a .fab {
   color: var(--ox-yellow) !important;
 }
 
-/* Desktop social media links (ΓëÑ992px) - text should be ox-beige */
-@media (min-width: 992px) {
-  .artist-meta-desktop a {
-    color: var(--ox-beige) !important;
-  }
-}
-
-/* Mobile social media links (<992px) - text should be ox-blue */
-@media (max-width: 991.98px) {
-  .artist-meta-mobile a {
-    color: var(--ox-blue) !important;
-  }
+.artist-meta-desktop a:hover,
+.artist-meta-mobile a:hover,
+.artist-meta-desktop a:focus,
+.artist-meta-mobile a:focus {
+  color: #fff !important;
 }
 
 /* Follow button heart icon should be ox-blue */
@@ -3070,4 +3066,15 @@ body.noscroll {
 .exhibition-description-style,
 .exhibition-detail__description {
   white-space: pre-line;
+}
+
+/* Social links in artist detail hero */
+.artist-social-link,
+.artist-social-link i {
+  color: #fff !important;
+}
+.artist-social-link:hover,
+.artist-social-link:focus {
+  color: #fff !important;
+  text-decoration: underline;
 }
