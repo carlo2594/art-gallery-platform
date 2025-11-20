@@ -85,6 +85,22 @@ block content
                     i.fas.fa-share.me-2
                     | Compartir
 
+    // Normaliza variables de filtros
+    - const actionUrl = `/artists/${artist.slug || artist._id}`;
+    - q = (typeof q !== 'undefined' && q) ? q : {};
+    - techniques = Array.isArray(techniques) ? techniques : (techniques ? [techniques].filter(Boolean) : []);
+    - priceBounds = (typeof priceBounds !== 'undefined' && priceBounds) ? priceBounds : null;
+    - appliedPrice = (typeof appliedPrice !== 'undefined' && appliedPrice) ? appliedPrice : null;
+    - const filterKeys = ['technique','type','orientation','avail','minw','maxw','minh','maxh','minPrice','maxPrice','minPriceCents','maxPriceCents','sort'];
+    - const isFiltering = filterKeys.some(function(key){
+    -   const value = q[key];
+    -   if (Array.isArray(value)) return value.length > 0;
+    -   return typeof value !== 'undefined' && value !== null && String(value).trim() !== '';
+    - });
+    - const totalFiltered = typeof totalArtworks === 'number' ? totalArtworks : (Array.isArray(artworks) ? artworks.length : 0);
+    - const statsTotal = stats && typeof stats.totalArtworks === 'number' ? stats.totalArtworks : 0;
+    - const showFilters = totalFiltered > 1 || statsTotal > 1 || isFiltering;
+
     // Obras del artista
     if artworks && artworks.length > 0
       section.artist-artworks.artist-artworks-section.py-5.artist-artworks-bg
@@ -93,14 +109,9 @@ block content
             .col-12.text-center
               h2.section-title.artist-artworks-title.display-5.fw-bold.mb-1.artist-section-title= `Obras de ${artist.name}`
               
-        if totalArtworks > 1
+        if showFilters
           section.filters-toolbar.artist-filters-section.py-2
             .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
-              - var q = typeof q !== 'undefined' ? q : {};
-              - var techniques = typeof techniques !== 'undefined' ? techniques : [];
-              - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
-              - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
-              - var actionUrl = `/artists/${artist.slug || artist._id}`;
               include /public/artworks/_artworkFilters.pug
         .container-xxl.artworks-flex.artist-artworks-grid.artist-container-padding
           if artworks && artworks.length
@@ -114,14 +125,9 @@ block content
       section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
           h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
-          if stats.totalArtworks > 1
+          if showFilters
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
               .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
-                - var q = typeof q !== 'undefined' ? q : {};
-                - var techniques = typeof techniques !== 'undefined' ? techniques : [];
-                - var priceBounds = typeof priceBounds !== 'undefined' ? priceBounds : {};
-                - var appliedPrice = typeof appliedPrice !== 'undefined' ? appliedPrice : {};
-                - var actionUrl = `/artists/${artist.slug || artist._id}`;
                 include /public/artworks/_artworkFilters.pug
           .row.justify-content-center
             .col-lg-6
