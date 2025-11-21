@@ -108,20 +108,6 @@ block content
                     i.fas.fa-share.me-2
                     | Compartir
 
-    section.exhibition-mobile.d-lg-none.py-5.exhibition-mobile-bg
-      .container
-        .row
-          .col-12.text-center
-            h1.display-4.fw-bold.mb-2.exhibition-mobile-title= title
-            if dateText
-              h2.h5.mb-3.text-muted.exhibition-mobile-date= dateText
-            if exhibition && exhibition.description
-              p.lead.mb-0.text-dark.exhibition-mobile-description= exhibition.description
-            // Botón compartir en mobile (con texto)
-            button.btn.btn-outline-primary.btn-lg.mt-4.exhibition-share-btn-mobile.ox-share-btn(type='button' data-exhibition-id=exhibition && exhibition._id)
-              i.fas.fa-share.me-2
-              | Compartir
-
     if artworks && artworks.length > 0
       section.exhibition-artworks.py-5.exhibition-artworks-bg
         .container
