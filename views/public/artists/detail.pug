@@ -78,9 +78,14 @@ block content
                 .hero-actions.artist-actions-desktop.d-flex.flex-wrap.gap-3.justify-content-center.justify-content-lg-start.mt-3
                   // BotÃ³n Seguir/Siguiendo
                   - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
-                  button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
-                    i.fas.fa-heart.me-2
-                    | #{following ? 'Siguiendo' : 'Seguir'}
+                  - const currentUserRawId = currentUser && (currentUser._id || currentUser.id);
+                  - const currentUserIdStr = currentUserRawId && currentUserRawId.toString ? currentUserRawId.toString() : (currentUserRawId ? String(currentUserRawId) : null);
+                  - const artistIdStr = artist && artist._id && artist._id.toString ? artist._id.toString() : (artist && artist._id ? String(artist._id) : null);
+                  - const isOwnProfile = !!(currentUserIdStr && artistIdStr && currentUserIdStr === artistIdStr);
+                  if !isOwnProfile
+                    button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
+                      i.fas.fa-heart.me-2
+                      | #{following ? 'Siguiendo' : 'Seguir'}
                   button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-share-btn.artist-action-btn.ox-share-btn
                     i.fas.fa-share.me-2
                     | Compartir
