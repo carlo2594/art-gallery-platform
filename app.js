@@ -12,8 +12,6 @@ const sanitize            = require('@middlewares/sanitize');
 const ensureDbReady       = require('@middlewares/ensureDbReady'); // ⬅️ nuevo middleware
 const globalErrorHandler  = require('@controllers/errorController');
 
-require('dotenv').config();
-
 const app = express();
 
 /* --------------------- Middlewares globales --------------------- */
