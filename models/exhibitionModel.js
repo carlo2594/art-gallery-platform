@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 const { norm } = require("@utils/normalizer");
 
 const exhibitionSchema = new mongoose.Schema({
-  title: { type: String, required: true, trim: true, maxlength: 100 },
+  title: { type: String, required: true, trim: true, maxlength: 25 },
   slug: { type: String }, // índice único definido explícitamente abajo
-  description: { type: String, trim: true, maxlength: 800 },
+  description: { type: String, trim: true, maxlength: 400 },
   coverImage: { type: String, trim: true, maxlength: 500 },
 
   location: {
@@ -80,7 +80,10 @@ exhibitionSchema.index({ artworks: 1 });
 exhibitionSchema.index({ "participants.user": 1 });
 
 // 6. TTL: purga 30 días después de moverse a la papelera
-exhibitionSchema.index({ deletedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
+exhibitionSchema.index(
+  { deletedAt: 1 },
+  { expireAfterSeconds: 60 * 60 * 24 * 30 }
+);
 
 /* ---------------------- Hooks para slug ---------------------- */
 exhibitionSchema.pre("save", function (next) {
@@ -99,24 +102,39 @@ exhibitionSchema.pre("save", function (next) {
 
 /* ---------------------- Hooks para participants ---------------------- */
 // Mantiene `participants` (role: 'artista') sincronizado con los artistas de `artworks`
-exhibitionSchema.pre('save', async function(next){
+exhibitionSchema.pre("save", async function (next) {
   try {
-    if (!this.isModified('artworks')) return next();
-    const Artwork = require('./artworkModel');
-    const ids = Array.from(new Set((this.artworks || []).map((x) => String(x))));
+    if (!this.isModified("artworks")) return next();
+    const Artwork = require("./artworkModel");
+    const ids = Array.from(
+      new Set((this.artworks || []).map((x) => String(x)))
+    );
     let artistIds = [];
     if (ids.length) {
       // Solo considerar obras visibles al p3blico: aprobadas y no en papelera
-      artistIds = await Artwork.find({ _id: { $in: ids }, status: 'approved', deletedAt: null }).distinct('artist');
+      artistIds = await Artwork.find({
+        _id: { $in: ids },
+        status: "approved",
+        deletedAt: null,
+      }).distinct("artist");
     }
-    const artistSet = new Set((artistIds || []).filter(Boolean).map((x) => String(x)));
+    const artistSet = new Set(
+      (artistIds || []).filter(Boolean).map((x) => String(x))
+    );
     const existing = Array.isArray(this.participants) ? this.participants : [];
-    const keepNonArtist = existing.filter((p) => String((p && p.role) || '').toLowerCase() !== 'artista');
-    const newArtistParticipants = Array.from(artistSet).map((uid) => ({ user: uid, role: 'artista' }));
+    const keepNonArtist = existing.filter(
+      (p) => String((p && p.role) || "").toLowerCase() !== "artista"
+    );
+    const newArtistParticipants = Array.from(artistSet).map((uid) => ({
+      user: uid,
+      role: "artista",
+    }));
     this.participants = [...keepNonArtist, ...newArtistParticipants];
     return next();
   } catch (err) {
-    try { console.error('exhibition participants sync error:', err); } catch(_) {}
+    try {
+      console.error("exhibition participants sync error:", err);
+    } catch (_) {}
     return next();
   }
 });

@@ -297,11 +297,11 @@ block content
                   small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info(style='color: var(--ox-blue);')
                     i.fas.fa-info-circle.account-form-info-icon
                     span.account-form-hint-copy Usa una imagen nítida, bien encuadrada y de al menos 250px de ancho y alto para que tu perfil se vea correctamente.
-                button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
-              hr.my-4.account-form-divider
+                .mt-3.account-form-actions
+                  button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
+                  button.btn.btn-outline-danger.account-form-delete(type='submit' form='accountPhotoDeleteForm') Eliminar foto
               form#accountPhotoDeleteForm.account-form.account-form-photo-delete(action='/api/v1/users/me/profile-image' method='POST')
                 input.account-form-hidden(type='hidden' name='profileImage' value='')
-                button.btn.btn-outline-danger.account-form-delete(type='submit') Eliminar foto
 
           //- Se ha ocultado la sección de portada para dejar solo foto de perfil
 
