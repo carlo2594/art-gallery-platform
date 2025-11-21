@@ -34,13 +34,13 @@
         form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
           .mb-3
             label.form-label Nombre
-            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name maxlength='120')
+            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name maxlength='20')
           .mb-3
             label.form-label Correo
             input.form-control(type='email' name='email' placeholder='correo@dominio.com' value=u.email)
           .mb-3
             label.form-label Biografía
-            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía' maxlength='1200')
+            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía' maxlength='400')
           .mb-3
             label.form-label Ubicación
             input.form-control(type='text' name='location' placeholder='Ciudad, País' maxlength='100')

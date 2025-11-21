@@ -238,11 +238,11 @@ __onReady(function () {
     };
 
     const PROFILE_FIELD_LIMITS = [
-      { key: 'firstName', label: 'Nombre', max: 60 },
-      { key: 'lastName', label: 'Apellidos', max: 60 },
-      { key: 'name', label: 'Nombre público', max: 120 },
+      { key: 'firstName', label: 'Nombre', max: 20 },
+      { key: 'lastName', label: 'Apellidos', max: 20 },
+      { key: 'name', label: 'Nombre público', max: 20 },
       { key: 'headline', label: 'Titular', max: 80 },
-      { key: 'bio', label: 'Biografía', max: 1200 },
+      { key: 'bio', label: 'Biografía', max: 400 },
       { key: 'website', label: 'Sitio web', max: 200 },
       { key: 'social[facebook]', label: 'Facebook', max: 80 },
       { key: 'social[instagram]', label: 'Instagram', max: 80 },
@@ -266,6 +266,18 @@ __onReady(function () {
     };
 
     if (profileForm) {
+      const bioInput = profileForm.querySelector('#bio');
+      const bioCounter = document.getElementById('accountBioCounter');
+      if (bioInput && bioCounter) {
+        const max = Number(bioInput.getAttribute('maxlength')) || 400;
+        const updateBioCounter = () => {
+          const len = bioInput.value ? bioInput.value.length : 0;
+          bioCounter.textContent = `${len}/${max}`;
+        };
+        updateBioCounter();
+        bioInput.addEventListener('input', updateBioCounter);
+      }
+
       profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = profileForm.querySelector('button[type=submit]');

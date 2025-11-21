@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const { norm } = require("@utils/normalizer");
 
 const exhibitionSchema = new mongoose.Schema({
-  title: { type: String, required: true },
+  title: { type: String, required: true, trim: true, maxlength: 100 },
   slug: { type: String }, // índice único definido explícitamente abajo
-  description: String,
-  coverImage: String,
+  description: { type: String, trim: true, maxlength: 800 },
+  coverImage: { type: String, trim: true, maxlength: 500 },
 
   location: {
     type: {
@@ -13,8 +13,8 @@ const exhibitionSchema = new mongoose.Schema({
       enum: ["physical", "virtual"],
       required: false,
     },
-    address: { type: String }, // solo si es physical
-    url: { type: String }, // solo si es virtual
+    address: { type: String, trim: true, maxlength: 200 }, // solo si es physical
+    url: { type: String, trim: true, maxlength: 300 }, // solo si es virtual
   },
 
   startDate: { type: Date, required: true },

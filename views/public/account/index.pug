@@ -25,19 +25,21 @@ block content
               .col-12.col-lg-6.account-form-column
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='firstName') Nombre
-                  input#firstName.form-control.account-form-control(type='text' name='firstName' maxlength='60' value=(currentUser && currentUser.firstName) || '')
+                  input#firstName.form-control.account-form-control(type='text' name='firstName' maxlength='20' value=(currentUser && currentUser.firstName) || '')
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='lastName') Apellidos
-                  input#lastName.form-control.account-form-control(type='text' name='lastName' maxlength='60' value=(currentUser && currentUser.lastName) || '')
+                  input#lastName.form-control.account-form-control(type='text' name='lastName' maxlength='20' value=(currentUser && currentUser.lastName) || '')
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='name') Nombre público (se mostrará)
-                  input#name.form-control.account-form-control(type='text' name='name' maxlength='120' required value=(currentUser && currentUser.name) || '')
+                  input#name.form-control.account-form-control(type='text' name='name' maxlength='20' required value=(currentUser && currentUser.name) || '')
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='headline') Titular
                   input#headline.form-control.account-form-control(type='text' name='headline' maxlength='80' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='bio') Biografía
-                  textarea#bio.form-control.account-form-control(name='bio' rows='5' maxlength='1200')= (currentUser && currentUser.bio) || ''
+                  .d-flex.align-items-center.justify-content-between
+                    label.form-label.account-form-label.mb-0(for='bio') Biografía
+                    small.text-muted#accountBioCounter 0/400
+                  textarea#bio.form-control.account-form-control(name='bio' rows='5' maxlength='400')= (currentUser && currentUser.bio) || ''
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='country') País
                   - var currentCountry = (currentUser && currentUser.country) || 'CR'

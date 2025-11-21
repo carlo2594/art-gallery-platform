@@ -4,9 +4,9 @@ const bcrypt   = require('bcryptjs');
 const validator = require('validator'); 
 
 const userSchema = new mongoose.Schema({
-  name:     { type: String, required: true, trim: true, maxlength: 120 },
-  firstName: { type: String, trim: true, maxlength: 60 },
-  lastName:  { type: String, trim: true, maxlength: 60 },
+  name:     { type: String, required: true, trim: true, maxlength: 20 },
+  firstName: { type: String, trim: true, maxlength: 20 },
+  lastName:  { type: String, trim: true, maxlength: 20 },
   email: {
   type: String,
   required: true,
@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema({
     default: 'collector',
     select: false
   },
-  profileImage: { type: String, trim: true },
-  profileImagePublicId: { type: String, trim: true },
-  coverImage: { type: String, trim: true },
-  coverImagePublicId: { type: String, trim: true },
-  bio: { type: String, trim: true, maxlength: 1200 },
+  profileImage: { type: String, trim: true, maxlength: 500 },
+  profileImagePublicId: { type: String, trim: true, maxlength: 200 },
+  coverImage: { type: String, trim: true, maxlength: 500 },
+  coverImagePublicId: { type: String, trim: true, maxlength: 200 },
+  bio: { type: String, trim: true, maxlength: 400 },
   headline: { type: String, trim: true, maxlength: 80 },
   location: { type: String, trim: true, maxlength: 100 },
   website: { type: String, trim: true, maxlength: 200 },
