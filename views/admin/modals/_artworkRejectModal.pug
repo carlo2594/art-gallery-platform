@@ -9,8 +9,19 @@
         .modal-body
           .mb-3
             label.form-label(for=`rejectReason-${a._id}`) Motivo del rechazo
-            textarea.form-control(id=`rejectReason-${a._id}` name='reason' rows='4' placeholder='Describe claramente el motivo...' required)
-            small.text-muted.mt-1 Se notificará al artista con este motivo.
+            textarea.form-control(
+              id=`rejectReason-${a._id}`
+              name='reason'
+              rows='4'
+              placeholder='Describe claramente el motivo...'
+              required
+              maxlength=(rejectReasonLimit || 100)
+              data-reject-limit=(rejectReasonLimit || 100)
+              data-reject-counter=`rejectCounter-${a._id}`
+            )
+            small.text-muted.mt-1
+              span(id=`rejectCounter-${a._id}`)= rejectReasonLimit || 100
+              |  caracteres disponibles. Se notificará al artista con este motivo.
         .modal-footer
           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
           button.btn.btn-danger(type='submit') Confirmar rechazo

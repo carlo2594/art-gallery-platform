@@ -2,6 +2,30 @@
 ;/* ==== admin-users.js ==== */
 
 'use strict';
+const MAX_REJECT_REASON = 100;
+function enforceRejectReasonLimit(textarea){
+  if (!textarea || typeof textarea.value !== 'string') return;
+  var limit = parseInt(textarea.getAttribute('data-reject-limit'), 10);
+  if (!Number.isFinite(limit) || limit <= 0) limit = MAX_REJECT_REASON;
+  var value = textarea.value || '';
+  if (value.length > limit) {
+    value = value.slice(0, limit);
+    textarea.value = value;
+  }
+  var counterId = textarea.getAttribute('data-reject-counter');
+  if (counterId) {
+    var counter = document.getElementById(counterId);
+    if (counter) counter.textContent = Math.max(0, limit - value.length);
+  }
+}
+document.addEventListener('input', function(e){
+  var target = e.target;
+  if (!target || !target.matches || !target.matches('textarea[data-reject-limit]')) return;
+  enforceRejectReasonLimit(target);
+});
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('textarea[data-reject-limit]').forEach(enforceRejectReasonLimit);
+});
 
 document.addEventListener('DOMContentLoaded', function(){
   // --- Create modal email uniqueness ---
@@ -630,6 +654,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var initialStatus = form.getAttribute('data-initial-status') || '';
     var reasonEl = form.querySelector('textarea[name="reason"]');
     var reason = (reasonEl && reasonEl.value || '').trim();
+    if (reason.length > MAX_REJECT_REASON) {
+      reason = reason.slice(0, MAX_REJECT_REASON);
+      if (reasonEl) { reasonEl.value = reason; enforceRejectReasonLimit(reasonEl); }
+    }
+    if (reason.length > MAX_REJECT_REASON) {
+      reason = reason.slice(0, MAX_REJECT_REASON);
+      if (reasonEl) { reasonEl.value = reason; enforceRejectReasonLimit(reasonEl); }
+    }
     if (!id || !reason) { if (window.showAdminToast) showAdminToast('Debes indicar un motivo', 'warning'); return; }
     var btn = form.querySelector('button[type="submit"]');
     var oldText = btn && btn.textContent; if (btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
@@ -1556,6 +1588,10 @@ document.addEventListener('DOMContentLoaded', function(){
     var ids = getSelected(); if (!ids.length) { if (window.showAdminToast) showAdminToast('Selecciona al menos una obra','warning'); return; }
     var statusInput = form.querySelector('input[name="status"]:checked'); var newStatus = statusInput && statusInput.value;
     var reasonEl = form.querySelector('textarea[name="reason"]'); var reason = (reasonEl && reasonEl.value || '').trim();
+    if (reason.length > MAX_REJECT_REASON) {
+      reason = reason.slice(0, MAX_REJECT_REASON);
+      if (reasonEl) { reasonEl.value = reason; enforceRejectReasonLimit(reasonEl); }
+    }
     if (!newStatus) { if (window.showAdminToast) showAdminToast('Selecciona un estado','warning'); return; }
     if (newStatus === 'rejected' && !reason) { if (window.showAdminToast) showAdminToast('Indica el motivo de rechazo','warning'); return; }
     var btn = form.querySelector('button[type="submit"]'); var old = btn && btn.textContent; if (btn){ btn.disabled=true; btn.textContent='Aplicando...'; }

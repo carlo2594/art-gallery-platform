@@ -19,6 +19,7 @@ const getAspectPolicy = () => 'none';
 const buildAspectErrorPayload = () => ({ code: 'ASPECT_VALIDATION_DISABLED' });
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'approved', 'rejected'];
+const MAX_REJECT_REASON_LENGTH = 100;
 
 
 // =======================
@@ -118,12 +119,18 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
     return res.status(400).json({ status: 'fail', message: 'La obra ya está rechazada.' });
   }
 
-  if (!req.body.reason || typeof req.body.reason !== 'string' || req.body.reason.trim() === '') {
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
+  if (!reason) {
     return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+  }
+  if (reason.length > MAX_REJECT_REASON_LENGTH) {
+    return next(
+      new AppError(`El motivo del rechazo no puede superar ${MAX_REJECT_REASON_LENGTH} caracteres.`, 400)
+    );
   }
 
   art.status = 'rejected';
-  art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: req.body.reason };
+  art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: reason };
   await art.save();
 
   // Notificar al artista que su obra fue rechazada
@@ -132,7 +139,7 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
     await sendMail({
       to: art.artist.email,
       subject: artworkStatusSubject('rejected'),
-      text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason: req.body.reason })
+      text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason })
     });
   }
 
@@ -682,6 +689,11 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       const reasonStr = (typeof rejectionReason === 'string') ? rejectionReason.trim() : '';
       if (!reasonStr) {
         return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+      }
+      if (reasonStr.length > MAX_REJECT_REASON_LENGTH) {
+        return next(
+          new AppError(`El motivo del rechazo no puede superar ${MAX_REJECT_REASON_LENGTH} caracteres.`, 400)
+        );
       }
       art.status = 'rejected';
       art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: reasonStr };

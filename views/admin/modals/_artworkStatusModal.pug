@@ -30,8 +30,18 @@
                 | Rechazado
           .mt-3
             label.form-label(for=`rejectReason2-${a._id}`) Motivo del rechazo (solo si "Rechazado")
-            textarea.form-control(id=`rejectReason2-${a._id}` name='reason' rows='3' placeholder='Describe el motivo...')
-            small.text-muted Si eliges "Rechazado", este texto se enviará al artista.
+            textarea.form-control(
+              id=`rejectReason2-${a._id}`
+              name='reason'
+              rows='3'
+              placeholder='Describe el motivo...'
+              maxlength=(rejectReasonLimit || 100)
+              data-reject-limit=(rejectReasonLimit || 100)
+              data-reject-counter=`rejectCounterStatus-${a._id}`
+            )
+            small.text-muted
+              span(id=`rejectCounterStatus-${a._id}`)= rejectReasonLimit || 100
+              |  caracteres disponibles. Si eliges "Rechazado", este texto se enviará al artista.
         .modal-footer
           button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
           button.btn.btn-primary(type='submit') Guardar estado
