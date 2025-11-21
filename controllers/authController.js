@@ -11,6 +11,7 @@ const { wantsHTML } = require('@utils/http');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const { sendMail } = require('@services/mailer');
+const { renderEmailLayout } = require('@services/emailLayout');
 const {
   generatePolicyCompliantPassword,
   isModeratePassword,
@@ -64,10 +65,25 @@ exports.signup = catchAsync(async (req, res) => {
 
   const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
 
+  const createPasswordHtml = renderEmailLayout({
+    previewText: 'Crea tu contraseña para completar tu registro en Galería del Ox.',
+    title: 'Crea tu contraseña',
+    greeting: name || newUser.name || '',
+    bodyLines: [
+      'Gracias por registrarte en Galería del Ox.',
+      'Haz clic en el botón para crear tu contraseña y comenzar a explorar la comunidad.',
+      'Este enlace expira en 24 horas para mantener tu cuenta segura.'
+    ],
+    actionLabel: 'Crear contraseña',
+    actionUrl: createPasswordLink,
+    footerLines: ['Si no fuiste tú quien inició este registro, ignora este correo.']
+  });
+
   await sendEmail({
     to: newUser.email,
     subject: 'Crea tu contraseña',
-    text: `Bienvenido, ${name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+    text: `Bienvenido, ${name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`,
+    html: createPasswordHtml
   });
 
   if (wantsHTML(req)) {
@@ -164,10 +180,24 @@ exports.forgotPassword = catchAsync(async (req, res) => {
 
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${user._id}&token=${token}`;
 
+  const forgotPasswordHtml = renderEmailLayout({
+    previewText: 'Usa este enlace temporal para restablecer tu contraseña de Galería del Ox.',
+    title: 'Restablece tu contraseña',
+    greeting: user.name || '',
+    bodyLines: [
+      'Recibimos una solicitud para restablecer tu contraseña.',
+      'Haz clic en el botón para continuar. Este enlace es válido por 15 minutos.',
+      'Si no solicitaste este cambio, puedes ignorar este mensaje.'
+    ],
+    actionLabel: 'Restablecer contraseña',
+    actionUrl: resetLink
+  });
+
   await sendEmail({
     to: user.email,
     subject: 'Restablece tu contraseña',
-    text: `Haz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\nEste enlace expira en 15 minutos.`
+    text: `Haz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\nEste enlace expira en 15 minutos.`,
+    html: forgotPasswordHtml
   });
 
   // Flujos HTML: redirigir con mensaje amigable
@@ -248,10 +278,21 @@ exports.resetPassword = catchAsync(async (req, res) => {
   resetToken.used = true;
   await resetToken.save({ validateBeforeSave: false });
 
+  const passwordUpdatedHtml = renderEmailLayout({
+    previewText: 'Confirmación de cambio de contraseña en Galería del Ox.',
+    title: 'Tu contraseña ha sido cambiada',
+    greeting: user.name || '',
+    bodyLines: [
+      'Tu contraseña se actualizó correctamente.',
+      'Si no reconoces este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.'
+    ]
+  });
+
   await sendEmail({
     to: user.email,
     subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`
+    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`,
+    html: passwordUpdatedHtml
   });
 
   // Redirige si es HTML (siempre) al welcome
@@ -302,10 +343,21 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     maxAge: 7 * 24 * 60 * 60 * 1000
   });
 
+  const authPasswordUpdatedHtml = renderEmailLayout({
+    previewText: 'Confirmación de cambio de contraseña en Galería del Ox.',
+    title: 'Tu contraseña ha sido cambiada',
+    greeting: user.name || '',
+    bodyLines: [
+      'Tu contraseña se actualizó correctamente.',
+      'Si no reconoces este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.'
+    ]
+  });
+
   await sendEmail({
     to: user.email,
     subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`
+    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`,
+    html: authPasswordUpdatedHtml
   });
 
   // Redirige si es HTML y es el primer login

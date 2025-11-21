@@ -3,6 +3,7 @@ const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const { uploadBuffer } = require('@utils/cloudinaryImage');
 const { sendMail } = require('@services/mailer');
+const { renderEmailLayout } = require('@services/emailLayout');
 const ArtistApplication = require('@models/artistApplicationModel');
 const cloudinary = require('@services/cloudinary');
 
@@ -107,9 +108,24 @@ exports.create = catchAsync(async (req, res, next) => {
                (statement ? `Statement:\n${statement}\n\n` : '') +
                `CV (descarga privada): ${downloadUrl || '(no disponible)'}\n` +
                `Aplicación ID: ${appDoc._id}`;
-  try { await sendMail({ to, subject, text }); } catch (_) {}
+
+  const html = renderEmailLayout({
+    previewText: `Nueva solicitud de artista de ${user.name || user.email || ''}.`,
+    title: 'Nueva solicitud de artista',
+    greeting: 'Equipo',
+    bodyLines: [
+      `Usuario: ${user.name || user.email || ''}`,
+      `Email: ${user.email || 'sin email'}`,
+      valid.length ? `Enlaces: ${valid.join(', ')}` : 'Sin enlaces válidos proporcionados.',
+      statement ? `Statement: ${statement}` : ''
+    ],
+    actionLabel: downloadUrl ? 'Descargar CV' : undefined,
+    actionUrl: downloadUrl,
+    footerLines: [`Aplicación ID: ${appDoc._id}`]
+  });
+
+  try { await sendMail({ to, subject, text, html }); } catch (_) {}
 
   if (wantsHTML(req)) return res.redirect(303, '/become-artist?success=1');
   return res.status(201).json({ ok: true, data: { id: appDoc._id } });
 });
-
