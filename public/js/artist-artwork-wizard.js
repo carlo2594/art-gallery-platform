@@ -95,10 +95,12 @@
     }
     if (s === 3){
       const amtEl = form.querySelector('input[name="amount"]');
+      const techEl = form.querySelector('input[name="technique"]');
+      const hasTechnique = techEl && String(techEl.value || '').trim().length > 0;
       if (!amtEl) return false;
       if (amtEl.value === '') return false;
       const amt = Number(amtEl.value);
-      return Number.isFinite(amt) && amt >= 0;
+      return hasTechnique && Number.isFinite(amt) && amt >= 0;
     }
     return true;
   }
@@ -332,11 +334,16 @@
   function collectPayload(){
     const form = qs('#artistArtworkWizardForm');
     if (!form) return {};
-    const getVal = (name) => {
+    const getVal = (name, opts = {}) => {
       const el = form.querySelector('[name="'+name+'"]');
       if (!el) return undefined;
       if (el.type === 'number') {
-        return el.value === '' ? undefined : el.value;
+        if (el.value === '' || el.value == null) return undefined;
+        const decimals = typeof opts.decimals === 'number' ? opts.decimals : 2;
+        const num = Number(el.value);
+        if (!Number.isFinite(num)) return undefined;
+        const factor = Math.pow(10, decimals);
+        return Math.round(num * factor) / factor;
       }
       return el.value != null ? el.value : undefined;
     };
@@ -356,7 +363,13 @@
     const amount = getVal('amount');
     if (amount !== undefined) payload.amount = amount;
     const completedAt = getVal('completedAt');
-    if (completedAt) payload.completedAt = completedAt;
+    if (completedAt != null && completedAt !== '') {
+      const yearNum = Number(completedAt);
+      const maxYear = new Date().getFullYear();
+      if (Number.isFinite(yearNum) && yearNum >= 1800 && yearNum <= maxYear) {
+        payload.completedAt = `${yearNum}-01-01`;
+      }
+    }
     return payload;
   }
 

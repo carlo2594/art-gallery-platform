@@ -505,6 +505,16 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido.', 400));
   }
 
+  // Normalizar completedAtYear (legacy del wizard)
+  if (Object.prototype.hasOwnProperty.call(req.body, 'completedAtYear')) {
+    const yearNum = Number(req.body.completedAtYear);
+    const currentYear = new Date().getFullYear();
+    if (Number.isFinite(yearNum) && yearNum >= 1800 && yearNum <= currentYear) {
+      req.body.completedAt = new Date(Date.UTC(yearNum, 0, 1));
+    }
+    delete req.body.completedAtYear;
+  }
+
   // El artista puede editar campos básicos; admin además exhibitions e images.
   const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'amount', 'price_cents', 'completedAt'];
   // Admin también puede cambiar estado y motivo de rechazo

@@ -93,13 +93,31 @@ block content
                 .row.g-3
                   .col-md-6
                     label.form-label(for='wizardWidth') Ancho (cm) *
-                    input#wizardWidth.form-control(type='number', name='width_cm', min='1', step='1', placeholder='Ej. 80')
+                    input#wizardWidth.form-control(
+                      type='number',
+                      name='width_cm',
+                      step='0.01',
+                      inputmode='decimal',
+                      placeholder='Ej. 80.5'
+                    )
                   .col-md-6
                     label.form-label(for='wizardHeight') Alto (cm) *
-                    input#wizardHeight.form-control(type='number', name='height_cm', min='1', step='1', placeholder='Ej. 60')
+                    input#wizardHeight.form-control(
+                      type='number',
+                      name='height_cm',
+                      step='0.01',
+                      inputmode='decimal',
+                      placeholder='Ej. 60.25'
+                    )
                 .mt-3
-                  label.form-label(for='wizardCompletedAt') Fecha de la obra
-                  input#wizardCompletedAt.form-control(type='date', name='completedAt')
+                  label.form-label(for='wizardCompletedAt') Año de la obra
+                  - var currentYear = new Date().getFullYear()
+                  - var years = []
+                  - for (var y = currentYear; y >= 1800; y--) years.push(y)
+                  select#wizardCompletedAt.form-select(name='completedAt')
+                    option(value='') Selecciona el año
+                    each y in years
+                      option(value=y selected=(artwork && artwork.completedAtYear === y ? true : false))= y
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='1') Anterior
@@ -110,8 +128,8 @@ block content
                 h2.h4.mb-3(style='color: var(--ox-blue);') Técnica y precio
                 .row.g-3
                   .col-12
-                    label.form-label(for='wizardTechnique') Técnica
-                    input#wizardTechnique.form-control(type='text', name='technique', placeholder='Óleo, acrílico, etc.')
+                    label.form-label(for='wizardTechnique') Técnica *
+                    input#wizardTechnique.form-control(type='text', name='technique', required, placeholder='Óleo, acrílico, etc.')
                 .mt-3
                   label.form-label(for='wizardAmount') Precio (USD) *
                   input#wizardAmount.form-control(type='number', name='amount', min='0', step='0.01', placeholder='0.00')
