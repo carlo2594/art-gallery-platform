@@ -2,6 +2,10 @@
 const mongoose = require('mongoose');
 const bcrypt   = require('bcryptjs');
 const validator = require('validator'); 
+const {
+  isModeratePassword,
+  MODERATE_PASSWORD_MESSAGE
+} = require('@utils/passwordPolicy');
 
 const userSchema = new mongoose.Schema({
   name:     { type: String, required: true, trim: true, maxlength: 20 },
@@ -20,7 +24,19 @@ const userSchema = new mongoose.Schema({
     trim: true
     // unique se define con índice explícito abajo
   },
-  password: { type: String, required: true, select: false },   // hash no se envía
+  password: {
+    type: String,
+    required: true,
+    minlength: 8,
+    select: false,
+    validate: {
+      validator: function (value) {
+        if (!this.isModified('password')) return true;
+        return isModeratePassword(value);
+      },
+      message: MODERATE_PASSWORD_MESSAGE
+    }
+  },   // hash no se envía
   role: {
     type: String,
     enum: ['artist', 'admin', 'collector'],

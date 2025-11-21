@@ -622,15 +622,18 @@ exports.getActivityExhibitions = catchAsync(async (req, res) => {
 
 // Vista para reset password (prevalida el enlace)
 exports.getResetPassword = catchAsync(async (req, res) => {
-  const { uid, token, type } = req.query;
+  const { uid, token, type, policyError } = req.query;
+  const isNewPassword = type === 'new';
 
   // Si faltan datos mínimos, muestra la página con error genérico
   if (!uid || !token) {
     return res.render('public/auth/resetPassword', {
       uid,
       token,
-      isNewPassword: type === 'new',
+      isNewPassword,
       error: 'El enlace no es válido o ya venció. Solicita uno nuevo.',
+      linkInvalid: true,
+      policyError,
       hideFooter: true
     });
   }
@@ -652,7 +655,8 @@ exports.getResetPassword = catchAsync(async (req, res) => {
   return res.render('public/auth/resetPassword', {
     uid,
     token,
-    isNewPassword: type === 'new',
+    isNewPassword,
+    policyError,
     hideFooter: true
   });
 });

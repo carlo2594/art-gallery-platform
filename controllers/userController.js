@@ -10,11 +10,17 @@ const crypto = require('crypto');
 const PasswordResetToken = require('@models/passwordResetTokenModel');
 const { normalizeEmail } = require('@utils/emailUtils');
 const { sendMail } = require('@services/mailer');
+const { renderEmailLayout } = require('@services/emailLayout');
 
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
 const handleCoverImage = require('@utils/handleCoverImage');
 const handleDuplicateKeyError = require('@utils/handleDuplicateKeyError');
+const {
+  generatePolicyCompliantPassword,
+  isModeratePassword,
+  MODERATE_PASSWORD_MESSAGE
+} = require('@utils/passwordPolicy');
 
 // CRUD estándar
 exports.getAllUsers = factory.getAll(User);
@@ -103,11 +109,22 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
   // Si el email cambió, notifica al nuevo email
   if (filteredBody.email && filteredBody.email !== oldEmail) {
+    const confirmEmailHtml = renderEmailLayout({
+      previewText: 'Confirmamos el cambio de correo de tu cuenta en Galería del Ox.',
+      title: 'Correo actualizado',
+      greeting: user.name || '',
+      bodyLines: [
+        'Tu correo ha sido actualizado exitosamente en Galería del Ox.',
+        'Si no realizaste este cambio, contáctanos inmediatamente en soporte@galeriadelox.com.'
+      ]
+    });
+
     await sendMail({
       to: filteredBody.email,
       subject: 'Confirmación de cambio de correo',
       text: `Hola ${user.name}, tu correo ha sido actualizado exitosamente en Galería del Ox. 
-Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`
+Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`,
+      html: confirmEmailHtml
     });
   }
 
@@ -126,13 +143,22 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 // Cambiar contraseña autenticado
 exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return next(new AppError('Debes proporcionar la contraseña actual y la nueva.', 400));
+  }
+
+  if (!isModeratePassword(newPassword)) {
+    return next(new AppError(MODERATE_PASSWORD_MESSAGE, 400));
+  }
+
   const user = await User.findById(req.user.id).select('+password');
 
-  if (!(await user.correctPassword(req.body.currentPassword))) {
+  if (!(await user.correctPassword(currentPassword))) {
     return next(new AppError('La contraseña actual es incorrecta', 401));
   }
 
-  user.password = req.body.newPassword;
+  user.password = newPassword;
   await user.save();
 
   sendResponse(res, null, 'Contraseña actualizada correctamente');
@@ -196,6 +222,10 @@ exports.resetUserPassword = catchAsync(async (req, res, next) => {
 
   if (!newPassword) {
     return next(new AppError('Debes proporcionar una nueva contraseña', 400));
+  }
+
+  if (!isModeratePassword(newPassword)) {
+    return next(new AppError(MODERATE_PASSWORD_MESSAGE, 400));
   }
 
   const user = await User.findById(req.params.id).select('+password');
@@ -299,7 +329,7 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
     return next(new AppError('El correo ya está registrado.', 400));
   }
 
-  const tempPassword = crypto.randomBytes(16).toString('hex');
+  const tempPassword = generatePolicyCompliantPassword();
   const payload = { name: name || normalizedEmail.split('@')[0], email: normalizedEmail, password: tempPassword };
   if (role && ['collector','artist','admin'].includes(role)) payload.role = role;
 
@@ -313,10 +343,23 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
 
   const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
 
+  const adminCreateUserHtml = renderEmailLayout({
+    previewText: 'Activa tu cuenta de Galería del Ox creando una contraseña.',
+    title: 'Completa tu acceso',
+    greeting: newUser.name || '',
+    bodyLines: [
+      'Un administrador creó una cuenta para ti en Galería del Ox.',
+      'Haz clic en el botón para configurar tu contraseña. El enlace expira en 24 horas.'
+    ],
+    actionLabel: 'Crear contraseña',
+    actionUrl: createPasswordLink
+  });
+
   await sendMail({
     to: newUser.email,
     subject: 'Crea tu contraseña',
-    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`
+    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`,
+    html: adminCreateUserHtml
   });
 
   return sendResponse(res, { userId: newUser._id }, 'Usuario creado. Se envió un correo para crear la contraseña.', 201);

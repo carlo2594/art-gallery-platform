@@ -1,13 +1,7 @@
 const validator = require('validator');
 const catchAsync = require('@utils/catchAsync');
 const { sendMail } = require('@services/mailer');
-
-const escapeHtml = s => String(s || '')
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&#39;');
+const { renderEmailLayout } = require('@services/emailLayout');
 
 function wantsJson(req) {
   const accept = (req.headers.accept || '').toLowerCase();
@@ -46,14 +40,20 @@ exports.submit = catchAsync(async (req, res) => {
   const to = process.env.CONTACT_EMAIL_TO || 'soporte@galeriadelox.com';
   const subject = `Contacto web: ${n}`;
   const text = `Nombre: ${n}\nEmail: ${e}\n\nMensaje:\n${m}\n\nIP: ${req.ip || ''}`;
-  const html = `
-    <p><strong>Nombre:</strong> ${escapeHtml(n)}</p>
-    <p><strong>Email:</strong> ${escapeHtml(e)}</p>
-    <p><strong>Mensaje:</strong></p>
-    <pre style="white-space:pre-wrap">${escapeHtml(m)}</pre>
-    <hr>
-    <p style="color:#888">IP: ${escapeHtml(req.ip || '')}</p>
-  `;
+  const html = renderEmailLayout({
+    previewText: `Nuevo mensaje de ${n}`,
+    title: 'Nuevo mensaje de contacto',
+    greeting: 'Equipo',
+    bodyLines: [
+      `Nombre: ${n}`,
+      `Email: ${e}`,
+      'Mensaje:',
+      m
+    ],
+    actionLabel: e ? 'Responder' : undefined,
+    actionUrl: e ? `mailto:${e}` : undefined,
+    footerLines: [`IP: ${req.ip || ''}`]
+  });
 
   await sendMail({ to, subject, text, html, replyTo: e });
 

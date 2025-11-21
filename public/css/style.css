@@ -2698,6 +2698,25 @@ body.noscroll {
 .admin-main {
   background: #fff;
 }
+.admin-artworks-table-wrapper {
+  overflow-x: auto;
+}
+.admin-artworks-table {
+  width: 100%;
+  table-layout: fixed;
+}
+.admin-artworks-table th,
+.admin-artworks-table td {
+  white-space: normal;
+  word-break: break-word;
+  vertical-align: middle;
+}
+.admin-artworks-table .artwork-title-cell {
+  min-width: 12rem;
+}
+.admin-artworks-table .btn {
+  white-space: nowrap;
+}
 .related-exhibitions-section > .col-12 {
   padding-top: 1.25rem; /* pt-4 */
   border-top: 1px solid rgba(0,0,0,.08); /* separador sutil alineado al contenido */

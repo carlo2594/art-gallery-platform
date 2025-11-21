@@ -94,7 +94,11 @@ const artworkSchema = new mongoose.Schema(
     review: {
       reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       reviewedAt: { type: Date },
-      rejectReason: { type: String },
+      rejectReason: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'La razón del rechazo no puede superar 100 caracteres.']
+      },
       comment: { type: String, trim: true },
     },
 

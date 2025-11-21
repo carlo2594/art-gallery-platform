@@ -1,5 +1,10 @@
 // --- Chips rápidos de exposiciones: siempre envía el parámetro type ---
 'use strict';
+const PASSWORD_POLICY_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+const PASSWORD_POLICY_MESSAGE = 'La contraseña debe tener al menos 8 caracteres, con una mayúscula, una minúscula y un número.';
+function isModeratePassword(value) {
+  return PASSWORD_POLICY_REGEX.test(String(value || '').trim());
+}
 try { console.log('[App] main.js loaded; readyState=', document.readyState); } catch(_) {}
 
 // Ejecuta el init incluso si DOMContentLoaded ya ocurrió (script al final del body)
@@ -513,6 +518,9 @@ __onReady(function () {
           const newPassword = fd.get('newPassword');
           if (!currentPassword || !newPassword) {
             throw new Error('Completa ambos campos de contraseña');
+          }
+          if (!isModeratePassword(newPassword)) {
+            throw new Error(PASSWORD_POLICY_MESSAGE);
           }
 
           const res = await fetch(passwordForm.action, {
@@ -2195,10 +2203,16 @@ __onReady(function () {
     };
     form.addEventListener('submit', function(e){
       if(!newPass || !confirm) return;
-      if(newPass.value !== confirm.value){
+      var message = '';
+      if(!isModeratePassword(newPass.value)){
+        message = PASSWORD_POLICY_MESSAGE;
+      } else if(newPass.value !== confirm.value){
+        message = 'Las contraseñas no coinciden.';
+      }
+      if(message){
         e.preventDefault();
         if(existing && existing.parentNode) existing.parentNode.removeChild(existing);
-        existing = makeAlert('Las contraseñas no coinciden.');
+        existing = makeAlert(message);
         form.insertBefore(existing, form.firstChild.nextSibling);
       }
     });

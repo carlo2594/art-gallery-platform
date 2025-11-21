@@ -5,6 +5,7 @@ const AppError = require('@utils/appError');
 const filterObject = require('@utils/filterObject');
 const sendResponse = require('@utils/sendResponse');
 const { sendMail } = require('@services/mailer');
+const { renderEmailLayout } = require('@services/emailLayout');
 const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const Artwork = require('@models/artworkModel');
 const arrayUnique = require('@utils/arrayUnique');
@@ -19,7 +20,16 @@ const getAspectPolicy = () => 'none';
 const buildAspectErrorPayload = () => ({ code: 'ASPECT_VALIDATION_DISABLED' });
 
 const ALLOWED_STATUS = ['draft', 'submitted', 'approved', 'rejected'];
+const MAX_REJECT_REASON_LENGTH = 100;
 
+
+const {
+  artworkStatusSubject,
+  artworkStatusText,
+  artworkStatusHtml,
+  adminSubmissionSubject,
+  adminSubmissionText
+} = require('@services/emailTemplates');
 
 // =======================
 // HELPERS
@@ -27,6 +37,24 @@ const ALLOWED_STATUS = ['draft', 'submitted', 'approved', 'rejected'];
 function checkAlreadyInStatus(res, art, status, mensaje) {
   // Allow idempotent state changes: never block
   return false;
+}
+
+function buildArtworkPublicUrl(req, art) {
+  if (!art) return '';
+  const slugOrId = art.slug || art._id;
+  if (!slugOrId) return '';
+  const baseFromEnv = (process.env.FRONTEND_URL || '').replace(/\/+$/, '');
+  if (baseFromEnv) return `${baseFromEnv}/artworks/${slugOrId}`;
+  try {
+    if (req && typeof req.get === 'function') {
+      const host = req.get('host');
+      if (host) {
+        const protocol = req.protocol || 'https';
+        return `${protocol}://${host}/artworks/${slugOrId}`;
+      }
+    }
+  } catch (_) {}
+  return '';
 }
 
 // moved to @utils/priceInput
@@ -39,7 +67,8 @@ exports.startReview = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   // Mantener estado "submitted"; solo marca quién inicia revisión
@@ -48,11 +77,17 @@ exports.startReview = catchAsync(async (req, res, next) => {
   
   // Notificar al artista que su obra fue tomada para revisión
   if (art.artist && art.artist.email) {
-    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
+    const artworkUrl = buildArtworkPublicUrl(req, art);
     await sendMail({
       to: art.artist.email,
-      subject: artworkStatusSubject('submitted'),
-      text: artworkStatusText({ status: 'submitted', artistName: art.artist.name, artworkTitle: art.title })
+      subject: artworkStatusSubject('under_review'),
+      text: artworkStatusText({ status: 'under_review', artistName: art.artist.name, artworkTitle: art.title }),
+      html: artworkStatusHtml({
+        status: 'under_review',
+        artistName: art.artist.name,
+        artworkTitle: art.title,
+        artworkUrl
+      })
     });
   }
   
@@ -66,7 +101,8 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (art.status === 'approved') {
@@ -93,11 +129,17 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
 
   // Notificar al artista que su obra fue aprobada
   if (art.artist && art.artist.email) {
-    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
+    const artworkUrl = buildArtworkPublicUrl(req, art);
     await sendMail({
       to: art.artist.email,
       subject: artworkStatusSubject('approved'),
-      text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title })
+      text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title }),
+      html: artworkStatusHtml({
+        status: 'approved',
+        artistName: art.artist.name,
+        artworkTitle: art.title,
+        artworkUrl
+      })
     });
   }
 
@@ -111,28 +153,42 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (art.status === 'rejected') {
     return res.status(400).json({ status: 'fail', message: 'La obra ya está rechazada.' });
   }
 
-  if (!req.body.reason || typeof req.body.reason !== 'string' || req.body.reason.trim() === '') {
+  const reason = typeof req.body.reason === 'string' ? req.body.reason.trim() : '';
+  if (!reason) {
     return next(new AppError('Debes especificar el motivo del rechazo.', 400));
+  }
+  if (reason.length > MAX_REJECT_REASON_LENGTH) {
+    return next(
+      new AppError(`El motivo del rechazo no puede superar ${MAX_REJECT_REASON_LENGTH} caracteres.`, 400)
+    );
   }
 
   art.status = 'rejected';
-  art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: req.body.reason };
+  art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: reason };
   await art.save();
 
   // Notificar al artista que su obra fue rechazada
   if (art.artist && art.artist.email) {
-    const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
+    const artworkUrl = buildArtworkPublicUrl(req, art);
     await sendMail({
       to: art.artist.email,
       subject: artworkStatusSubject('rejected'),
-      text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason: req.body.reason })
+      text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason }),
+      html: artworkStatusHtml({
+        status: 'rejected',
+        artistName: art.artist.name,
+        artworkTitle: art.title,
+        reason,
+        artworkUrl
+      })
     });
   }
 
@@ -149,7 +205,8 @@ exports.markArtworkSold = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido', 400));
   }
 
-  const artwork = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const artwork = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!artwork) {
     return next(new AppError('Obra no encontrada', 404));
   }
@@ -170,11 +227,25 @@ exports.markArtworkSold = catchAsync(async (req, res, next) => {
   await artwork.markSold(saleData);
 
   if (artwork.artist && artwork.artist.email) {
+    const artworkUrl = buildArtworkPublicUrl(req, artwork);
+    const soldHtml = renderEmailLayout({
+      previewText: `Tu obra "${artwork.title}" ha sido vendida.`,
+      title: '¡Tu obra ha sido vendida!',
+      greeting: artwork.artist.name || '',
+      bodyLines: [
+        `Te informamos que tu obra "${artwork.title}" ha sido vendida exitosamente.`,
+        'Pronto nos pondremos en contacto para coordinar los siguientes pasos.'
+      ],
+      actionLabel: artworkUrl ? 'Ver obra' : undefined,
+      actionUrl: artworkUrl
+    });
+
     try {
       await sendMail({
         to: artwork.artist.email,
         subject: `¡Tu obra "${artwork.title}" ha sido vendida!`,
-        text: `Hola ${artwork.artist.name},\n\nTe informamos que tu obra "${artwork.title}" ha sido vendida exitosamente.\n\nFelicidades por esta venta.\n\nSaludos,\nEquipo Galería del Ox`
+        text: `Hola ${artwork.artist.name},\n\nTe informamos que tu obra "${artwork.title}" ha sido vendida exitosamente.\n\nFelicidades por esta venta.\n\nSaludos,\nEquipo Galería del Ox`,
+        html: soldHtml
       });
     } catch (emailError) {
       console.error('Error enviando email de venta:', emailError);
@@ -561,7 +632,8 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       }
     }
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada o está en la papelera.', 404));
 
   // ---- Precio (si viene) ----
@@ -683,6 +755,11 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       if (!reasonStr) {
         return next(new AppError('Debes especificar el motivo del rechazo.', 400));
       }
+      if (reasonStr.length > MAX_REJECT_REASON_LENGTH) {
+        return next(
+          new AppError(`El motivo del rechazo no puede superar ${MAX_REJECT_REASON_LENGTH} caracteres.`, 400)
+        );
+      }
       art.status = 'rejected';
       art.review = { reviewedBy: req.user.id, reviewedAt: new Date(), rejectReason: reasonStr };
     }
@@ -696,19 +773,33 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   // Notificaciones por email si el admin cambió a approved/rejected
   if (req.user.role === 'admin' && requestedStatus && art.artist) {
     try {
-      const { artworkStatusSubject, artworkStatusText } = require('@services/emailTemplates');
+      const artworkUrl = buildArtworkPublicUrl(req, art);
       if (requestedStatus === 'approved' && art.artist.email) {
         await sendMail({
           to: art.artist.email,
           subject: artworkStatusSubject('approved'),
-          text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title })
+          text: artworkStatusText({ status: 'approved', artistName: art.artist.name, artworkTitle: art.title }),
+          html: artworkStatusHtml({
+            status: 'approved',
+            artistName: art.artist.name,
+            artworkTitle: art.title,
+            artworkUrl
+          })
         });
       }
       if (requestedStatus === 'rejected' && art.artist.email) {
+        const reason = art?.review?.rejectReason || '';
         await sendMail({
           to: art.artist.email,
           subject: artworkStatusSubject('rejected'),
-          text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason: art?.review?.rejectReason || '' })
+          text: artworkStatusText({ status: 'rejected', artistName: art.artist.name, artworkTitle: art.title, reason }),
+          html: artworkStatusHtml({
+            status: 'rejected',
+            artistName: art.artist.name,
+            artworkTitle: art.title,
+            reason,
+            artworkUrl
+          })
         });
       }
     } catch (_) {}
@@ -756,7 +847,8 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido.', 400));
   }
   // Busca la obra y el artista
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'submitted', 'La obra ya fue enviada a revisión.')) return;
@@ -791,7 +883,7 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
 
   // Notifica a todos los administradores
   const User = require('@models/userModel');
-  const admins = await User.find({ role: 'admin', active: true });
+  const admins = await User.find({ role: 'admin', active: true }).select('name +email');
 
   const artworkInfo = `
 Título: ${art.title}
@@ -809,12 +901,31 @@ Si no ves la obra en el queue de aprobación, es posible que ya fue aprobada o r
 Puedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
   }
 
-  const { adminSubmissionSubject, adminSubmissionText } = require('@services/emailTemplates');
   for (const admin of admins) {
+    const artworkUrl = buildArtworkPublicUrl(req, art);
+    const adminSubmissionHtml = renderEmailLayout({
+      previewText: `Nueva obra enviada por ${art.artist.name || 'un artista'}.`,
+      title: 'Nueva obra enviada para revisión',
+      greeting: admin.name || 'Administrador',
+      bodyLines: [
+        `${art.artist.name} envió la obra "${art.title}" para revisión.`,
+        'Detalles principales:'
+      ],
+      listItems: [
+        `Descripción: ${art.description || '(sin descripción)'}`,
+        `Artista: ${art.artist.name} (${art.artist.email})`,
+        `ID de obra: ${art._id}`
+      ],
+      actionLabel: artworkUrl ? 'Ver obra' : undefined,
+      actionUrl: artworkUrl,
+      footerLines: extraInfo ? [extraInfo.trim()] : []
+    });
+
     await sendMail({
       to: admin.email,
       subject: adminSubmissionSubject(),
-      text: adminSubmissionText({ art, artist: art.artist })
+      text: adminSubmissionText({ art, artist: art.artist }),
+      html: adminSubmissionHtml
     });
   }
 

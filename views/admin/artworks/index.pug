@@ -3,6 +3,7 @@
 block content
   .container.py-5
     - const isAdmin = currentUser && currentUser.role === 'admin'
+    - const rejectReasonLimit = 100
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
       span Obras
       if isAdmin
@@ -49,8 +50,8 @@ block content
           a.btn.btn-outline-secondary(href='?') Limpiar
 
     if artworks && artworks.length
-      .table-responsive
-        table.table.table-striped.table-hover.align-middle
+      .table-responsive.admin-artworks-table-wrapper
+        table.table.table-striped.table-hover.align-middle.admin-artworks-table
           thead
             tr
               th Título
@@ -67,8 +68,8 @@ block content
             each a in artworks
               - const status = a.status || a.moderationStatus
               tr(id=`artRow-${a._id}`)
-                td= a.title
-                td= (a.artist && a.artist.name) || '—'
+                td.artwork-title-cell.text-break= a.title
+                td.text-break= (a.artist && a.artist.name) || '—'
                 td
                   span.badge(class=status === 'approved' ? 'text-bg-success' : (status === 'submitted' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary')))= status || 'draft'
                 td
