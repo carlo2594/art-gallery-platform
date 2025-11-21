@@ -67,7 +67,8 @@ exports.startReview = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   // Mantener estado "submitted"; solo marca quién inicia revisión
@@ -100,7 +101,8 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (art.status === 'approved') {
@@ -151,7 +153,8 @@ exports.rejectArtwork = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(req.params.id)) {
     return next(new AppError('ID de obra inválido.', 400));
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (art.status === 'rejected') {
@@ -202,7 +205,8 @@ exports.markArtworkSold = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido', 400));
   }
 
-  const artwork = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const artwork = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!artwork) {
     return next(new AppError('Obra no encontrada', 404));
   }
@@ -628,7 +632,8 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       }
     }
   }
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null });
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada o está en la papelera.', 404));
 
   // ---- Precio (si viene) ----
@@ -842,7 +847,8 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
     return next(new AppError('ID de obra inválido.', 400));
   }
   // Busca la obra y el artista
-  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null }).populate('artist');
+  const art = await Artwork.findOne({ _id: req.params.id, deletedAt: null })
+    .populate({ path: 'artist', select: 'name +email' });
   if (!art) return next(new AppError('Obra no encontrada.', 404));
 
   if (checkAlreadyInStatus(res, art, 'submitted', 'La obra ya fue enviada a revisión.')) return;
@@ -877,7 +883,7 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
 
   // Notifica a todos los administradores
   const User = require('@models/userModel');
-  const admins = await User.find({ role: 'admin', active: true });
+  const admins = await User.find({ role: 'admin', active: true }).select('name +email');
 
   const artworkInfo = `
 Título: ${art.title}
