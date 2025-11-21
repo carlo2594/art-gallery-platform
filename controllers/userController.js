@@ -15,6 +15,11 @@ const { upload, deleteImage } = require('@utils/cloudinaryImage');
 const handleProfileImage = require('@utils/handleProfileImage');
 const handleCoverImage = require('@utils/handleCoverImage');
 const handleDuplicateKeyError = require('@utils/handleDuplicateKeyError');
+const {
+  generatePolicyCompliantPassword,
+  isModeratePassword,
+  MODERATE_PASSWORD_MESSAGE
+} = require('@utils/passwordPolicy');
 
 // CRUD estándar
 exports.getAllUsers = factory.getAll(User);
@@ -126,13 +131,22 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
 
 // Cambiar contraseña autenticado
 exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return next(new AppError('Debes proporcionar la contraseña actual y la nueva.', 400));
+  }
+
+  if (!isModeratePassword(newPassword)) {
+    return next(new AppError(MODERATE_PASSWORD_MESSAGE, 400));
+  }
+
   const user = await User.findById(req.user.id).select('+password');
 
-  if (!(await user.correctPassword(req.body.currentPassword))) {
+  if (!(await user.correctPassword(currentPassword))) {
     return next(new AppError('La contraseña actual es incorrecta', 401));
   }
 
-  user.password = req.body.newPassword;
+  user.password = newPassword;
   await user.save();
 
   sendResponse(res, null, 'Contraseña actualizada correctamente');
@@ -196,6 +210,10 @@ exports.resetUserPassword = catchAsync(async (req, res, next) => {
 
   if (!newPassword) {
     return next(new AppError('Debes proporcionar una nueva contraseña', 400));
+  }
+
+  if (!isModeratePassword(newPassword)) {
+    return next(new AppError(MODERATE_PASSWORD_MESSAGE, 400));
   }
 
   const user = await User.findById(req.params.id).select('+password');
@@ -299,7 +317,7 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
     return next(new AppError('El correo ya está registrado.', 400));
   }
 
-  const tempPassword = crypto.randomBytes(16).toString('hex');
+  const tempPassword = generatePolicyCompliantPassword();
   const payload = { name: name || normalizedEmail.split('@')[0], email: normalizedEmail, password: tempPassword };
   if (role && ['collector','artist','admin'].includes(role)) payload.role = role;
 

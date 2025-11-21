@@ -317,9 +317,18 @@ block content
               .col-12.col-md-6.account-form-column
                 label.form-label.account-form-label(for='newPassword') Nueva contraseña
                 .input-group.account-form-input-group.account-form-input-group--append
-                  input#newPassword.form-control.account-form-control(type='password' name='newPassword' required minlength='8')
+                  input#newPassword.form-control.account-form-control(
+                    type='password'
+                    name='newPassword'
+                    required
+                    minlength='8'
+                    pattern='(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}'
+                    title='Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'
+                    autocomplete='new-password'
+                  )
                   button.btn.btn-outline-secondary.account-form-toggle(type='button' data-toggle-password='#newPassword' aria-pressed='false' title='Mostrar/ocultar')
                     i.fas.fa-eye.account-form-toggle-icon
+                small.form-text.text-muted.mt-1 Contraseña de al menos 8 caracteres con una mayúscula, una minúscula y un número.
             .mt-3.account-form-actions
               button.btn.btn-primary.account-form-submit(type='submit') Cambiar contraseña
 

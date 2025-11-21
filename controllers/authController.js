@@ -11,6 +11,11 @@ const { wantsHTML } = require('@utils/http');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const { sendMail } = require('@services/mailer');
+const {
+  generatePolicyCompliantPassword,
+  isModeratePassword,
+  MODERATE_PASSWORD_MESSAGE
+} = require('@utils/passwordPolicy');
 
 // Wrapper simple por si cambias proveedor de correo
 async function sendEmail({ to, subject, text, html }) {
@@ -42,7 +47,7 @@ exports.signup = catchAsync(async (req, res) => {
   }
 
   // Creamos con password temporal (hook del modelo lo hashea)
-  const tempPassword = crypto.randomBytes(16).toString('hex');
+  const tempPassword = generatePolicyCompliantPassword();
   const newUser = await User.create({ name, email: normalizedEmail, password: tempPassword });
 
   // Token para que el usuario defina su primera contraseña
@@ -184,6 +189,18 @@ exports.resetPassword = catchAsync(async (req, res) => {
     return sendResponse(res, null, 'Datos incompletos.', 400);
   }
 
+  if (!isModeratePassword(newPassword)) {
+    if (wantsHTML(req)) {
+      const url = new URL(`${req.protocol}://${req.get('host')}/reset-password`);
+      url.searchParams.set('uid', uid);
+      url.searchParams.set('token', token);
+      if (req.body.type) url.searchParams.set('type', req.body.type);
+      url.searchParams.set('policyError', MODERATE_PASSWORD_MESSAGE);
+      return res.redirect(303, url.toString());
+    }
+    return sendResponse(res, null, MODERATE_PASSWORD_MESSAGE, 400);
+  }
+
   const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
 
   const resetToken = await PasswordResetToken.findOne({
@@ -255,6 +272,10 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   if (!userId) return next(new AppError('No autorizado', 401));
   if (!currentPassword || !newPassword) {
     return sendResponse(res, null, 'Debes enviar la contraseña actual y la nueva.', 400);
+  }
+
+  if (!isModeratePassword(newPassword)) {
+    return sendResponse(res, null, MODERATE_PASSWORD_MESSAGE, 400);
   }
 
   const user = await User.findById(userId).select('+password +email +lastLoginAt');
