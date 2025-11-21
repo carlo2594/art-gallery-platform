@@ -15,13 +15,15 @@ block content
             | Desde obras originales hasta experiencias sensoriales, cada rincón de la galería está pensado para celebrar la diversidad creativa.
           a.btn.btn-primary.btn-lg.px-4.me-md-2.fw-bold.text-uppercase.hero-cta-btn.mt-3(href="/artworks") Ver el arte
         .col-lg-5.d-flex.justify-content-end.align-items-center.hero-image-container.hero-col-image
-          img.hero-image.collectors-hero-image.hero-img-main(
-            src="/img/Ox-hero-image-landing.jpg",
-            alt="Galería del Ox",
-            loading="eager",
-            fetchpriority="high",
-            decoding="async"
-          )
+          picture
+            source(srcset="/img/Ox-hero-image-landing.webp", type="image/webp")
+            img.hero-image.collectors-hero-image.hero-img-main(
+              src="/img/Ox-hero-image-landing.jpg",
+              alt="Galería del Ox",
+              loading="eager",
+              fetchpriority="high",
+              decoding="async"
+            )
 
   
   //- Exposiciones recientes (3) usando estilo Bootstrap featurette
@@ -63,7 +65,9 @@ block content
 
   //- CTA coleccionistas
   section.join-artists.position-relative
-    img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Unete como coleccionista")
+    picture
+      source(srcset="/img/join-artists-bg.webp", type="image/webp")
+      img.join-artists-bg.img-fluid.rounded-4(src="/img/join-artists-bg.jpg", alt="Unete como coleccionista")
     .join-artists-card.card.position-absolute.top-50.start-50.translate-middle.shadow-lg.w-75.w-md-50.w-lg-40
       .card-body.text-center.px-2.px-md-4.py-1.py-md-3.d-flex.flex-column.justify-content-center.align-items-center
         i.fas.fa-gem.text-primary.mb-1.mb-md-3.collectors-icon
