@@ -415,7 +415,7 @@ exports.getActivity = catchAsync(async (req, res) => {
       .limit(50)
       .populate({
         path: 'artwork',
-        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents exhibitions',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents exhibitions',
         populate: { path: 'artist', select: 'name' }
       })
       .lean();
@@ -439,7 +439,7 @@ exports.getActivity = catchAsync(async (req, res) => {
       .limit(50)
       .populate({
         path: 'artwork',
-        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents status deletedAt',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents status deletedAt',
         populate: { path: 'artist', select: 'name' }
       })
       .lean();
