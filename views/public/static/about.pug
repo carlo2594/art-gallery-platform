@@ -1,4 +1,4 @@
-extends /layouts/public
+﻿extends /layouts/public
 
 block content
   .container-xxl.py-5
@@ -17,5 +17,6 @@ block content
           p.about-text.mb-0 Galería del Ox es un reflejo de nuestro origen: un lugar donde el arte se vive en familia y se comparte desde el alma.
       .col-lg-5
         .about-image-container
-          img.img-fluid.about-image(src="/img/family-ox.jpg", alt="Familia Galería del Ox")
-
+          picture
+            source(srcset="/img/family-ox.webp", type="image/webp")
+            img.img-fluid.about-image(src="/img/family-ox.jpg", alt="Familia Galería del Ox")
