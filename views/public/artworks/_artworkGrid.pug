@@ -50,11 +50,11 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
               .artwork-grid__details
                 if a.technique
                   .artwork-grid__detail-item= a.technique
-                // Preferir size textual; si no, fallback a WxH
+                // Preferir size textual; si no, fallback a HxW
                 if a.size
                   .artwork-grid__detail-item= a.size
                 else if a.width_cm && a.height_cm
-                  .artwork-grid__detail-item #{a.width_cm} x #{a.height_cm} cm
+                  .artwork-grid__detail-item #{a.height_cm} x #{a.width_cm} cm
                 if a.completedAt
                   - const __y = (function(v){ try { var d = new Date(v); var y = d.getFullYear(); return Number.isFinite(y) ? y : null; } catch(_) { return null; } })(a.completedAt)
                   if __y

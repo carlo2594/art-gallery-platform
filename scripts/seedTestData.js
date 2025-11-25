@@ -28,6 +28,7 @@ const Newsletter = require('../models/newsletterModel');
 const ArtistApplication = require('../models/artistApplicationModel');
 
 const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
+const DB_NAME = process.env.DB_NAME || 'galeria_dev';
 
 const randomImages = [
   'https://picsum.photos/seed/gdo-1/1200/800',
@@ -98,7 +99,7 @@ const AVAILABILITY_STATUSES = ['for_sale', 'reserved', 'sold', 'not_for_sale', '
  * Función principal que conecta a la base de datos, elimina toda la base y agrega datos de prueba variados.
  */
 async function seed() {
-  await mongoose.connect(DB);
+  await mongoose.connect(DB, { dbName: DB_NAME });
   
   console.log('[SEED] Sincronizando índices...');
   
@@ -139,7 +140,7 @@ async function seed() {
   userData.push({ 
     name: 'Admin', 
     email: 'admin@test.com', 
-    password: '123456', 
+    password: 'SeedPass1', 
     role: 'admin', 
     profileImage: randomFromArray(randomImages),
     coverImage: randomFromArray(randomImages),
@@ -151,7 +152,7 @@ async function seed() {
     userData.push({
       name: `Collector ${i}`,
       email: `collector${i}@test.com`,
-      password: '123456',
+      password: 'SeedPass1',
       role: 'collector',
       bio: `Coleccionista de arte ${i}`,
       profileImage: randomFromArray(randomImages),
@@ -162,7 +163,7 @@ async function seed() {
   userData.push({ 
     name: 'UsuarioExtra', 
     email: 'usuarioextra@test.com', 
-    password: '123456', 
+    password: 'SeedPass1', 
     role: 'admin', 
     bio: 'Bio de usuario extra', 
     profileImage: randomFromArray(randomImages),
@@ -174,7 +175,7 @@ async function seed() {
   userData.push({
     name: 'Leonardo Martinez',
     email: 'leonardo.martinez@test.com',
-    password: '123456',
+    password: 'SeedPass1',
     role: 'artist',
     bio: 'Artista contemporáneo especializado en pintura abstracta y escultura moderna. Con más de 15 años de experiencia, ha expuesto en galerías de todo el mundo.',
     location: 'Barcelona, España',
@@ -194,7 +195,7 @@ async function seed() {
     userData.push({
       name: `Artista ${i}`,
       email: `artista${i}@test.com`,
-      password: '123456',
+      password: 'SeedPass1',
       role: 'artist',
       bio: `Bio de Artista ${i}`,
       profileImage: randomFromArray(randomImages),
@@ -564,21 +565,11 @@ async function seed() {
   const showcaseArtist = await User.create({
     name: 'María Fernández',
     email: 'maria.fernandez@example.com',
-    password: '123456',
+    password: 'SeedPass1',
     role: 'artist',
     profileImage: randomFromArray(randomImages),
     coverImage: randomFromArray(randomImages),
-    bio: `Artista contemporánea argentina. Su práctica se centra en la pintura y el dibujo expandido,
-    con un fuerte énfasis en la relación entre color, luz y materia. Explora series de procesos largos en
-    las que alterna capas de veladuras con zonas de alto empaste, permitiendo que la huella del gesto y
-    el tiempo de secado de los óleos dialoguen con la geometría de la composición.
-
-    Estudió Artes Visuales en la UNA (Buenos Aires) y realizó clínicas de obra con referentes locales e
-    internacionales. Participó en residencias en Madrid y Ciudad de México, y fue seleccionada en salones
-    y premios de pintura. Su obra integra colecciones privadas en Argentina, España y México.
-
-    En los últimos años ha desarrollado la serie “Luz y Materia”, en la que indaga la vibración entre planos
-    cromáticos y el espesor del material, buscando un equilibrio entre paisaje, abstracción y memoria.`,
+    bio: 'Artista contemporanea argentina enfocada en pintura y dibujo expandido. Explora el vínculo entre color, luz y materia en series donde alterna veladuras y empaste. Ha expuesto en Buenos Aires, Madrid y Ciudad de México, participando en residencias y clínicas de obra con enfoque experimental.',
     website: 'https://maria-fernandez.art',
     location: 'Buenos Aires, Argentina',
     social: { instagram: 'maria_fernandez_art' }
@@ -591,13 +582,7 @@ async function seed() {
   const showcaseArtwork = await Artwork.create({
     title: awTitle,
     slug: awSlug,
-    description: `Óleo sobre lienzo de trazo gestual y paleta cálida. La superficie alterna zonas de
-    veladura con sectores de alto empaste para construir un horizonte vibrante que parece avanzar y
-    retroceder con la luz. La pieza forma parte de la serie “Luz y Materia”, en la que la artista trabaja
-    sobre la transición entre planos cromáticos y la percepción del relieve.
-
-    Obra original firmada al dorso. Incluye certificado de autenticidad. Se recomienda luz indirecta y
-    limpieza en seco con paño suave.`,
+    description: 'Oleo gestual de paleta calida. Veladuras y empastes construyen un horizonte vibrante que cambia con la luz. Obra original firmada con certificado y guia breve de cuidado.',
     imageUrl: randomFromArray(randomImages),
     type: awType,
     technique: awTechnique,
@@ -623,14 +608,7 @@ async function seed() {
   const showcaseExhibition = await Exhibition.create({
     title: exTitle,
     slug: exSlug,
-    description: `Selección de obras recientes que indagan en el cruce entre luz, textura y color.
-    La muestra propone un recorrido en tres núcleos: Materia, Horizonte y Vibración. Cada sección articula
-    obras que dialogan por capas, donde el espesor del óleo y las transparencias construyen atmósferas
-    que invitan a detenerse en el detalle. La curaduría de Estudio Ox pone el foco en el proceso y en
-    la relación entre obra y espectador, proponiendo una lectura sensible y a la vez rigurosa.
-
-    Actividades: visita guiada con la artista, conversación abierta con curaduría y edición de un pequeño
-    folleto-catálogo digital descargable mediante QR.`,
+    description: 'Seleccion enfocada en luz, textura y color con tres nucleos que muestran obras en capas y transparencias. Incluye visita guiada corta y folleto digital QR.',
     startDate: new Date(new Date().getFullYear(), 9, 1), // 1 Oct del año actual
     endDate: new Date(new Date().getFullYear(), 9, 15), // 15 Oct del año actual
     artworks: [showcaseArtwork._id],

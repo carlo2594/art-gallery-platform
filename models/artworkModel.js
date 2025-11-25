@@ -351,7 +351,7 @@ artworkSchema.pre('save', async function (next) {
 
   // Derivar size si hay medidas
   if (typeof this.width_cm === 'number' && typeof this.height_cm === 'number') {
-    this.size = `${this.width_cm} x ${this.height_cm} cm`;
+    this.size = `${this.height_cm} x ${this.width_cm} cm`;
   }
   // Normalizar facetas\n  this.title_norm = norm(this.title);\n  this.type_norm = norm(this.type);
   this.technique_norm = norm(this.technique);
