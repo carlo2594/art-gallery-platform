@@ -8,6 +8,8 @@ const sizeOf = require('image-size');
 
 const DEBUG = process.env.NODE_ENV !== 'production';
 const dlog = (...args) => { try { if (DEBUG) console.log('[handleCoverImage]', ...args); } catch(_) {} };
+const MAX_COVER_DIMENSION = 8000; // px por lado
+const COVER_TRANSFORM_WIDTH = 2560; // px maximo al generar la version web
 
 async function handleCoverImage(user, req, filteredBody) {
   // Subir nueva imagen
@@ -40,14 +42,18 @@ async function handleCoverImage(user, req, filteredBody) {
       throw new AppError('La portada debe ser horizontal (más ancha que alta).', 400);
     }
 
+    if (dimensions.width > MAX_COVER_DIMENSION || dimensions.height > MAX_COVER_DIMENSION) {
+      throw new AppError('La portada no puede superar ' + MAX_COVER_DIMENSION + 'px por lado.', 400);
+    }
+
     // Registrar anterior para eliminar post-guardado
     if (user.coverImagePublicId) {
       req._oldCoverImagePublicId = user.coverImagePublicId;
       dlog('will remove old cover after save', req._oldCoverImagePublicId);
     }
 
-    // Transformación sugerida para portada (máx 1920px ancho, WebP, calidad auto)
-    const eager = [{ width: 1920, crop: 'limit', format: 'webp', quality: 'auto' }];
+    // Transformación sugerida para portada (máx 2560px ancho, WebP, calidad auto)
+    const eager = [{ width: COVER_TRANSFORM_WIDTH, crop: 'limit', format: 'webp', quality: 'auto' }];
     let imageResult;
     if (req.file.path) imageResult = await upload(req.file.path, 'galeria-del-ox', { eager });
     else imageResult = await uploadBuffer(req.file.buffer, 'galeria-del-ox', { eager });

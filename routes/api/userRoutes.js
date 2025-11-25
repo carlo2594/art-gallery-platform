@@ -12,14 +12,14 @@ const multer = require('multer');
 // Usar memoria + límites y filtro de tipo para imágenes
 const upload = multer({
   storage: multer.memoryStorage(),
-  // Subimos el límite a 50MB para permitir archivos grandes
-  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB máx.
+  // Subimos el límite a 80MB para permitir archivos muy grandes sin saturar el servidor
+  limits: { fileSize: 80 * 1024 * 1024 }, // 80MB máx.
   fileFilter: (req, file, cb) => {
     try {
       const ok = file && file.mimetype && file.mimetype.toLowerCase().startsWith('image/');
       if (!ok) {
         try { console.warn('[multer:fileFilter] Rechazado', { mimetype: file && file.mimetype, originalname: file && file.originalname }); } catch(_) {}
-        return cb(new AppError('Solo se permiten archivos de imagen (máx. 50MB).', 400));
+        return cb(new AppError('Solo se permiten archivos de imagen (máx. 80MB).', 400));
       }
       cb(null, true);
     } catch (e) {
