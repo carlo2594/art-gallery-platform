@@ -18,7 +18,7 @@
                 span.badge(class=(status === 'approved' ? 'text-bg-success' : (status === 'submitted' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= status || 'draft'
           .mb-3
             label.form-label Descripción
-            textarea.form-control(name='description' rows='3')= a.description || ''
+            textarea.form-control(name='description' rows='3' data-allow-empty='true')= a.description || ''
           // Imagen principal
           .mb-3
             label.form-label Imagen de la obra
@@ -43,17 +43,14 @@
           // Técnica y medidas
           .row.g-3
             .col-md-4
-              label.form-label Tipo
-              input.form-control(type='text', name='type', value=a.type || '')
-            .col-md-4
               label.form-label Técnica
               input.form-control(type='text', name='technique', value=a.technique || '')
             .col-md-2
-              label.form-label Ancho (cm)
-              input.form-control(type='number', name='width_cm', min='0', step='1', value=a.width_cm)
-            .col-md-2
               label.form-label Alto (cm)
-              input.form-control(type='number', name='height_cm', min='0', step='1', value=a.height_cm)
+              input.form-control(type='number', name='height_cm', min='0.01', step='0.01', value=a.height_cm)
+            .col-md-2
+              label.form-label Ancho (cm)
+              input.form-control(type='number', name='width_cm', min='0.01', step='0.01', value=a.width_cm)
           // Precio y disponibilidad
           .row.g-3
             .col-md-4

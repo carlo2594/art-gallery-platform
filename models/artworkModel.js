@@ -12,6 +12,13 @@ const STATUS = ['draft', 'submitted', 'approved', 'rejected', 'trashed'];
 const AVAILABILITY = ['for_sale', 'reserved', 'sold', 'not_for_sale', 'on_loan'];
 const THIRTY_DAYS = 60 * 60 * 24 * 30; // segundos
 
+const roundDimension = (value) => {
+  if (value === null || value === undefined || value === '') return value;
+  const num = typeof value === 'string' ? Number(value) : value;
+  if (!Number.isFinite(num)) return value;
+  return Math.round(num * 100) / 100;
+};
+
 const artworkSchema = new mongoose.Schema(
   {
     /* ------ Basics ------ */
@@ -57,8 +64,18 @@ const artworkSchema = new mongoose.Schema(
     size: { type: String }, // texto derivado de width_cm/height_cm
     technique: { type: String },
     // (1) Validaciones adicionales para dimensiones y precio
-    width_cm: { type: Number, required: function(){ return this.status !== 'draft'; }, min: 1 },
-    height_cm: { type: Number, required: function(){ return this.status !== 'draft'; }, min: 1 },
+    width_cm: {
+      type: Number,
+      required: function(){ return this.status !== 'draft'; },
+      min: 0.01,
+      set: roundDimension
+    },
+    height_cm: {
+      type: Number,
+      required: function(){ return this.status !== 'draft'; },
+      min: 0.01,
+      set: roundDimension
+    },
 
     // --- Precio en USD (centavos) ---
     // Guarda siempre en centavos para evitar flotantes (ej. $3499.50 -> 349950)

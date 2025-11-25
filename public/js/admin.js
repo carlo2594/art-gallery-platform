@@ -367,7 +367,11 @@ document.addEventListener('DOMContentLoaded', function () {
       // Whitelisted fields for updateArtwork
       ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'completedAt'].forEach(function (name) {
         var el = pick(name);
-        if (el && el.value !== '') fd.append(name, el.value);
+        if (!el) return;
+        var allowEmpty = el.dataset && el.dataset.allowEmpty === 'true';
+        if (allowEmpty || el.value !== '') {
+          fd.append(name, el.value);
+        }
       });
 
       // price_usd -> amount (USD)

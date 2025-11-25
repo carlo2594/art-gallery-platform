@@ -43,19 +43,16 @@
           // Técnica y medidas
           .row.g-3
             .col-md-4
-              label.form-label Tipo
-              input.form-control(type='text', name='type', placeholder='Pintura, Escultura, etc.')
-            .col-md-4
               label.form-label Tecnica
               input.form-control(type='text', name='technique', placeholder='Oleo, Acrilico, etc.')
             .col-md-2
-              label.form-label Ancho (cm)
-              input.form-control(type='number', name='width_cm', min='1', step='1', required)
-              .invalid-feedback.admin-artworks-width-error Ingresa un valor mayor a 0
-            .col-md-2
               label.form-label Alto (cm)
-              input.form-control(type='number', name='height_cm', min='1', step='1', required)
+              input.form-control(type='number', name='height_cm', min='0.01', step='0.01', required)
               .invalid-feedback.admin-artworks-height-error Ingresa un valor mayor a 0
+            .col-md-2
+              label.form-label Ancho (cm)
+              input.form-control(type='number', name='width_cm', min='0.01', step='0.01', required)
+              .invalid-feedback.admin-artworks-width-error Ingresa un valor mayor a 0
           .row.g-3
             .col-md-4
               label.form-label Fecha de la obra

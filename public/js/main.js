@@ -145,6 +145,7 @@ __onReady(function () {
         URL.revokeObjectURL(url);
         reject(new Error('No se pudo leer la imagen seleccionada.'));
       };
+      img.src = url;
     });
   };
 
