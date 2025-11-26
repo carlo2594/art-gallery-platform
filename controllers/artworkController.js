@@ -114,7 +114,6 @@ exports.approveArtwork = catchAsync(async (req, res, next) => {
   if (!art.imageUrl) missing.push('imageUrl');
   if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
   if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
-  if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
   if (missing.length) {
     return res.status(400).json({
       status: 'fail',
@@ -467,20 +466,20 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     }
   }
 
-  if (!draftOnly) {
-  // Precio: primero intentamos amount (USD), si no viene usamos price_cents
+  // Precio (opcional): si viene amount (USD) o price_cents lo normalizamos
   let priceCents;
   if (req.body.amount !== undefined && req.body.amount !== null && req.body.amount !== '') {
     priceCents = toCentsOrThrow(req.body.amount, 'amount');
-  } else if (req.body.price_cents !== undefined) {
+  } else if (
+    req.body.price_cents !== undefined &&
+    req.body.price_cents !== null &&
+    req.body.price_cents !== ''
+  ) {
     const parsed = parseInt(req.body.price_cents, 10);
     if (!Number.isFinite(parsed) || parsed < 0) {
       return next(new AppError('"price_cents" debe ser un entero no negativo.', 400));
     }
     priceCents = parsed;
-  } else {
-    return next(new AppError('Debes especificar el precio (amount en USD o price_cents).', 400));
-  }
   }
 
   // Sube la imagen principal a Cloudinary
@@ -723,7 +722,6 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       if (!art.imageUrl) missing.push('imageUrl');
       if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
       if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
-      if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
       if (missing.length) {
         return res.status(400).json({
           status: 'fail',
@@ -740,7 +738,6 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
       if (!art.imageUrl) missing.push('imageUrl');
       if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
       if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
-      if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
       if (missing.length) {
         return res.status(400).json({
           status: 'fail',
@@ -870,7 +867,6 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
   if (!art.imageUrl) missing.push('imageUrl');
   if (!Number.isFinite(art.width_cm)) missing.push('width_cm');
   if (!Number.isFinite(art.height_cm)) missing.push('height_cm');
-  if (!Number.isFinite(art.price_cents)) missing.push('price_cents');
   if (missing.length) {
     return res.status(400).json({
       status: 'fail',

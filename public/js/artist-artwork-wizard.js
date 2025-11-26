@@ -143,10 +143,10 @@
       const amtEl = form.querySelector('input[name="amount"]');
       const techEl = form.querySelector('input[name="technique"]');
       const hasTechnique = techEl && String(techEl.value || '').trim().length > 0;
-      if (!amtEl) return false;
-      if (amtEl.value === '') return false;
+      if (!hasTechnique) return false;
+      if (!amtEl || amtEl.value === '') return true;
       const amt = Number(amtEl.value);
-      return hasTechnique && Number.isFinite(amt) && amt >= 0;
+      return Number.isFinite(amt) && amt >= 0;
     }
     return true;
   }
@@ -416,9 +416,8 @@
         typeof art.width_cm === 'number' && isFinite(art.width_cm) && art.width_cm > 0 &&
         typeof art.height_cm === 'number' && isFinite(art.height_cm) && art.height_cm > 0;
       if (!hasDims) return 2;
-      const hasPrice =
-        typeof art.price_cents === 'number' && isFinite(art.price_cents) && art.price_cents >= 0;
-      if (!hasPrice) return 3;
+      const hasTechnique = !!(art.technique && String(art.technique).trim());
+      if (!hasTechnique) return 3;
       const hasImage = !!art.imageUrl;
       if (!hasImage) return 4;
       return 4;
@@ -920,6 +919,7 @@
         'input[name="title"]',
         'input[name="width_cm"]',
         'input[name="height_cm"]',
+        'input[name="technique"]',
         'input[name="amount"]'
       ];
       fields.forEach((sel) => {

@@ -96,9 +96,6 @@ const artworkSchema = new mongoose.Schema(
     // Guarda siempre en centavos para evitar flotantes (ej. $3499.50 -> 349950)
     price_cents: {
       type: Number,
-      required: function () {
-        return this.status !== "draft";
-      },
       min: 0,
       index: true,
     },
