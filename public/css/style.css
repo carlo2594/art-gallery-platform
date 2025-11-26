@@ -1933,6 +1933,31 @@ body.loading .main-content { visibility: hidden; }
     border: 1px solid rgba(255,255,255,0.2);
 }
 
+
+/* Artist cover modal cropper */
+#artistCoverModal .modal-dialog {
+  max-width: 720px;
+}
+.artist-cover-cropper {
+  position: relative;
+  width: 100%;
+  min-height: 260px;
+  border: 1px dashed rgba(0,0,0,0.2);
+  border-radius: 0.75rem;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.artist-cover-cropper img {
+  max-width: 100%;
+  display: block;
+}
+.artist-cover-helper {
+  line-height: 1.4;
+}
 /* Artist Detail - Additional Classes */
 .artist-image-cover {
     object-fit: cover;

@@ -1,5 +1,10 @@
 ﻿extends /layouts/public
 
+block headExtra
+  if isMyPanel
+    link(rel='stylesheet', href='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css')
+
+
 block content
   main.main-content.artist-detail-page
     // Hero Section
@@ -231,4 +236,5 @@ block content
 
 block scriptsExtra
   if isMyPanel
+    script(src='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js')
     script(src='/js/artist-panel.js')

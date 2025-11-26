@@ -754,14 +754,20 @@
     if (!form) return;
     const fileInput =
       qs("#artistCoverInput", form) ||
-      qs('input[type="file"][name="coverImage"]', form);
+      qs("input[type=\"file\"][name=\"coverImage\"]", form);
     const submitBtn = document.querySelector(
       "button[form='artistPanelCoverForm'][type='submit']"
     );
     const errorEl = qs("#artistCoverError");
     const progressWrap = qs("#artistCoverProgressWrap");
     const progressBar = qs("#artistCoverProgressBar");
-    let isHorizontal = false;
+    const cropWrapper = qs("#artistCoverCropWrapper");
+    const coverPreview = qs("#artistCoverPreview");
+    const COVER_ASPECT_RATIO = 16 / 9;
+    const TARGET_WIDTH = 1920;
+    const TARGET_HEIGHT = Math.round(TARGET_WIDTH / COVER_ASPECT_RATIO);
+
+    let cropper = null;
     let lastObjectUrl = null;
 
     function setError(msg) {
@@ -786,52 +792,153 @@
       progressBar.style.width = pct + "%";
       progressBar.setAttribute("aria-valuenow", String(pct));
     }
-
-    // Validate orientation on file change
-    if (fileInput) {
-      fileInput.addEventListener("change", function () {
-        setError("");
-        isHorizontal = false;
-        resetProgress();
+    function destroyCropper() {
+      if (cropper) {
         try {
-          if (lastObjectUrl) {
-            URL.revokeObjectURL(lastObjectUrl);
-            lastObjectUrl = null;
-          }
+          cropper.destroy();
         } catch (_) {}
-        const f = fileInput.files && fileInput.files[0];
-        if (!f) {
-          setSubmitEnabled(true);
+        cropper = null;
+      }
+      if (coverPreview) {
+        coverPreview.removeAttribute("src");
+        coverPreview.classList.add("d-none");
+      }
+      if (cropWrapper) cropWrapper.classList.add("d-none");
+      if (lastObjectUrl) {
+        try {
+          URL.revokeObjectURL(lastObjectUrl);
+        } catch (_) {}
+        lastObjectUrl = null;
+      }
+    }
+
+    function sendCover(fd) {
+      const url = form.action || "/api/v1/users/me/cover-image";
+      const http = window.api || window.axios;
+      return http && http.post
+        ? http.post(url, fd, {
+            headers: { Accept: "application/json" },
+            withCredentials: true,
+            onUploadProgress: function (evt) {
+              if (evt && evt.total) {
+                const pct = Math.round((evt.loaded / evt.total) * 100);
+                showProgress(pct);
+              }
+            },
+          })
+        : fetch(url, {
+            method: "POST",
+            body: fd,
+            credentials: "same-origin",
+          }).then((r) => r.json());
+    }
+
+    function generateCroppedBlob() {
+      return new Promise((resolve, reject) => {
+        if (!cropper) {
+          reject(
+            new Error("Selecciona una imagen y ajusta el recorte antes de continuar.")
+          );
           return;
         }
-        const url = URL.createObjectURL(f);
-        lastObjectUrl = url;
-        const img = new Image();
-        img.onload = function () {
-          isHorizontal = img.width > img.height;
-          if (!isHorizontal) {
-            setError("La imagen debe ser horizontal (más ancha que alta).");
-            setSubmitEnabled(false);
-          } else {
-            setError("");
-            setSubmitEnabled(true);
-          }
-          try {
-            URL.revokeObjectURL(url);
-          } catch (_) {}
-        };
-        img.onerror = function () {
-          setError("No se pudo leer la imagen seleccionada.");
-          setSubmitEnabled(false);
-          try {
-            URL.revokeObjectURL(url);
-          } catch (_) {}
-        };
-        img.src = url;
+        let canvas;
+        try {
+          canvas = cropper.getCroppedCanvas({
+            width: TARGET_WIDTH,
+            height: TARGET_HEIGHT,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: "high",
+            fillColor: "#ffffff",
+          });
+        } catch (err) {
+          reject(err);
+          return;
+        }
+        if (!canvas) {
+          reject(new Error("No se pudo generar el recorte."));
+          return;
+        }
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("No se pudo exportar el recorte."));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/jpeg",
+          0.92
+        );
       });
     }
 
-    // Reset state when modal closes
+    if (fileInput) {
+      fileInput.addEventListener("change", function () {
+        setError("");
+        resetProgress();
+        setSubmitEnabled(false);
+        destroyCropper();
+
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          setSubmitEnabled(true);
+          return;
+        }
+        if (typeof Cropper !== "function") {
+          setError("La herramienta de recorte no se cargó correctamente. Recarga la página.");
+          setSubmitEnabled(true);
+          return;
+        }
+
+        let objectUrl = null;
+        try {
+          objectUrl = URL.createObjectURL(file);
+          lastObjectUrl = objectUrl;
+        } catch (err) {
+          setError("No se pudo previsualizar la imagen seleccionada.");
+          setSubmitEnabled(true);
+          return;
+        }
+
+        if (!coverPreview) {
+          setError("No se pudo inicializar la vista previa del recorte.");
+          setSubmitEnabled(true);
+          return;
+        }
+
+        coverPreview.src = objectUrl;
+        coverPreview.classList.remove("d-none");
+        if (cropWrapper) cropWrapper.classList.remove("d-none");
+
+        const initCropper = () => {
+          try {
+            cropper = new Cropper(coverPreview, {
+              aspectRatio: COVER_ASPECT_RATIO,
+              viewMode: 1,
+              autoCropArea: 1,
+              responsive: true,
+              background: false,
+              dragMode: "move",
+              minContainerHeight: 260,
+              zoomOnWheel: true,
+              ready() {
+                setSubmitEnabled(true);
+              },
+            });
+          } catch (err) {
+            setError("No se pudo inicializar la herramienta de recorte.");
+            setSubmitEnabled(true);
+          }
+        };
+
+        if (window.requestAnimationFrame) {
+          requestAnimationFrame(initCropper);
+        } else {
+          setTimeout(initCropper, 0);
+        }
+      });
+    }
+
     try {
       const modalEl = qs("#artistCoverModal");
       if (modalEl)
@@ -840,47 +947,27 @@
           resetProgress();
           setSubmitEnabled(true);
           if (form) form.reset();
+          destroyCropper();
         });
     } catch (_) {}
 
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      const f = fileInput && fileInput.files && fileInput.files[0];
-      if (!f) {
-        setError("Selecciona una imagen.");
+      setError("");
+      if (!cropper) {
+        setError("Selecciona una imagen y ajusta el recorte antes de continuar.");
         return;
       }
-      if (!isHorizontal) {
-        setError("La imagen debe ser horizontal (más ancha que alta).");
-        return;
-      }
-
-      const fd = new FormData(form);
-      const url = form.action || "/api/v1/users/me/cover-image";
-      const http = window.api || window.axios;
 
       setSubmitEnabled(false);
       showProgress(0);
 
-      const req =
-        http && http.post
-          ? http.post(url, fd, {
-              headers: { Accept: "application/json" },
-              withCredentials: true,
-              onUploadProgress: function (evt) {
-                if (evt && evt.total) {
-                  const pct = Math.round((evt.loaded / evt.total) * 100);
-                  showProgress(pct);
-                }
-              },
-            })
-          : fetch(url, {
-              method: "POST",
-              body: fd,
-              credentials: "same-origin",
-            }).then((r) => r.json());
-
-      Promise.resolve(req)
+      generateCroppedBlob()
+        .then((blob) => {
+          const fd = new FormData(form);
+          fd.set("coverImage", blob, `cover-${Date.now()}.jpg`);
+          return sendCover(fd);
+        })
         .then((res) => {
           const successMsg =
             (res && res.data && res.data.message) ||
@@ -899,6 +986,7 @@
           try {
             resetProgress();
           } catch (_) {}
+          destroyCropper();
           if (form) form.reset();
           setTimeout(() => {
             window.location.reload();
@@ -908,22 +996,15 @@
           resetProgress();
           setSubmitEnabled(true);
           const msg =
-            (err &&
-              err.response &&
-              err.response.data &&
-              err.response.data.message) ||
+            (err && err.response && err.response.data && err.response.data.message) ||
             (err && err.normalized && err.normalized.message) ||
-            err.message ||
+            (err && err.message) ||
             "No se pudo actualizar la portada";
+          setError(msg);
           alertToast("danger", msg);
-          // If server rejected due to orientation, reflect it inline too
-          if (msg && msg.toLowerCase().indexOf("horizontal") !== -1) {
-            setError("La imagen debe ser horizontal (más ancha que alta).");
-          }
         });
     });
   }
-
   // Límite para el botón "Agregar obras" del estado vacío
   function hookArtworkPanelAddLimit() {
     try {
