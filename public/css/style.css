@@ -2076,7 +2076,7 @@ body.loading .main-content { visibility: hidden; }
 }
 .artwork-grid__content { display: flex; flex-direction: row; gap: 0.75rem; align-items: stretch; }
 .artwork-grid__info { flex: 1; display: flex; flex-direction: column; word-break: break-word; overflow-wrap: anywhere; }
-.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; min-height: 3.2rem; word-break: break-word; overflow-wrap: anywhere; }
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; min-height: 3.2rem; word-break: break-word; overflow-wrap: anywhere; padding-top: 1.6rem; padding-bottom: 1.4rem; }
 .artwork-grid__title { font-weight: 700; font-size: 1.3rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); word-break: break-word; overflow-wrap: anywhere; }
 .artwork-grid__artist { font-weight: 700; font-size: 1.1rem; line-height: 1.2; margin-bottom: 0.3rem; text-transform: uppercase; color: #666; letter-spacing: 0.02em; word-break: break-word; overflow-wrap: anywhere; }
 .artwork-grid__details { margin-bottom: 0.3rem; word-break: break-word; overflow-wrap: anywhere; }
@@ -2086,7 +2086,8 @@ body.loading .main-content { visibility: hidden; }
 .artwork-grid__price-value { font-weight: 400 !important; color: inherit !important; }
 .artwork-grid__stat-item { font-size: 1.4rem; line-height: 1.4; margin-bottom: 0.2rem; color: #999; font-weight: 400; }
 .artwork-grid__stat-item:last-child { margin-bottom: 0; }
-.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+.artwork-grid__availability { margin-top: 0.35rem; display: flex; justify-content: flex-end; position: static; }
+.artwork-grid__availability .badge { font-size: 1rem; padding: 0.25rem 0.75rem; }
 .artwork-grid__image { display: block; width: 100%; height: auto; }
 .artwork-grid__stretched-link { position: absolute; inset: 0; }
 
@@ -2837,7 +2838,7 @@ body.noscroll {
 .artwork-grid__info { flex: 1; display: flex; flex-direction: column; }
 
 /* Right column - stats */
-.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; }
+.artwork-grid__stats { flex: 1; text-align: right; font-size: 0.9rem; position: relative; padding-top: 1.6rem; padding-bottom: 1.4rem; }
 
 /* Typography with minimal spacing */
 .artwork-grid__title { font-weight: 700; font-size: 1.3rem; line-height: 1.1; margin-bottom: 0.4rem; color: var(--ox-blue); }
@@ -2855,7 +2856,8 @@ body.noscroll {
 .artwork-grid__stat-item:last-child { margin-bottom: 0; }
 
 /* Availability badge placement (avoid :first-child hacks) */
-.artwork-grid__availability { position: absolute; top: 0; right: 0; }
+.artwork-grid__availability { margin-top: 0.35rem; display: flex; justify-content: flex-end; position: static; }
+.artwork-grid__availability .badge { font-size: 1rem; padding: 0.25rem 0.75rem; }
 
 /* Image/link helpers */
 .artwork-grid__image { display: block; width: 100%; height: auto; }

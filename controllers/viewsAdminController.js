@@ -167,7 +167,7 @@ exports.getExhibition = catchAsync(async (req, res, next) => {
   let artworks = [];
   if (Array.isArray(exhibition.artworks) && exhibition.artworks.length) {
     artworks = await Artwork.find({ _id: { $in: exhibition.artworks }, status: 'approved', deletedAt: null })
-      .select('title slug imageUrl imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents createdAt')
+      .select('title slug imageUrl imageWidth_px imageHeight_px technique width_cm height_cm artist availability price_cents createdAt')
       .sort({ createdAt: -1 })
       .populate({ path: 'artist', select: 'name' })
       .lean();

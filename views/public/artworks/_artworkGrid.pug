@@ -63,6 +63,10 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
               if a.price_cents && a.price_cents > 0
                 .artwork-grid__price
                   | $#{(a.price_cents / 100).toLocaleString('en-US')} USD
+              if typeof a.availability === 'string'
+                - const __isForSale = a.availability === 'for_sale'
+                .artwork-grid__availability
+                  span.badge.rounded-pill(class=__isForSale ? 'text-bg-success' : 'text-bg-secondary')= __isForSale ? 'En venta' : 'No disponible'
               .artwork-grid__meta
                 .artwork-grid__stat
                   i.fas.fa-eye.me-1

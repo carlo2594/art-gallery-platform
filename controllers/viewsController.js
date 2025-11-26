@@ -87,7 +87,7 @@ exports.getSearchResults = catchAsync(async (req, res) => {
   ] = await Promise.all([
     Artwork.countDocuments(artworkFilter),
     Artwork.find(artworkFilter)
-      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents')
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents')
       .populate({ path: 'artist', select: 'name' })
       .sort(sort)
       .skip(skip)
@@ -281,7 +281,7 @@ exports.getHome = catchAsync(async (req, res) => {
         status: 'approved',
         deletedAt: null
       })
-        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents')
+        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist availability price_cents')
         .sort({ createdAt: -1 })
         .limit(18)
         .populate({ path: 'artist', select: 'name' })
@@ -415,7 +415,7 @@ exports.getActivity = catchAsync(async (req, res) => {
       .limit(50)
       .populate({
         path: 'artwork',
-        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents exhibitions',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents exhibitions',
         populate: { path: 'artist', select: 'name' }
       })
       .lean();
@@ -439,7 +439,7 @@ exports.getActivity = catchAsync(async (req, res) => {
       .limit(50)
       .populate({
         path: 'artwork',
-        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents status deletedAt',
+        select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents status deletedAt',
         populate: { path: 'artist', select: 'name' }
       })
       .lean();
@@ -521,13 +521,13 @@ exports.getActivityWorks = catchAsync(async (req, res) => {
   if (tab === 'likes') {
     const likes = await Favorite.find({ user: uid })
       .sort({ createdAt: -1 })
-      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents status deletedAt', populate: { path: 'artist', select: 'name' } })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents status deletedAt', populate: { path: 'artist', select: 'name' } })
       .lean();
     artworks = likes.map(l => l.artwork).filter(a => a && a.status === 'approved' && a.deletedAt == null);
   } else {
     const views = await ArtworkView.find({ user: uid })
       .sort({ createdAt: -1 })
-      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents', populate: { path: 'artist', select: 'name' } })
+      .populate({ path: 'artwork', select: 'title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents', populate: { path: 'artist', select: 'name' } })
       .lean();
     const seen = new Set();
     artworks = [];
@@ -810,7 +810,7 @@ exports.getArtworks = catchAsync(async (req, res) => {
   const [totalArtworks, artworksRaw] = await Promise.all([
     Artwork.countDocuments({ status: 'approved', deletedAt: null, ...filter }),
     Artwork.findApproved(filter)
-      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents')
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents')
       .sort(sort)
       .skip(skip)
       .limit(perPage)
@@ -985,7 +985,7 @@ exports.getArtistDetail = catchAsync(async (req, res, next) => {
     Artwork.countDocuments(combinedFilter),
     // Obras paginadas con filtros
     Artwork.find(combinedFilter)
-      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents createdAt')
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents createdAt')
       .populate({ path: 'artist', select: 'name' })
       .sort(sort)
       .skip(skip)
@@ -1091,7 +1091,7 @@ exports.getExhibitionDetail = catchAsync(async (req, res, next) => {
     [totalArtworks, artworks] = await Promise.all([
       Artwork.countDocuments(baseFilter),
       Artwork.find(baseFilter)
-        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist price_cents views favoritesCount')
+        .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm artist availability price_cents views favoritesCount')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(perPage)
@@ -1192,7 +1192,7 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
   ] = await Promise.all([
     Artwork.countDocuments(combinedFilter),
     Artwork.find(combinedFilter)
-      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist price_cents createdAt')
+      .select('title slug imageUrl imagePublicId imageWidth_px imageHeight_px technique width_cm height_cm size completedAt views favoritesCount artist availability price_cents createdAt')
       .populate({ path: 'artist', select: 'name' })
       .sort(sort)
       .skip(skip)
