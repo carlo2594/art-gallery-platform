@@ -8,6 +8,7 @@ block headExtra
     #navUserOverlay,
     footer,
     .footer { display: none !important; }
+  link(rel='stylesheet', href='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css')
   link(rel='stylesheet', href='/css/artist-wizard.css')
 
 block content
@@ -146,26 +147,37 @@ block content
                 .mb-3
                   label.form-label(for='wizardImage') Imagen principal *
                   .artist-image-dropzone#artistImageDropzone
-                    img#wizardImagePreview.artist-image-preview.img-thumbnail(
-                      src=''
-                      alt='Vista previa de la obra'
-                      hidden
-                    )
-                    .artist-image-dropzone-instructions
-                      i.fas.fa-cloud-upload-alt.me-2
-                      span Arrastra la imagen aquí o 
-                      button#wizardImageTrigger.btn.btn-link.p-0(type='button') búscala en tu dispositivo
                     input#wizardImage.form-control(
                       type='file'
                       name='image'
                       accept='image/*'
                       hidden
                     )
+                    .artist-image-upload-shell
+                      .artist-image-upload-overlay.d-none#artistImageUploadOverlay
+                        i.fas.fa-spinner.fa-spin.me-2
+                        span Procesando imagen...
+                      .artist-image-cropper-wrapper.d-none#artistWizardCropperWrapper
+                        img#artistWizardCropperImg.img-fluid.rounded(alt='Vista previa del recorte' decoding='async' loading='lazy')
+                      img#wizardImagePreview.artist-image-preview.img-thumbnail(
+                        src=''
+                        alt='Vista previa de la obra'
+                        hidden
+                      )
+                      .artist-image-dropzone-instructions
+                        i.fas.fa-cloud-upload-alt.me-2
+                        span Arrastra la imagen aqu\u00ed o 
+                        button#wizardImageTrigger.btn.btn-link.p-0(type='button') b\u00fascalo en tu dispositivo
+                  .artist-image-cropper-helper.text-muted.small.mt-2
+                    strong Ajusta el recorte:&nbsp;
+                    | usa el recuadro para definir el encuadre (horizontal, vertical o cuadrado).
+                  .d-flex.flex-wrap.gap-2.mt-3
+                    button#artistWizardApplyCrop.btn.btn-primary.btn-sm(type='button' disabled) Aplicar recorte
+                    button#artistWizardChangeImage.btn.btn-outline-secondary.btn-sm(type='button') Cambiar imagen
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='3') Anterior
                   .d-flex.gap-2
-                    button#wizardSaveDraft.btn.btn-outline-secondary(type='button') Guardar borrador
                     button#wizardSubmit.btn.btn-success(type='button', disabled) Enviar obra para revisión
 
     // Modal de confirmación de envío
@@ -184,5 +196,6 @@ block content
             button#artistSubmitConfirmBtn.btn.btn-success(type='button') Enviar obra
 
 block scriptsExtra
+  script(src='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js')
   script(src='/js/artist-artwork-wizard.js')
   script(src='/js/artist-artwork-confirm-modal.js')

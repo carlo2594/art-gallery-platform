@@ -4,6 +4,28 @@
   let currentArtworkId = null;
   let isSaving = false;
   let hasImage = false;
+  let wizardImageCropper = null;
+  let wizardImageCropperUrl = null;
+  let wizardImageDirty = false;
+  let wizardImageInput = null;
+  let wizardImagePreview = null;
+  let wizardCropperWrapper = null;
+  let wizardCropperImg = null;
+  let wizardDropzone = null;
+  let wizardDropzoneInstructions = null;
+  let wizardUploadOverlay = null;
+
+  let wizardCropApplied = false;
+  let wizardApplyBtn = null;
+  let wizardChangeBtn = null;
+  let wizardSubmitBtn = null;
+  let wizardSubmitBusy = false;
+
+  const DROPZONE_MODES = {
+    EMPTY: 'empty',
+    CROPPING: 'cropping',
+    PREVIEW: 'preview'
+  };
 
   function qs(sel, ctx){ return (ctx||document).querySelector(sel); }
   function qsa(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); }
@@ -43,6 +65,30 @@
     btn.setAttribute('aria-label','Cerrar');
     el.appendChild(btn);
     container.appendChild(el);
+  }
+
+  function setDropzoneMode(mode){
+    if (!wizardDropzone) return;
+    wizardDropzone.classList.remove('has-preview', 'is-cropping');
+    switch (mode){
+      case DROPZONE_MODES.CROPPING:
+        wizardDropzone.classList.add('is-cropping');
+        break;
+      case DROPZONE_MODES.PREVIEW:
+        wizardDropzone.classList.add('has-preview');
+        break;
+      default:
+        break;
+    }
+  }
+
+  function toggleUploadOverlay(show, message){
+    if (!wizardUploadOverlay) return;
+    const label = wizardUploadOverlay.querySelector('span');
+    if (label && typeof message === 'string' && message.trim().length){
+      label.textContent = message.trim();
+    }
+    wizardUploadOverlay.classList.toggle('d-none', !show);
   }
 
   function setStep(step){
@@ -117,9 +163,26 @@
   }
 
   function updateSubmitButtonState(){
-    const submitBtn = qs('#wizardSubmit');
-    if (!submitBtn) return;
-    submitBtn.disabled = !hasImage;
+    const canProceed = !!(hasImage && wizardCropApplied);
+    if (wizardSubmitBtn && !wizardSubmitBusy) wizardSubmitBtn.disabled = !canProceed;
+  }
+
+  function updateChangeImageButton(){
+    if (!wizardChangeBtn) return;
+    const show = !!(hasImage && wizardCropApplied);
+    wizardChangeBtn.classList.toggle('d-none', !show);
+  }
+
+  async function persistCropImmediately(){
+    try {
+      if (!currentArtworkId){
+        const created = await saveDraft(false);
+        if (!created) return;
+      }
+      await uploadImageIfNeeded();
+    } catch(err){
+      console.error('[ArtistArtworkWizard] persistCropImmediately failed', err);
+    }
   }
 
   function initCharacterCounters(){
@@ -160,6 +223,189 @@
       }
     } catch(_){}
   }
+
+  function destroyWizardImageCropper(){
+    try {
+      if (wizardImageCropper && typeof wizardImageCropper.destroy === 'function') {
+        wizardImageCropper.destroy();
+      }
+    } catch(_){}
+    wizardImageCropper = null;
+    if (wizardImageCropperUrl){
+      try { URL.revokeObjectURL(wizardImageCropperUrl); } catch(_){}
+    }
+    wizardImageCropperUrl = null;
+    if (wizardCropperWrapper) wizardCropperWrapper.classList.add('d-none');
+    if (wizardCropperImg) wizardCropperImg.removeAttribute('src');
+    if (wizardApplyBtn) wizardApplyBtn.disabled = true;
+    if (wizardDropzone){
+      if (hasImage && wizardCropApplied){
+        setDropzoneMode(DROPZONE_MODES.PREVIEW);
+      } else {
+        setDropzoneMode(DROPZONE_MODES.EMPTY);
+      }
+    }
+  }
+
+  function initWizardImageCropper(file){
+    if (!wizardCropperWrapper || !wizardCropperImg) return;
+    destroyWizardImageCropper();
+    if (!file) return;
+    if (typeof window.Cropper !== 'function') {
+      alertToast('warning', 'No se pudo cargar la herramienta de recorte. Recarga la página e inténtalo de nuevo.');
+      return;
+    }
+    try {
+      wizardImageCropperUrl = URL.createObjectURL(file);
+    } catch (err) {
+      console.error(err);
+      alertToast('danger', 'No se pudo previsualizar la imagen seleccionada.');
+      wizardImageCropperUrl = null;
+      return;
+    }
+    wizardCropperImg.src = wizardImageCropperUrl;
+    wizardCropperWrapper.classList.remove('d-none');
+    setDropzoneMode(DROPZONE_MODES.CROPPING);
+    const init = () => {
+      try {
+        wizardImageCropper = new Cropper(wizardCropperImg, {
+          aspectRatio: NaN,
+          viewMode: 1,
+          autoCropArea: 1,
+          dragMode: 'move',
+          background: false,
+          responsive: true,
+          minContainerHeight: 220,
+          ready() {
+            if (wizardApplyBtn) wizardApplyBtn.disabled = false;
+          },
+          crop() {
+            if (wizardCropApplied) {
+              wizardCropApplied = false;
+              wizardImageDirty = false;
+              if (wizardApplyBtn) wizardApplyBtn.disabled = false;
+              updateSubmitButtonState();
+            }
+          }
+        });
+      } catch (err) {
+        console.error(err);
+        alertToast('danger', 'No se pudo iniciar el recorte. Intenta subir la imagen nuevamente.');
+        destroyWizardImageCropper();
+      }
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(init);
+    else setTimeout(init, 0);
+  }
+
+  function requireWizardImageBlob(){
+    return new Promise((resolve, reject) => {
+      if (!wizardImageCropper) {
+        reject(new Error('Selecciona una imagen y ajusta el recorte antes de continuar.'));
+        return;
+      }
+      let canvas;
+      try {
+        canvas = wizardImageCropper.getCroppedCanvas({
+          width: 2000,
+          height: 2000,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high',
+          fillColor: '#ffffff',
+        });
+      } catch (err) {
+        reject(err);
+        return;
+      }
+      if (!canvas) {
+        reject(new Error('No se pudo generar el recorte.'));
+        return;
+      }
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('No se pudo exportar el recorte.'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.92);
+    });
+  }
+
+  function setWizardImagePreviewFromUrl(url){
+    const imgPrev = wizardImagePreview || qs('#wizardImagePreview');
+    wizardImagePreview = imgPrev;
+    if (!imgPrev) return;
+    if (url) {
+      imgPrev.onload = function(){
+        adjustPreviewAspect(imgPrev);
+      };
+      imgPrev.src = url;
+      imgPrev.hidden = false;
+      hasImage = true;
+      wizardCropApplied = true;
+    } else {
+      imgPrev.hidden = true;
+      imgPrev.removeAttribute('src');
+      hasImage = false;
+      wizardCropApplied = false;
+    }
+    wizardImageDirty = false;
+    destroyWizardImageCropper();
+    if (wizardApplyBtn) wizardApplyBtn.disabled = true;
+    updateSubmitButtonState();
+    updateChangeImageButton();
+  }
+
+  function handleWizardImageSelection(file){
+    if (!file) return;
+    destroyWizardImageCropper();
+    const imgPrev = wizardImagePreview || qs('#wizardImagePreview');
+    wizardImagePreview = imgPrev;
+    if (imgPrev) {
+      imgPrev.hidden = true;
+      imgPrev.removeAttribute('src');
+    }
+    hasImage = false;
+    wizardCropApplied = false;
+    wizardImageDirty = false;
+    updateSubmitButtonState();
+    updateChangeImageButton();
+    setDropzoneMode(DROPZONE_MODES.CROPPING);
+    initWizardImageCropper(file);
+  }
+
+
+  async function applyWizardCrop(){
+    if (!wizardImageCropper) {
+      alertToast('warning', 'Selecciona una imagen antes de aplicar el recorte.');
+      return;
+    }
+    try {
+      const blob = await requireWizardImageBlob();
+      const previewUrl = URL.createObjectURL(blob);
+      const imgPrev = wizardImagePreview || qs('#wizardImagePreview');
+      wizardImagePreview = imgPrev;
+      if (imgPrev) {
+        imgPrev.hidden = false;
+        imgPrev.onload = function(){
+          adjustPreviewAspect(imgPrev);
+          try { URL.revokeObjectURL(previewUrl); } catch(_){ }
+        };
+        imgPrev.src = previewUrl;
+      }
+      wizardImageDirty = true;
+      wizardCropApplied = true;
+      hasImage = true;
+      setDropzoneMode(DROPZONE_MODES.PREVIEW);
+      if (wizardApplyBtn) wizardApplyBtn.disabled = true;
+      updateSubmitButtonState();
+      updateChangeImageButton();
+      persistCropImmediately();
+    } catch (err) {
+      alertToast('danger', (err && err.message) || 'No se pudo aplicar el recorte.');
+    }
+  }
+
 
   function computeInitialStepFromArtwork(art){
     try {
@@ -222,22 +468,7 @@
               }
               const hiddenId = qs('#artistArtworkId', form);
               if (hiddenId) hiddenId.value = art._id;
-              const imgPrev = qs('#wizardImagePreview', form);
-              if (imgPrev){
-                if (art.imageUrl){
-                  imgPrev.onload = function(){
-                    adjustPreviewAspect(imgPrev);
-                  };
-                  imgPrev.src = art.imageUrl;
-                  imgPrev.hidden = false;
-                  hasImage = true;
-                } else {
-                  imgPrev.hidden = true;
-                  imgPrev.removeAttribute('src');
-                  hasImage = false;
-                }
-                updateSubmitButtonState();
-              }
+              setWizardImagePreviewFromUrl(art.imageUrl || '');
             }
             return computeInitialStepFromArtwork(art);
           }
@@ -310,22 +541,7 @@
       }
       const hiddenId = qs('#artistArtworkId', form);
       if (hiddenId) hiddenId.value = art._id;
-      const imgPrev = qs('#wizardImagePreview', form);
-      if (imgPrev){
-        if (art.imageUrl){
-          imgPrev.onload = function(){
-            adjustPreviewAspect(imgPrev);
-          };
-          imgPrev.src = art.imageUrl;
-          imgPrev.hidden = false;
-          hasImage = true;
-        } else {
-          imgPrev.hidden = true;
-          imgPrev.removeAttribute('src');
-          hasImage = false;
-        }
-        updateSubmitButtonState();
-      }
+      setWizardImagePreviewFromUrl(art.imageUrl || '');
     }
 
     return computeInitialStepFromArtwork(art);
@@ -462,12 +678,27 @@
   async function uploadImageIfNeeded(){
     const form = qs('#artistArtworkWizardForm');
     if (!form || !currentArtworkId) return currentArtworkId;
-    const fileInput = qs('input[name=\"image\"]', form);
+    if (!wizardImageDirty) return currentArtworkId;
+    const fileInput = wizardImageInput || qs('input[name="image"]', form);
     const file = fileInput && fileInput.files && fileInput.files[0];
-    if (!file) return currentArtworkId;
+    let blob = null;
+    if (wizardImageCropper) {
+      try {
+        blob = await requireWizardImageBlob();
+      } catch (err) {
+        alertToast('danger', (err && err.message) || 'Ajusta el recorte antes de guardar la imagen.');
+        return null;
+      }
+    } else if (file) {
+      blob = file;
+    } else {
+      return currentArtworkId;
+    }
     const fd = new FormData();
-    fd.append('image', file);
+    const filename = blob && blob.name ? blob.name : 'artwork-' + Date.now() + '.jpg';
+    fd.append('image', blob, filename);
     isSaving = true;
+    toggleUploadOverlay(true, 'Guardando imagen...');
     try {
       const res = await fetch('/api/v1/artworks/' + encodeURIComponent(currentArtworkId), {
         method: 'PATCH',
@@ -481,80 +712,46 @@
         return null;
       }
       alertToast('success', 'Imagen guardada en el borrador.');
+      wizardImageDirty = false;
+      wizardCropApplied = true;
+      hasImage = true;
+      if (wizardApplyBtn) wizardApplyBtn.disabled = true;
+      updateSubmitButtonState();
+      updateChangeImageButton();
       return currentArtworkId;
     } catch(err){
       alertToast('danger', err && err.message ? err.message : 'Error al subir la imagen.');
       return null;
     } finally {
       isSaving = false;
+      toggleUploadOverlay(false);
     }
   }
 
+
+
   async function submitArtwork(){
-    const submitBtn = qs('#wizardSubmit');
-    let wizardOverlayTimeout = null;
+    if (wizardSubmitBusy) return;
+    wizardSubmitBusy = true;
+    const submitBtn = wizardSubmitBtn || qs('#wizardSubmit');
+    const originalLabel = submitBtn ? submitBtn.innerHTML : null;
     if (submitBtn){
-      try {
-        submitBtn.disabled = true;
-        submitBtn.innerHTML =
-          '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
-          'Enviando obra...';
-      } catch (_) {}
+      submitBtn.disabled = true;
+      submitBtn.innerHTML =
+        '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
+        'Enviando obra...';
     }
-
-    let wizardOverlay = document.getElementById('artistWizardBlockingOverlay');
-    if (!wizardOverlay){
-      try {
-        wizardOverlay = document.createElement('div');
-        wizardOverlay.id = 'artistWizardBlockingOverlay';
-        wizardOverlay.style.position = 'fixed';
-        wizardOverlay.style.inset = '0';
-        wizardOverlay.style.background = 'rgba(0,0,0,0.45)';
-        wizardOverlay.style.zIndex = '10500';
-        wizardOverlay.style.display = 'flex';
-        wizardOverlay.style.alignItems = 'center';
-        wizardOverlay.style.justifyContent = 'center';
-        wizardOverlay.innerHTML =
-          '<div class="text-center text-white"><div class="spinner-border text-light mb-2" role="status"></div><div>Enviando obra...</div></div>';
-        document.body.appendChild(wizardOverlay);
-      } catch (_) {}
-    } else {
-      try { wizardOverlay.style.display = 'flex'; } catch (_) {}
-    }
-
-    if (wizardOverlay){
-      try {
-        wizardOverlayTimeout = setTimeout(function(){
-          try { wizardOverlay.style.display = 'none'; } catch (_){}
-          const btn = qs('#wizardSubmit');
-          if (btn){
-            try {
-              btn.disabled = false;
-              btn.innerHTML = 'Enviar obra para revisiA3n';
-            } catch (_){}
-          }
-        }, 15000);
-      } catch (_){}
-    }
-
-    const pageOverlay = document.getElementById('page-loading-overlay');
-    if (pageOverlay){
-      try {
-        document.body && document.body.classList && document.body.classList.add('loading');
-        pageOverlay.style.display = 'flex';
-      } catch (_) {}
-    }
-    if (!currentArtworkId){
-      const id = await saveDraft(false);
-      if (!id) return;
-    } else {
-      const id = await updateDraft(false);
-      if (!id) return;
-    }
-    const imgId = await uploadImageIfNeeded();
-    if (!imgId) return;
-
     try {
+      if (!currentArtworkId){
+        const created = await saveDraft(false);
+        if (!created) return;
+      } else {
+        const updated = await updateDraft(false);
+        if (!updated) return;
+      }
+      const uploaded = await uploadImageIfNeeded();
+      if (!uploaded) return;
+
       const res = await fetch('/api/v1/artworks/' + encodeURIComponent(currentArtworkId) + '/submit', {
         method: 'PATCH',
         credentials: 'same-origin',
@@ -572,22 +769,54 @@
       }, 800);
     } catch(err){
       alertToast('danger', err && err.message ? err.message : 'Error al enviar la obra.');
+    } finally {
+      wizardSubmitBusy = false;
+      if (submitBtn){
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalLabel || 'Enviar obra para revisión';
+      }
     }
   }
 
   function hookSteps(){
     const container = qs('.artist-artwork-wizard');
     if (!container) return;
+
+    wizardApplyBtn = document.getElementById('artistWizardApplyCrop') || wizardApplyBtn;
+    if (wizardApplyBtn) {
+      wizardApplyBtn.disabled = true;
+      wizardApplyBtn.addEventListener('click', applyWizardCrop);
+    }
+    wizardChangeBtn = document.getElementById('artistWizardChangeImage');
+    if (wizardChangeBtn) {
+      wizardChangeBtn.classList.add('d-none');
+      wizardChangeBtn.addEventListener('click', function(){
+        if (wizardImageInput) {
+          try { wizardImageInput.click(); } catch(_){}
+        }
+      });
+    }
+    wizardSubmitBtn = qs('#wizardSubmit');
+
     setStep(1);
     updateNextButtonsState();
     updateSubmitButtonState();
 
-    // Si venimos desde el panel con un borrador existente, precargar datos
-    // y mover al paso correspondiente segun los campos completos.
+    wizardImageInput = qs('#wizardImage');
+    wizardImagePreview = qs('#wizardImagePreview');
+    wizardCropperWrapper = document.getElementById('artistWizardCropperWrapper');
+    wizardCropperImg = document.getElementById('artistWizardCropperImg');
+    wizardDropzone = qs('#artistImageDropzone');
+    wizardDropzoneInstructions = wizardDropzone ? wizardDropzone.querySelector('.artist-image-dropzone-instructions') : null;
+    wizardUploadOverlay = document.getElementById('artistImageUploadOverlay');
+    const initialMode = (wizardImagePreview && !wizardImagePreview.hidden) ? DROPZONE_MODES.PREVIEW : DROPZONE_MODES.EMPTY;
+    setDropzoneMode(initialMode);
+    toggleUploadOverlay(false);
+
     try {
-      const p = loadExistingArtworkFromQuery();
-      if (p && typeof p.then === 'function'){
-        p.then((step) => {
+      const pending = loadExistingArtworkFromQuery();
+      if (pending && typeof pending.then === 'function'){
+        pending.then((step) => {
           if (!step || step === 1) return;
           setStep(step);
           updateNextButtonsState();
@@ -600,7 +829,7 @@
         const next = this.getAttribute('data-wizard-next');
         const current = Number(next) - 1;
         if (current === 1){
-          const titleEl = qs('input[name=\"title\"]');
+          const titleEl = qs('input[name="title"]');
           const titleVal = titleEl && String(titleEl.value || '').trim();
           if (!titleVal){
             if (titleEl){
@@ -626,27 +855,11 @@
       });
     });
 
-    const saveBtn = qs('#wizardSaveDraft');
-    if (saveBtn){
-      const originalLabel = saveBtn.textContent;
-      saveBtn.addEventListener('click', async function(){
-        if (saveBtn.disabled) return;
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Guardando...';
-        try {
-          await saveDraftWithImage(true);
-        } finally {
-          saveBtn.disabled = false;
-          saveBtn.textContent = originalLabel;
-        }
-      });
-    }
-    const submitBtn = qs('#wizardSubmit');
-    if (submitBtn){
-      submitBtn.addEventListener('click', function(){
+    if (wizardSubmitBtn){
+      wizardSubmitBtn.addEventListener('click', function(){
         const confirmed = window.confirm(
           '¿Estás seguro de enviar la obra para revisión?\n\n' +
-          'Después de enviarla ya no podrás editar ni la obra ni la información que subiste. ' +
+          'Después de enviarla ya no podrás editar ni la información que subiste. ' +
           'Si quieres hacer cambios más adelante, tendrás que eliminar esta solicitud y crear una nueva.'
         );
         if (!confirmed) return;
@@ -655,66 +868,49 @@
     }
 
     initCharacterCounters();
-    const imgInput = qs('#wizardImage');
-    const imgPrev = qs('#wizardImagePreview');
-    if (imgInput && imgPrev){
-      imgInput.addEventListener('change', function(){
+
+    if (wizardImageInput){
+      wizardImageInput.addEventListener('change', function(){
         const f = this.files && this.files[0];
-        if (!f){
-          imgPrev.hidden = true;
-          imgPrev.removeAttribute('src');
-          imgPrev.classList.remove('is-landscape', 'is-portrait', 'is-square');
-          hasImage = false;
-          updateSubmitButtonState();
-          return;
-        }
-        const url = URL.createObjectURL(f);
-        imgPrev.src = url;
-        imgPrev.hidden = false;
-        imgPrev.onload = function(){
-          adjustPreviewAspect(imgPrev);
-          try { URL.revokeObjectURL(url); } catch(_){}
-        };
-        hasImage = true;
-        updateSubmitButtonState();
+        if (!f) return;
+        handleWizardImageSelection(f);
       });
-      const dropzone = qs('#artistImageDropzone');
-      const trigger = qs('#wizardImageTrigger');
-      if (trigger){
-        trigger.addEventListener('click', function(){
-          try { imgInput.click(); } catch(_){}
+    }
+
+    const trigger = qs('#wizardImageTrigger');
+    if (trigger && wizardImageInput){
+      trigger.addEventListener('click', function(){
+        try { wizardImageInput.click(); } catch(_){}
+      });
+    }
+    if (wizardDropzone && wizardImageInput){
+      ['dragenter','dragover'].forEach(function(ev){
+        wizardDropzone.addEventListener(ev, function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          wizardDropzone.classList.add('is-dragover');
         });
-      }
-      if (dropzone){
-        ['dragenter','dragover'].forEach(function(ev){
-          dropzone.addEventListener(ev, function(e){
-            e.preventDefault();
-            e.stopPropagation();
-            dropzone.classList.add('is-dragover');
-          });
+      });
+      ['dragleave','drop'].forEach(function(ev){
+        wizardDropzone.addEventListener(ev, function(e){
+          e.preventDefault();
+          e.stopPropagation();
+          wizardDropzone.classList.remove('is-dragover');
         });
-        ['dragleave','drop'].forEach(function(ev){
-          dropzone.addEventListener(ev, function(e){
-            e.preventDefault();
-            e.stopPropagation();
-            dropzone.classList.remove('is-dragover');
-          });
-        });
-        dropzone.addEventListener('drop', function(e){
-          const dt = e.dataTransfer;
-          if (!dt || !dt.files || !dt.files.length) return;
-          const file = dt.files[0];
-          try {
-            const dataTx = new DataTransfer();
-            dataTx.items.add(file);
-            imgInput.files = dataTx.files;
-          } catch(_){
-            // Fallback: asignar directamente si DataTransfer no existe
-            try { imgInput.files = dt.files; } catch(__){}
-          }
-          imgInput.dispatchEvent(new Event('change', { bubbles: true }));
-        });
-      }
+      });
+      wizardDropzone.addEventListener('drop', function(e){
+        const dt = e.dataTransfer;
+        if (!dt || !dt.files || !dt.files.length) return;
+        const file = dt.files[0];
+        try {
+          const dataTx = new DataTransfer();
+          dataTx.items.add(file);
+          wizardImageInput.files = dataTx.files;
+        } catch(_){
+          try { wizardImageInput.files = dt.files; } catch(__){}
+        }
+        handleWizardImageSelection(file);
+      });
     }
 
     // Validacion en vivo para habilitar/deshabilitar "Siguiente"
