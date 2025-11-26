@@ -1958,6 +1958,27 @@ body.loading .main-content { visibility: hidden; }
 .artist-cover-helper {
   line-height: 1.4;
 }
+
+/* Admin user cover cropper */
+.admin-users-cover-cropper-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  border: 1px dashed rgba(0,0,0,0.2);
+  border-radius: 0.5rem;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.admin-users-cover-cropper-wrapper img {
+  max-width: 100%;
+  display: block;
+}
+.admin-users-cover-helper {
+  line-height: 1.4;
+}
 /* Artist Detail - Additional Classes */
 .artist-image-cover {
     object-fit: cover;

@@ -1505,6 +1505,108 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // Edit User modals
   (function setupAdminEditUsers(){
+    const ADMIN_COVER_ASPECT = 16 / 9;
+    const ADMIN_COVER_WIDTH = 1920;
+    const ADMIN_COVER_HEIGHT = Math.round(ADMIN_COVER_WIDTH / ADMIN_COVER_ASPECT);
+    const adminCoverCropState = new WeakMap();
+
+    function destroyAdminCoverCropper(modalEl){
+      const state = adminCoverCropState.get(modalEl);
+      if (!state) return;
+      try {
+        if (state.cropper && typeof state.cropper.destroy === 'function') {
+          state.cropper.destroy();
+        }
+      } catch (_) {}
+      try {
+        if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+      } catch (_) {}
+      adminCoverCropState.delete(modalEl);
+      try {
+        const wrapper = modalEl.querySelector('.admin-users-cover-cropper-wrapper');
+        const img = wrapper && wrapper.querySelector('.admin-users-cover-cropper-img');
+        if (wrapper) wrapper.classList.add('d-none');
+        if (img) img.removeAttribute('src');
+      } catch (_) {}
+    }
+
+    function initAdminCoverCropper(modalEl, file){
+      destroyAdminCoverCropper(modalEl);
+      if (!file) return;
+      if (typeof Cropper !== 'function') {
+        if (window.showAdminToast) showAdminToast('La herramienta de recorte no se cargó correctamente. Recarga la página.', 'warning');
+        return;
+      }
+      const wrapper = modalEl.querySelector('.admin-users-cover-cropper-wrapper');
+      const img = wrapper && wrapper.querySelector('.admin-users-cover-cropper-img');
+      if (!wrapper || !img) return;
+      let objectUrl;
+      try {
+        objectUrl = URL.createObjectURL(file);
+      } catch (err) {
+        console.error(err);
+        if (window.showAdminToast) showAdminToast('No se pudo previsualizar la imagen seleccionada.', 'danger');
+        return;
+      }
+      img.src = objectUrl;
+      wrapper.classList.remove('d-none');
+      const state = { cropper: null, objectUrl };
+      adminCoverCropState.set(modalEl, state);
+      const init = function(){
+        try {
+          state.cropper = new Cropper(img, {
+            aspectRatio: ADMIN_COVER_ASPECT,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            background: false,
+            dragMode: 'move',
+            minContainerHeight: 220,
+          });
+        } catch (err) {
+          console.error(err);
+          destroyAdminCoverCropper(modalEl);
+          if (window.showAdminToast) showAdminToast('No se pudo iniciar el recorte. Intenta de nuevo.', 'danger');
+        }
+      };
+      if (window.requestAnimationFrame) window.requestAnimationFrame(init);
+      else setTimeout(init, 0);
+    }
+
+    function requireAdminCoverBlob(modalEl){
+      return new Promise(function(resolve, reject){
+        const state = adminCoverCropState.get(modalEl);
+        if (!state || !state.cropper) {
+          reject(new Error('Selecciona una imagen y ajusta el recorte antes de subir.'));
+          return;
+        }
+        let canvas;
+        try {
+          canvas = state.cropper.getCroppedCanvas({
+            width: ADMIN_COVER_WIDTH,
+            height: ADMIN_COVER_HEIGHT,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+            fillColor: '#ffffff',
+          });
+        } catch (err) {
+          reject(err);
+          return;
+        }
+        if (!canvas) {
+          reject(new Error('No se pudo generar el recorte.'));
+          return;
+        }
+        canvas.toBlob(function(blob){
+          if (!blob) {
+            reject(new Error('No se pudo exportar el recorte.'));
+            return;
+          }
+          resolve(blob);
+        }, 'image/jpeg', 0.92);
+      });
+    }
+
     function setAvatarPreview(modalEl, url){
       try {
         var img = modalEl.querySelector('.admin-users-avatar-preview');
@@ -1520,6 +1622,7 @@ document.addEventListener('DOMContentLoaded', function(){
     }
     function setCoverPreview(modalEl, url){
       try {
+        destroyAdminCoverCropper(modalEl);
         var img = modalEl.querySelector('.admin-users-cover-preview');
         if (!img) return;
         if (url) { img.src = url; img.style.display = ''; }
@@ -1572,6 +1675,26 @@ document.addEventListener('DOMContentLoaded', function(){
           fetch(url).then(function(res){ return res.json(); }).then(handle).catch(function(err){ console.error(err); });
         }
       });
+      modalEl.addEventListener('hidden.bs.modal', function(){
+        destroyAdminCoverCropper(modalEl);
+        try {
+          var input = modalEl.querySelector('.admin-users-cover-input');
+          if (input) input.value = '';
+        } catch (_) {}
+      });
+    });
+
+    document.addEventListener('change', function(e){
+      var input = e.target.closest && e.target.closest('.admin-users-cover-input');
+      if (!input) return;
+      var modalEl = input.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!modalEl) return;
+      var file = input.files && input.files[0];
+      if (!file) {
+        destroyAdminCoverCropper(modalEl);
+        return;
+      }
+      initAdminCoverCropper(modalEl, file);
     });
 
     // Subir imagen de perfil (delegado)
@@ -1633,13 +1756,19 @@ document.addEventListener('DOMContentLoaded', function(){
       var id = modalEl.getAttribute('data-user-id');
       var fileInput = modalEl.querySelector('.admin-users-cover-input');
       if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
-      var file = fileInput.files[0];
-      try { await ensureHorizontalImage(file, { type: 'cover' }); } catch (err) { var msgV=(err && err.message)||'La portada debe ser horizontal (más ancha que alta).'; if(window.showAdminToast) showAdminToast(msgV,'warning'); else alert(msgV); return; }
+      var blob;
+      try {
+        blob = await requireAdminCoverBlob(modalEl);
+      } catch (err) {
+        var msgCrop = (err && err.message) || 'Ajusta el recorte antes de subir.';
+        if (window.showAdminToast) showAdminToast(msgCrop, 'warning');
+        return;
+      }
       var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Subiendo...';
       var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
-      var fd = new FormData(); fd.append('coverImage', file);
-      var onSuccess = function(resp){ try { var data=(resp&&resp.data)||resp; var user=data&&(data.data||data.user||data); var newUrl=user&&user.coverImage; setCoverPreview(modalEl, newUrl||''); fileInput.value=''; } catch(_){ } if(window.showAdminToast) showAdminToast('Portada actualizada','success'); };
+      var fd = new FormData(); fd.append('coverImage', blob, `cover-${Date.now()}.jpg`);
+      var onSuccess = function(resp){ try { var data=(resp&&resp.data)||resp; var user=data&&(data.data||data.user||data); var newUrl=user&&user.coverImage; setCoverPreview(modalEl, newUrl||''); if (fileInput) fileInput.value=''; destroyAdminCoverCropper(modalEl); } catch(_){ } if(window.showAdminToast) showAdminToast('Portada actualizada','success'); };
       var onError = function(err){ console.error(err); var msg=(err&&err.response&&err.response.data&&(err.response.data.message||err.response.data.error||err.response.data.err))||err&&err.message||'No se pudo subir la portada'; if(window.showAdminToast) showAdminToast(msg,'danger'); };
       if (window.axios) axios.patch(url, fd).then(onSuccess).catch(onError).finally(done);
       else fetch(url, { method:'PATCH', body: fd }).then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d&&d.message)||'Failed');}); return res.json(); }).then(onSuccess).catch(onError).finally(done);
@@ -1657,7 +1786,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Quitando...';
       var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
-      var onSuccess = function(resp){ setCoverPreview(modalEl, ''); if (window.showAdminToast) showAdminToast('Portada eliminada','success'); };
+      var onSuccess = function(resp){ setCoverPreview(modalEl, ''); destroyAdminCoverCropper(modalEl); try { var input = modalEl.querySelector('.admin-users-cover-input'); if (input) input.value=''; } catch(_){ } if (window.showAdminToast) showAdminToast('Portada eliminada','success'); };
       var onError = function(err){ console.error(err); var msg=(err&&err.response&&err.response.data&&(err.response.data.message||err.response.data.error||err.response.data.err))||err&&err.message||'No se pudo eliminar la portada'; if(window.showAdminToast) showAdminToast(msg,'danger'); };
       if (window.axios) axios.patch(url, { coverImage: '' }).then(onSuccess).catch(onError).finally(done);
       else fetch(url, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ coverImage: '' })}).then(function(res){ if(!res.ok) return res.json().then(function(d){ throw new Error((d&&d.message)||'Failed');}); return res.json(); }).then(onSuccess).catch(onError).finally(done);
