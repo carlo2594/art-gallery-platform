@@ -1509,6 +1509,9 @@ document.addEventListener('DOMContentLoaded', function(){
     const ADMIN_COVER_WIDTH = 1920;
     const ADMIN_COVER_HEIGHT = Math.round(ADMIN_COVER_WIDTH / ADMIN_COVER_ASPECT);
     const adminCoverCropState = new WeakMap();
+    const ADMIN_AVATAR_ASPECT = 1;
+    const ADMIN_AVATAR_SIZE = 600;
+    const adminAvatarCropState = new WeakMap();
 
     function destroyAdminCoverCropper(modalEl){
       const state = adminCoverCropState.get(modalEl);
@@ -1607,8 +1610,107 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
 
+
+    function destroyAdminAvatarCropper(modalEl){
+      const state = adminAvatarCropState.get(modalEl);
+      if (!state) return;
+      try {
+        if (state.cropper && typeof state.cropper.destroy === 'function') {
+          state.cropper.destroy();
+        }
+      } catch (_) {}
+      try {
+        if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
+      } catch (_) {}
+      adminAvatarCropState.delete(modalEl);
+      try {
+        const wrapper = modalEl.querySelector('.admin-users-avatar-cropper-wrapper');
+        const img = wrapper && wrapper.querySelector('.admin-users-avatar-cropper-img');
+        if (wrapper) wrapper.classList.add('d-none');
+        if (img) img.removeAttribute('src');
+      } catch (_) {}
+    }
+
+    function initAdminAvatarCropper(modalEl, file){
+      destroyAdminAvatarCropper(modalEl);
+      if (!file) return;
+      if (typeof Cropper !== 'function') {
+        if (window.showAdminToast) showAdminToast('La herramienta de recorte no se carg? correctamente. Recarga la p?gina.', 'warning');
+        return;
+      }
+      const wrapper = modalEl.querySelector('.admin-users-avatar-cropper-wrapper');
+      const img = wrapper && wrapper.querySelector('.admin-users-avatar-cropper-img');
+      if (!wrapper || !img) return;
+      let objectUrl;
+      try {
+        objectUrl = URL.createObjectURL(file);
+      } catch (err) {
+        console.error(err);
+        if (window.showAdminToast) showAdminToast('No se pudo previsualizar la imagen seleccionada.', 'danger');
+        return;
+      }
+      img.src = objectUrl;
+      wrapper.classList.remove('d-none');
+      const state = { cropper: null, objectUrl };
+      adminAvatarCropState.set(modalEl, state);
+      const init = function(){
+        try {
+          state.cropper = new Cropper(img, {
+            aspectRatio: ADMIN_AVATAR_ASPECT,
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            background: false,
+            dragMode: 'move',
+            minContainerHeight: 200,
+          });
+        } catch (err) {
+          console.error(err);
+          destroyAdminAvatarCropper(modalEl);
+          if (window.showAdminToast) showAdminToast('No se pudo iniciar el recorte. Intenta de nuevo.', 'danger');
+        }
+      };
+      if (window.requestAnimationFrame) window.requestAnimationFrame(init);
+      else setTimeout(init, 0);
+    }
+
+    function requireAdminAvatarBlob(modalEl){
+      return new Promise(function(resolve, reject){
+        const state = adminAvatarCropState.get(modalEl);
+        if (!state || !state.cropper) {
+          reject(new Error('Selecciona una imagen y ajusta el recorte antes de subir.'));
+          return;
+        }
+        let canvas;
+        try {
+          canvas = state.cropper.getCroppedCanvas({
+            width: ADMIN_AVATAR_SIZE,
+            height: ADMIN_AVATAR_SIZE,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+            fillColor: '#ffffff',
+          });
+        } catch (err) {
+          reject(err);
+          return;
+        }
+        if (!canvas) {
+          reject(new Error('No se pudo generar el recorte.'));
+          return;
+        }
+        canvas.toBlob(function(blob){
+          if (!blob) {
+            reject(new Error('No se pudo exportar el recorte.'));
+            return;
+          }
+          resolve(blob);
+        }, 'image/jpeg', 0.92);
+      });
+    }
+
     function setAvatarPreview(modalEl, url){
       try {
+        destroyAdminAvatarCropper(modalEl);
         var img = modalEl.querySelector('.admin-users-avatar-preview');
         if (!img) return;
         if (url) {
@@ -1677,24 +1779,39 @@ document.addEventListener('DOMContentLoaded', function(){
       });
       modalEl.addEventListener('hidden.bs.modal', function(){
         destroyAdminCoverCropper(modalEl);
+        destroyAdminAvatarCropper(modalEl);
         try {
           var input = modalEl.querySelector('.admin-users-cover-input');
           if (input) input.value = '';
+          var avatarInput = modalEl.querySelector('.admin-users-avatar-input');
+          if (avatarInput) avatarInput.value = '';
         } catch (_) {}
       });
     });
 
     document.addEventListener('change', function(e){
-      var input = e.target.closest && e.target.closest('.admin-users-cover-input');
-      if (!input) return;
-      var modalEl = input.closest('.admin-users-edit-modal, .admin-edit-user-modal');
-      if (!modalEl) return;
-      var file = input.files && input.files[0];
-      if (!file) {
-        destroyAdminCoverCropper(modalEl);
+      var coverInput = e.target.closest && e.target.closest('.admin-users-cover-input');
+      if (coverInput) {
+        var coverModal = coverInput.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+        if (!coverModal) return;
+        var coverFile = coverInput.files && coverInput.files[0];
+        if (!coverFile) {
+          destroyAdminCoverCropper(coverModal);
+          return;
+        }
+        initAdminCoverCropper(coverModal, coverFile);
         return;
       }
-      initAdminCoverCropper(modalEl, file);
+      var avatarInput = e.target.closest && e.target.closest('.admin-users-avatar-input');
+      if (!avatarInput) return;
+      var avatarModal = avatarInput.closest('.admin-users-edit-modal, .admin-edit-user-modal');
+      if (!avatarModal) return;
+      var avatarFile = avatarInput.files && avatarInput.files[0];
+      if (!avatarFile) {
+        destroyAdminAvatarCropper(avatarModal);
+        return;
+      }
+      initAdminAvatarCropper(avatarModal, avatarFile);
     });
 
     // Subir imagen de perfil (delegado)
@@ -1706,11 +1823,11 @@ document.addEventListener('DOMContentLoaded', function(){
       var id = modalEl.getAttribute('data-user-id');
       var fileInput = modalEl.querySelector('.admin-users-avatar-input');
       if (!id || !fileInput || !fileInput.files || !fileInput.files[0]) { if (window.showAdminToast) showAdminToast('Selecciona una imagen','warning'); return; }
-      var file = fileInput.files[0];
+      var avatarBlob;
       try {
-        await ensureHorizontalImage(file, { type: 'profile' });
+        avatarBlob = await requireAdminAvatarBlob(modalEl);
       } catch (err) {
-        var msgValidate = (err && err.message) || 'La foto no cumple los requisitos mínimos de tamaño o proporción.';
+        var msgValidate = (err && err.message) || 'Ajusta el recorte antes de subir.';
         if (window.showAdminToast) {
           showAdminToast(msgValidate, 'warning');
         } else {
@@ -1722,13 +1839,13 @@ document.addEventListener('DOMContentLoaded', function(){
       var done = function(){ btn.disabled = false; btn.classList.remove('disabled'); btn.textContent = old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/profile-image';
       var formData = new FormData();
-      formData.append('profileImage', file);
+      formData.append('profileImage', avatarBlob, 'avatar-' + Date.now() + '.jpg');
       var onSuccess = function(resp){
         try {
           var data = (resp && resp.data) || resp; var user = data && (data.data || data.user || data);
           var newUrl = user && user.profileImage; setAvatarPreview(modalEl, newUrl || '');
-          fileInput.value = '';
-        } catch(_){ }
+          if (fileInput) fileInput.value = '';
+        } catch(_) { }
         if (window.showAdminToast) showAdminToast('Imagen actualizada','success');
       };
       var onError = function(err){
@@ -1737,7 +1854,6 @@ document.addEventListener('DOMContentLoaded', function(){
         if (window.showAdminToast) showAdminToast(msg,'danger');
       };
       if (window.axios) {
-        // No establezcas Content-Type manualmente; el navegador agrega el boundary correcto
         axios.patch(url, formData)
           .then(function(resp){ onSuccess(resp); }).catch(onError).finally(done);
       } else {
@@ -1782,7 +1898,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!modalEl) return;
       var id = modalEl.getAttribute('data-user-id');
       if (!id) return;
-      if (!confirm('¿Quitar imagen de portada?')) return;
+      if (!confirm('Quitar imagen de portada?')) return;
       var old = btn.textContent; btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Quitando...';
       var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/cover-image';
@@ -1800,11 +1916,11 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!modalEl) return;
       var id = modalEl.getAttribute('data-user-id');
       if (!id) return;
-      if (!confirm('¿Quitar imagen de perfil?')) return;
+      if (!confirm('Quitar imagen de perfil?')) return;
       var old = btn.textContent; btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Quitando...';
       var done = function(){ btn.disabled = false; btn.classList.remove('disabled'); btn.textContent = old; };
       var url = '/api/v1/users/' + encodeURIComponent(id) + '/profile-image';
-      var onSuccess = function(resp){ setAvatarPreview(modalEl, ''); if (window.showAdminToast) showAdminToast('Imagen eliminada','success'); };
+      var onSuccess = function(resp){ setAvatarPreview(modalEl, ''); destroyAdminAvatarCropper(modalEl); try { var input = modalEl.querySelector('.admin-users-avatar-input'); if (input) input.value = ''; } catch(_){} if (window.showAdminToast) showAdminToast('Imagen eliminada','success'); };
       var onError = function(err){
         console.error(err);
         var msg = (err && err.response && err.response.data && (err.response.data.message || err.response.data.error || err.response.data.err)) || err && err.message || 'No se pudo eliminar la imagen';
@@ -1819,6 +1935,8 @@ document.addEventListener('DOMContentLoaded', function(){
           .then(onSuccess).catch(onError).finally(done);
       }
     });
+
+
 
     document.addEventListener('submit', function(e){
       var form = e.target.closest && e.target.closest('.admin-users-edit-form, .admin-edit-user-form');

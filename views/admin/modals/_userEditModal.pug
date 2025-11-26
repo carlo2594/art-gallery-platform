@@ -9,15 +9,21 @@
         // Bloque de imagen de perfil
         .mb-3.admin-users-avatar-block
           label.form-label Imagen de perfil
-          .d-flex.align-items-center.gap-3
-            if u.profileImage
-              img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;')
-            else
-              img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
-            .d-flex.flex-wrap.gap-2
-              input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
-              button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
-              button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
+          .d-flex.flex-column.gap-3
+            .d-flex.align-items-center.gap-3.flex-wrap
+              if u.profileImage
+                img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;')
+              else
+                img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
+              .d-flex.flex-wrap.gap-2
+                input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
+                button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
+                button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
+            .admin-users-avatar-helper.text-muted.small
+              strong Recorte cuadrado:&nbsp;
+              | ajusta el recuadro para centrar el rostro antes de guardar.
+            .admin-users-avatar-cropper-wrapper.d-none
+              img.admin-users-avatar-cropper-img.img-fluid.rounded(alt='Vista previa de recorte' decoding='async' loading='lazy')
         // Bloque de imagen de portada (cover)
         .mb-3.admin-users-cover-block
           label.form-label Imagen de portada

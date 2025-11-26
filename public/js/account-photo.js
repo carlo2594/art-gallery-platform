@@ -8,6 +8,12 @@
   var coverDeleteForm = document.getElementById('accountCoverDeleteForm');
   var alerts = document.getElementById('accountAlerts');
   var hasAxios = !!(window.axios && typeof window.axios.post === 'function');
+  var PHOTO_ASPECT_RATIO = 1;
+  var PHOTO_EXPORT_SIZE = 800;
+  var cropperWrapper = document.getElementById('accountPhotoCropperWrapper');
+  var cropperImageEl = document.getElementById('accountPhotoCropperImg');
+  var photoCropper = null;
+  var photoCropperUrl = null;
 
   function showAlert(type, message) {
     if (!message) return;
@@ -76,6 +82,90 @@
     }
   }
 
+  function destroyPhotoCropper() {
+    if (photoCropper) {
+      try { photoCropper.destroy(); } catch (_) {}
+      photoCropper = null;
+    }
+    if (photoCropperUrl) {
+      try { URL.revokeObjectURL(photoCropperUrl); } catch (_) {}
+      photoCropperUrl = null;
+    }
+    if (cropperWrapper) cropperWrapper.classList.add('d-none');
+    if (cropperImageEl) cropperImageEl.removeAttribute('src');
+  }
+
+  function initPhotoCropper(file) {
+    if (!cropperWrapper || !cropperImageEl) return;
+    destroyPhotoCropper();
+    if (!file) return;
+    if (typeof window.Cropper !== 'function') {
+      showAlert('warning', 'No se pudo cargar la herramienta de recorte. Intenta recargar la página.');
+      return;
+    }
+    try {
+      photoCropperUrl = URL.createObjectURL(file);
+    } catch (err) {
+      console.error(err);
+      showAlert('danger', 'No se pudo previsualizar la imagen seleccionada.');
+      return;
+    }
+    cropperImageEl.src = photoCropperUrl;
+    cropperWrapper.classList.remove('d-none');
+    var init = function () {
+      try {
+        photoCropper = new Cropper(cropperImageEl, {
+          aspectRatio: PHOTO_ASPECT_RATIO,
+          viewMode: 1,
+          autoCropArea: 1,
+          dragMode: 'move',
+          background: false,
+          responsive: true,
+          minContainerHeight: 220,
+        });
+      } catch (err) {
+        console.error(err);
+        showAlert('danger', 'No se pudo iniciar el recorte. Intenta de nuevo.');
+        destroyPhotoCropper();
+      }
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(init);
+    else setTimeout(init, 0);
+  }
+
+  function requirePhotoBlob() {
+    return new Promise(function (resolve, reject) {
+      if (!photoCropper) {
+        reject(new Error('Selecciona una imagen y ajusta el recorte antes de continuar.'));
+        return;
+      }
+      var canvas;
+      try {
+        canvas = photoCropper.getCroppedCanvas({
+          width: PHOTO_EXPORT_SIZE,
+          height: PHOTO_EXPORT_SIZE,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high',
+          fillColor: '#ffffff',
+        });
+      } catch (err) {
+        reject(err);
+        return;
+      }
+      if (!canvas) {
+        reject(new Error('No se pudo generar el recorte.'));
+        return;
+      }
+      canvas.toBlob(function (blob) {
+        if (!blob) {
+          reject(new Error('No se pudo exportar el recorte.'));
+          return;
+        }
+        resolve(blob);
+      }, 'image/jpeg', 0.92);
+    });
+  }
+
   function showCoverPlaceholder() {
     var container = document.querySelector('.account-cover-preview-group');
     if (container) {
@@ -92,6 +182,7 @@
   }
 
   function showPlaceholder() {
+    destroyPhotoCropper();
     var container = document.querySelector('.account-photo-preview-group');
     if (container) {
       container.innerHTML = '';
@@ -108,17 +199,26 @@
 
   if (photoForm) {
     try { console.log('[AccountPhoto:new] Hooked photo upload'); } catch(_) {}
+    var photoInput = photoForm.querySelector('input[name="profileImage"][type="file"]');
+    if (photoInput) {
+      photoInput.addEventListener('change', function () {
+        var file = photoInput.files && photoInput.files[0];
+        if (!file) {
+          destroyPhotoCropper();
+          return;
+        }
+        initPhotoCropper(file);
+      });
+    }
     photoForm.addEventListener('submit', function (e) {
       if (e) { try { e.stopImmediatePropagation(); } catch(_) {} }
       e.preventDefault();
       var btn = photoForm.querySelector('button[type=submit]');
-      var fileInput = photoForm.querySelector('input[name="profileImage"][type="file"]');
-      var file = fileInput && fileInput.files && fileInput.files[0];
-      if (!file) { showAlert('warning', 'Selecciona una imagen.'); return; }
+      var fileInput = photoInput;
+      var fileExists = fileInput && fileInput.files && fileInput.files[0];
+      if (!fileExists) { showAlert('warning', 'Selecciona una imagen.'); return; }
 
       setBtn(btn, true, 'Subiendo...');
-      var formData = new FormData(photoForm);
-      // Do not disable the input before FormData; after that is fine
       if (fileInput) fileInput.disabled = true;
 
       var onSuccess = function (payload) {
@@ -129,27 +229,38 @@
         }
       };
       var onError = function (err) {
-        var msg = (err && err.response && err.response.data && err.response.data.message) || err.message || 'No se pudo actualizar la foto';
+        var msg = (err && err.response && err.response.data && err.response.data.message) || err && err.message || 'No se pudo actualizar la foto';
         showAlert('danger', msg);
       };
       var onFinally = function () {
         setBtn(btn, false, 'Actualizar foto');
         photoForm.reset();
+        destroyPhotoCropper();
         if (fileInput) fileInput.disabled = false;
       };
 
-      if (hasAxios) {
-        axios.post(photoForm.action, formData, { headers: { Accept: 'application/json' }, withCredentials: true })
-          .then(function (res) { onSuccess(res && res.data); })
-          .catch(onError)
-          .finally(onFinally);
-      } else {
-        fetch(photoForm.action, { method: 'POST', headers: { Accept: 'application/json' }, body: formData, credentials: 'same-origin' })
-          .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error(d && d.message || 'Error'); return d; }); })
-          .then(onSuccess)
-          .catch(onError)
-          .finally(onFinally);
-      }
+      requirePhotoBlob()
+        .then(function (blob) {
+          var formData = new FormData();
+          formData.append('profileImage', blob, 'profile-' + Date.now() + '.jpg');
+          if (hasAxios) {
+            return axios.post(photoForm.action, formData, { headers: { Accept: 'application/json' }, withCredentials: true })
+              .then(function (res) { onSuccess(res && res.data); })
+              .catch(onError)
+              .finally(onFinally);
+          }
+          return fetch(photoForm.action, { method: 'POST', headers: { Accept: 'application/json' }, body: formData, credentials: 'same-origin' })
+            .then(function (res) { return res.json().then(function (d) { if (!res.ok) throw new Error((d && d.message) || 'Error'); return d; }); })
+            .then(onSuccess)
+            .catch(onError)
+            .finally(onFinally);
+        })
+        .catch(function (err) {
+          setBtn(btn, false, 'Actualizar foto');
+          if (fileInput) fileInput.disabled = false;
+          var msg = (err && err.message) || 'Ajusta el recorte antes de subir.';
+          showAlert('warning', msg);
+        });
     });
   }
 

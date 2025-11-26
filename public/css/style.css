@@ -1259,6 +1259,24 @@ body.loading .main-content { visibility: hidden; }
 .account-photo-row { row-gap: 2rem; align-items: flex-start; }
 .account-photo-preview-group { display: flex; justify-content: center; }
 .account-photo-placeholder-icon { color: color-mix(in srgb, var(--ox-blue) 65%, transparent); box-shadow: none; }
+.account-photo-cropper-helper { line-height: 1.45; }
+.account-photo-cropper-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 220px;
+  border: 1px dashed rgba(0,0,0,0.2);
+  border-radius: 0.5rem;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+.account-photo-cropper-wrapper img {
+  max-width: 100%;
+  display: block;
+}
 .account-form-hidden { display: none; }
 
 @media (max-width: 575.98px) {
@@ -1977,6 +1995,28 @@ body.loading .main-content { visibility: hidden; }
   display: block;
 }
 .admin-users-cover-helper {
+  line-height: 1.4;
+}
+.admin-users-avatar-cropper-wrapper,
+.admin-users-cover-cropper-wrapper {
+  width: 100%;
+}
+.admin-users-avatar-cropper-wrapper {
+  position: relative;
+  min-height: 200px;
+  border: 1px dashed rgba(0,0,0,0.2);
+  border-radius: 0.5rem;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.admin-users-avatar-cropper-wrapper img {
+  max-width: 100%;
+  display: block;
+}
+.admin-users-avatar-helper {
   line-height: 1.4;
 }
 /* Artist Detail - Additional Classes */

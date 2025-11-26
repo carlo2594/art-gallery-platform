@@ -1,5 +1,8 @@
 extends /layouts/public
 
+block headExtra
+  link(rel='stylesheet', href='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css')
+
 block content
   section.account-page-section.py-5
     .container.account-page-container
@@ -297,6 +300,11 @@ block content
                   small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info(style='color: var(--ox-blue);')
                     i.fas.fa-info-circle.account-form-info-icon
                     span.account-form-hint-copy Usa una imagen nítida, bien encuadrada y de al menos 250px de ancho y alto para que tu perfil se vea correctamente.
+                  .account-photo-cropper-helper.text-muted.small.mt-2
+                    strong Ajusta el recorte:&nbsp;
+                    | usa el recuadro para centrar tu rostro en un formato cuadrado.
+                  .account-photo-cropper-wrapper.d-none#accountPhotoCropperWrapper
+                    img#accountPhotoCropperImg.img-fluid.rounded(alt='Vista previa del recorte' decoding='async' loading='lazy')
                 .mt-3.account-form-actions
                   button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
                   button.btn.btn-outline-danger.account-form-delete(type='submit' form='accountPhotoDeleteForm') Eliminar foto
@@ -334,6 +342,7 @@ block content
 
 //- Scripts adicionales para esta vista
 block append scriptsExtra
+  script(src='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js')
   script(src='/js/account-photo.js')
 
 
