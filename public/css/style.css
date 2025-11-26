@@ -2155,9 +2155,49 @@ body.loading .main-content { visibility: hidden; }
 .hero-background { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; }
 
 @keyframes hero-kenburns {
-  0%   { transform: scale(1.06) translate3d(0%, 0%, 0); }
-  50%  { transform: scale(1.10) translate3d(1.5%, -1.5%, 0); }
-  100% { transform: scale(1.06) translate3d(-1.5%, 1.5%, 0); }
+  0%   { transform: scale(1.03) translate3d(0%, 0%, 0); }
+  50%  { transform: scale(1.06) translate3d(0.8%, -0.8%, 0); }
+  100% { transform: scale(1.03) translate3d(-0.8%, 0.8%, 0); }
+}
+
+@media (max-width: 900px) {
+  .artist-detail-page .artist-hero-fullscreen {
+    min-height: auto;
+    height: auto;
+    padding-bottom: 2rem;
+  }
+  .artist-detail-page .artist-hero-bg,
+  .artist-detail-page .hero-background {
+    position: relative;
+    inset: auto;
+    width: 100vw;
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+  }
+  .artist-detail-page .artist-hero-overlay {
+    display: none;
+  }
+  .artist-detail-page .hero-bg-image,
+  .artist-detail-page .artist-bg-image {
+    width: 100vw;
+    max-width: 100vw;
+    height: auto !important;
+  }
+  .artist-detail-page .artist-hero-content {
+    position: static !important;
+    inset: auto !important;
+    display: block !important;
+    padding-top: 1.5rem;
+  }
+  .artist-detail-page .artist-hero-content .row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .artist-detail-page .artist-hero-card {
+    margin-top: 1rem;
+    width: 100%;
+  }
 }
 
 /* Small devices polish: < 400px width */
