@@ -3121,3 +3121,37 @@ body.noscroll {
   color: inherit;
   text-decoration: none;
 }
+
+/* Password revealer */
+.ox-password-reveal {
+  position: relative;
+}
+.ox-password-reveal .form-control {
+  padding-right: 3rem;
+}
+.ox-password-reveal-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  border: 0;
+  background: transparent;
+  color: #6c757d;
+  cursor: pointer;
+}
+.ox-password-reveal-toggle:hover,
+.ox-password-reveal-toggle:focus {
+  color: #111;
+}
+.ox-password-reveal-toggle:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}
+.ox-password-reveal-icon {
+  font-size: 1rem;
+  line-height: 1;
+}

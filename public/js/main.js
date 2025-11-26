@@ -593,6 +593,35 @@ __onReady(function () {
     });
   });
 
+  // Password reveal helper (.ox-password-reveal)
+  document.querySelectorAll('.ox-password-reveal').forEach(wrapper => {
+    const input =
+      wrapper.querySelector('input[type=password]') ||
+      wrapper.querySelector('[data-password-field]');
+    const toggle = wrapper.querySelector('.ox-password-reveal-toggle');
+    if (!input || !toggle) return;
+    const icon = toggle.querySelector('.ox-password-reveal-icon');
+    const setIconState = (visible) => {
+      if (!icon) return;
+      icon.classList.toggle('fa-eye', visible);
+      icon.classList.toggle('fa-eye-slash', !visible);
+    };
+    const toggleType = () => {
+      const isPwd = input.getAttribute('type') === 'password';
+      input.setAttribute('type', isPwd ? 'text' : 'password');
+      const visible = isPwd;
+      toggle.setAttribute('aria-pressed', String(visible));
+      setIconState(visible);
+    };
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      toggleType();
+    });
+    const isInitiallyVisible = input.getAttribute('type') !== 'password';
+    toggle.setAttribute('aria-pressed', String(isInitiallyVisible));
+    setIconState(isInitiallyVisible);
+  });
+
   // Muestra el nombre de archivo seleccionado en inputs file
   document.querySelectorAll('input[type=file]').forEach(input => {
     input.addEventListener('change', () => {

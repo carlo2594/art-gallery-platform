@@ -9,7 +9,7 @@ block content
           .card.shadow-sm.rounded-4.border-0
             .card-body.p-4.p-md-5
               h1.h3.mb-3.text-ox-blue.font-title
-                | ¡Bienvenido
+                | Hola
                 if currentUser && currentUser.name
                   | , #{currentUser.name}
                 | !
@@ -23,12 +23,5 @@ block content
                 a.btn.btn-outline-secondary.text-uppercase.fw-bold(href='/edit-profile')
                   i.fas.fa-user-circle.me-2
                   | Editar cuenta
-
-              .mt-4
-                h2.h6.text-muted.mb-2 Sugerencias
-                ul.mb-0
-                  li Completa tu perfil (nombre público, foto, biografía).
-                  li Explora artistas y sigue tus favoritos.
-                  li Activa notificaciones por correo para novedades.
 
   .my-4

@@ -43,9 +43,11 @@ block content
                     label.login-signin-label(for="floatingInput") Correo electr&oacute;nico
 
                   if mode !== 'signUp'
-                    .form-floating.mb-3.login-signin-field
+                    .form-floating.mb-3.login-signin-field.ox-password-reveal
                       input.form-control.login-signin-input(type="password", id="floatingPassword", name="password", placeholder="Contrase&ntilde;a", required)
                       label.login-signin-label(for="floatingPassword") Contrase&ntilde;a
+                      button.ox-password-reveal-toggle(type="button", aria-label="Mostrar u ocultar contraseña", aria-pressed="false", title="Mostrar/ocultar")
+                        i.fas.fa-eye-slash.ox-password-reveal-icon
 
                     .form-check.text-start.my-3.login-signin-remember
                       input.form-check-input.login-signin-checkbox(type="checkbox", value="remember-me", id="checkDefault", name="remember")
