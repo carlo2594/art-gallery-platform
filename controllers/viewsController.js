@@ -673,6 +673,7 @@ exports.getResetLinkInvalid = (req, res) => {
 exports.getSignUp = (req, res) => {
   res.render('public/auth/loginSignUp', {
     title: 'Registrarse · Galería del Ox',
+    hideNavbar: true,
     hideFooter: true,
     mode: 'signUp',
     error: req.query.error,
@@ -685,6 +686,7 @@ exports.getSignUp = (req, res) => {
 exports.getLogin = (req, res) => {
   res.render('public/auth/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
+    hideNavbar: true,
     hideFooter: true,
     mode: 'login',
     error: req.query.error,
