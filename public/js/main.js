@@ -2129,7 +2129,7 @@ document.addEventListener('DOMContentLoaded', function(){
     setTimeout(clearOverlay, 3000);
     window.addEventListener('load', clearOverlay, { once: true });
   }
-  function bindMasonryReady(){
+function bindMasonryReady(){
     var grids = document.querySelectorAll('.artwork-grid');
     if (!grids || !grids.length) { setTimeout(clearOverlay, 400); return; }
     var left = grids.length;
@@ -2152,6 +2152,39 @@ document.addEventListener('DOMContentLoaded', function(){
     else bindMasonryReady();
   }
   try { init(); } catch(_) {}
+})();
+
+// ==========================
+// Artwork grid image fallbacks
+// ==========================
+(function artworkGridFallbacks(){
+  if (typeof document === 'undefined') return;
+  function hideImage(img){
+    if (img && img.style) {
+      img.style.display = 'none';
+    }
+  }
+  function applyFallback(img){
+    if (!img) return;
+    var fallback = img.getAttribute('data-fallback-src');
+    if (fallback) {
+      try { img.removeAttribute('srcset'); } catch(_) {}
+      try { img.removeAttribute('sizes'); } catch(_) {}
+      img.removeAttribute('data-fallback-src');
+      img.setAttribute('data-hide-on-error', 'true');
+      img.src = fallback;
+      return;
+    }
+    if (img.getAttribute('data-hide-on-error') === 'true') {
+      hideImage(img);
+    }
+  }
+  function handleError(event){
+    var img = event && event.target;
+    if (!img || !img.classList || !img.classList.contains('artwork-grid__image')) return;
+    applyFallback(img);
+  }
+  document.addEventListener('error', handleError, true);
 })();
 
 // ==========================

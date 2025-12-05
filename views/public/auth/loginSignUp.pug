@@ -1,17 +1,14 @@
 ﻿extends /layouts/public
+- var hideNavbar = true
+- var hideFooter = true
 
 block headExtra
-  style.
-    .main-navbar,
-    #navUserMobile,
-    #navMainOverlay,
-    #navUserOverlay { display: none !important; }
 
 block content
   .login-signin-container
     .row.g-0.align-items-stretch
       .col-12.col-lg
-        .d-flex.align-items-center.py-4.login-signin-bg(style="min-height:100vh;")
+        .d-flex.align-items-center.py-4.login-signin-bg.min-vh-100
           .container-sm.login-form-narrow.px-3
             main.form-signin.w-100.m-auto.font-title.login-signin-main
               .login-signup-form-wrapper

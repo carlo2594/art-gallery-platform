@@ -10,16 +10,15 @@
           .artist-image-container.position-relative
             - const artistCover = artist.coverImage || artist.profileImage
             if artistCover
-              img.artist-image(
+              img.artist-image.artist-grid-img(
                 src=artistCover,
                 alt=artist.name,
                 loading=eager ? 'eager' : 'lazy',
                 fetchpriority=eager ? 'high' : 'low',
                 decoding='async',
-                style="height: 300px; width: 100%; object-fit: cover;"
               )
             else
-              .artist-placeholder.d-flex.align-items-center.justify-content-center(style="height: 300px; background: linear-gradient(135deg, #55595c 0%, #6c757d 100%);")
+              .artist-placeholder.artist-placeholder--grid.d-flex.align-items-center.justify-content-center
                 .text-center
                   i.fas.fa-user.fa-3x.text-white.mb-2
                   .text-white.small No image

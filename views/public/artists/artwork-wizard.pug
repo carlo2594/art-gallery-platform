@@ -1,13 +1,8 @@
 extends /layouts/public
+- var hideNavbar = true
+- var hideFooter = true
 
 block headExtra
-  style.
-    .main-navbar,
-    #navUserMobile,
-    #navMainOverlay,
-    #navUserOverlay,
-    footer,
-    .footer { display: none !important; }
   link(rel='stylesheet', href='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.css')
   link(rel='stylesheet', href='/css/artist-wizard.css')
 
@@ -18,7 +13,7 @@ block content
         .row.mb-4
           .col-12.col-lg-8.mx-auto.d-flex.justify-content-between.align-items-start
             .artist-wizard-header-text
-              h1.display-4.fw-bold.mb-2(style='color: var(--ox-blue);') Nueva obra
+              h1.display-4.fw-bold.mb-2.artist-wizard-title Nueva obra
               if artist && artist.name
                 p.lead.mb-0.text-muted= `Crear una nueva obra para ${artist.name}`
               else
@@ -30,11 +25,11 @@ block content
         .row
           .col-12.col-lg-8.mx-auto
             // Texto y barra de progreso del flujo
-            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1(style='color: var(--ox-blue);') Paso 1 de 4 – Información básica
+            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1.artist-wizard-step-title Paso 1 de 4 – Información básica
             .progress.mb-4
               .progress-bar.bg-primary#artistWizardProgressBar(
                 role='progressbar'
-                style='width: 25%;'
+                class='artist-wizard-progress-bar'
                 aria-valuenow='1'
                 aria-valuemin='1'
                 aria-valuemax='4'
@@ -61,7 +56,7 @@ block content
 
               // Paso 1: título y descripción
               .artist-wizard-pane(data-step='1')
-                h2.h4.mb-3(style='color: var(--ox-blue);') Información básica
+                h2.h4.mb-3.artist-wizard-section-title Información básica
                 .mb-3
                   label.form-label(for='wizardTitle') Título de la obra *
                   .d-flex.align-items-center.justify-content-between.mb-1
@@ -90,7 +85,7 @@ block content
 
               // Paso 2: dimensiones y fecha
               .artist-wizard-pane.d-none(data-step='2')
-                h2.h4.mb-3(style='color: var(--ox-blue);') Dimensiones y fecha
+                h2.h4.mb-3.artist-wizard-section-title Dimensiones y fecha
                 .row.g-3
                   .col-md-6
                     label.form-label(for='wizardWidth') Ancho (cm) *
@@ -128,7 +123,7 @@ block content
 
               // Paso 3: técnica y precio
               .artist-wizard-pane.d-none(data-step='3')
-                h2.h4.mb-3(style='color: var(--ox-blue);') Técnica y precio
+                h2.h4.mb-3.artist-wizard-section-title Técnica y precio
                 .row.g-3
                   .col-12
                     label.form-label(for='wizardTechnique') Técnica *

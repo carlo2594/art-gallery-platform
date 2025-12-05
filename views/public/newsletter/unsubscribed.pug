@@ -2,14 +2,14 @@ extends /layouts/public
 
 block content
   main.main-content
-    section.py-5(style="min-height: 70vh; background: var(--ox-beige);")
+    section.py-5.min-vh-70.newsletter-unsubscribed-section
       .container
         .row.justify-content-center
           .col-md-6.text-center
             .card.shadow-sm.border-0
               .card-body.p-5
                 i.fas.fa-check-circle.fa-3x.text-success.mb-4
-                h1.h3.fw-bold.mb-3(style="color: var(--ox-blue);") Te has dado de baja
+                h1.h3.fw-bold.mb-3.newsletter-unsubscribed-heading Te has dado de baja
                 p.lead.text-muted.mb-4= message || 'Has sido removido exitosamente de nuestro newsletter'
                 .mb-4
                   p.small.text-muted Ya no recibirás emails promocionales de nosotros.
@@ -24,8 +24,8 @@ block content
             h5.mb-3 ¿Nos ayudas a mejorar?
             p.small.text-muted ¿Podrías decirnos por qué te diste de baja? (Opcional)
             .d-flex.flex-wrap.justify-content-center.gap-2
-              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option(style="cursor: pointer;") Demasiados emails
-              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option(style="cursor: pointer;") Contenido no relevante
-              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option(style="cursor: pointer;") Ya no me interesa el arte
-              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option(style="cursor: pointer;") Otro motivo
+              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option Demasiados emails
+              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option Contenido no relevante
+              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option Ya no me interesa el arte
+              .badge.bg-light.text-dark.border.px-3.py-2.feedback-option Otro motivo
 

@@ -1,10 +1,12 @@
 extends /layouts/public
+- var hideNavbar = true
+- var hideFooter = true
 
 block content
   .container.reset-password-container
     .row.justify-content-center
       .col-md-6.col-lg-5
-        .d-flex.align-items-start.py-4(style="min-height:80vh;")
+        .d-flex.align-items-start.py-4.min-vh-80
           main.form-signin.w-100.m-auto.font-title
             img.mb-4.logo-reset.mb-3(src="/Logos/GOX_LOGO_01.png", alt="Logo", width="72", height="57")
             h1.h3.mb-3.fw-normal.text-center Enlace no válido

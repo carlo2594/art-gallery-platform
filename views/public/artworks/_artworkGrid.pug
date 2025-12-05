@@ -25,7 +25,8 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             decoding='async',
             width=a._media.width || a.imageWidth_px,
             height=a._media.height || a.imageHeight_px,
-            onerror=(a.imageUrl ? "this.onerror=null; this.removeAttribute('srcset'); this.removeAttribute('sizes'); this.src='" + a.imageUrl + "';" : "this.style.display='none';")
+            data-fallback-src=a.imageUrl || null,
+            data-hide-on-error=(a.imageUrl ? null : 'true')
           )
         else
           img.artwork-grid__image(
@@ -38,7 +39,8 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
             decoding='async',
             width=a.imageWidth_px,
             height=a.imageHeight_px,
-            onerror=(a.imageUrl ? "this.onerror=null; this.removeAttribute('srcset'); this.removeAttribute('sizes'); this.src='" + a.imageUrl + "';" : "this.style.display='none';")
+            data-fallback-src=a.imageUrl || null,
+            data-hide-on-error=(a.imageUrl ? null : 'true')
           )
         .artwork-grid__body.artwork-info-glass
           .artwork-grid__content

@@ -205,66 +205,15 @@ html.no-js(lang='es')
       .main-content
         block content
 
-    //- Overlays de navbar (menús principal y de usuario)
-    #navMainOverlay.lightbox.nav-overlay(
-      role='dialog'
-      aria-modal='true'
-      aria-label='Menú de navegación')
-      button.lightbox__close.nav-overlay__close(
-        type='button'
-        aria-label='Cerrar menú de navegación')
-        svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
-          path(
-            d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
-            fill='currentColor')
-        span.sr-only Cerrar
-      .lightbox__inner.nav-overlay__inner
-        .nav-overlay__content
-          form.nav-overlay__search-form(
-            action='/search'
-            method='GET'
-            role='search'
-            aria-label='Buscar')
-            input.form-control.nav-overlay__search-input(
-              type='search'
-              name='q'
-              placeholder='Buscar'
-              aria-label='Buscar')
-          ul.nav-overlay__list
-            li
-              a.nav-overlay__link(href='/artworks') Obras
-            li
-              a.nav-overlay__link(href='/artists') Artistas
-            li
-              a.nav-overlay__link(href='/exhibitions') Exposiciones
-            if currentUser && currentUser.role === 'artist'
-              li
-                a.nav-overlay__link(
-                  href='/artists/panel'
-                  aria-label='Panel de artista') Panel de artista
-            if currentUser
-              li
-                a.nav-overlay__link(
-                  href='/activity'
-                  aria-label='Actividad reciente') Actividad
-            if !currentUser
-              li
-                a.nav-overlay__link(
-                  href='/login'
-                  aria-label='Iniciar sesión') Iniciar sesión
-              li
-                a.nav-overlay__link(
-                  href='/signup'
-                  aria-label='Registrarse') Registrarse
-
-    if currentUser
-      #navUserOverlay.lightbox.nav-overlay(
+    if !hideNavbar
+      //- Overlays de navbar (menús principal y de usuario)
+      #navMainOverlay.lightbox.nav-overlay(
         role='dialog'
         aria-modal='true'
-        aria-label='Menú de usuario')
+        aria-label='Menú de navegación')
         button.lightbox__close.nav-overlay__close(
           type='button'
-          aria-label='Cerrar menú de usuario')
+          aria-label='Cerrar menú de navegación')
           svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
             path(
               d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
@@ -272,21 +221,73 @@ html.no-js(lang='es')
           span.sr-only Cerrar
         .lightbox__inner.nav-overlay__inner
           .nav-overlay__content
+            form.nav-overlay__search-form(
+              action='/search'
+              method='GET'
+              role='search'
+              aria-label='Buscar')
+              input.form-control.nav-overlay__search-input(
+                type='search'
+                name='q'
+                placeholder='Buscar'
+                aria-label='Buscar')
             ul.nav-overlay__list
               li
-                a.nav-overlay__link(
-                  href='/edit-profile'
-                  aria-label='Editar cuenta') Editar cuenta
-              if currentUser && currentUser.role === 'admin'
+                a.nav-overlay__link(href='/artworks') Obras
+              li
+                a.nav-overlay__link(href='/artists') Artistas
+              li
+                a.nav-overlay__link(href='/exhibitions') Exposiciones
+              if currentUser && currentUser.role === 'artist'
                 li
                   a.nav-overlay__link(
-                    href='/admin'
-                    aria-label='Panel de administrador') Panel de administrador
-              li
-                form(action='/api/v1/auth/logout' method='POST')
-                  button.btn.btn-outline-danger.nav-user-logout-btn(
-                    type='submit'
-                    aria-label='Cerrar sesión') Cerrar sesión
+                    href='/artists/panel'
+                    aria-label='Panel de artista') Panel de artista
+              if currentUser
+                li
+                  a.nav-overlay__link(
+                    href='/activity'
+                    aria-label='Actividad reciente') Actividad
+              if !currentUser
+                li
+                  a.nav-overlay__link(
+                    href='/login'
+                    aria-label='Iniciar sesión') Iniciar sesión
+                li
+                  a.nav-overlay__link(
+                    href='/signup'
+                    aria-label='Registrarse') Registrarse
+
+      if currentUser
+        #navUserOverlay.lightbox.nav-overlay(
+          role='dialog'
+          aria-modal='true'
+          aria-label='Menú de usuario')
+          button.lightbox__close.nav-overlay__close(
+            type='button'
+            aria-label='Cerrar menú de usuario')
+            svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
+              path(
+                d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
+                fill='currentColor')
+            span.sr-only Cerrar
+          .lightbox__inner.nav-overlay__inner
+            .nav-overlay__content
+              ul.nav-overlay__list
+                li
+                  a.nav-overlay__link(
+                    href='/edit-profile'
+                    aria-label='Editar cuenta') Editar cuenta
+                if currentUser && currentUser.role === 'admin'
+                  li
+                    a.nav-overlay__link(
+                      href='/admin'
+                      aria-label='Panel de administrador') Panel de administrador
+                li
+                  form(action='/api/v1/auth/logout' method='POST')
+                    button.btn.btn-outline-danger.nav-user-logout-btn(
+                      type='submit'
+                      aria-label='Cerrar sesión') Cerrar sesión
 
     //- Footer opcional
     if !hideFooter

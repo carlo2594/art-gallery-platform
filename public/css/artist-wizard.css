@@ -4,6 +4,15 @@
   display: flex;
   align-items: center;
 }
+.artist-wizard-title,
+.artist-wizard-step-title,
+.artist-wizard-section-title {
+  color: var(--ox-blue);
+}
+.artist-wizard-progress-bar {
+  width: 25%;
+  transition: width 0.3s ease;
+}
 
 .artist-wizard-steps {
   gap: 0.75rem;

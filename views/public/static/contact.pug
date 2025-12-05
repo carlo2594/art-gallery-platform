@@ -19,7 +19,7 @@ block content
           h2.h5.mt-5.mb-3 Envíanos un mensaje
           form(action="/api/v1/contact" method="POST")
             //- Honeypot anti-spam
-            input(type='text' name='company' tabindex='-1' autocomplete='off' aria-hidden='true' style='position:absolute;left:-9999px;height:1px;width:1px;padding:0;margin:0;border:0;')
+            input.honeypot-field(type='text' name='company' tabindex='-1' autocomplete='off' aria-hidden='true')
             .mb-3
               label.form-label(for="name") Nombre
               input#name.form-control(type="text" name="name" required value=formData && formData.name)

@@ -94,13 +94,12 @@ block content
               .d-flex.justify-content-between.align-items-center.mb-4
                 h2.section-title.artist-artworks-title.display-5.fw-bold.mb-0.artist-section-title= `Obras de ${artist.name}`
                 if isMyPanel
-                  a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2(
+                  a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2.artist-add-artwork-btn(
                     href='/artists/panel/artworks/new'
                     aria-label='Agregar obras'
                     data-max-artworks='10'
-                    style='background: var(--ox-blue); border-color: var(--ox-blue); color: var(--ox-beige);'
                   )
-                    i.fas.fa-plus.me-2(style='color: var(--ox-blue);')
+                    i.fas.fa-plus.me-2.artist-add-artwork-icon
                     | Agregar obras
               - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
               p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
@@ -125,15 +124,14 @@ block content
       section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
           .d-flex.justify-content-between.align-items-center.mb-4
-            h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title(style='color: var(--ox-blue);')= `Obras de ${artist.name}`
+            h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title= `Obras de ${artist.name}`
             if isMyPanel
-              a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2(
+              a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2.artist-add-artwork-btn(
                 href='/artists/panel/artworks/new'
                 aria-label='Agregar obras'
                 data-max-artworks='10'
-                style='background: var(--ox-blue); border-color: var(--ox-blue); color: var(--ox-beige);'
               )
-                i.fas.fa-plus.me-2(style='color: var(--ox-blue);')
+                i.fas.fa-plus.me-2.artist-add-artwork-icon
                 | Agregar obras
           if stats.totalArtworks > 1
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
@@ -193,7 +191,7 @@ block content
                   ul.list-group.list-group-flush#artistSubmittedList
                     li.list-group-item.text-muted.small No hay obras enviadas.
             //- Columna de rechazadas: visible solo si hay elementos (la muestra JS)
-            .col-12.col-lg-4#rejectedColumn(style='display:none')
+            .col-12.col-lg-4.artist-rejected-column#rejectedColumn
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
                   span.fw-semibold Rechazadas
