@@ -1,7 +1,7 @@
 //- Lightweight wrapper that reuses the generic auth modal with a dedicated ID
 - var modalId    = 'purchaseAuthModal'
-- var title      = 'Crea una cuenta para consultar'
-- var message    = 'Para consultar la compra de esta obra necesitas una cuenta. Inicia sesión o regístrate para continuar.'
+- var title      = 'Create an account to consult'
+- var message    = 'To consult the purchase of this work you need an account. Please log in or register to continue.'
 - var returnTo   = (typeof returnTo !== 'undefined' ? returnTo : (`/artworks/${artwork && (artwork.slug || artwork._id)}`))
 include /public/common/_authRequiredModal.pug
 

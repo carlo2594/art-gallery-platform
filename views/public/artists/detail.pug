@@ -1,8 +1,8 @@
 ﻿extends /layouts/public
 
 block headExtra
-  - var metaTitle = artist && artist.name ? `${artist.name} · Galería del Ox` : 'Artista · Galería del Ox'
-  - var __desc = (artist && artist.bio) ? artist.bio : (artist && artist.name ? `Perfil de ${artist.name} en Galería del Ox.` : 'Perfil de artista en Galería del Ox.')
+  - var metaTitle = artist && artist.name ? `${artist.name} · Ox Gallery` : 'Artist · Ox Gallery'
+  - var __desc = (artist && artist.bio) ? artist.bio : (artist && artist.name ? `Profile of ${artist.name} in the Ox Gallery.` : 'Artist profile in Galería del Ox.')
   - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
   - var metaImage = (artist && artist.profileImage) ? artist.profileImage : '/img/Ox-hero-image-landing.jpg'
   - var metaType = 'profile'
@@ -12,7 +12,7 @@ block headExtra
 block content
   #page-loading-overlay.page-loading-overlay
     .loading-spinner
-    .loading-text Cargando…
+    .loading-text Loading…
   main.main-content.artist-detail-page
     // Hero Section
     section.artist-profile-hero.artist-hero-section.position-relative.artist-hero-fullscreen
@@ -34,7 +34,7 @@ block content
                 h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
                 if stats && stats.techniques && stats.techniques.length
                   .artist-techniques-inline.d-flex.flex-wrap.align-items-center.gap-3.mb-4
-                    span.artist-techniques-heading.text-white-75.text-uppercase.small.fw-semibold Tecnicas
+                    span.artist-techniques-heading.text-white-75.text-uppercase.small.fw-semibold Techniques
                     .artist-techniques-tags.d-flex.flex-wrap.align-items-center.gap-2
                       each technique in stats.techniques.slice(0, 10)
                         - var normalizedTechnique = technique ? technique.toString().trim() : ''
@@ -42,16 +42,16 @@ block content
                         if normalizedTechnique
                           span.small.text-warning.fw-bold.artist-technique-tag= normalizedTechnique
                     if stats.techniques.length > 10
-                      span.small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} mas
+                      span.small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} but
                 if artist.createdAt
-                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Member since ${new Date(artist.createdAt).getFullYear()}`
                 if artist.bio
                   p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75.artist-bio-style= artist.bio
                 .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
                   if typeof artist.followersCount !== 'undefined'
                     .meta-item.artist-followers-item.d-flex.align-items-center
                       i.fas.fa-users.me-2.text-warning
-                      span.text-white-75 #{artist.followersCount} seguidores
+                      span.text-white-75 #{artist.followersCount} followers
                   if artist.location
                     .meta-item.artist-location-item.d-flex.align-items-center
                       i.fas.fa-map-marker-alt.me-2.text-warning
@@ -60,7 +60,7 @@ block content
                     .meta-item.artist-website-item
                       a.artist-social-link.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
                         i.fas.fa-globe.me-2
-                        span Sitio web
+                        span Website
                   if artist.social && artist.social.instagram
                     .meta-item.artist-social-instagram
                       a.artist-social-link.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
@@ -85,10 +85,10 @@ block content
                   if !isOwnProfile
                     button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
                       i.fas.fa-heart.me-2
-                      | #{following ? 'Siguiendo' : 'Seguir'}
+                      | #{following ? 'Following' : 'Follow'}
                   button.btn.btn-outline-light.btn-lg.px-4.py-3.artist-share-btn.artist-action-btn.ox-share-btn
                     i.fas.fa-share.me-2
-                    | Compartir
+                    | Share
 
     // Normaliza variables de filtros
     - const baseActionUrl = `/artists/${artist.slug || artist._id}`;
@@ -114,7 +114,7 @@ block content
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-1.artist-section-title= `Obras de ${artist.name}`
+              h2.section-title.artist-artworks-title.display-5.fw-bold.mb-1.artist-section-title= `Artworks by ${artist.name}`
               
         if showFilters
           section.filters-toolbar.artist-filters-section.py-2
@@ -127,11 +127,11 @@ block content
               include /public/artworks/_artworkGrid.pug
               include /public/artworks/_artworkPagination.pug
           else
-            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No se encontraron obras con estos filtros.
+            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No works were found with these filters.
     else
       section#artist-artworks.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
-          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Obras de ${artist.name}`
+          h2.section-title.artist-no-artworks-title.display-5.fw-bold.mb-3.artist-section-title= `Artworks by ${artist.name}`
           if showFilters
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
               .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
@@ -140,26 +140,26 @@ block content
             .col-lg-6
               i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
               if stats.totalArtworks > 1
-                h3.h4.mb-3.text-muted.artist-filtered-message No se encontraron obras con estos filtros
-                p.text-muted.artist-filter-help Prueba ajustar los filtros o
+                h3.h4.mb-3.text-muted.artist-filtered-message No works were found with these filters
+                p.text-muted.artist-filter-help Try adjusting the filters or
                   |  
-                  a(href=actionUrl) limpiar todos los filtros
-                  |  para ver todas las obras de #{artist.name}
+                  a(href=actionUrl) clean all filters
+                  |  to see all the works of #{artist.name}
               else if stats.totalArtworks === 1
-                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
-                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
+                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} has a published work`
+                p.text-muted.artist-single-work-message This is the only work available by this talented artist. Come back soon to see more creations!
               else
-                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
-                p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} does not have published works yet`
+                p.text-muted.artist-portfolio-message This artist is preparing his portfolio. Come back soon to see their creations!
 
     // BotÃ³n de volver
   section.back-navigation.py-4
     .container
       .row
         .col-12.text-center
-          a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Volver")
+          a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Return")
             i.fas.fa-arrow-left.me-2
-            | Volver
+            | Return
 
 
 

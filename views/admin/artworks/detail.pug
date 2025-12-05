@@ -40,7 +40,7 @@ block content
             if currentUser
               button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn.artwork-detail__fav-btn(
                 type='button'
-                aria-label='Agregar a favoritos'
+                aria-label='Add to favorites'
                 data-artwork-id=artwork._id
                 data-favorited='false'
               )
@@ -48,7 +48,7 @@ block content
             else
               button.btn.btn-outline-danger.btn-lg.px-3.ms-2.artwork-fav-btn.artwork-detail__fav-btn(
                 type='button'
-                aria-label='Inicia sesión para agregar a favoritos'
+                aria-label='Inicia session to add to favorites'
                 data-bs-toggle='modal'
                 data-bs-target='#favAuthModal'
               )
@@ -95,18 +95,18 @@ block content
                   button.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
                     type="button"
                     onclick=`toggleFavorite('${artwork._id}')`
-                    aria-label="Consultar compra"
+                    aria-label="Consultar buy"
                   )
-                    span CONSULTAR COMPRA
+                    span CONSULT PURCHASE
                 else
-                  a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link.artwork-detail__cta-link(href='/login' aria-label='Inicia sesión para consultar')
-                    span CONSULTAR COMPRA
+                  a.btn.btn-dark.btn-lg.px-4.py-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-link.artwork-detail__cta-link(href='/login' aria-label='Sign in to consult')
+                    span CONSULT PURCHASE
 
     if relatedArtworks && relatedArtworks.length > 0
       section.related-artworks.py-5.px-3.px-md-4.px-lg-5.related-artworks-section.artwork-detail__related-artworks
         .row
           .col-12
-            h3.mb-4.related-artworks-title Más obras de 
+            h3.mb-4.related-artworks-title More works by 
               // Siempre usar ID para que redirija al slug vigente
               a.text-decoration-none.artist-title-hover(href=`/artists/${artwork.artist._id}`)= artwork.artist.name
         - var artworks = relatedArtworks
@@ -116,25 +116,25 @@ block content
     section.back-navigation.py-4.artwork-back-section.artwork-detail__back-section
       .row.artwork-detail__back-row
         .col-12.text-center.artwork-detail__back-col
-          a.btn.btn-outline-primary.btn-lg.artwork-back-btn.artwork-detail__back-btn.ox-back-btn(href="/" aria-label="Volver")
+          a.btn.btn-outline-primary.btn-lg.artwork-back-btn.artwork-detail__back-btn.ox-back-btn(href="/" aria-label="Return")
             i.fas.fa-arrow-left.me-2.artwork-detail__back-icon
-            span.artwork-detail__back-text Volver
+            span.artwork-detail__back-text Return
 
   #lightbox.lightbox.artwork-lightbox.artwork-detail__lightbox(
     role="dialog"
     aria-modal="true"
-    aria-label="Vista ampliada de la obra"
+    aria-label="Vista expanded work"
   )
-    button.lightbox__close.artwork-lightbox-close.artwork-detail__lightbox-close(type="button" aria-label="Cerrar (Esc)")
+    button.lightbox__close.artwork-lightbox-close.artwork-detail__lightbox-close(type="button" aria-label="Close (Esc)")
       svg(viewBox="0 0 24 24" fill="none" aria-hidden="true")
         path(d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z" fill="currentColor")
-      span.sr-only Cerrar
+      span.sr-only Close
     .lightbox__inner.artwork-lightbox-inner.artwork-detail__lightbox-inner
       img#lightboxImg.lightbox__img.artwork-lightbox-img.artwork-detail__lightbox-img(alt="")
 
   .mt-5
     - var modalId = 'favAuthModal'
-    - var title = 'Necesitas iniciar sesión'
-    - var message = 'Para agregar esta obra a tus favoritos, inicia sesión o regístrate.'
+    - var title = 'You need to log in'
+    - var message = 'To add this work to your favorites, log in or register.'
     - var returnTo = `/artworks/${artwork.slug || artwork._id}`
     include /public/common/_authRequiredModal.pug

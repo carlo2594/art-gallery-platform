@@ -1,8 +1,8 @@
 extends /layouts/public
 
 block headExtra
-  - var metaTitle = exhibition && exhibition.title ? `${exhibition.title} · Galería del Ox` : 'Exposición · Galería del Ox'
-  - var __desc = (exhibition && exhibition.description) ? exhibition.description : 'Exposición en Galería del Ox.'
+  - var metaTitle = exhibition && exhibition.title ? `${exhibition.title} · Ox Gallery` : 'Exhibition · Ox Gallery'
+  - var __desc = (exhibition && exhibition.description) ? exhibition.description : 'Exhibition at the Ox Gallery.'
   - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
   - var metaImage = (exhibition && exhibition.coverImage) ? exhibition.coverImage : '/img/Ox-hero-image-landing.jpg'
   - var metaType = 'article'
@@ -12,7 +12,7 @@ block content
   - var visibleArtistIds = Array.isArray(artworks) ? artworks.map(function(a){ try { return String(a && a.artist && a.artist._id); } catch(e) { return null; } }).filter(Boolean) : [];
   - var guestArtists = Array.isArray(exhibition && exhibition.participants) ? exhibition.participants.filter(function(p){
   -   try {
-  -     var roleOk = p && p.role && ['artista','invitado'].includes(String(p.role).toLowerCase());
+  -     var roleOk = p && p.role && ['artist','invitado'].includes(String(p.role).toLowerCase());
   -     var uid = p && p.user && (p.user._id || p.user);
   -     return roleOk && uid && visibleArtistIds.includes(String(uid)) && p.user && p.user.name;
   -   } catch(e) { return false; }
@@ -24,7 +24,7 @@ block content
         if exhibition && exhibition.coverImage
           img.exhibition-hero-bg-custom.exhibition-detail__hero-img(
             src=exhibition.coverImage,
-            alt=(exhibition.title || exhibition.name || 'Exposición')
+            alt=(exhibition.title || exhibition.name || 'Exhibition')
           )
         else
           .hero-bg-placeholder.w-100.h-100.exhibition-gradient-bg.exhibition-detail__hero-placeholder
@@ -47,7 +47,7 @@ block content
                 // Fechas y lugar en dos columnas en desktop
                 .row.g-4
                   .col-12.col-lg-6
-                    .small.text-white-75.mb-2 Fechas
+                    .small.text-white-75.mb-2 Dates
                     - try {
                     -   var hasStart = exhibition && exhibition.startDate;
                     -   var hasEnd = exhibition && exhibition.endDate;
@@ -71,29 +71,29 @@ block content
                     -         dateText = `${sd} ${sMonthShort} ${sy} – ${ed} ${eMonthShort} ${ey}`;
                     -       }
                     -     } else if (hasStart) {
-                    -       dateText = `Desde ${sd} ${sMonthShort} ${sy}`;
+                    -       dateText = `From ${sd} ${sMonthShort} ${sy}`;
                     -     } else if (hasEnd) {
-                    -       dateText = `Hasta ${ed} ${eMonthShort} ${ey}`;
+                    -       dateText = `Until ${ed} ${eMonthShort} ${ey}`;
                     -     }
                     -   }
                     - } catch(e) { }
                     if dateText
                       .h6.mb-0= dateText
                     else
-                      .small.text-white-50 Por anunciar
+                      .small.text-white-50 To be announced
                   .col-12.col-lg-6
-                    .small.text-white-75.mb-2 Lugar
+                    .small.text-white-75.mb-2 Place
                     if exhibition && exhibition.location && exhibition.location.type === 'physical'
                       .h6.mb-0= exhibition.venue || exhibition.location.address || 'Por anunciar'
                     else if exhibition && exhibition.location && exhibition.location.type === 'virtual'
                       .h6.mb-0.exhibition-detail__venue
-                        span.text-white Exposición virtual
+                        span.text-white Virtual exhibition
                     else
-                      .small.text-white-50 Por anunciar
+                      .small.text-white-50 To be announced
 
                 if guestArtists && guestArtists.length
                   hr.my-3.opacity-50
-                  .small.text-white-75.mb-2.exhibition-detail__guests-label Artistas invitados
+                  .small.text-white-75.mb-2.exhibition-detail__guests-label Guest artists
                   ul.list-unstyled.mb-0.exhibition-detail__guests-list
                     each p in guestArtists
                       li.text-white-75.exhibition-detail__guest-item
@@ -106,15 +106,15 @@ block content
                 .hero-actions.exhibition-actions-desktop.d-flex.flex-wrap.gap-3.justify-content-center.justify-content-lg-start.mt-3
                   button.btn.btn-outline-light.btn-lg.px-4.py-3.exhibition-share-btn.ox-share-btn(type="button" data-exhibition-id=exhibition && exhibition._id)
                     i.fas.fa-share.me-2
-                    | Compartir
+                    | Share
 
     if artworks && artworks.length > 0
       section.exhibition-artworks.py-5.exhibition-artworks-bg
         .container
           .row.mb-5
             .col-12.text-center
-              h2.section-title.display-5.fw-bold.mb-3.artist-section-title Obras en esta exposición
-              - var displayText = (typeof totalArtworks !== 'undefined' && typeof artworks !== 'undefined') ? (artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`) : `${artworks.length} obra${artworks.length === 1 ? '' : 's'}`
+              h2.section-title.display-5.fw-bold.mb-3.artist-section-title Artworks in this exhibition
+              - var displayText = (typeof totalArtworks !== 'undefined' && typeof artworks !== 'undefined') ? (artworks.length === totalArtworks ? `${totalArtworks} work${totalArtworks === 1 ? '' : 's'}` : `Showing ${artworks.length} of ${totalArtworks} works`) : `${artworks.length} work${artworks.length === 1 ? '' : 's'}`
               p.lead.text-muted= displayText
         .container-xxl.artworks-flex.artist-container-padding
           .artworks-grid-paginate
@@ -126,8 +126,8 @@ block content
       section.no-artworks.py-5.text-center
         .container
           i.fas.fa-images.fa-3x.text-muted.mb-3
-          h3.h4.mb-2.text-muted No hay obras asociadas a esta exposición
-          p.text-muted Vuelve pronto para descubrir nuevas piezas.
+          h3.h4.mb-2.text-muted There are no works associated with this exhibition
+          p.text-muted Come back soon to discover new pieces.
 
     section.back-navigation.py-4
       .container
@@ -135,4 +135,4 @@ block content
           .col-12.text-center
             a.btn.btn-outline-primary.btn-lg.exhibition-back-btn.ox-back-btn(href="/exhibitions")
               i.fas.fa-arrow-left.me-2
-              | Volver
+              | Return

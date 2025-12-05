@@ -24,7 +24,7 @@ section.filters-toolbar.py-2
         - var _maxDateFromYear = `${q.maxYear}-12-31`
         input(type='hidden' name='ex_maxDate' value=_maxDateFromYear)
       // Chips de tipo de exposición (solo Física y Virtual)
-      - var typeOpts = [{label: 'Todas', value: ''}, {label: 'Presenciales', value: 'physical'}, {label: 'Virtuales', value: 'virtual'}];
+      - var typeOpts = [{label: 'All', value: ''}, {label: 'In-person', value: 'physical'}, {label: 'Virtual', value: 'virtual'}];
       each opt in typeOpts
         - var _isActive = ((!q || (!q.ex_type && !q.type)) && opt.value === '') || (q && (q.ex_type === opt.value || (!q.ex_type && q.type === opt.value)))
         button.chip.btn(type='submit', name='ex_type', value=opt.value, class=(_isActive ? 'active' : ''))= opt.label
@@ -35,12 +35,12 @@ section.filters-toolbar.py-2
       aria-controls='exhibitionFiltersDrawer'
     )
       i.fa-solid.fa-filter.me-1
-      | Filtros
+      | Filters
 
 div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
   .offcanvas-header
-    h5#filtersTitle Filtros
-    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
+    h5#filtersTitle Filters
+    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Close')
   form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
     input(type='hidden' name='tab' value='exposiciones')
     // Mantener el término de búsqueda si existe
@@ -50,12 +50,12 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
       input(type='hidden' name='q' value=q.q)
     // Filtro: rango de fechas de la exposición
     .filter-block
-      label.form-label.mb-2 Rango de fechas
+      label.form-label.mb-2 Date range
       .row.g-2
         .col-6
           - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
           - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
-          - var _minPlaceholder = _minBound ? `Desde (${new Date(_minBound).toLocaleDateString('es-ES')})` : 'Desde'
+          - var _minPlaceholder = _minBound ? `From (${new Date(_minBound).toLocaleDateString('es-ES')})` : 'From'
           input.form-control(
             type='date' 
             name='ex_minDate' 
@@ -63,12 +63,12 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
             min=_minBound
             max=_maxBound
             value=(q && q.ex_minDate ? q.ex_minDate : (q && q.minYear ? `${q.minYear}-01-01` : ''))
-            title=_minBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+            title=_minBound ? `Available range: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
           )
         .col-6
           - var _minBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.min) ? exhibitionDateBounds.min : ''
           - var _maxBound = (typeof exhibitionDateBounds !== 'undefined' && exhibitionDateBounds && exhibitionDateBounds.max) ? exhibitionDateBounds.max : ''
-          - var _maxPlaceholder = _maxBound ? `Hasta (${new Date(_maxBound).toLocaleDateString('es-ES')})` : 'Hasta'
+          - var _maxPlaceholder = _maxBound ? `Until (${new Date(_maxBound).toLocaleDateString('es-ES')})` : 'Until'
           input.form-control(
             type='date' 
             name='ex_maxDate' 
@@ -76,20 +76,20 @@ div.offcanvas.offcanvas-end#exhibitionFiltersDrawer(tabindex='-1' aria-labelledb
             min=_minBound
             max=_maxBound
             value=(q && q.ex_maxDate ? q.ex_maxDate : (q && q.maxYear ? `${q.maxYear}-12-31` : ''))
-            title=_maxBound ? `Rango disponible: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
+            title=_maxBound ? `Available range: ${new Date(_minBound).toLocaleDateString('es-ES')} - ${new Date(_maxBound).toLocaleDateString('es-ES')}` : ''
           )
       if _minBound && _maxBound
         .col-12
           small.text-muted.mt-1 
-            | Rango disponible: #{new Date(_minBound).toLocaleDateString('es-ES')} - #{new Date(_maxBound).toLocaleDateString('es-ES')}
+            | Available range: #{new Date(_minBound).toLocaleDateString('es-ES')} - #{new Date(_maxBound).toLocaleDateString('es-ES')}
     // Ordenar por fecha de inicio
     .filter-block
-      label.form-label.mb-2 Ordenar por fecha
+      label.form-label.mb-2 Sort by date
       select.form-select(name='sort')
-        option(value='') Selecciona
-        option(value='recent' selected=(q && q.sort==='recent')) Más futuras
-        option(value='oldest' selected=(q && q.sort==='oldest')) Más antiguas
+        option(value='') Select
+        option(value='recent' selected=(q && q.sort==='recent')) More future
+        option(value='oldest' selected=(q && q.sort==='oldest')) Older
     .mt-auto.d-flex.gap-2.sticky-apply
-      a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
-      button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+      a.btn.btn-light.flex-fill(href=actionUrl) Clean
+      button.btn.btn-apply.flex-fill(type='submit') See results
 

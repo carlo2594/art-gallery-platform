@@ -3,48 +3,48 @@
   .modal-dialog.modal-lg
     .modal-content
       .modal-header
-        h5.modal-title#adminCreateExhibitionLabel Agregar exposicion
+        h5.modal-title#adminCreateExhibitionLabel Add exhibition
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         form.admin-create-exhibition-form#adminCreateExhibitionForm
           .row.g-3
             .col-md-8
-              label.form-label Titulo
-              input.form-control(type='text', name='title', placeholder='Titulo de la exposicion', required)
-              .invalid-feedback Campo requerido
+              label.form-label title
+              input.form-control(type='text', name='title', placeholder='Title of the exhibition', required)
+              .invalid-feedback Required field
             .col-md-4
-              label.form-label Estado
+              label.form-label State
               select.form-select(name='status')
-                option(value='draft' selected) Borrador
-                option(value='published') Publicada
-                option(value='archived') Archivada
+                option(value='draft' selected) Eraser
+                option(value='published') Published
+                option(value='archived') Archived
           .mb-3
-            label.form-label Descripcion
-            textarea.form-control(name='description' rows='3' placeholder='Descripcion (opcional)')
+            label.form-label Description
+            textarea.form-control(name='description' rows='3' placeholder='Description (optional)')
           .row.g-3
             .col-md-4
-              label.form-label Tipo de ubicacion
+              label.form-label Location type
               select.form-select(name='location_type')
-                option(value='') Sin especificar
-                option(value='physical') Fisica
+                option(value='') Unspecified
+                option(value='physical') Physics
                 option(value='virtual') Virtual
             .col-md-8
-              label.form-label Direccion (si es fisica) o URL (si es virtual)
-              input.form-control(type='text', name='location_value', placeholder='Direccion o URL (opcional)')
+              label.form-label Address (if physical) or URL (if virtual)
+              input.form-control(type='text', name='location_value', placeholder='Address or URL (optional)')
           .row.g-3
             .col-md-6
-              label.form-label Fecha de inicio
+              label.form-label Start date
               input.form-control(type='date', name='startDate', required)
-              .invalid-feedback Ingresa una fecha valida
+              .invalid-feedback Enter a valid date
             .col-md-6
-              label.form-label Fecha de fin
+              label.form-label End date
               input.form-control(type='date', name='endDate', required)
-              .invalid-feedback Ingresa una fecha valida
+              .invalid-feedback Enter a valid date
 
           // Imagen de portada (opcional, se sube tras crear)
           .mt-3
-            label.form-label Portada (opcional)
+            label.form-label Cover (optional)
             input.form-control(type='file', name='coverImage', accept='image/*')
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-        button.btn.btn-primary.admin-exhibitions-create-submit(type='submit' form='adminCreateExhibitionForm') Crear
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+        button.btn.btn-primary.admin-exhibitions-create-submit(type='submit' form='adminCreateExhibitionForm') Create

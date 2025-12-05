@@ -3,64 +3,64 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title(id=`adminEditUserLabel-${u._id}`) Editar usuario - #{u.name}
+        h5.modal-title(id=`adminEditUserLabel-${u._id}`) Edit user - #{u.name}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         // Bloque de imagen de perfil
         .mb-3.admin-users-avatar-block
-          label.form-label Imagen de perfil
+          label.form-label profile picture
           .d-flex.flex-column.gap-3
             .d-flex.align-items-center.gap-3.flex-wrap
               if u.profileImage
-                img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;')
+                img.admin-users-avatar-preview.img-thumbnail(src=u.profileImage alt=`Avatar of ${u.name}` style='width:64px;height:64px;object-fit:cover;')
               else
-                img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar de ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
+                img.admin-users-avatar-preview.img-thumbnail(src='' alt=`Avatar of ${u.name}` style='width:64px;height:64px;object-fit:cover;display:none;')
               .d-flex.flex-wrap.gap-2
                 input.form-control.form-control-sm.admin-users-avatar-input(type='file' accept='image/*')
-                button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Subir
-                button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Quitar
+                button.btn.btn-sm.btn-primary.admin-users-avatar-upload-btn(type='button') Climb
+                button.btn.btn-sm.btn-outline-danger.admin-users-avatar-remove-btn(type='button') Remove
             .admin-users-avatar-helper.text-muted.small
-              strong Recorte cuadrado:&nbsp;
-              | ajusta el recuadro para centrar el rostro antes de guardar.
+              strong Square cutout: 
+              | Adjust the frame to center the face before saving.
             .admin-users-avatar-cropper-wrapper.d-none
-              img.admin-users-avatar-cropper-img.img-fluid.rounded(alt='Vista previa de recorte' decoding='async' loading='lazy')
+              img.admin-users-avatar-cropper-img.img-fluid.rounded(alt='Crop Preview' decoding='async' loading='lazy')
         // Bloque de imagen de portada (cover)
         .mb-3.admin-users-cover-block
-          label.form-label Imagen de portada
+          label.form-label Cover image
           .d-flex.flex-column.gap-3
             .d-flex.align-items-center.gap-3.flex-wrap
               if u.coverImage
-                img.admin-users-cover-preview.img-thumbnail(src=u.coverImage alt=`Portada de ${u.name}` style='width:120px;height:64px;object-fit:cover;')
+                img.admin-users-cover-preview.img-thumbnail(src=u.coverImage alt=`Cover of ${u.name}` style='width:120px;height:64px;object-fit:cover;')
               else
-                img.admin-users-cover-preview.img-thumbnail(src='' alt=`Portada de ${u.name}` style='width:120px;height:64px;object-fit:cover;display:none;')
+                img.admin-users-cover-preview.img-thumbnail(src='' alt=`Cover of ${u.name}` style='width:120px;height:64px;object-fit:cover;display:none;')
               .d-flex.flex-wrap.gap-2
                 input.form-control.form-control-sm.admin-users-cover-input(type='file' accept='image/*')
-                button.btn.btn-sm.btn-primary.admin-users-cover-upload-btn(type='button') Subir
-                button.btn.btn-sm.btn-outline-danger.admin-users-cover-remove-btn(type='button') Quitar
+                button.btn.btn-sm.btn-primary.admin-users-cover-upload-btn(type='button') Climb
+                button.btn.btn-sm.btn-outline-danger.admin-users-cover-remove-btn(type='button') Remove
             .admin-users-cover-helper.text-muted.small
-              strong Ajusta el recorte:&nbsp;
-              | usa el recuadro para mover y hacer zoom, asegurando una portada panorámica.
+              strong Adjust the crop: 
+              | use the marquee to pan and zoom, ensuring a panoramic cover.
             .admin-users-cover-cropper-wrapper.d-none
-              img.admin-users-cover-cropper-img.img-fluid.rounded(alt='Vista previa de recorte' decoding='async' loading='lazy')
+              img.admin-users-cover-cropper-img.img-fluid.rounded(alt='Crop Preview' decoding='async' loading='lazy')
         // Formulario de datos
         form.admin-edit-user-form.admin-users-edit-form(id=`adminEditUserForm-${u._id}` data-user-id=u._id)
           .mb-3
-            label.form-label Nombre
-            input.form-control(type='text' name='name' placeholder='Nombre' value=u.name maxlength='20')
+            label.form-label Name
+            input.form-control(type='text' name='name' placeholder='Name' value=u.name maxlength='20')
           .mb-3
-            label.form-label Correo
+            label.form-label Mail
             input.form-control(type='email' name='email' placeholder='correo@dominio.com' value=u.email)
           .mb-3
-            label.form-label Biografía
-            textarea.form-control(name='bio' rows='3' placeholder='Breve biografía' maxlength='400')
+            label.form-label Biography
+            textarea.form-control(name='bio' rows='3' placeholder='Brief biography' maxlength='400')
           .mb-3
-            label.form-label Ubicación
-            input.form-control(type='text' name='location' placeholder='Ciudad, País' maxlength='100')
+            label.form-label Location
+            input.form-control(type='text' name='location' placeholder='City, Country' maxlength='100')
           .mb-3
-            label.form-label Sitio web
+            label.form-label Website
             input.form-control(type='url' name='website' placeholder='https://...' maxlength='200')
           .mb-3
-            label.form-label Redes sociales
+            label.form-label Social networks
             .row.g-2
               .col-md-4
                 input.form-control(type='text' name='social.instagram' placeholder='Instagram' maxlength='80')
@@ -69,5 +69,5 @@
               .col-md-4
                 input.form-control(type='text' name='social.facebook' placeholder='Facebook' maxlength='80')
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-        button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Guardar cambios
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+        button.btn.btn-primary.admin-edit-user-submit.admin-users-edit-submit(type='submit' form=`adminEditUserForm-${u._id}`) Save changes

@@ -1,7 +1,7 @@
 //- Grid de obras (reutilizable)
 - var __gridId = (typeof gridId !== 'undefined' && gridId) ? gridId : 'grid'
 ul.grid.effect-2.artwork-grid(id=__gridId)
-  //- Permite priorizar carga: define cuántas primeras imágenes van eager/high
+  //- Permite priorizar carga: define cuÃ¡ntas primeras imÃ¡genes van eager/high
   - const eagerCount = (typeof firstEagerCount !== 'undefined' && firstEagerCount) ? firstEagerCount : 0
   each a, idx in artworks
     - const _sizes = '(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 33vw'
@@ -51,7 +51,7 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
                 .artwork-grid__artist= a.artist.name
               .artwork-grid__details
                 if a.technique
-                  .artwork-grid__detail-item= a.technique
+                  .artwork-grid__detail-item= a.technical
                 // Preferir size textual; si no, fallback a HxW
                 if a.size
                   .artwork-grid__detail-item= a.size
@@ -68,11 +68,11 @@ ul.grid.effect-2.artwork-grid(id=__gridId)
               if typeof a.availability === 'string'
                 - const __isForSale = a.availability === 'for_sale'
                 .artwork-grid__availability
-                  span.badge.rounded-pill(class=__isForSale ? 'text-bg-success' : 'text-bg-secondary')= __isForSale ? 'En venta' : 'No disponible'
+                  span.badge.rounded-pill(class=__isForSale ? 'text-bg-success' : 'text-bg-secondary')= __isForSale ? 'On sale' : 'No disponible'
               .artwork-grid__meta
                 .artwork-grid__stat
                   i.fas.fa-eye.me-1
-                  span= (typeof a.views === 'number' ? a.views.toLocaleString('en-US') : '—')
+                  span= (typeof a.views === 'number' ? a.views.toLocaleString('en-US') : 'Â—')
                 .artwork-grid__stat.ms-3
                   i.fas.fa-heart.me-1
-                  span= (typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString('en-US') : '—')
+                  span= (typeof a.favoritesCount === 'number' ? a.favoritesCount.toLocaleString('en-US') : 'Â—')

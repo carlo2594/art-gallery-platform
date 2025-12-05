@@ -13,19 +13,19 @@ block content
         .row.mb-4
           .col-12.col-lg-8.mx-auto.d-flex.justify-content-between.align-items-start
             .artist-wizard-header-text
-              h1.display-4.fw-bold.mb-2.artist-wizard-title Nueva obra
+              h1.display-4.fw-bold.mb-2.artist-wizard-title New work
               if artist && artist.name
-                p.lead.mb-0.text-muted= `Crear una nueva obra para ${artist.name}`
+                p.lead.mb-0.text-muted= `Create a new work for ${artist.name}`
               else
-                p.lead.mb-0.text-muted Crea una nueva obra
+                p.lead.mb-0.text-muted Create a new work
             a.btn-close.btn-close-dark(
               href='/artists/panel'
-              aria-label='Volver al panel de artista'
+              aria-label='Volver to the artist panel
             )
         .row
           .col-12.col-lg-8.mx-auto
             // Texto y barra de progreso del flujo
-            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1.artist-wizard-step-title Paso 1 de 4 – Información básica
+            p#artistWizardStepTitle.text-uppercase.small.fw-semibold.mb-1.artist-wizard-step-title Step 1 of 4 – Basic information
             .progress.mb-4
               .progress-bar.bg-primary#artistWizardProgressBar(
                 role='progressbar'
@@ -38,16 +38,16 @@ block content
             .artist-wizard-steps.d-flex.justify-content-between.mb-4
               .artist-wizard-step(data-step='1')
                 i.fas.fa-info-circle.artist-wizard-step-icon
-                span.artist-wizard-step-label Información básica
+                span.artist-wizard-step-label Basic information
               .artist-wizard-step(data-step='2')
                 i.fas.fa-ruler-combined.artist-wizard-step-icon
-                span.artist-wizard-step-label Dimensiones
+                span.artist-wizard-step-label Dimensions
               .artist-wizard-step(data-step='3')
                 i.fas.fa-palette.artist-wizard-step-icon
-                span.artist-wizard-step-label Técnica y precio
+                span.artist-wizard-step-label Technique and price
               .artist-wizard-step(data-step='4')
                 i.fas.fa-image.artist-wizard-step-icon
-                span.artist-wizard-step-label Imagen
+                span.artist-wizard-step-label Image
 
             #artistArtworkWizardAlerts.mb-3
 
@@ -56,36 +56,36 @@ block content
 
               // Paso 1: título y descripción
               .artist-wizard-pane(data-step='1')
-                h2.h4.mb-3.artist-wizard-section-title Información básica
+                h2.h4.mb-3.artist-wizard-section-title Basic information
                 .mb-3
-                  label.form-label(for='wizardTitle') Título de la obra *
+                  label.form-label(for='wizardTitle') Title of the work *
                   .d-flex.align-items-center.justify-content-between.mb-1
                     small.text-muted.mb-0#wizardTitleCounter 0/50
                   input#wizardTitle.form-control(
                     type='text',
                     name='title',
                     required,
-                    placeholder='Título de la obra',
+                    placeholder='Título of the work',
                     maxlength='50'
                   )
                 .mb-3
-                  label.form-label(for='wizardDescription') Descripción
+                  label.form-label(for='wizardDescription') Description
                   .d-flex.align-items-center.justify-content-between.mb-1
                     small.text-muted.mb-0#wizardDescriptionCounter 0/200
                   textarea#wizardDescription.form-control(
                     name='description',
                     rows='4',
-                    placeholder='Describe brevemente la obra (opcional)',
+                    placeholder='Describe briefly the work (optional)',
                     maxlength='200'
                   )
 
                 .d-flex.justify-content-between.mt-4
-                  a.btn.btn-outline-secondary(href='/artists/panel') Volver al panel
-                  button.btn.btn-primary(type='button', data-wizard-next='2') Siguiente
+                  a.btn.btn-outline-secondary(href='/artists/panel') Return to panel
+                  button.btn.btn-primary(type='button', data-wizard-next='2') Following
 
               // Paso 2: dimensiones y fecha
               .artist-wizard-pane.d-none(data-step='2')
-                h2.h4.mb-3.artist-wizard-section-title Dimensiones y fecha
+                h2.h4.mb-3.artist-wizard-section-title Dimensions and date
                 .row.g-3
                   .col-md-6
                     label.form-label(for='wizardWidth') Ancho (cm) *
@@ -98,7 +98,7 @@ block content
                       placeholder='Ej. 80.5'
                     )
                   .col-md-6
-                    label.form-label(for='wizardHeight') Alto (cm) *
+                    label.form-label(for='wizardHeight') High (cm) *
                     input#wizardHeight.form-control(
                       type='number',
                       name='height_cm',
@@ -108,39 +108,39 @@ block content
                       placeholder='Ej. 60.25'
                     )
                 .mt-3
-                  label.form-label(for='wizardCompletedAt') Año de la obra
+                  label.form-label(for='wizardCompletedAt') Year of work
                   - var currentYear = new Date().getFullYear()
                   - var years = []
                   - for (var y = currentYear; y >= 1800; y--) years.push(y)
                   select#wizardCompletedAt.form-select(name='completedAt')
-                    option(value='') Selecciona el año
+                    option(value='') Select the year
                     each y in years
                       option(value=y selected=(artwork && artwork.completedAtYear === y ? true : false))= y
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='1') Anterior
-                  button.btn.btn-primary(type='button', data-wizard-next='3') Siguiente
+                  button.btn.btn-primary(type='button', data-wizard-next='3') Following
 
               // Paso 3: técnica y precio
               .artist-wizard-pane.d-none(data-step='3')
-                h2.h4.mb-3.artist-wizard-section-title Técnica y precio
+                h2.h4.mb-3.artist-wizard-section-title Technique and price
                 .row.g-3
                   .col-12
-                    label.form-label(for='wizardTechnique') Técnica *
-                    input#wizardTechnique.form-control(type='text', name='technique', required, placeholder='Óleo, acrílico, etc.')
+                    label.form-label(for='wizardTechnique') Technique *
+                    input#wizardTechnique.form-control(type='text', name='technique', required, placeholder='Oil, acrylic, etc.')
                 .mt-3
                   label.form-label(for='wizardAmount') Precio (USD)
                   input#wizardAmount.form-control(type='number', name='amount', min='0', step='0.01', placeholder='0.00')
-                  small.text-muted.mt-1 El precio se guarda en dólares estadounidenses.
+                  small.text-muted.mt-1 The price is saved in US dollars.
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='2') Anterior
-                  button.btn.btn-primary(type='button', data-wizard-next='4') Siguiente
+                  button.btn.btn-primary(type='button', data-wizard-next='4') Following
 
               // Paso 4: imagen
               .artist-wizard-pane.d-none(data-step='4')
                 .mb-3
-                  label.form-label(for='wizardImage') Imagen principal *
+                  label.form-label(for='wizardImage') Main image *
                   .artist-image-dropzone#artistImageDropzone
                     input#wizardImage.form-control(
                       type='file'
@@ -151,44 +151,44 @@ block content
                     .artist-image-upload-shell
                       .artist-image-upload-overlay.d-none#artistImageUploadOverlay
                         i.fas.fa-spinner.fa-spin.me-2
-                        span Procesando imagen...
+                        span Processing image...
                       .artist-image-cropper-wrapper.d-none#artistWizardCropperWrapper
-                        img#artistWizardCropperImg.img-fluid.rounded(alt='Vista previa del recorte' decoding='async' loading='lazy')
+                        img#artistWizardCropperImg.img-fluid.rounded(alt='Crop preview' decoding='async' loading='lazy')
                       img#wizardImagePreview.artist-image-preview.img-thumbnail(
                         src=''
-                        alt='Vista previa de la obra'
+                        alt='Vista preview of the work'
                         hidden
                       )
                       .artist-image-dropzone-instructions
                         i.fas.fa-cloud-upload-alt.me-2
-                        span Arrastra la imagen aqu\u00ed o 
-                        button#wizardImageTrigger.btn.btn-link.p-0(type='button') b\u00fascalo en tu dispositivo
+                        span Drag the image here or 
+                        button#wizardImageTrigger.btn.btn-link.p-0(type='button') find it on your device
                   .artist-image-cropper-helper.text-muted.small.mt-2
-                    strong Ajusta el recorte:&nbsp;
-                    | usa el recuadro para definir el encuadre (horizontal, vertical o cuadrado).
+                    strong Adjust the crop: 
+                    | use the box to define the frame (horizontal, vertical or square).
                   .d-flex.flex-wrap.gap-2.mt-3
-                    button#artistWizardApplyCrop.btn.btn-primary.btn-sm(type='button' disabled) Aplicar recorte
-                    button#artistWizardChangeImage.btn.btn-outline-secondary.btn-sm(type='button') Cambiar imagen
+                    button#artistWizardApplyCrop.btn.btn-primary.btn-sm(type='button' disabled) Apply crop
+                    button#artistWizardChangeImage.btn.btn-outline-secondary.btn-sm(type='button') Change image
 
                 .d-flex.justify-content-between.mt-4
                   button.btn.btn-outline-secondary(type='button', data-wizard-prev='3') Anterior
                   .d-flex.gap-2
-                    button#wizardSubmit.btn.btn-success(type='button', disabled) Enviar obra para revisión
+                    button#wizardSubmit.btn.btn-success(type='button', disabled) Send work for review
 
     // Modal de confirmación de envío
     #artistSubmitConfirmModal.modal.fade(tabindex='-1' aria-labelledby='artistSubmitConfirmLabel' aria-hidden='true')
       .modal-dialog.modal-dialog-centered
         .modal-content
           .modal-header
-            h5#artistSubmitConfirmLabel.modal-title Confirmar envío
-            button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Cerrar')
+            h5#artistSubmitConfirmLabel.modal-title Confirm shipment
+            button.btn-close(type='button', data-bs-dismiss='modal', aria-label='Close')
           .modal-body
-            p.mb-2 ¿Quieres enviar esta obra para revisión?
-            p.text-muted.small.mb-0 Una vez enviada, no podrás editar la obra ni la información que subiste. Si necesitas hacer cambios después, tendrás que eliminar esta solicitud y crear una nueva.
+            p.mb-2 Do you want to submit this work for review?
+            p.text-muted.small.mb-0 Once submitted, you will not be able to edit the work or the information you uploaded. If you need to make changes later, you will need to delete this request and create a new one.
           .modal-footer.d-flex.flex-column.flex-md-row.gap-2.justify-content-between
-            button#artistSubmitKeepEditingBtn.btn.btn-outline-secondary(type='button', data-bs-dismiss='modal') Seguir editando
-            button#artistSubmitSaveDraftBtn.btn.btn-outline-secondary(type='button') Guardar en borrador
-            button#artistSubmitConfirmBtn.btn.btn-success(type='button') Enviar obra
+            button#artistSubmitKeepEditingBtn.btn.btn-outline-secondary(type='button', data-bs-dismiss='modal') Continue editing
+            button#artistSubmitSaveDraftBtn.btn.btn-outline-secondary(type='button') Save to draft
+            button#artistSubmitConfirmBtn.btn.btn-success(type='button') Send work
 
 block scriptsExtra
   script(src='https://unpkg.com/cropperjs@1.6.1/dist/cropper.min.js')

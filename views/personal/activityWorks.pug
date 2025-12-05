@@ -3,10 +3,10 @@ extends /layouts/public
 block content
   .container.py-4
     .d-flex.align-items-center.justify-content-between.mb-4
-      h2.mb-0 Obras
-      .btn-group( role='group' aria-label='Filtro de obras')
-        a.btn.btn-outline-secondary(href='/activity/works?tab=views' class= tab === 'views' ? 'active' : '') Vistas recientemente
-        a.btn.btn-outline-secondary(href='/activity/works?tab=likes' class= tab === 'likes' ? 'active' : '') Tus me gusta
+      h2.mb-0 Artworks
+      .btn-group( role='group' aria-label='Artworks filter')
+        a.btn.btn-outline-secondary(href='/activity/works?tab=views' class= tab === 'views' ? 'active' : '') Recently viewed
+        a.btn.btn-outline-secondary(href='/activity/works?tab=likes' class= tab === 'likes' ? 'active' : '') Your likes
 
     if artworks && artworks.length
       .container-xxl.artworks-flex
@@ -17,4 +17,4 @@ block content
           // Paginación consistente con artworks/index
           include /public/artworks/_artworkPagination.pug
     else
-      p.text-muted No hay obras para mostrar en esta sección.
+      p.text-muted There are no artworks to show in this section.

@@ -16,7 +16,7 @@ block content
   if appliedPrice && appliedPrice.minUSD != null && appliedPrice.maxUSD != null
     .container-xxl.mb-2
       .small.text-muted
-        | Mostrando: $
+        | Showing: $
         = appliedPrice.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
         |  — $
         = appliedPrice.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -30,7 +30,7 @@ block content
           include /public/artworks/_artworkPagination.pug
       else
         .text-center.py-5
-          p.mb-2 No hay obras publicadas todavía.
-          a.btn.btn-primary(href='/signup') ¿Eres artista? Regístrate y comparte tu obra
+          p.mb-2 There are no published artworks yet.
+          a.btn.btn-primary(href='/signup') Are you an artist? Sign up and share your work
 
 

@@ -5,12 +5,12 @@ block content
     .container
       .row.justify-content-center
         .col-lg-8
-          h1.display-5.fw-bold.mb-3 Vender mi arte
+          h1.display-5.fw-bold.mb-3 sell my art
           p.lead.text-muted.mb-4
-            | ¿Eres artista y quieres vender tus obras en Galería del Ox?
-            |  Comienza creando tu cuenta y comparte tu portfolio con nuestra comunidad.
+            | Are you an artist and want to sell your works at Galería del Ox?
+            |  Start by creating your account and share your portfolio with our community.
           if success
-            .alert.alert-success(role='alert') Tu solicitud fue enviada correctamente. Te contactaremos pronto.
+            .alert.alert-success(role='alert') Your request was sent successfully. We will contact you soon.
           if error
             .alert.alert-danger(role='alert')= error
 
@@ -19,54 +19,54 @@ block content
             .col-12.col-md-6
               .p-3.bg-white.rounded-3.shadow-sm
                 i.fas.fa-palette.me-2.text-primary
-                span Exhibe y vende tus obras
+                span Exhibit and sell your works
             .col-12.col-md-6
               .p-3.bg-white.rounded-3.shadow-sm
                 i.fas.fa-user-group.me-2.text-primary
-                span Llega a coleccionistas reales
+                span Reach real collectors
             .col-12.col-md-6
               .p-3.bg-white.rounded-3.shadow-sm
                 i.fas.fa-shield-halved.me-2.text-primary
-                span Curaduría y revisión de calidad
+                span Curation and quality review
             .col-12.col-md-6
               .p-3.bg-white.rounded-3.shadow-sm
                 i.fas.fa-money-bill-wave.me-2.text-primary
-                span Gestión de reservas y ventas
+                span Reservations and sales management
 
           // CTAs según estado de sesión
           if !currentUser
-            a.btn.btn-primary.btn-lg.rounded-pill.fw-bold.mb-3(href='/signup?intent=artist' aria-label='Crear cuenta de artista')
+            a.btn.btn-primary.btn-lg.rounded-pill.fw-bold.mb-3(href='/signup?intent=artist' aria-label='Create artist account')
               i.fas.fa-user-plus.me-2
-              | Crear cuenta de artista
+              | Create artist account
             p.small.text-muted
-              | ¿Ya tienes cuenta? Inicia sesión y completa tu solicitud.
+              | Do you already have an account? Log in and complete your application.
           else if currentUser.role === 'artist'
             .alert.alert-success(role='status')
               i.fas.fa-circle-check.me-2
-              | Ya eres artista en la galería. ¡Bienvenido!
-            a.btn.btn-outline-primary.rounded-pill.fw-bold(href='/artworks' aria-label='Explorar obras')
+              | You are already an artist in the gallery. Welcome!
+            a.btn.btn-outline-primary.rounded-pill.fw-bold(href='/artworks' aria-label='Explore works')
               i.fas.fa-images.me-2
-              | Explorar obras
+              | Explore works
           else if application
             // Estado de solicitud existente
             - var st = application && application.status
             - var isRejected = (st === 'rejected')
             - var percent = (st === 'pending') ? 33 : ((st === 'under_review') ? 66 : 100)
             - var progressWidthClass = `progress-width-${percent}`
-            - var step3 = isRejected ? 'Rechazada' : 'Aprobada'
+            - var step3 = isRejected ? 'Rejected' : 'Approved'
             .card.mb-4
               .card-body
-                h2.h5.fw-bold.mb-3 Estado de tu solicitud
+                h2.h5.fw-bold.mb-3 Status of your application
                 p.mb-2
-                  | Estado actual:
+                  | Current status:
                   if st === 'pending'
-                    span.badge.text-bg-warning.ms-2 Recibida
+                    span.badge.text-bg-warning.ms-2 Received
                   else if st === 'under_review'
-                    span.badge.text-bg-info.ms-2 En revisión
+                    span.badge.text-bg-info.ms-2 Under review
                   else if st === 'approved'
-                    span.badge.text-bg-success.ms-2 Aprobada
+                    span.badge.text-bg-success.ms-2 Approved
                   else if st === 'rejected'
-                    span.badge.text-bg-danger.ms-2 Rechazada
+                    span.badge.text-bg-danger.ms-2 Rejected
                 .progress.mb-3.artist-application-progress
                   if isRejected
                     .progress-bar.bg-danger(class=progressWidthClass role='progressbar', aria-valuenow=percent aria-valuemin='0' aria-valuemax='100')
@@ -76,27 +76,27 @@ block content
                   .flex-fill
                     if st === 'pending'
                       i.fas.fa-hourglass-half.text-warning
-                      div.small.fw-bold Recibida
+                      div.small.fw-bold Received
                     else
                       i.fas.fa-check.text-success
-                      div.small.text-success Recibida
+                      div.small.text-success Received
                   .flex-fill
                     if st === 'under_review'
                       i.fas.fa-magnifying-glass.text-info
-                      div.small.fw-bold En revisión
+                      div.small.fw-bold Under review
                     else if st === 'approved' || st === 'rejected'
                       i.fas.fa-check.text-success
-                      div.small.text-success En revisión
+                      div.small.text-success Under review
                     else
                       i.fas.fa-circle.text-muted
-                      div.small.text-muted En revisión
+                      div.small.text-muted Under review
                   .flex-fill
                     if st === 'approved'
                       i.fas.fa-circle-check.text-success
-                      div.small.fw-bold Aprobada
+                      div.small.fw-bold Approved
                     else if st === 'rejected'
                       i.fas.fa-circle-xmark.text-danger
-                      div.small.fw-bold Rechazada
+                      div.small.fw-bold Rejected
                     else
                       i.fas.fa-circle.text-muted
                       div.small.text-muted= step3
@@ -104,18 +104,18 @@ block content
                 if application && application.createdAt
                   - var created = new Date(application.createdAt)
                   p.small.text-muted.mb-0
-                    | Enviada: #{created.toLocaleString('es-ES')}
+                    | Sent: #{created.toLocaleString('es-ES')}
                 if updated
                   p.small.text-muted.mt-0
-                    | Última actualización: #{updated.toLocaleString('es-ES')}
+                    | Last update: #{updated.toLocaleString('es-ES')}
                 if isRejected
                   if application && application.adminNotes
                     .alert.alert-warning.mt-2
-                      strong Motivo del rechazo:
+                      strong Reason for rejection:
                       div.mt-1.text-prewrap= application.adminNotes
                   p.mt-2
-                    | Si tienes dudas, contáctanos para más información. 
-                    a(href='/contact') Contacto
+                    | If you have questions, contact us for more information. 
+                    a(href='/contact') Contact
           else
             // Formulario de solicitud de artista
             form#artistAppForm(action='/api/v1/artist-applications' method='POST' enctype='multipart/form-data')
@@ -123,32 +123,32 @@ block content
               input.honeypot-field(type='text' name='company' tabindex='-1' autocomplete='off' aria-hidden='true')
 
               .mb-3
-                label.form-label Redes sociales, páginas web y links de interés
+                label.form-label Social networks, web pages and links of interest
                 // Lista dinámica de enlaces
                 .links-list
                   .input-group.mb-2.links-item
                     span.input-group-text
                       i.fas.fa-link
                     input.form-control(type='url' name='links' placeholder='https://tuweb.com o https://instagram.com/usuario' required)
-                    button.btn.btn-outline-secondary(type='button' data-action='remove-link' aria-label='Eliminar enlace' title='Eliminar' disabled)
+                    button.btn.btn-outline-secondary(type='button' data-action='remove-link' aria-label='Delete link' title='Eliminate' disabled)
                       i.fas.fa-xmark
                 button.btn.btn-outline-primary.btn-sm(type='button' id='addLinkBtn')
                   i.fas.fa-plus.me-1
-                  | Agregar enlace
-                .form-text Puedes añadir hasta 5 enlaces (redes sociales, páginas web, portafolios, links de interés).
+                  | Add link
+                .form-text You can add up to 5 links (social networks, web pages, portfolios, links of interest).
 
               .mb-3
                 label.form-label(for='resume') CV (PDF)
                 input#resume.form-control(type='file' name='resume' accept='.pdf,application/pdf' required)
-                .form-text Solo PDF. Máximo 10 MB.
+                .form-text PDF only. Maximum 10 MB.
 
               .mb-3
-                label.form-label(for='statement') Sobre tu trabajo (opcional)
-                textarea#statement.form-control(name='statement' rows='5' maxlength='1500' placeholder='Cuéntanos brevemente sobre tu obra, técnica y experiencia (máx. 1500 caracteres).')
+                label.form-label(for='statement') About your work (optional)
+                textarea#statement.form-control(name='statement' rows='5' maxlength='1500' placeholder='Tell us briefly about your work, technique and experience (max. 1500 characters).')
 
               button.btn.btn-primary.rounded-pill.fw-bold(type='submit')
                 i.fas.fa-paper-plane.me-2
-                | Enviar solicitud
+                | Send request
 
           block scriptsExtra
             // JS de lista dinámica movido a /js/main.js

@@ -6,9 +6,9 @@ block headExtra
 
   - var _artistName = (artwork && artwork.artist && artwork.artist.name) ? artwork.artist.name : ''
 
-  - var metaTitle = artwork && artwork.title ? `${artwork.title}${_artistName ? ' – ' + _artistName : ''} · Galería del Ox` : 'Obra · Galería del Ox'
+  - var metaTitle = artwork && artwork.title ? `${artwork.title}${_artistName ? ' – ' + _artistName : ''} · Ox Gallery` : 'Work · Ox Gallery'
 
-  - var __desc = (artwork && artwork.description) ? artwork.description : (_artistName ? `Obra de ${_artistName} en Galería del Ox.` : 'Obra en Galería del Ox.')
+  - var __desc = (artwork && artwork.description) ? artwork.description : (_artistName ? `Work of ${_artistName} in the Ox Gallery.` : 'Work in Galería del Ox.')
 
   - var metaDescription = __desc && __desc.length > 220 ? __desc.substring(0, 217) + '…' : __desc
 
@@ -208,7 +208,7 @@ block content
 
 
 
-                  a.artist-avatar-link.artwork-detail__artist-avatar-link(href=`/artists/${artwork.artist._id}` aria-label=`Ver perfil de ${artwork.artist.name}`)
+                  a.artist-avatar-link.artwork-detail__artist-avatar-link(href=`/artists/${artwork.artist._id}` aria-label=`View profile of ${artwork.artist.name}`)
 
 
 
@@ -216,7 +216,7 @@ block content
 
                       src=artwork.artist.profileImage
 
-                      alt=`Foto de ${artwork.artist.name}`
+                      alt=`Photo of ${artwork.artist.name}`
 
                       width='40'
 
@@ -384,23 +384,23 @@ block content
                     if currentUser
                       button.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
                         type='button'
-                        aria-label='Consultar compra'
+                        aria-label='Consultar buy'
                         data-bs-toggle='modal'
                         data-bs-target='#purchaseInquiryModal'
                       )
-                        span CONSULTAR COMPRA
+                        span CONSULT PURCHASE
                     else
                       button.btn.btn-dark.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(
                         type='button'
-                        aria-label='Inicia sesión para consultar'
+                        aria-label='Inicia session to consult'
                         data-bs-toggle='modal'
                         data-bs-target='#purchaseAuthModal'
                       )
-                        span CONSULTAR COMPRA
+                        span CONSULT PURCHASE
                   else
                     // Botón mostrado pero deshabilitado cuando no está a la venta
-                    button.btn.btn-secondary.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(disabled aria-disabled='true' type='button' title='No está a la venta')
-                      span NO ESTÁ A LA VENTA
+                    button.btn.btn-secondary.btn-lg.px-4.py-3.mb-3.fw-bold.text-uppercase.btn-letter-spacing.artwork-cta-btn.artwork-detail__cta-btn(disabled aria-disabled='true' type='button' title='Not for sale')
+                      span NOT FOR SALE
 
 
               // Acciones secundarias agrupadas (favorito y compartir)
@@ -423,7 +423,7 @@ block content
 
 
 
-                    aria-label='Agregar a favoritos'
+                    aria-label='Add to favorites'
 
 
 
@@ -443,7 +443,7 @@ block content
 
 
 
-                    span Favorito
+                    span Favorite
 
 
 
@@ -459,7 +459,7 @@ block content
 
 
 
-                    aria-label='Inicia sesión para agregar a favoritos'
+                    aria-label='Inicia session to add to favorites'
 
 
 
@@ -479,11 +479,11 @@ block content
 
 
 
-                    span Favorito
+                    span Favorite
 
 
 
-                button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-share-btn.artwork-detail__share-btn.ox-share-btn(type='button' aria-label='Compartir esta obra')
+                button.btn.btn-outline-dark.btn-lg.px-4.py-3.artwork-share-btn.artwork-detail__share-btn.ox-share-btn(type='button' aria-label='Share this work')
 
 
 
@@ -491,7 +491,7 @@ block content
 
 
 
-                  span Compartir
+                  span Share
 
 
 
@@ -515,7 +515,7 @@ block content
 
 
 
-            h3.mb-4.related-artworks-title Más obras de 
+            h3.mb-4.related-artworks-title More works by 
 
 
 
@@ -555,7 +555,7 @@ block content
 
 
 
-          a.btn.btn-outline-primary.btn-lg.artwork-back-btn.artwork-detail__back-btn.ox-back-btn(href="/artworks" aria-label="Volver")
+          a.btn.btn-outline-primary.btn-lg.artwork-back-btn.artwork-detail__back-btn.ox-back-btn(href="/artworks" aria-label="Return")
 
 
 
@@ -563,7 +563,7 @@ block content
 
 
 
-            span.artwork-detail__back-text Volver
+            span.artwork-detail__back-text Return
 
 
 
@@ -583,7 +583,7 @@ block content
 
 
 
-    aria-label="Vista ampliada de la obra"
+    aria-label="Vista expanded work"
 
 
 
@@ -591,7 +591,7 @@ block content
 
 
 
-    button.lightbox__close.artwork-lightbox-close.artwork-detail__lightbox-close(type="button" aria-label="Cerrar (Esc)")
+    button.lightbox__close.artwork-lightbox-close.artwork-detail__lightbox-close(type="button" aria-label="Close (Esc)")
 
 
 
@@ -603,7 +603,7 @@ block content
 
 
 
-      span.sr-only Cerrar
+      span.sr-only Close
 
 
 
@@ -627,11 +627,11 @@ block content
 
 
 
-    - var title = 'Necesitas iniciar sesión'
+    - var title = 'You need to log in'
 
 
 
-    - var message = 'Para agregar esta obra a tus favoritos, inicia sesión o regístrate.'
+    - var message = 'To add this work to your favorites, log in or register.'
 
 
 

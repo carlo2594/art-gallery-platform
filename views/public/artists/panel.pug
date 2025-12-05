@@ -27,7 +27,7 @@ block content
                 h1.hero-title.artist-name-desktop.display-2.fw-bold.mb-3.artist-title-font.artist-text-shadow= artist.name
                 if stats && stats.techniques && stats.techniques.length
                   .artist-techniques-inline.d-flex.flex-wrap.align-items-center.gap-3.mb-4
-                    span.artist-techniques-heading.text-white-75.text-uppercase.small.fw-semibold Tecnicas
+                    span.artist-techniques-heading.text-white-75.text-uppercase.small.fw-semibold Techniques
                     .artist-techniques-tags.d-flex.flex-wrap.align-items-center.gap-2
                       each technique in stats.techniques.slice(0, 10)
                         - var normalizedTechnique = technique ? technique.toString().trim() : ''
@@ -35,9 +35,9 @@ block content
                         if normalizedTechnique
                           span.small.text-warning.fw-bold.artist-technique-tag= normalizedTechnique
                     if stats.techniques.length > 10
-                      span.small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} mas
+                      span.small.text-white-50.artist-techniques-more +#{stats.techniques.length - 10} but
                 if artist.createdAt
-                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Miembro desde ${new Date(artist.createdAt).getFullYear()}`
+                  h2.hero-subtitle.artist-member-since.h4.mb-4.text-white-50.artist-subtitle-font.artist-text-shadow-light= `Member since ${new Date(artist.createdAt).getFullYear()}`
                 if artist.bio
                   p.hero-bio.artist-bio-desktop.lead.mb-4.text-white-75.artist-bio-style= artist.bio
                 .hero-meta.artist-meta-desktop.d-flex.flex-wrap.gap-4.mb-4
@@ -49,7 +49,7 @@ block content
                     .meta-item.artist-website-item
                       a.text-warning.text-decoration-none(href=artist.website, target="_blank", rel="noopener")
                         i.fas.fa-globe.me-2
-                        span Sitio web
+                        span Website
                   if artist.social && artist.social.instagram
                     .meta-item.artist-social-instagram
                       a.text-warning.text-decoration-none(href=`https://instagram.com/${artist.social.instagram}`, target="_blank", rel="noopener")
@@ -70,20 +70,20 @@ block content
                     - var following = typeof isFollowing !== 'undefined' ? isFollowing : false;
                     button.btn.btn-outline-light.btn-lg.px-4.artist-follow-btn.artist-action-btn(type="button" data-artist-id=artist._id aria-pressed=following ? 'true' : 'false' class= following ? 'active' : '')
                       i.fas.fa-heart.me-2
-                      | #{following ? 'Siguiendo' : 'Seguir'}
+                      | #{following ? 'Following' : 'Follow'}
                     button.btn.btn-outline-light.btn-lg.px-4.artist-share-btn.artist-action-btn
                       i.fas.fa-share.me-2
-                      | Compartir
+                      | Share
                 if isMyPanel
                   .hero-actions.artist-actions-desktop.mt-3.d-flex.flex-wrap.gap-2
                     // Botón controlado por JS: abre modal de crear o el modal de límite
                     //- Botón \"Agregar obra\" eliminado
                     button.btn.btn-outline-light.btn-sm(data-bs-toggle='modal', data-bs-target='#artistCoverModal')
                       i.fas.fa-image.me-2
-                      | Editar portada
+                      | Edit cover
                     a.btn.btn-outline-light.btn-sm(href='/edit-profile')
                       i.fas.fa-user-edit.me-2
-                      | Editar perfil
+                      | Edit profile
 
     // Obras del artista
     if artworks && artworks.length > 0
@@ -92,17 +92,17 @@ block content
           .row.mb-5
             .col-12
               .d-flex.justify-content-between.align-items-center.mb-4
-                h2.section-title.artist-artworks-title.display-5.fw-bold.mb-0.artist-section-title= `Obras de ${artist.name}`
+                h2.section-title.artist-artworks-title.display-5.fw-bold.mb-0.artist-section-title= `Artworks by ${artist.name}`
                 if isMyPanel
                   a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2.artist-add-artwork-btn(
                     href='/artists/panel/artworks/new'
-                    aria-label='Agregar obras'
+                    aria-label='Add works'
                     data-max-artworks='10'
                   )
                     i.fas.fa-plus.me-2.artist-add-artwork-icon
-                    | Agregar obras
-              - var displayText = artworks.length === totalArtworks ? `${totalArtworks} obra${totalArtworks === 1 ? '' : 's'}` : `Mostrando ${artworks.length} de ${totalArtworks} obras`
-              p.lead.text-muted.artist-artworks-subtitle= `${displayText} de este talentoso artista`
+                    | Add works
+              - var displayText = artworks.length === totalArtworks ? `${totalArtworks} work${totalArtworks === 1 ? '' : 's'}` : `Showing ${artworks.length} of ${totalArtworks} works`
+              p.lead.text-muted.artist-artworks-subtitle= `${displayText} by this talented artist`
         if totalArtworks > 1
           section.filters-toolbar.artist-filters-section.py-2
             .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
@@ -119,20 +119,20 @@ block content
               include /public/artworks/_artworkGrid.pug
               include /public/artworks/_artworkPagination.pug
           else
-            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No se encontraron obras con estos filtros.
+            h3.h5.mt-4.text-muted.artist-no-filtered-artworks No works were found with these filters.
     else
       section.no-artworks.artist-no-artworks-section.py-5.text-center
         .container
           .d-flex.justify-content-between.align-items-center.mb-4
-            h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title= `Obras de ${artist.name}`
+            h2.section-title.artist-no-artworks-title.display-4.fw-bold.mb-0.artist-section-title= `Artworks by ${artist.name}`
             if isMyPanel
               a#artistAddArtworkBtn.btn.btn-primary.btn-lg.px-4.py-2.artist-add-artwork-btn(
                 href='/artists/panel/artworks/new'
-                aria-label='Agregar obras'
+                aria-label='Add works'
                 data-max-artworks='10'
               )
                 i.fas.fa-plus.me-2.artist-add-artwork-icon
-                | Agregar obras
+                | Add works
           if stats.totalArtworks > 1
             section.filters-toolbar.artist-no-artworks-filters.py-2.mb-4
               .container-xxl.d-flex.align-items-center.flex-wrap.gap-2.artist-container-padding
@@ -146,17 +146,17 @@ block content
             .col-lg-6
               i.fas.fa-palette.fa-4x.text-muted.mb-4.artist-no-artworks-icon
               if stats.totalArtworks > 1
-                h3.h4.mb-3.text-muted.artist-filtered-message No se encontraron obras con estos filtros
-                p.text-muted.artist-filter-help Prueba ajustar los filtros o
+                h3.h4.mb-3.text-muted.artist-filtered-message No works were found with these filters
+                p.text-muted.artist-filter-help Try adjusting the filters or
                   |  
-                  a(href=actionUrl) limpiar todos los filtros
-                  |  para ver todas las obras de #{artist.name}
+                  a(href=actionUrl) clean all filters
+                  |  to see all the works of #{artist.name}
               else if stats.totalArtworks === 1
-                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} tiene una obra publicada`
-                p.text-muted.artist-single-work-message Esta es la única obra disponible de este talentoso artista. ¡Vuelve pronto para ver más creaciones!
+                h3.h4.mb-3.text-muted.artist-single-work= `${artist.name} has a published work`
+                p.text-muted.artist-single-work-message This is the only work available by this talented artist. Come back soon to see more creations!
               else
-                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} aún no tiene obras publicadas`
-                 p.text-muted.artist-portfolio-message Este artista está preparando su portfolio. ¡Vuelve pronto para ver sus creaciones!
+                h3.h4.mb-3.text-muted.artist-no-published-works= `${artist.name} does not have published works yet`
+                 p.text-muted.artist-portfolio-message This artist is preparing his portfolio. Come back soon to see their creations!
 
     if isMyPanel
       // Gestión de obras del artista (borradores y enviadas)
@@ -164,55 +164,55 @@ block content
         .container
           .row
             .col-12
-              h2.h4.mb-3 Gestión de mis obras
-              p.text-muted.small Administra tus obras en borrador y envíalas a revisión.
+              h2.h4.mb-3 Management of my works
+              p.text-muted.small Manage your draft works and send them for review.
               #artistPanelAlerts
           .row.g-4
             .col-12.col-lg-4
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
-                  span.fw-semibold Borradores
+                  span.fw-semibold Erasers
                     span#countDrafts.badge.bg-secondary.ms-2 0
                   button.btn.btn-sm.btn-outline-primary#reloadDrafts(type='button')
                     i.fas.fa-rotate-right.me-1
-                    | Actualizar
+                    | Update
                 .card-body
                   ul.list-group.list-group-flush#artistDraftsList
-                    li.list-group-item.text-muted.small No hay borradores.
+                    li.list-group-item.text-muted.small There are no drafts.
             .col-12.col-lg-4
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
-                  span.fw-semibold Enviadas
+                  span.fw-semibold Sent
                     span#countSubmitted.badge.bg-secondary.ms-2 0
                   button.btn.btn-sm.btn-outline-primary#reloadSubmitted(type='button')
                     i.fas.fa-rotate-right.me-1
-                    | Actualizar
+                    | Update
                 .card-body
                   ul.list-group.list-group-flush#artistSubmittedList
-                    li.list-group-item.text-muted.small No hay obras enviadas.
+                    li.list-group-item.text-muted.small There are no works sent.
             //- Columna de rechazadas: visible solo si hay elementos (la muestra JS)
             .col-12.col-lg-4.artist-rejected-column#rejectedColumn
               .card.shadow-sm
                 .card-header.bg-light.d-flex.align-items-center.justify-content-between
-                  span.fw-semibold Rechazadas
+                  span.fw-semibold Rejected
                     span#countRejected.badge.bg-secondary.ms-2 0
                   button.btn.btn-sm.btn-outline-primary#reloadRejected(type='button')
                     i.fas.fa-rotate-right.me-1
-                    | Actualizar
+                    | Update
                 .card-body
-                  p.text-muted.small.mb-2 Motivo del rechazo (si aplica)
-                  p.text-muted.small.mb-3 Para intentarlo de nuevo, crea una nueva solicitud desde cero. Esta obra permanecerá en estado rechazado.
+                  p.text-muted.small.mb-2 Reason for rejection (if applicable)
+                  p.text-muted.small.mb-3 To try again, create a new request from scratch. This work will remain in rejected status.
                   ul.list-group.list-group-flush#artistRejectedList
-                    li.list-group-item.text-muted.small No hay obras rechazadas recientes.
+                    li.list-group-item.text-muted.small There are no recent rejected works.
 
     // BotÃ³n de volver
   section.back-navigation.py-4
     .container
       .row
         .col-12.text-center
-          a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Volver")
+          a.btn.btn-outline-primary.btn-lg.artist-back-btn.ox-back-btn(href="/artists" aria-label="Return")
             i.fas.fa-arrow-left.me-2
-            | Volver
+            | Return
 
   
   if isMyPanel
@@ -224,13 +224,13 @@ block content
       .modal-dialog
         .modal-content
           .modal-header
-            h5.modal-title#artistDraftLimitLabel Límite de borradores alcanzado
-            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+            h5.modal-title#artistDraftLimitLabel Draft limit reached
+            button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
           .modal-body
-            p.mb-2 Has alcanzado el número máximo de obras en borrador.
-            p.small.text-muted Para agregar nuevas obras, envía algunas a aprobación o elimina borradores existentes.
+            p.mb-2 You have reached the maximum number of works in draft.
+            p.small.text-muted To add new works, submit some for approval or delete existing drafts.
           .modal-footer
-            button.btn.btn-primary(type='button' data-bs-dismiss='modal') Entendido
+            button.btn.btn-primary(type='button' data-bs-dismiss='modal') Understood
 
 block scriptsExtra
   if isMyPanel

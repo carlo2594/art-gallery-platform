@@ -3,43 +3,43 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title(id=`userActionsLabel-${u._id}`) Acciones - #{u.name}
+        h5.modal-title(id=`userActionsLabel-${u._id}`) Actions - #{u.name}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
-        h2.fs-5 Acciones de seguridad
+        h2.fs-5 Security actions
         p
-          button.btn.btn.warning.admin-reset-pass(type='button' data-user-id=u._id aria-label='Resetear contraseña')
+          button.btn.btn.warning.admin-reset-pass(type='button' data-user-id=u._id aria-label='Reset password')
             i.fas.fa-key.me-1
-            | Resetear contraseña
+            | Reset password
         hr
-        h2.fs-5 Cambiar rol
+        h2.fs-5 Change role
         .d-flex.gap-2.flex-wrap
           if u.role !== 'collector'
-            button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Cambiar a coleccionista')
+            button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Switch to collector')
               i.fas.fa-arrow-down-long.me-1
-              | Cambiar a Coleccionista
+              | Switch to Collector
           if u.role !== 'artist'
-            button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Cambiar a artista')
+            button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Change artist')
               i.fas.fa-arrow-up-right-dots.me-1
-              | Cambiar a Artista
+              | Switch to Artist
           if u.role !== 'admin'
-            button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Cambiar a administrador')
+            button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Switch to administrator')
               i.fas.fa-user-shield.me-1
-              | Cambiar a Administrador
+              | Switch to Administrator
         hr
-        h2.fs-5 Estado de la cuenta
+        h2.fs-5 Account status
         p
           if u.active === false
-            button.btn.btn-success.admin-toggle-active(type='button' data-user-id=u._id data-action='reactivate' aria-label='Reactivar usuario')
+            button.btn.btn-success.admin-toggle-active(type='button' data-user-id=u._id data-action='reactivate' aria-label='Reactivate user')
               i.fas.fa-user-check.me-1
-              | Reactivar cuenta
+              | Reactivate account
           else
-            button.btn.btn-outline-secondary.admin-toggle-active(type='button' data-user-id=u._id data-action='deactivate' aria-label='Desactivar usuario')
+            button.btn.btn-outline-secondary.admin-toggle-active(type='button' data-user-id=u._id data-action='deactivate' aria-label='Deactivate user')
               i.fas.fa-user-slash.me-1
-              | Desactivar cuenta
+              | Deactivate account
       .modal-footer
         // Usar ID para que la vista pública canonicé al slug actual
         a.btn.btn-outline-secondary.admin-users-public-link(target='_blank' href=`/artists/${u._id}`)
           i.fas.fa-user.me-1
-          | Ver público
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
+          | View public
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close

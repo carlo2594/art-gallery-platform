@@ -3,22 +3,22 @@ extends /layouts/admin
 block content
   .container.py-5
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
-      span= title || 'Usuarios'
+      span= title || 'Users'
       // Botón para abrir modal de nuevo usuario
       button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateUser')
         i.fas.fa-user-plus.me-1
-        | Agregar usuario
+        | Add user
     // Barra de búsqueda
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
-        input.form-control(type='text', name='q', placeholder='Buscar por nombre o correo', value=q || '')
+        input.form-control(type='text', name='q', placeholder='Search by name or email', value=q || '')
       if typeof role !== 'undefined' && role
         input(type='hidden', name='role', value=role)
       .col-sm-6.col-md-3
         select.form-select(name='active')
           option(value='') Estado: Todos
-          option(value='active' selected=active === 'active') Activos
-          option(value='inactive' selected=active === 'inactive') Inactivos
+          option(value='active' selected=active === 'active') Assets
+          option(value='inactive' selected=active === 'inactive') Inactive
       .col-sm-6.col-md-3
         select.form-select(name='img')
           option(value='') Imagen: Todas
@@ -26,41 +26,41 @@ block content
           option(value='without' selected=img === 'without') Sin imagen
       .col-sm-6.col-md-3
         select.form-select(name='sort')
-          option(value='recent' selected=sort === 'recent') Recientes primero
+          option(value='recent' selected=sort === 'recent') Recent first
           option(value='oldest' selected=sort === 'oldest') Antiguos primero
           option(value='name_asc' selected=sort === 'name_asc') Nombre A-Z
-          option(value='name_desc' selected=sort === 'name_desc') Nombre Z-A
-          option(value='last_login' selected=sort === 'last_login') Último acceso
+          option(value='name_desc' selected=sort === 'name_desc') Name Z-A
+          option(value='last_login' selected=sort === 'last_login') Last access
       .col-auto
-        button.btn.btn-primary(type='submit') Buscar
+        button.btn.btn-primary(type='submit') Search
       if q
         .col-auto
-          a.btn.btn-outline-secondary(href='?') Limpiar
+          a.btn.btn-outline-secondary(href='?') Clean
     
     if users && users.length
       .table-responsive
         table.table.table-striped.table-hover.align-middle.admin-users-table
           thead
             tr
-              th Nombre
-              th Correo
-              th Estado
-              th Creado
-              th Editar
-              th Acciones
+              th Name
+              th Mail
+              th State
+              th Created
+              th Edit
+              th Actions
           tbody
             each u in users
               tr
                 td= u.name
                 td= u.email
                 td
-                  span.badge(class=u.active === false ? 'text-bg-secondary' : 'text-bg-success')= (u.active === false ? 'Inactivo' : 'Activo')
+                  span.badge(class=u.active === false ? 'text-bg-secondary' : 'text-bg-success')= (u.active === false ? 'Inactive' : 'Active')
                 td= new Date(u.createdAt).toLocaleDateString('es-ES')
                 // Columna Editar
                 td
                   button.btn.btn-sm.btn-outline-primary.admin-users-edit-trigger(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditUser-${u._id}`, data-user-name=u.name, data-user-email=u.email)
                     i.fas.fa-pen-to-square.me-1
-                    | Editar
+                    | Edit
                   // Modal de edición por usuario (extraído)
                   include /admin/modals/_userEditModal.pug
                 td
@@ -72,16 +72,16 @@ block content
     else
       .alert.alert-info No hay usuarios
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label=`Paginación de ${title || 'usuarios'}`)
+      nav.mt-4(aria-label=`Pagination ${title || 'usuarios'}`)
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `Page ${page} of ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
-            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Following') Following
 
     // Modal: Crear nuevo usuario (extraído)
     include /admin/modals/_userCreateModal.pug

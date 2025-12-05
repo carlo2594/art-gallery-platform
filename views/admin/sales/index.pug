@@ -2,16 +2,16 @@ extends /layouts/admin
 
 block content
   .container.py-5
-    h1.h3.mb-4 Gestión de ventas
+    h1.h3.mb-4 Sales management
     if sales && sales.length
       .table-responsive
         table.table.table-striped.table-hover.align-middle
           thead
             tr
-              th Obra
-              th Artista
-              th Estado
-              th Vendida en
+              th Work
+              th Artist
+              th State
+              th Sold in
           tbody
             each s in sales
               tr
@@ -20,5 +20,5 @@ block content
                 td= s.availability
                 td= s.soldAt ? new Date(s.soldAt).toLocaleDateString('es-ES') : '—'
     else
-      .alert.alert-info No hay ventas
+      .alert.alert-info There are no sales
 

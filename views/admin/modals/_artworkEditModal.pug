@@ -3,50 +3,50 @@
   .modal-dialog.modal-lg
     .modal-content
       .modal-header
-        h5.modal-title(id=`adminEditArtworkLabel-${a._id}`) Editar obra - #{a.title}
+        h5.modal-title(id=`adminEditArtworkLabel-${a._id}`) Edit work - #{a.title}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         form.admin-edit-artwork-form(id=`adminEditArtworkForm-${a._id}` data-artwork-id=a._id data-initial-status=(status || 'draft') data-initial-availability=a.availability enctype='multipart/form-data')
           // Básicos
           .row.g-3
             .col-md-8
-              label.form-label Título
+              label.form-label Title
               input.form-control(type='text', name='title', value=a.title)
             .col-md-4
-              label.form-label Estado
+              label.form-label State
               .form-control-plaintext
                 span.badge(class=(status === 'approved' ? 'text-bg-success' : (status === 'submitted' ? 'text-bg-warning' : (status === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= status || 'draft'
           .mb-3
-            label.form-label Descripción
+            label.form-label Description
             textarea.form-control(name='description' rows='3' data-allow-empty='true')= a.description || ''
           // Imagen principal
           .mb-3
-            label.form-label Imagen de la obra
+            label.form-label Image of the work
             .d-flex.align-items-center.gap-3
               - const imgSrc = a.imageUrl || ''
-              img.admin-artworks-image-preview.img-thumbnail(src=imgSrc, alt=`Imagen de ${a.title}` style='width:64px;height:64px;object-fit:cover;' hidden=!a.imageUrl)
+              img.admin-artworks-image-preview.img-thumbnail(src=imgSrc, alt=`Image of ${a.title}` style='width:64px;height:64px;object-fit:cover;' hidden=!a.imageUrl)
               .d-flex.flex-wrap.gap-2
                 // Input de archivo; si no se elige, se conserva la imagen existente
                 input.form-control.form-control-sm.admin-artworks-image-input(type='file', name='image', accept='image/*')
-                button.btn.btn-sm.btn-primary.admin-artworks-image-upload-btn(type='button') Subir
-                button.btn.btn-sm.btn-outline-danger.admin-artworks-image-remove-btn(type='button') Quitar
-            small.text-muted.mt-1 Selecciona una imagen y presiona "Subir".
+                button.btn.btn-sm.btn-primary.admin-artworks-image-upload-btn(type='button') Climb
+                button.btn.btn-sm.btn-outline-danger.admin-artworks-image-remove-btn(type='button') Remove
+            small.text-muted.mt-1 Select an image and press "Upload."
           .row.g-3
             .col-md-6
-              label.form-label Artista
+              label.form-label Artist
               input.form-control(type='text', value=(a.artist && a.artist.name) || '""', readonly)
             .col-md-6
-              label.form-label Fecha de la obra
+              label.form-label Date of work
               - const _d = a.completedAt ? new Date(a.completedAt) : null
               - const completedVal = (_d && !isNaN(_d.getTime())) ? _d.toISOString().slice(0,10) : ''
               input.form-control(type='date', name='completedAt', value=completedVal, disabled=!isAdmin)
           // Técnica y medidas
           .row.g-3
             .col-md-4
-              label.form-label Técnica
+              label.form-label Technique
               input.form-control(type='text', name='technique', value=a.technique || '')
             .col-md-2
-              label.form-label Alto (cm)
+              label.form-label Tall (cm)
               input.form-control(type='number', name='height_cm', min='0.01', step='0.01', value=a.height_cm)
             .col-md-2
               label.form-label Ancho (cm)
@@ -58,28 +58,28 @@
               - const priceUSD = (typeof a.price_cents === 'number') ? (a.price_cents/100).toFixed(2) : ''
               input.form-control(type='number', name='price_usd', min='0', step='0.01', value=priceUSD)
             .col-md-4
-              label.form-label Disponibilidad
+              label.form-label Availability
               select.form-select(name='availability', disabled=!isAdmin)
-                option(value='not_for_sale' selected=a.availability==='not_for_sale') No a la venta
-                option(value='for_sale' selected=a.availability==='for_sale') En venta
-                option(value='reserved' selected=a.availability==='reserved') Reservada
+                option(value='not_for_sale' selected=a.availability==='not_for_sale') Not for sale
+                option(value='for_sale' selected=a.availability==='for_sale') On sale
+                option(value='reserved' selected=a.availability==='reserved') Reserved
                 // Ocultamos 'sold' en el panel admin (requiere datos de venta)
-                option(value='on_loan' selected=a.availability==='on_loan') En préstamo
+                option(value='on_loan' selected=a.availability==='on_loan') On loan
             .col-md-4
-              label.form-label Reservada hasta
+              label.form-label Reserved until
               - const reservedVal = a.reservedUntil ? new Date(a.reservedUntil).toISOString().slice(0,10) : ''
               input.form-control(type='date', name='reservedUntil', value=reservedVal, disabled=!isAdmin)
           .row.g-3
             .col-md-4
-              label.form-label Favoritos (solo lectura)
+              label.form-label Favorites (read only)
               input.form-control(type='number', value=a.favoritesCount || 0, readonly)
             .col-md-4
-              label.form-label Vistas (solo lectura)
+              label.form-label Views (read only)
               input.form-control(type='number', value=a.views || 0, readonly)
             .col-md-4
-              label.form-label Creada
+              label.form-label Created
               input.form-control(type='text', value=new Date(a.createdAt).toLocaleString('es-ES'), readonly)
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
         // Nota: requiere JS para guardar
-        button.btn.btn-primary.admin-artworks-save(type='submit' form=`adminEditArtworkForm-${a._id}`) Guardar cambios
+        button.btn.btn-primary.admin-artworks-save(type='submit' form=`adminEditArtworkForm-${a._id}`) Save changes

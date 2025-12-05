@@ -4,7 +4,7 @@ html(lang='es')
   head
     meta(charset='utf-8')
     meta(name='viewport', content='width=device-width, initial-scale=1')
-    title #{title ? title + ' · Admin · Galería del Ox' : 'Admin · Galería del Ox'}
+    title #{title ? title + ' · Admin · Ox Gallery' : 'Admin · Ox Gallery'}
     link(rel='stylesheet', href='/bootstrap/css/bootstrap.min.css')
     link(rel='stylesheet', href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css')
     link(rel='stylesheet', href='/css/style.css')
@@ -17,38 +17,38 @@ html(lang='es')
       //- Sidebar
       aside.admin-sidebar.d-flex.flex-column.flex-shrink-0.p-3
         a.d-flex.align-items-center.mb-3.mb-md-0.me-md-auto.text-decoration-none(href='/')
-          img.logo-navbar.me-2(src='/Logos/GOX_LOGO_06.png', alt='Galería del Ox', width='32', height='32')
-          span.fs-5.fw-bold.text-uppercase Galería del Ox
+          img.logo-navbar.me-2(src='/Logos/GOX_LOGO_06.png', alt='Ox Gallery', width='32', height='32')
+          span.fs-5.fw-bold.text-uppercase Ox Gallery
         hr
         ul.nav.nav-pills.flex-column.mb-auto
           li.nav-item.mb-2
             a.nav-link.admin-nav-link(href='/admin' aria-current='page')
               i.fas.fa-house.me-2
-              | Inicio
+              | Start
           li.mb-2
             a.nav-link.admin-nav-link(href='/admin/users?role=artist')
               i.fas.fa-user.me-2
-              | Artistas
+              | Artists
           li.mb-2
             a.nav-link.admin-nav-link(href='/admin/collectors')
               i.fas.fa-users.me-2
-              | Coleccionistas
+              | Collectors
           li.mb-2
             a.nav-link.admin-nav-link(href='/admin/artist-applications')
               i.fas.fa-id-card.me-2
-              | Solicitudes artistas
+              | Artist requests
           li.mb-2
             a.nav-link.admin-nav-link(href='/admin/artworks')
               i.fas.fa-image.me-2
-              | Obras
+              | Artworks
           li.mb-2
             a.nav-link.admin-nav-link(href='/admin/exhibitions')
               i.fas.fa-landmark.me-2
-              | Exposiciones
+              | Exhibitions
         hr
-        a.btn.btn-outline-primary.ox-back-btn.w-100.mt-auto(href='/' aria-label='Volver')
+        a.btn.btn-outline-primary.ox-back-btn.w-100.mt-auto(href='/' aria-label='Return')
           i.fas.fa-arrow-left.me-2
-          | Volver
+          | Return
 
       //- Main content
       main.admin-main.flex-grow-1.p-4
@@ -83,19 +83,19 @@ html(lang='es')
           var action = modal.getAttribute('data-action');
           var method = (modal.getAttribute('data-method')||'DELETE').toUpperCase();
           if(!action) return;
-          var old = btn.textContent; btn.disabled = true; btn.textContent = 'Eliminando...';
+          var old = btn.textContent; btn.disabled = true; btn.textContent = 'Eliminating...';
           var opts = { method: method, credentials: 'include' };
           fetch(action, opts).then(function(res){
             if(!res.ok) return res.json().catch(function(){ return {}; }).then(function(d){ throw new Error(d.message || (d.error && (d.error.message || d.error.code)) || 'Error'); });
             return res.json().catch(function(){ return {}; });
           }).then(function(){
-            if (window.showAdminToast) showAdminToast('Eliminado', 'success');
+            if (window.showAdminToast) showAdminToast('Deleted', 'success');
             try {
               var sel = modal.getAttribute('data-remove-selector');
               if (sel) { var el = document.querySelector(sel); if (el) el.remove(); }
               if (window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modal).hide();
             } catch(_){ }
-          }).catch(function(err){ console.error(err); if (window.showAdminToast) showAdminToast(err && err.message || 'No se pudo eliminar', 'danger'); })
+          }).catch(function(err){ console.error(err); if (window.showAdminToast) showAdminToast(err && err.message || 'Could not delete', 'danger'); })
           .finally(function(){ btn.disabled = false; btn.textContent = old; });
         });
       })();
@@ -134,13 +134,13 @@ html(lang='es')
           e.preventDefault();
           var id = btn.getAttribute('data-user-id');
           if(!id) return;
-          if(!confirm('¿Resetear contraseña para este usuario?')) return;
+          if(!confirm('Reset password for this user?')) return;
           var old = btn.textContent;
           btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Reseteando...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/reset-password';
           var success = function(){
-            if (window.showAdminToast) showAdminToast('Contraseña reseteada.','success');
+            if (window.showAdminToast) showAdminToast('Password reset.','success');
             var modalEl = btn.closest && btn.closest('.modal');
             if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
           };
@@ -158,17 +158,17 @@ html(lang='es')
           var id = btn.getAttribute('data-user-id');
           var role = btn.getAttribute('data-role');
           if(!id || !role) return;
-          if(!confirm('¿Promover a "' + role + '"?')) return;
+          if(!confirm('Promote to "' + role + '"?')) return;
           var old = btn.textContent;
-          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Updating...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/role';
           var success = function(){
-            if (window.showAdminToast) showAdminToast('Rol actualizado a ' + role, 'success');
+            if (window.showAdminToast) showAdminToast('Role updated to ' + role, 'success');
             var modalEl = btn.closest && btn.closest('.modal');
             if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
           };
-          var failure = function(){ if (window.showAdminToast) showAdminToast('No se pudo actualizar el rol','danger'); };
+          var failure = function(){ if (window.showAdminToast) showAdminToast('Could not update role','danger');};
           if (window.axios) {
             axios.patch(url, { role: role }).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           } else {
@@ -191,14 +191,14 @@ html(lang='es')
           var id = btn.getAttribute('data-user-id');
           var action = btn.getAttribute('data-action'); // 'deactivate' | 'reactivate'
           if(!id || !action) return;
-          var confirmMsg = action === 'deactivate' ? '¿Desactivar esta cuenta?' : '¿Reactivar esta cuenta?';
+          var confirmMsg = action === 'deactivate' ?'Deactivate this account?': 'Reactivate this account?';
           if(!confirm(confirmMsg)) return;
           var old = btn.textContent;
-          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Actualizando...';
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Updating...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/' + (action === 'deactivate' ? 'deactivate' : 'reactivate');
           var success = function(){
-            if (window.showAdminToast) showAdminToast('Estado actualizado','success');
+            if (window.showAdminToast) showAdminToast('Updated status','success');
             var modalEl = btn.closest && btn.closest('.modal');
             if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
             var row = btn.closest && btn.closest('tr');
@@ -207,21 +207,21 @@ html(lang='es')
             if (badge) {
               badge.classList.remove('text-bg-success','text-bg-secondary');
               badge.classList.add(isDeactivate ? 'text-bg-secondary' : 'text-bg-success');
-              badge.textContent = isDeactivate ? 'Inactivo' : 'Activo';
+              badge.textContent = isDeactivate ? 'Idle' : 'Asset';
             }
             if (isDeactivate) {
               btn.setAttribute('data-action','reactivate');
               btn.classList.remove('btn-outline-secondary');
               btn.classList.add('btn-success');
-              btn.innerText = 'Reactivar cuenta';
+              btn.innerText = 'Reactivate account';
             } else {
               btn.setAttribute('data-action','deactivate');
               btn.classList.remove('btn-success');
               btn.classList.add('btn-outline-secondary');
-              btn.innerText = 'Desactivar cuenta';
+              btn.innerText = 'Deactivate account';
             }
           };
-          var failure = function(){ if (window.showAdminToast) showAdminToast('No se pudo actualizar el estado','danger'); };
+          var failure = function(){ if (window.showAdminToast) showAdminToast('Could not update status','danger');};
           if (window.axios) {
             axios.patch(url).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           } else {

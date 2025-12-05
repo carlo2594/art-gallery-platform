@@ -7,7 +7,7 @@ if Array.isArray(exhibitions)
       - const eager = idx < 2
       - const detailUrl = `/exhibitions/${expo.slug || expo._id}`
       section.article-template.exhibition-section
-        a.exhibition-card-link.d-block.text-decoration-none(href=detailUrl aria-label=`Ver detalles de ${expo.title}`)
+        a.exhibition-card-link.d-block.text-decoration-none(href=detailUrl aria-label=`See details of ${expo.title}`)
           .article-template__hero-container.exhibition-hero-container.position-relative.reveal-item
             .article-template__hero-adapt.media.exhibition-hero-adapt
               if expo.coverImage
@@ -22,14 +22,14 @@ if Array.isArray(exhibitions)
                 .exhibition-placeholder.d-flex.align-items-center.justify-content-center.exhibition-grid__placeholder
                   .text-center
                     i.fas.fa-image.fa-4x.text-white.mb-3
-                    .text-white.h5 Sin imagen
+                    .text-white.h5 No image
             .exhibition-overlay.position-absolute.bottom-0.start-0.end-0.p-3
               .exhibition-info.text-white
                 h2.exhibition-title.fw-bold.mb-2.exhibition-grid__title= expo.title
                 if expo.startDate && expo.endDate
                   .d-flex.align-items-center.mb-1
                     i.fas.fa-calendar-alt.me-2.text-warning.exhibition-grid__meta-icon
-                    span.small.mb-0.exhibition-grid__meta-text= `Del ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
+                    span.small.mb-0.exhibition-grid__meta-text= `Of the ${new Date(expo.startDate).toLocaleDateString()} al ${new Date(expo.endDate).toLocaleDateString()}`
                 if expo.location && expo.location.type
                   .d-flex.align-items-center.mb-1
                     if expo.location.type === 'physical' && expo.location.address
@@ -37,7 +37,7 @@ if Array.isArray(exhibitions)
                       span.small.mb-0.exhibition-grid__meta-text= expo.location.address
                     else if expo.location.type === 'virtual' && expo.location.url
                       i.fas.fa-globe.me-2.text-info.exhibition-grid__meta-icon
-                      span.small.mb-0.exhibition-grid__meta-text Exposición Virtual
+                      span.small.mb-0.exhibition-grid__meta-text Virtual Exhibition
                 if expo.description
                   - const desc = expo.description.length > 160 ? expo.description.slice(0, 160) + '…' : expo.description;
                   p.exhibition-description.mb-0.exhibition-grid__description= desc
@@ -45,10 +45,10 @@ if Array.isArray(exhibitions)
     .container-xxl.py-5
       .row.justify-content-center
         .col-lg-8.text-center
-          h3.h4.mb-2 No hay exposiciones que coincidan con tus filtros
-          p.text-muted.mb-4 Prueba ajustar el rango de fechas, el tipo o
+          h3.h4.mb-2 There are no exposures that match your filters
+          p.text-muted.mb-4 Try adjusting the date range, type or
             |  
-            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions') limpiar los filtros
+            a(href=typeof actionUrl !== 'undefined' ? actionUrl : '/exhibitions') clean the filters
           .d-grid.gap-3
             .skeleton.skeleton-hero
             .skeleton.skeleton-hero

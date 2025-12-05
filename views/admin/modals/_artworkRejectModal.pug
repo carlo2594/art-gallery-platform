@@ -3,17 +3,17 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title(id=`adminRejectArtworkLabel-${a._id}`) Rechazar obra - #{a.title}
+        h5.modal-title(id=`adminRejectArtworkLabel-${a._id}`) Reject work - #{a.title}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       form.admin-reject-artwork-form(data-artwork-id=a._id data-edit-form-id=`adminEditArtworkForm-${a._id}`)
         .modal-body
           .mb-3
-            label.form-label(for=`rejectReason-${a._id}`) Motivo del rechazo
+            label.form-label(for=`rejectReason-${a._id}`) Reason for rejection
             textarea.form-control(
               id=`rejectReason-${a._id}`
               name='reason'
               rows='4'
-              placeholder='Describe claramente el motivo...'
+              placeholder='Clearly describe the reason...'
               required
               maxlength=(rejectReasonLimit || 100)
               data-reject-limit=(rejectReasonLimit || 100)
@@ -21,7 +21,7 @@
             )
             small.text-muted.mt-1
               span(id=`rejectCounter-${a._id}`)= rejectReasonLimit || 100
-              |  caracteres disponibles. Se notificará al artista con este motivo.
+              |  available characters. The artist will be notified of this reason.
         .modal-footer
-          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-          button.btn.btn-danger(type='submit') Confirmar rechazo
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+          button.btn.btn-danger(type='submit') Confirm rejection

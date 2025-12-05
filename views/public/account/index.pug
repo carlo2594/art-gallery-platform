@@ -8,18 +8,18 @@ block content
     .container.account-page-container
       .row.mb-4.account-page-header-row
         .col.account-page-header-col
-          h1.h3.mb-0.font-title.account-page-title Editar cuenta
-          p.text-muted.account-page-subtitle Actualiza tu perfil, foto y contraseña.
+          h1.h3.mb-0.font-title.account-page-title Edit account
+          p.text-muted.account-page-subtitle Update your profile, photo and password.
 
       #accountAlerts.account-page-alerts
 
       ul.nav.nav-tabs.account-tabs.account-tabs-list(role='tablist')
         li.nav-item.account-tabs-item(role='presentation')
-          button.nav-link.account-tabs-link.active(data-bs-toggle='tab' data-bs-target='#tab-perfil' type='button' role='tab' aria-controls='tab-perfil' aria-selected='true' data-ox-tab='perfil') Perfil
+          button.nav-link.account-tabs-link.active(data-bs-toggle='tab' data-bs-target='#tab-perfil' type='button' role='tab' aria-controls='tab-perfil' aria-selected='true' data-ox-tab='perfil') Profile
         li.nav-item.account-tabs-item(role='presentation')
-          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') Foto de perfil
+          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-foto' type='button' role='tab' aria-controls='tab-foto' aria-selected='false' data-ox-tab='foto') profile photo
         li.nav-item.account-tabs-item(role='presentation')
-          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Cambiar contraseña
+          button.nav-link.account-tabs-link(data-bs-toggle='tab' data-bs-target='#tab-password' type='button' role='tab' aria-controls='tab-password' aria-selected='false' data-ox-tab='password') Change password
 
       .tab-content.mt-4.account-tabs-content
         .tab-pane.account-tab-pane.account-tab-pane--profile.fade.show.active#tab-perfil(role='tabpanel' aria-labelledby='tab-perfil')
@@ -27,27 +27,27 @@ block content
             .row.g-4.account-form-row
               .col-12.col-lg-6.account-form-column
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='firstName') Nombre
+                  label.form-label.account-form-label(for='firstName') Name
                   input#firstName.form-control.account-form-control(type='text' name='firstName' maxlength='20' value=(currentUser && currentUser.firstName) || '')
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='lastName') Apellidos
+                  label.form-label.account-form-label(for='lastName') Surnames
                   input#lastName.form-control.account-form-control(type='text' name='lastName' maxlength='20' value=(currentUser && currentUser.lastName) || '')
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='name') Nombre público (se mostrará)
+                  label.form-label.account-form-label(for='name') Public name (will be displayed)
                   input#name.form-control.account-form-control(type='text' name='name' maxlength='20' required value=(currentUser && currentUser.name) || '')
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='headline') Titular
-                  input#headline.form-control.account-form-control(type='text' name='headline' maxlength='80' placeholder='Artista visual, ilustrador, etc.' value=(currentUser && currentUser.headline) || '')
+                  input#headline.form-control.account-form-control(type='text' name='headline' maxlength='80' placeholder='Visual artist, illustrator, etc.' value=(currentUser && currentUser.headline) || '')
                 .mb-3.account-form-group
                   .d-flex.align-items-center.justify-content-between
-                    label.form-label.account-form-label.mb-0(for='bio') Biografía
+                    label.form-label.account-form-label.mb-0(for='bio') Biography
                     small.text-muted#accountBioCounter 0/400
                   textarea#bio.form-control.account-form-control(name='bio' rows='5' maxlength='400')= (currentUser && currentUser.bio) || ''
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='country') País
+                  label.form-label.account-form-label(for='country') Country
                   - var currentCountry = (currentUser && currentUser.country) || 'CR'
                   select#country.form-select.account-form-control(name='country')
-                    option(value='' selected=(currentCountry==='') ? true : false) Seleccionar país
+                    option(value='' selected=(currentCountry==='') ? true : false) Select country
                     option(value='AF' selected=(currentCountry==='AF') ? true : false) Afghanistan
                     option(value='AL' selected=(currentCountry==='AL') ? true : false) Albania
                     option(value='DZ' selected=(currentCountry==='DZ') ? true : false) Algeria
@@ -76,7 +76,7 @@ block content
                     option(value='BG' selected=(currentCountry==='BG') ? true : false) Bulgaria
                     option(value='BF' selected=(currentCountry==='BF') ? true : false) Burkina Faso
                     option(value='BI' selected=(currentCountry==='BI') ? true : false) Burundi
-                    option(value='CV' selected=(currentCountry==='CV') ? true : false) Cabo Verde
+                    option(value='CV' selected=(currentCountry==='CV') ? true : false) Cape Verde
                     option(value='KH' selected=(currentCountry==='KH') ? true : false) Cambodia
                     option(value='CM' selected=(currentCountry==='CM') ? true : false) Cameroon
                     option(value='CA' selected=(currentCountry==='CA') ? true : false) Canada
@@ -89,7 +89,7 @@ block content
                     option(value='CG' selected=(currentCountry==='CG') ? true : false) Congo
                     option(value='CD' selected=(currentCountry==='CD') ? true : false) Congo (DRC)
                     option(value='CR' selected=(currentCountry==='CR') ? true : false) Costa Rica
-                    option(value='CI' selected=(currentCountry==='CI') ? true : false) Cote d'Ivoire
+                    option(value='CI' selected=(currentCountry==='CI') ? true : false) Ivory Coast
                     option(value='HR' selected=(currentCountry==='HR') ? true : false) Croatia
                     option(value='CU' selected=(currentCountry==='CU') ? true : false) Cuba
                     option(value='CY' selected=(currentCountry==='CY') ? true : false) Cyprus
@@ -97,7 +97,7 @@ block content
                     option(value='DK' selected=(currentCountry==='DK') ? true : false) Denmark
                     option(value='DJ' selected=(currentCountry==='DJ') ? true : false) Djibouti
                     option(value='DM' selected=(currentCountry==='DM') ? true : false) Dominica
-                    option(value='DO' selected=(currentCountry==='DO') ? true : false) Republica Dominicana
+                    option(value='DO' selected=(currentCountry==='DO') ? true : false) Dominican Republic
                     option(value='EC' selected=(currentCountry==='EC') ? true : false) Ecuador
                     option(value='EG' selected=(currentCountry==='EG') ? true : false) Egypt
                     option(value='SV' selected=(currentCountry==='SV') ? true : false) El Salvador
@@ -226,7 +226,7 @@ block content
                     option(value='TO' selected=(currentCountry==='TO') ? true : false) Tonga
                     option(value='TT' selected=(currentCountry==='TT') ? true : false) Trinidad and Tobago
                     option(value='TN' selected=(currentCountry==='TN') ? true : false) Tunisia
-                    option(value='TR' selected=(currentCountry==='TR') ? true : false) Turkiye
+                    option(value='TR' selected=(currentCountry==='TR') ? true : false) Turkey
                     option(value='TM' selected=(currentCountry==='TM') ? true : false) Turkmenistan
                     option(value='TV' selected=(currentCountry==='TV') ? true : false) Tuvalu
                     option(value='UG' selected=(currentCountry==='UG') ? true : false) Uganda
@@ -246,7 +246,7 @@ block content
 
               .col-12.col-lg-6.account-form-column
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='website') Sitio web
+                  label.form-label.account-form-label(for='website') Website
                   input#website.form-control.account-form-control(type='url' name='website' placeholder='URL' maxlength='200' value=(currentUser && currentUser.website) || '')
                 .mb-3.account-form-group
                   label.form-label.account-form-label(for='facebook') Facebook
@@ -280,34 +280,34 @@ block content
                     input#youtube.form-control.account-form-control(type='text' name='social[youtube]' maxlength='80' value=(currentUser && currentUser.social && currentUser.social.youtube) || '')
 
             .mt-3.account-form-actions
-              button.btn.btn-primary.account-form-submit(type='submit') Guardar cambios
+              button.btn.btn-primary.account-form-submit(type='submit') Save changes
 
         .tab-pane.account-tab-pane.account-tab-pane--photo.fade#tab-foto(role='tabpanel' aria-labelledby='tab-foto')
           .row.account-photo-row
             .col-12.col-md-6.account-form-column
               .mb-3.account-form-group.account-photo-preview-group
                 if currentUser && currentUser.profileImage
-                  img.img-fluid.rounded.account-photo-preview(src=currentUser.profileImage alt='Foto de perfil')
+                  img.img-fluid.rounded.account-photo-preview(src=currentUser.profileImage alt='profile photo')
                 else
                   .d-inline-flex.align-items-center.justify-content-center.bg-light.rounded.account-photo-placeholder
                     i.fas.fa-user.fa-3x.text-muted.account-photo-placeholder-icon
             .col-12.col-md-6.account-form-column
               form#accountPhotoForm.account-form.account-form-photo(action='/api/v1/users/me/profile-image' method='POST' enctype='multipart/form-data')
                 .mb-3.account-form-group
-                  label.form-label.account-form-label(for='profileImage') Subir nueva foto de perfil
+                  label.form-label.account-form-label(for='profileImage') Upload new profile photo
                   input#profileImage.form-control.account-form-control(type='file' name='profileImage' accept='image/*' required)
-                  small.form-text.text-muted.account-form-hint Se optimiza automáticamente (WebP, ancho máx. 1600px). Hasta 50MB.
+                  small.form-text.text-muted.account-form-hint It is automatically optimized (WebP, max. width 1600px). Up to 50MB.
                   small.form-text.d-flex.align-items-center.gap-2.mt-2.account-form-hint.account-form-hint-info
                     i.fas.fa-info-circle.account-form-info-icon
-                    span.account-form-hint-copy Usa una imagen nítida, bien encuadrada y de al menos 250px de ancho y alto para que tu perfil se vea correctamente.
+                    span.account-form-hint-copy Use a clear image, well framed and at least 250px wide and tall so that your profile is seen correctly.
                   .account-photo-cropper-helper.text-muted.small.mt-2
-                    strong Ajusta el recorte:&nbsp;
-                    | usa el recuadro para centrar tu rostro en un formato cuadrado.
+                    strong Adjust the crop: 
+                    | use the box to center your face in a square format.
                   .account-photo-cropper-wrapper.d-none#accountPhotoCropperWrapper
-                    img#accountPhotoCropperImg.img-fluid.rounded(alt='Vista previa del recorte' decoding='async' loading='lazy')
+                    img#accountPhotoCropperImg.img-fluid.rounded(alt='Crop preview' decoding='async' loading='lazy')
                 .mt-3.account-form-actions
-                  button.btn.btn-primary.account-form-submit(type='submit') Actualizar foto
-                  button.btn.btn-outline-danger.account-form-delete(type='submit' form='accountPhotoDeleteForm') Eliminar foto
+                  button.btn.btn-primary.account-form-submit(type='submit') Update photo
+                  button.btn.btn-outline-danger.account-form-delete(type='submit' form='accountPhotoDeleteForm') Delete photo
               form#accountPhotoDeleteForm.account-form.account-form-photo-delete(action='/api/v1/users/me/profile-image' method='POST')
                 input.account-form-hidden(type='hidden' name='profileImage' value='')
 
@@ -317,28 +317,28 @@ block content
           form#accountPasswordForm.account-form.account-form-password(action='/api/v1/users/update-password' method='POST')
             .row.g-3.account-form-row
               .col-12.col-md-6.account-form-column
-                label.form-label.account-form-label(for='currentPassword') contraseña actual
+                label.form-label.account-form-label(for='currentPassword') current password
                 .input-group.account-form-input-group.account-form-input-group--append.ox-password-reveal
                   input#currentPassword.form-control.account-form-control(type='password' name='currentPassword' required minlength='6')
-                  button.btn.btn-outline-secondary.account-form-toggle.ox-password-reveal-toggle(type='button' aria-label='Mostrar u ocultar contraseña' aria-pressed='false' title='Mostrar/ocultar')
+                  button.btn.btn-outline-secondary.account-form-toggle.ox-password-reveal-toggle(type='button' aria-label='Show or hide password' aria-pressed='false' title='Show/hide')
                     i.fas.fa-eye-slash.account-form-toggle-icon.ox-password-reveal-icon
               .col-12.col-md-6.account-form-column
-                label.form-label.account-form-label(for='newPassword') Nueva contraseña
+                label.form-label.account-form-label(for='newPassword') New password
                 .input-group.account-form-input-group.account-form-input-group--append.ox-password-reveal
                   input#newPassword.form-control.account-form-control(
                     type='password'
                     name='newPassword'
                     required
                     minlength='8'
-                    pattern='(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}'
-                    title='Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.'
+                    pattern='(?=.*[a-z])(?=.*[A-Z])(?=.*\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\d).{8,}'
+                    title='Debe have at least 8 characters, one uppercase letter, one lowercase letter and one number.'
                     autocomplete='new-password'
                   )
-                  button.btn.btn-outline-secondary.account-form-toggle.ox-password-reveal-toggle(type='button' aria-label='Mostrar u ocultar contraseña' aria-pressed='false' title='Mostrar/ocultar')
+                  button.btn.btn-outline-secondary.account-form-toggle.ox-password-reveal-toggle(type='button' aria-label='Show or hide password' aria-pressed='false' title='Show/hide')
                     i.fas.fa-eye-slash.account-form-toggle-icon.ox-password-reveal-icon
-                small.form-text.text-muted.mt-1 Contraseña de al menos 8 caracteres con una mayúscula, una minúscula y un número.
+                small.form-text.text-muted.mt-1 Password of at least 8 characters with one uppercase letter, one lowercase letter and one number.
             .mt-3.account-form-actions
-              button.btn.btn-primary.account-form-submit(type='submit') Cambiar contraseña
+              button.btn.btn-primary.account-form-submit(type='submit') Change password
 
 //- Scripts adicionales para esta vista
 block append scriptsExtra

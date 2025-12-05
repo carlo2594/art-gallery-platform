@@ -2,29 +2,29 @@ extends ../layouts/admin
 
 block content
   .container.py-5
-    h1.h3.mb-4 Panel de administrador
+    h1.h3.mb-4 Admin Dashboard
     if totals
       .row.mb-4
         .col-md-4
           .card.shadow-sm
             .card-body
-              h6.mb-1.text-muted Obras
+              h6.mb-1.text-muted Artworks
               .display-6= totals.artworks || 0
         .col-md-4
           .card.shadow-sm
             .card-body
-              h6.mb-1.text-muted Exposiciones
+              h6.mb-1.text-muted Exhibitions
               .display-6= totals.exhibitions || 0
         .col-md-4
           .card.shadow-sm
             .card-body
-              h6.mb-1.text-muted Usuarios
+              h6.mb-1.text-muted Users
               .display-6= totals.users || 0
 
     .row.g-3
       .col-auto
-        a.btn.btn-primary(href='/admin/artworks') Gestionar obras
+        a.btn.btn-primary(href='/admin/artworks') Manage artworks
       .col-auto
-        a.btn.btn-primary(href='/admin/exhibitions') Gestionar exposiciones
+        a.btn.btn-primary(href='/admin/exhibitions') Manage exhibitions
       .col-auto
-        a.btn.btn-primary(href='/admin/users') Gestionar usuarios
+        a.btn.btn-primary(href='/admin/users') Manage users

@@ -1,7 +1,7 @@
 // views/public/artists/_artistPagination.pug
 // Requiere: page, totalPages, q, (opcional: search, tab)
 if typeof page !== 'undefined' && typeof totalPages !== 'undefined' && totalPages > 1
-  - var navAttrs = { class: 'mt-4 mb-4 d-flex justify-content-center', id: 'pager-artistas', 'aria-label': 'Paginación artistas' };
+  - var navAttrs = { class: 'mt-4 mb-4 d-flex justify-content-center', id: 'pager-artists', 'aria-label': 'Pagination artists' };
   - if (typeof tab !== 'undefined') navAttrs['data-tab'] = tab;
   nav(&attributes(navAttrs))
     ul.pagination-ox.pagination-lg
@@ -11,7 +11,7 @@ if typeof page !== 'undefined' && typeof totalPages !== 'undefined' && totalPage
             ? `?q=${search || ''}&tab=${tab}&artistPage=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.name ? `&name=${q.name}` : ''}`
             : `?artistPage=${page-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.name ? `&name=${q.name}` : ''}`)
           aria-label="Anterior")
-          span(aria-hidden="true") &laquo;
+          span(aria-hidden="true") «
       - var startPage = Math.max(1, page - 2);
       - var endPage = Math.min(totalPages, page + 2);
       - if (endPage - startPage < 4) {
@@ -30,6 +30,6 @@ if typeof page !== 'undefined' && typeof totalPages !== 'undefined' && totalPage
           href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
             ? `?q=${search || ''}&tab=${tab}&artistPage=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.name ? `&name=${q.name}` : ''}`
             : `?artistPage=${page+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.name ? `&name=${q.name}` : ''}`)
-          aria-label="Siguiente")
-          span(aria-hidden="true") &raquo;
+          aria-label="Following")
+          span(aria-hidden="true") »
 

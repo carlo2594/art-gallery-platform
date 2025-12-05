@@ -3,23 +3,23 @@
   .modal-dialog.modal-dialog-centered
     .modal-content
       .modal-header
-        h1.modal-title.fs-5#purchaseInquiryLabel Consultar compra
-        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+        h1.modal-title.fs-5#purchaseInquiryLabel Consult purchase
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       form#purchaseInquiryForm
         .modal-body
           p.mb-3
-            | Se enviará un correo al artista con copia para ti. Podrán continuar la conversación por email para concretar detalles (precio final, envío y métodos de pago).
+            | An email will be sent to the artist with a copy for you. They can continue the conversation by email to specify details (final price, shipping and payment methods).
           input(type='hidden' name='artworkId' value=artwork._id)
           .mb-3
-            label.form-label(for='purchaseMessage') Mensaje opcional
-            textarea.form-control#purchaseMessage(name='message' rows='4' maxlength='800' placeholder='Mensaje para el artista (opcional)')
+            label.form-label(for='purchaseMessage') Optional message
+            textarea.form-control#purchaseMessage(name='message' rows='4' maxlength='800' placeholder='Message to the artist (optional)')
           .alert.alert-success.d-none#purchaseInquirySuccess(role='alert')
             i.fas.fa-circle-check.me-2
-            | Consulta enviada. Revisa tu correo.
+            | Query sent. Check your email.
           .alert.alert-danger.d-none#purchaseInquiryError(role='alert')
             i.fas.fa-triangle-exclamation.me-2
-            | Ocurrió un error al enviar. Intenta de nuevo.
+            | An error occurred while sending. Try again.
         .modal-footer
-          button.btn.btn-light(type='button' data-bs-dismiss='modal') Cancelar
-          button.btn.btn-primary#purchaseInquirySubmit(type='submit') Enviar consulta
+          button.btn.btn-light(type='button' data-bs-dismiss='modal') Cancel
+          button.btn.btn-primary#purchaseInquirySubmit(type='submit') Send inquiry
 

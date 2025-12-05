@@ -7,13 +7,13 @@ block content
         .card.border-0.shadow-sm
           .card-body.p-5.text-center
             i.fas.fa-lock.fa-3x.text-warning.mb-3
-            h1.h4.fw-bold.mb-2 Acceso no autorizado
+            h1.h4.fw-bold.mb-2 Unauthorized access
             if message
               p.text-muted.mb-4= message
             else
-              p.text-muted.mb-4 No tienes permiso para ver esta página.
+              p.text-muted.mb-4 You do not have permission to view this page.
             .d-flex.justify-content-center.gap-2
-              a.btn.btn-outline-primary.ox-back-btn(href='/' aria-label='Volver') Volver
+              a.btn.btn-outline-primary.ox-back-btn(href='/' aria-label='Return') Return
               if !currentUser
-                a.btn.btn-outline-secondary(href='/login' aria-label='Iniciar sesión') Iniciar sesión
+                a.btn.btn-outline-secondary(href='/login' aria-label='Login') Login
 

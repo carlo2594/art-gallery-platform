@@ -3,8 +3,8 @@ extends /layouts/public
 block content
   section.page-header.py-4
     .container
-      h2.h3.mb-1 Artistas
-      p.text-muted.mb-0 Explora todos los artistas registrados en la galería.
+      h2.h3.mb-1 Artists
+      p.text-muted.mb-0 Explore all artists registered in the gallery.
 
   .container-xxl.my-4
     // Filtros de artistas
@@ -20,8 +20,8 @@ block content
           include /public/artists/_artistGrid.pug
           - var page = typeof page !== 'undefined' ? page : 1;
           - var totalPages = typeof totalPages !== 'undefined' ? totalPages : 1;
-          - var tab = 'artistas';
+          - var tab = 'artists';
           include /public/artists/_artistPagination.pug
       else
-        h3.h5.mt-4.text-muted No se encontraron artistas.
+        h3.h5.mt-4.text-muted No artists found.
 

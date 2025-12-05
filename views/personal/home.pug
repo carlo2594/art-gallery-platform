@@ -7,44 +7,44 @@ block content
   .container.py-4
     // Saludo simple
     .d-flex.align-items-center.mb-4.gap-3
-      - const uname = (locals.currentUser && (locals.currentUser.firstName || locals.currentUser.name)) || 'Artista'
+      - const uname = (locals.currentUser && (locals.currentUser.firstName || locals.currentUser.name)) || 'Artist'
       .avatar-circle.d-flex.align-items-center.justify-content-center(style="width:64px;height:64px;border-radius:50%;background:#EEE;color:#555;font-weight:700")
         = uname.charAt(0).toUpperCase()
       .flex-grow-1
-        h2.mb-0 Bienvenido de nuevo, #{uname}
-        p.text-muted.mb-0 Explora novedades y retoma donde lo dejaste
+        h2.mb-0 Welcome back, #{uname}
+        p.text-muted.mb-0 Explore what's new and pick up where you left off
 
     // Obras recientes (prioridad alta)
     section.mb-5
       .d-flex.align-items-center.justify-content-between.mb-2
-        h3.mb-0 Obras recientes
-        a.btn.btn-sm.btn-outline-secondary(href="/artworks") Ver todo
+        h3.mb-0 Recent works
+        a.btn.btn-sm.btn-outline-secondary(href="/artworks") See all
       if recentWorks && recentWorks.length
         - var artworks = recentWorks.slice(0, 6)
         - var gridId = 'grid-recent'
         - var firstEagerCount = 2
         include /public/artworks/_artworkGrid.pug
       else
-        p.text-muted Aún no hay obras recientes.
+        p.text-muted There are no recent works yet.
 
     // Populares (prioridad media/baja)
     section.mb-5
       .d-flex.align-items-center.justify-content-between.mb-2
-        h3.mb-0 Populares esta semana
-        a.btn.btn-sm.btn-outline-secondary(href="/artworks?sort=popular") Ver todo
+        h3.mb-0 Popular this week
+        a.btn.btn-sm.btn-outline-secondary(href="/artworks?sort=popular") See all
       if popularWorks && popularWorks.length
         - var artworks = popularWorks.slice(0, 6)
         - var gridId = 'grid-popular'
         - var firstEagerCount = 0
         include /public/artworks/_artworkGrid.pug
       else
-        p.text-muted Sin datos populares por ahora.
+        p.text-muted No popular data for now.
 
     // Exposiciones próximas
     section.mb-5
       .d-flex.align-items-center.justify-content-between.mb-2
-        h3.mb-0 Próximas exposiciones
-        a.btn.btn-sm.btn-outline-secondary(href="/exhibitions") Ver todo
+        h3.mb-0 Upcoming exhibitions
+        a.btn.btn-sm.btn-outline-secondary(href="/exhibitions") See all
       if upcomingExhibitions && upcomingExhibitions.length
         - var exs = upcomingExhibitions.slice(0, 3)
         - var carouselId = 'carouselExhibitions'
@@ -73,7 +73,7 @@ block content
                               hr.my-2.opacity-50
                               .row.g-3
                                 .col-12.col-lg-6
-                                  .small.text-white-75.mb-1 Fechas
+                                  .small.text-white-75.mb-1 Dates
                                   - let sD = ex.startDate ? new Date(ex.startDate) : null
                                   - let eD = ex.endDate ? new Date(ex.endDate) : null
                                   - if (sD && isNaN(sD.getTime())) sD = null
@@ -94,16 +94,16 @@ block content
                                   -   }
                                   -   return ''
                                   - })()
-                                  .h6.mb-0= rangeText || 'Por definir'
+                                  .h6.mb-0= rangeText || 'To be defined'
                                 .col-12.col-lg-6
-                                  .small.text-white-75.mb-1 Lugar
+                                  .small.text-white-75.mb-1 Place
                                   .h6.mb-0.exhibition-detail__venue
                                     if ex.location && (ex.location.address || ex.location.url)
-                                      span.text-white= ex.location.address || 'Exposición virtual'
+                                      span.text-white= ex.location.address || 'Virtual exhibition'
                                     else if ex.location && ex.location.type
-                                      span.text-white= ex.location.type === 'virtual' ? 'Exposición virtual' : 'Por definir'
+                                      span.text-white= ex.location.type === 'virtual' ? 'Virtual exhibition': 'To be defined'
                                     else
-                                      span.text-white Por definir
+                                      span.text-white To be defined
                         //- Se omite la lista de artistas en el carrusel de home para simplificar
             if exs.length > 1
               button.carousel-control-prev(type='button', data-bs-target=`#${carouselId}`, data-bs-slide='prev')
@@ -111,15 +111,15 @@ block content
                 span.visually-hidden Anterior
               button.carousel-control-next(type='button', data-bs-target=`#${carouselId}`, data-bs-slide='next')
                 span.carousel-control-next-icon(aria-hidden='true')
-                span.visually-hidden Siguiente
+                span.visually-hidden Following
       else
-        p.text-muted No hay exposiciones próximas.
+        p.text-muted There are no upcoming exhibitions.
 
     // Artistas destacados
     section.mb-4
       .d-flex.align-items-center.justify-content-between.mb-2
-        h3.mb-0 Artistas destacados
-        a.btn.btn-sm.btn-outline-secondary(href="/artists") Ver todos
+        h3.mb-0 Featured artists
+        a.btn.btn-sm.btn-outline-secondary(href="/artists") See all
       if featuredArtists && featuredArtists.length
         .row.row-cols-2.row-cols-md-4.row-cols-lg-6.g-3
           each a in featuredArtists
@@ -131,6 +131,6 @@ block content
                   .rounded-circle.mb-2.d-inline-flex.align-items-center.justify-content-center(style='width:80px;height:80px;background:#EEE;color:#666;font-weight:700')= (a.name||'A').charAt(0).toUpperCase()
                 div.fw-semibold= a.name
                 if typeof a.followersCount !== 'undefined'
-                  div.text-muted.small #{a.followersCount} seguidores
+                  div.text-muted.small #{a.followersCount} followers
       else
-        p.text-muted Pronto destacaremos artistas aquí.
+        p.text-muted We will soon be highlighting artists here.

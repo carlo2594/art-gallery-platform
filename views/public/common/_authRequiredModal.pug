@@ -3,8 +3,8 @@
 //- ParÃ¡metros opcionales: modalId, title, message, returnTo, loginHref, signupHref
 
 - var _id        = typeof modalId !== 'undefined' ? modalId : 'authRequiredModal'
-- var _title     = typeof title !== 'undefined' ? title : 'Necesitas iniciar sesión'
-- var _message   = typeof message !== 'undefined' ? message : 'Para continuar, inicia sesión o regístrate.'
+- var _title     = typeof title !== 'undefined' ? title : 'You need to log in'
+- var _message   = typeof message !== 'undefined' ? message : 'To continue, log in or register.'
 - var _returnTo  = typeof returnTo !== 'undefined' ? returnTo : '/'
 - var _loginHref = typeof loginHref !== 'undefined' ? loginHref : '/login'
 - var _signupHref= typeof signupHref !== 'undefined' ? signupHref : '/signup'
@@ -14,18 +14,18 @@
     .modal-content
       .modal-header
         h1.modal-title.fs-5(id=`${_id}Label`)= _title
-        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         p.mb-0= _message
       .modal-footer
         a.btn.btn-outline-secondary(href=`${_signupHref}?returnTo=${encodeURIComponent(_returnTo)}`)
           i.fas.fa-user-plus.me-2
-          | Registrarme
+          | Register
         a.btn.btn-primary(href=`${_loginHref}?returnTo=${encodeURIComponent(_returnTo)}`)
           i.fas.fa-right-to-bracket.me-2
-          | Iniciar sesión
+          | Login
         button.btn.btn-light(type='button' data-bs-dismiss='modal')
-          | Cancelar
+          | Cancel
 
 
 

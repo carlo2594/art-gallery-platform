@@ -7,17 +7,17 @@ block content
       .row
         .col-md-6
           dl
-            dt Correo
+            dt Mail
             dd= user.email
-            dt Rol
+            dt Role
             dd= user.role
-            dt Activo
-            dd= (user.active === false ? 'No' : 'Sí')
-            dt Creado
+            dt Asset
+            dd= (user.active === false ? 'No' : 'Yes')
+            dt Created
             dd= new Date(user.createdAt).toLocaleDateString('es-ES')
         .col-md-6
           if user.profileImage
-            img.img-fluid.rounded(src=user.profileImage alt='Foto de perfil')
+            img.img-fluid.rounded(src=user.profileImage alt='profile photo')
     else
-      .alert.alert-warning Usuario no encontrado
+      .alert.alert-warning User not found
 

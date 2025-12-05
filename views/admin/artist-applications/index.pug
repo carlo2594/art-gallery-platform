@@ -2,42 +2,42 @@ extends /layouts/admin
 
 block content
   .container.py-5
-    h1.h3.mb-4 Solicitudes de artista
+    h1.h3.mb-4 Artist Requests
 
     // Filtros de búsqueda
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
-        input.form-control(type='text', name='q', placeholder='Buscar por nombre o correo', value=q || '')
+        input.form-control(type='text', name='q', placeholder='Search by name or email', value=q || '')
       .col-sm-6.col-md-3
         select.form-select(name='status')
-          option(value='') Estado: Todos
-          option(value='pending' selected=status === 'pending') Pendiente
-          option(value='under_review' selected=status === 'under_review') En revisión
-          option(value='approved' selected=status === 'approved') Aprobada
-          option(value='rejected' selected=status === 'rejected') Rechazada
+          option(value='') Status: All
+          option(value='pending' selected=status === 'pending') Earring
+          option(value='under_review' selected=status === 'under_review') Under review
+          option(value='approved' selected=status === 'approved') Approved
+          option(value='rejected' selected=status === 'rejected') Rejected
       .col-sm-6.col-md-3
         select.form-select(name='sort')
-          option(value='recent' selected=!sort || sort === 'recent') Recientes primero
-          option(value='oldest' selected=sort === 'oldest') Antiguas primero
+          option(value='recent' selected=!sort || sort === 'recent') Recent first
+          option(value='oldest' selected=sort === 'oldest') Old first
       .col-auto
-        button.btn.btn-primary(type='submit') Buscar
+        button.btn.btn-primary(type='submit') Search
       if q || status || (sort && sort !== 'recent')
         .col-auto
-          a.btn.btn-outline-secondary(href='?') Limpiar
+          a.btn.btn-outline-secondary(href='?') Clean
 
     if applications && applications.length
       .table-responsive
         table.table.table-striped.table-hover.align-middle
           thead
             tr
-              th Artista
-              th Correo
-              th Enlaces
+              th Artist
+              th Mail
+              th Links
               th CV
               th Statement
-              th Estado
-              th Creada
-              th Acciones
+              th State
+              th Created
+              th Actions
           tbody
             each a in applications
               - const u = a.user || {}
@@ -63,7 +63,7 @@ block content
                 td
                   a.btn.btn-sm.btn-outline-secondary(href=`/admin/artist-applications/${a._id}/download`)
                     i.fas.fa-file-arrow-down.me-1
-                    | Descargar CV
+                    | Download CV
                 // Columna Statement (wrap + altura máx + scroll)
                 td
                   - const st = String(a.statement || '')
@@ -79,25 +79,25 @@ block content
                   form.d-flex.gap-2.flex-wrap(action=`/admin/artist-applications/${a._id}/status` method='POST')
                     input(type='hidden', name='redirect', value=`/admin/artist-applications?page=${page}${qsPrefix || ''}`)
                     select.form-select.form-select-sm(name='status')
-                      option(value='pending' selected=a.status === 'pending') Pendiente
-                      option(value='under_review' selected=a.status === 'under_review') En revisión
-                      option(value='approved' selected=a.status === 'approved') Aprobar
-                      option(value='rejected' selected=a.status === 'rejected') Rechazar
-                    input.form-control.form-control-sm(type='text', name='adminNotes', placeholder='Notas (opcional)', value=a.adminNotes || '')
+                      option(value='pending' selected=a.status === 'pending') Earring
+                      option(value='under_review' selected=a.status === 'under_review') Under review
+                      option(value='approved' selected=a.status === 'approved') Approve
+                      option(value='rejected' selected=a.status === 'rejected') Decline
+                    input.form-control.form-control-sm(type='text', name='adminNotes', placeholder='Notes (optional)', value=a.adminNotes || '')
                     button.btn.btn-sm.btn-outline-primary(type='submit')
                       i.fas.fa-floppy-disk.me-1
-                      | Guardar
+                      | Keep
     else
-      .alert.alert-info No hay solicitudes
+      .alert.alert-info There are no requests
 
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label='Paginación de solicitudes')
+      nav.mt-4(aria-label='Request pagination')
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `Page ${page} of ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
-            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Following') Following

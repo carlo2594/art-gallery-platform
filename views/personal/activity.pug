@@ -4,18 +4,18 @@ block content
   .container.py-4
     // Encabezado
     .d-flex.align-items-center.mb-4.gap-3
-      - const uname = (locals.currentUser && (locals.currentUser.firstName || locals.currentUser.name)) || 'Artista'
+      - const uname = (locals.currentUser && (locals.currentUser.firstName || locals.currentUser.name)) || 'Artist'
       .avatar-circle.d-flex.align-items-center.justify-content-center(style="width:64px;height:64px;border-radius:50%;background:#EEE;color:#555;font-weight:700")
         = uname.charAt(0).toUpperCase()
       .flex-grow-1
-        h2.mb-0 Tu actividad
-        p.text-muted.mb-0 Un vistazo a lo que viste, te gustó y a quién sigues
+        h2.mb-0 Your activity
+        p.text-muted.mb-0 A look at what you watched, liked and who you follow
 
     // Obras vistas recientemente
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
-        h3.mb-0 Obras vistas recientemente
-        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=views') Ver más
+        h3.mb-0 Recently viewed works
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=views') See more
       if recentViewedArtworks && recentViewedArtworks.length
         .activity-max.activity-inline-grid
           - var artworks = recentViewedArtworks.slice(0, 3)
@@ -23,13 +23,13 @@ block content
           - var firstEagerCount = 2
           include /public/artworks/_artworkGrid.pug
       else
-        p.text-muted Aún no hay actividad de vistas recientes.
+        p.text-muted There is no recent views activity yet.
 
     // Tus me gusta
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
-        h3.mb-0 Tus me gusta
-        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=likes') Ver más
+        h3.mb-0 your likes
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/works?tab=likes') See more
       if likedArtworks && likedArtworks.length
         .activity-max.activity-inline-grid
           - var artworks = likedArtworks.slice(0, 3)
@@ -37,13 +37,13 @@ block content
           - var firstEagerCount = 0
           include /public/artworks/_artworkGrid.pug
       else
-        p.text-muted Todavía no marcaste obras como favoritas.
+        p.text-muted You have not yet marked works as favorites.
 
     // Artistas que sigues
     section.mb-5.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
-        h3.mb-0 Artistas que sigues
-        a.btn.btn-sm.btn-outline-secondary(href='/activity/artists') Ver más
+        h3.mb-0 Artists you follow
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/artists') See more
       if followedArtists && followedArtists.length
         .activity-max
           - var artists = followedArtists.slice(0, 5)
@@ -56,15 +56,15 @@ block content
                   .rounded-circle.mb-2.d-inline-flex.align-items-center.justify-content-center(style='width:80px;height:80px;background:#EEE;color:#666;font-weight:700')= (a.name||'A').charAt(0).toUpperCase()
                 div.fw-semibold= a.name
                 if typeof a.followersCount !== 'undefined'
-                  div.text-muted.small #{a.followersCount} seguidores
+                  div.text-muted.small #{a.followersCount} followers
       else
-        p.text-muted Aún no sigues a ningún artista.
+        p.text-muted You don't follow any artists yet.
 
     // Exposiciones relacionadas a tus vistas
     section.mb-3.activity-section
       .d-flex.align-items-center.justify-content-between.mb-4
-        h3.mb-0 Exposiciones vistas recientemente
-        a.btn.btn-sm.btn-outline-secondary(href='/activity/exhibitions') Ver más
+        h3.mb-0 Recently viewed exhibitions
+        a.btn.btn-sm.btn-outline-secondary(href='/activity/exhibitions') See more
       if recentExhibitions && recentExhibitions.length
         .activity-max
           - var exs = recentExhibitions.slice(0, 3)
@@ -78,4 +78,4 @@ block content
                     i.fas.fa-image
                 .activity-exhibition-title= ex.title
       else
-        p.text-muted Aún no hay exposiciones recientes para mostrar.
+        p.text-muted There are no recent exhibitions to show yet.

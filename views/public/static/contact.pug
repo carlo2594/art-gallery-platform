@@ -5,28 +5,28 @@ block content
     .container
       .row.justify-content-center
         .col-lg-8
-          h1.display-4.fw-bold.mb-4 Contáctanos
+          h1.display-4.fw-bold.mb-4 Contact us
           if success
-            .alert.alert-success(role='alert') Tu mensaje fue enviado. Te responderemos pronto.
+            .alert.alert-success(role='alert') Your message has been sent. We will reply to you soon.
           if error
             .alert.alert-danger(role='alert')= error
-          p.lead.mb-4 Si tienes preguntas o deseas ponerte en contacto con Galería del Ox, escríbenos a nuestro correo de soporte.
+          p.lead.mb-4 If you have questions or want to contact Galería del Ox, write to us at our support email.
 
           .contact-info.mb-4
-            span.contact-label Correo:
-            a.contact-email-link(href="mailto:soporte@galeriadelox.com" aria-label="Enviar correo a soporte@galeriadelox.com") soporte@galeriadelox.com
+            span.contact-label Mail:
+            a.contact-email-link(href="mailto:soporte@galeriadelox.com" aria-label="Send email to support@galeriadelox.com") soporte@galeriadelox.com
 
-          h2.h5.mt-5.mb-3 Envíanos un mensaje
+          h2.h5.mt-5.mb-3 Send us a message
           form(action="/api/v1/contact" method="POST")
             //- Honeypot anti-spam
             input.honeypot-field(type='text' name='company' tabindex='-1' autocomplete='off' aria-hidden='true')
             .mb-3
-              label.form-label(for="name") Nombre
+              label.form-label(for="name") Name
               input#name.form-control(type="text" name="name" required value=formData && formData.name)
             .mb-3
-              label.form-label(for="email") Correo electrónico
+              label.form-label(for="email") Email
               input#email.form-control(type="email" name="email" required value=formData && formData.email)
             .mb-3
-              label.form-label(for="message") Mensaje
+              label.form-label(for="message") Message
               textarea#message.form-control(name="message" rows="5" required)= (formData && formData.message) || ''
-            button.btn.btn-primary(type="submit") Enviar mensaje
+            button.btn.btn-primary(type="submit") Send message

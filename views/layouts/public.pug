@@ -1,16 +1,16 @@
 //- views/layouts/public.pug
 doctype html
-html.no-js(lang='es')
+html.no-js(lang='en')
   head
-    title #{title || 'Galería del Ox'}
+    title #{title || 'Ox Gallery'}
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible' content='IE=edge,chrome=1')
     meta(name='viewport' content='width=device-width, initial-scale=1')
 
     //- SEO base
-    - var __siteName = 'Galería del Ox'
+    - var __siteName = 'Ox Gallery'
     - var __metaTitle = (typeof metaTitle !== 'undefined' && metaTitle) ? metaTitle : (title || __siteName)
-    - var __defaultDesc = 'Galería del Ox: un espacio vivo de inspiración, expresión y conexión. Arte original, exposiciones y comunidad.'
+    - var __defaultDesc = 'Ox Gallery: a living space of inspiration, expression and connection. Original art, exhibitions and community.'
     - var __metaDescription = (typeof metaDescription !== 'undefined' && metaDescription) ? metaDescription : __defaultDesc
     meta(name='description' content=__metaDescription)
 
@@ -53,7 +53,7 @@ html.no-js(lang='es')
     meta(property='og:url' content=__metaUrl)
     meta(property='og:type' content=__metaType)
     meta(property='og:site_name' content=__siteName)
-    meta(property='og:locale' content='es_ES')
+    meta(property='og:locale' content='en_US')
 
     meta(name='twitter:card' content='summary_large_image')
     meta(name='twitter:title' content=__metaTitle)
@@ -67,16 +67,16 @@ html.no-js(lang='es')
     if !hideGlobalOverlay
       #page-loading-overlay.page-loading-overlay
         .loading-spinner
-        .loading-text Cargando…
+        .loading-text Loading…
 
     if !hideNavbar
       //- Navbar: Expande a partir de lg (colapsa < 992px)
-      nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Navbar principal')
+      nav.navbar.navbar-expand-xxl.main-navbar(aria-label='Primary navigation')
         .container-fluid.navbar-container
           //- Marca (logo + título)
           a.navbar-brand.d-flex.align-items-center.navbar-logo-link.order-1(href='/')
-            img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Galería del Ox')
-            h1.ms-1.text-uppercase.fw-bold.navbar-title Galería del Ox
+            img.logo-navbar(src='/Logos/GOX_LOGO_06.png' alt='Ox Gallery')
+            h1.ms-1.text-uppercase.fw-bold.navbar-title Ox Gallery
 
           //- Contenido colapsable (buscador + links)
           .collapse.navbar-collapse#navbarsExample05.text-center.order-3.order-lg-2
@@ -85,35 +85,35 @@ html.no-js(lang='es')
               action='/search'
               method='GET'
               role='search'
-              aria-label='Buscar')
+              aria-label='Search')
               input.form-control.searchbar-input(
                 type='search'
                 name='q'
-                placeholder='Buscar'
-                aria-label='Buscar')
+                placeholder='Search'
+                aria-label='Search')
 
             //- Links principales — centrados en mobile, a la derecha en desktop
             ul.navbar-nav.navbar-links.mx-auto.mx-lg-0.ms-lg-auto.mb-2.mb-lg-0.fs-5
               li.nav-item
-                a.nav-link.me-lg-3(href='/artworks') Obras
+                a.nav-link.me-lg-3(href='/artworks') Artworks
               li.nav-item
-                a.nav-link.me-lg-3(href='/artists') Artistas
+                a.nav-link.me-lg-3(href='/artists') Artists
               li.nav-item
-                a.nav-link.me-lg-3(href='/exhibitions') Exposiciones
+                a.nav-link.me-lg-3(href='/exhibitions') Exhibitions
 
               if currentUser && currentUser.role === 'artist'
                 li.nav-item
-                  a.nav-link.me-lg-3(href='/artists/panel' aria-label='Panel de artista') Panel de artista
+                  a.nav-link.me-lg-3(href='/artists/panel' aria-label='Artist dashboard') Artist dashboard
 
               if currentUser
                 li.nav-item
-                  a.nav-link.me-lg-3(href='/activity') Actividad
+                  a.nav-link.me-lg-3(href='/activity') Activity
 
               if !currentUser
                 li.nav-item
-                  a.nav-link(href='/login' aria-label='Iniciar sesión') Iniciar sesión
-                li.nav-item
-                  a.nav-link.nav-link-registrarse(href='/signup' aria-label='Registrarse') Registrarse
+                  a.nav-link(href='/login' aria-label='Log in') Log in
+              li.nav-item
+                  a.nav-link.nav-link-registrarse(href='/signup' aria-label='Sign up') Sign up
 
           //- Iconos (avatar + hamburguesa) agrupados a la derecha
           .navbar-icons.d-flex.align-items-center.ms-auto.order-2.order-lg-3
@@ -125,11 +125,11 @@ html.no-js(lang='es')
                   role='button'
                   data-bs-toggle='dropdown'
                   aria-expanded='false'
-                  aria-label='Menú de usuario')
+                  aria-label='User menu')
                   if currentUser && currentUser.profileImage
                     img.nav-user-avatar-img.rounded-circle(
                       src=currentUser.profileImage
-                      alt=currentUser.name || 'Foto de perfil'
+                      alt=currentUser.name || 'Profile photo'
                       width='40'
                       height='40'
                       loading='lazy'
@@ -141,17 +141,17 @@ html.no-js(lang='es')
                   li
                     a.dropdown-item.nav-user-menu-link.mb-2(
                       href='/edit-profile'
-                      aria-label='Editar cuenta') Editar cuenta
+                      aria-label='Edit account') Edit account
                   if currentUser && currentUser.role === 'admin'
                     li
                       a.dropdown-item.nav-user-menu-link.mb-2(
                         href='/admin'
-                        aria-label='Panel de administrador') Panel de administrador
+                        aria-label='Admin dashboard') Admin dashboard
                   li
                     hr.dropdown-divider.my-2
                   li
                     form(action='/api/v1/auth/logout' method='POST')
-                      button.dropdown-item(type='submit' aria-label='Cerrar sesión') Cerrar sesión
+                      button.dropdown-item(type='submit' aria-label='Sign out') Sign out
 
               //- Mobile: menú tipo hamburguesa con las opciones de usuario
               button.nav-link.nav-user-avatar.nav-user-avatar-btn.d-flex.d-xxl-none.border-0.bg-transparent.p-0#userMenuMobileToggle(
@@ -160,11 +160,11 @@ html.no-js(lang='es')
                 data-bs-target='#navUserMobile'
                 aria-controls='navUserMobile'
                 aria-expanded='false'
-                aria-label='Menú de usuario')
+                aria-label='User menu')
                 if currentUser && currentUser.profileImage
                   img.nav-user-avatar-img.rounded-circle(
                     src=currentUser.profileImage
-                    alt=currentUser.name || 'Foto de perfil'
+                    alt=currentUser.name || 'Profile photo'
                     width='40'
                     height='40'
                     loading='lazy'
@@ -180,7 +180,7 @@ html.no-js(lang='es')
               data-bs-target='#navbarsExample05'
               aria-controls='navbarsExample05'
               aria-expanded='false'
-              aria-label='Abrir menú')
+              aria-label='Open menu')
               span.navbar-toggler-icon
 
       //- Menú de usuario mobile (estilo hamburguesa)
@@ -190,17 +190,17 @@ html.no-js(lang='es')
             li.nav-item
               a.nav-link.nav-user-menu-link(
                 href='/edit-profile'
-                aria-label='Editar cuenta') Editar cuenta
+                aria-label='Edit account') Edit account
             if currentUser && currentUser.role === 'admin'
               li.nav-item
                 a.nav-link.nav-user-menu-link(
                   href='/admin'
-                  aria-label='Panel de administrador') Panel de administrador
+                  aria-label='Admin dashboard') Admin dashboard
             li.nav-item.mt-2
               form(action='/api/v1/auth/logout' method='POST')
                 button.btn.btn-outline-danger.nav-user-logout-btn(
                   type='submit'
-                  aria-label='Cerrar sesión') Cerrar sesión
+                  aria-label='Log out') Log out
 
       .main-content
         block content
@@ -210,84 +210,84 @@ html.no-js(lang='es')
       #navMainOverlay.lightbox.nav-overlay(
         role='dialog'
         aria-modal='true'
-        aria-label='Menú de navegación')
+        aria-label='Navigation menu')
         button.lightbox__close.nav-overlay__close(
           type='button'
-          aria-label='Cerrar menú de navegación')
+          aria-label='Close navigation menu')
           svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
             path(
               d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
               fill='currentColor')
-          span.sr-only Cerrar
+          span.sr-only Close
         .lightbox__inner.nav-overlay__inner
           .nav-overlay__content
             form.nav-overlay__search-form(
               action='/search'
               method='GET'
               role='search'
-              aria-label='Buscar')
+              aria-label='Search')
               input.form-control.nav-overlay__search-input(
                 type='search'
                 name='q'
-                placeholder='Buscar'
-                aria-label='Buscar')
+                placeholder='Search'
+                aria-label='Search')
             ul.nav-overlay__list
               li
-                a.nav-overlay__link(href='/artworks') Obras
+                a.nav-overlay__link(href='/artworks') Artworks
               li
-                a.nav-overlay__link(href='/artists') Artistas
+                a.nav-overlay__link(href='/artists') Artists
               li
-                a.nav-overlay__link(href='/exhibitions') Exposiciones
+                a.nav-overlay__link(href='/exhibitions') Exhibitions
               if currentUser && currentUser.role === 'artist'
                 li
                   a.nav-overlay__link(
                     href='/artists/panel'
-                    aria-label='Panel de artista') Panel de artista
+                    aria-label='Artist dashboard') Artist dashboard
               if currentUser
                 li
                   a.nav-overlay__link(
                     href='/activity'
-                    aria-label='Actividad reciente') Actividad
+                    aria-label='Recent activity') Activity
               if !currentUser
                 li
                   a.nav-overlay__link(
                     href='/login'
-                    aria-label='Iniciar sesión') Iniciar sesión
+                    aria-label='Log in') Log in
                 li
                   a.nav-overlay__link(
                     href='/signup'
-                    aria-label='Registrarse') Registrarse
+                    aria-label='Sign up') Sign up
 
       if currentUser
         #navUserOverlay.lightbox.nav-overlay(
           role='dialog'
           aria-modal='true'
-          aria-label='Menú de usuario')
+          aria-label='User menu')
           button.lightbox__close.nav-overlay__close(
             type='button'
-            aria-label='Cerrar menú de usuario')
+            aria-label='Close user menu')
             svg(viewBox='0 0 24 24' fill='none' aria-hidden='true')
               path(
                 d='M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 0 1-1.4-1.4l4.9-4.9-4.9-4.9A1 1 0 1 1 7.1 4.3L12 9.2l4.9-4.9a1 1 0 0 1 1.4 0Z'
                 fill='currentColor')
-            span.sr-only Cerrar
+            span.sr-only Close
           .lightbox__inner.nav-overlay__inner
             .nav-overlay__content
               ul.nav-overlay__list
                 li
                   a.nav-overlay__link(
                     href='/edit-profile'
-                    aria-label='Editar cuenta') Editar cuenta
+                    aria-label='Edit account') Edit account
                 if currentUser && currentUser.role === 'admin'
                   li
                     a.nav-overlay__link(
                       href='/admin'
-                      aria-label='Panel de administrador') Panel de administrador
+                      aria-label='Admin dashboard') Admin dashboard
                 li
                   form(action='/api/v1/auth/logout' method='POST')
                     button.btn.btn-outline-danger.nav-user-logout-btn(
                       type='submit'
-                      aria-label='Cerrar sesión') Cerrar sesión
+                      aria-label='Log out') Log out
 
     //- Footer opcional
     if !hideFooter

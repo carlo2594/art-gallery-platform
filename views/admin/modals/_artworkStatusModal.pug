@@ -3,45 +3,45 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title(id=`adminStatusArtworkLabel-${a._id}`) Cambiar estado — #{a.title}
+        h5.modal-title(id=`adminStatusArtworkLabel-${a._id}`) Change status — #{a.title}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       form.admin-status-artwork-form(data-artwork-id=a._id data-initial-status=(a.status || 'draft'))
         .modal-body
           .mb-2
-            small.text-muted Estado actual:
+            small.text-muted Current status:
             - const _st = a.status || 'draft'
             div
               span.badge(class=(_st === 'approved' ? 'text-bg-success' : (_st === 'submitted' ? 'text-bg-warning' : (_st === 'rejected' ? 'text-bg-danger' : 'text-bg-secondary'))))= _st
           .mt-3
-            label.form-label Nuevo estado
+            label.form-label New status
             .list-group
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='draft', checked=_st==='draft')
-                | Borrador
+                | Eraser
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='submitted', checked=_st==='submitted')
-                | Enviado
-              //- Estado "En revisión" removido del flujo
+                | Sent
+              //- Estado "Under review" removido del flujo
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='approved', checked=_st==='approved')
-                | Aprobado
+                | Approved
               label.list-group-item
                 input.form-check-input.me-1(type='radio', name='status', value='rejected', checked=_st==='rejected')
-                | Rechazado
+                | Refused
           .mt-3
-            label.form-label(for=`rejectReason2-${a._id}`) Motivo del rechazo (solo si "Rechazado")
+            label.form-label(for=`rejectReason2-${a._id}`) Reason for rejection (only if "Rejected")
             textarea.form-control(
               id=`rejectReason2-${a._id}`
               name='reason'
               rows='3'
-              placeholder='Describe el motivo...'
+              placeholder='Describe the reason...'
               maxlength=(rejectReasonLimit || 100)
               data-reject-limit=(rejectReasonLimit || 100)
               data-reject-counter=`rejectCounterStatus-${a._id}`
             )
             small.text-muted
               span(id=`rejectCounterStatus-${a._id}`)= rejectReasonLimit || 100
-              |  caracteres disponibles. Si eliges "Rechazado", este texto se enviará al artista.
+              |  available characters. If you choose "Rejected", this text will be sent to the artist.
         .modal-footer
-          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-          button.btn.btn-primary(type='submit') Guardar estado
+          button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+          button.btn.btn-primary(type='submit') Save status

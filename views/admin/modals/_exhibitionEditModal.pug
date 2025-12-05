@@ -3,7 +3,7 @@
   .modal-dialog.modal-lg
     .modal-content
       .modal-header
-        h5.modal-title(id=`adminEditExhibitionLabel-${e._id}`) Editar exposicion - #{e.title || e.name}
+        h5.modal-title(id=`adminEditExhibitionLabel-${e._id}`) Edit exhibition - #{e.title || e.name}
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         // Formulario principal (sin inputs de archivo)
@@ -11,61 +11,61 @@
           // Basicos
           .row.g-3
             .col-md-8
-              label.form-label Titulo
+              label.form-label title
               input.form-control(type='text', name='title', value=e.title || e.name)
             .col-md-4
-              label.form-label Estado
+              label.form-label State
               select.form-select(name='status')
-                option(value='draft' selected=(e.status||'draft')==='draft') Borrador
-                option(value='published' selected=e.status==='published') Publicada
-                option(value='archived' selected=e.status==='archived') Archivada
+                option(value='draft' selected=(e.status||'draft')==='draft') Eraser
+                option(value='published' selected=e.status==='published') Published
+                option(value='archived' selected=e.status==='archived') Archived
           .mb-3
-            label.form-label Descripcion
+            label.form-label Description
             textarea.form-control(name='description' rows='3')= e.description || ''
           // Ubicacion
           .row.g-3
             .col-md-4
               - const locTypeVal = (e.location && e.location.type) || ''
-              label.form-label Tipo de ubicacion
+              label.form-label Location type
               select.form-select(name='location_type')
-                option(value='' selected=!locTypeVal) Sin especificar
-                option(value='physical' selected=locTypeVal==='physical') Fisica
+                option(value='' selected=!locTypeVal) Unspecified
+                option(value='physical' selected=locTypeVal==='physical') Physics
                 option(value='virtual' selected=locTypeVal==='virtual') Virtual
             .col-md-8
               - const locValue = (e.location && (e.location.address || e.location.url)) || ''
-              label.form-label Direccion (si es fisica) o URL (si es virtual)
+              label.form-label Address (if physical) or URL (if virtual)
               input.form-control(type='text', name='location_value', value=locValue)
           // Fechas
           .row.g-3
             .col-md-6
               - const startVal = e.startDate ? new Date(e.startDate).toISOString().slice(0,10) : ''
-              label.form-label Fecha de inicio
+              label.form-label Start date
               input.form-control(type='date', name='startDate', value=startVal)
             .col-md-6
               - const endVal = e.endDate ? new Date(e.endDate).toISOString().slice(0,10) : ''
-              label.form-label Fecha de fin
+              label.form-label End date
               input.form-control(type='date', name='endDate', value=endVal)
 
         // Imagen de portada (separada del formulario principal)
         hr
         .row.g-3.align-items-center
           .col-md-8
-            label.form-label Portada actual
+            label.form-label Current cover
             if e.coverImage
-              img.img-fluid.rounded.border.mb-2(src=e.coverImage alt='Portada' style='max-height: 180px;')
+              img.img-fluid.rounded.border.mb-2(src=e.coverImage alt='Front page' style='max-height: 180px;')
             else
-              .text-muted.mb-2 Sin portada
+              .text-muted.mb-2 No cover
             form.admin-exhibition-cover-form(data-exhibition-id=e._id enctype='multipart/form-data')
               .input-group
                 input.form-control(type='file', name='coverImage', accept='image/*')
-                button.btn.btn-outline-primary(type='submit') Guardar portada
+                button.btn.btn-outline-primary(type='submit') Save cover
               if e.coverImage
-                button.btn.btn-outline-danger.btn-sm.mt-2(type='button' data-action='remove-cover' data-exhibition-id=e._id) Eliminar portada
+                button.btn.btn-outline-danger.btn-sm.mt-2(type='button' data-action='remove-cover' data-exhibition-id=e._id) Delete cover
           .col-md-4
-            small.text-muted Subir una imagen para usar como portada de la exposicion.
+            small.text-muted Upload an image to use as the exhibition cover.
 
         // (Sin galeria de imagenes adicionales)
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cerrar
-        button.btn.btn-primary.admin-exhibitions-save(type='submit' form=`adminEditExhibitionForm-${e._id}`) Guardar cambios
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Close
+        button.btn.btn-primary.admin-exhibitions-save(type='submit' form=`adminEditExhibitionForm-${e._id}`) Save changes
 

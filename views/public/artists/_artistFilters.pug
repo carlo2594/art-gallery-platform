@@ -17,32 +17,32 @@ form#artistChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
     aria-pressed=(currentSort === 'name_asc' ? 'true' : 'false')
   )
     i.fa.fa-arrow-down-a-z.me-1(title='A-Z')
-    | Nombre A-Z
+    | Name A-Z
   button.chip.btn(
     type='submit'
     name='sort'
     value='name_desc'
     class=(currentSort === 'name_desc' ? 'active' : '')
-    aria-label='Nombre Z-A'
+    aria-label='Name Z-A'
     aria-pressed=(currentSort === 'name_desc' ? 'true' : 'false')
   )
     i.fa.fa-arrow-down-z-a.me-1(title='Z-A')
-    | Nombre Z-A
+    | Name Z-A
   // Chips para fecha (siempre visibles)
   button.chip.btn(
     type='submit'
     name='sort'
     value='recent'
     class=(currentSort === 'recent' ? 'active' : '')
-    aria-label='Nuevos primero'
+    aria-label='New first'
     aria-pressed=(currentSort === 'recent' ? 'true' : 'false')
-  ) Recientes
+  ) Recent
   button.chip.btn(
     type='submit'
     name='sort'
     value='oldest'
     class=(currentSort === 'oldest' ? 'active' : '')
-    aria-label='Antiguos primero'
+    aria-label='Antiguos first'
     aria-pressed=(currentSort === 'oldest' ? 'true' : 'false')
-  ) Antiguos primero
+  ) Ancients first
 

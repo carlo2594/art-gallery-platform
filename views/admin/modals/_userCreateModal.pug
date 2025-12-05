@@ -3,24 +3,24 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title#adminCreateUserLabel Crear nuevo usuario
+        h5.modal-title#adminCreateUserLabel Create new user
         button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         form.admin-users-create-form#adminCreateUserForm
           .mb-3
-            label.form-label(for='newUserName') Nombre
-            input.form-control#newUserName(type='text' name='name' placeholder='Nombre (opcional)' maxlength='20')
+            label.form-label(for='newUserName') Name
+            input.form-control#newUserName(type='text' name='name' placeholder='Name (optional)' maxlength='20')
           .mb-3
-            label.form-label(for='newUserEmail') Correo
+            label.form-label(for='newUserEmail') Mail
             input.form-control#newUserEmail(type='email' name='email' placeholder='correo@dominio.com' required)
           .mb-3
-            label.form-label(for='newUserRole') Rol
+            label.form-label(for='newUserRole') Role
             select.form-select#newUserRole(name='role')
               option(value='collector') Collector
               option(value='artist' selected=role === 'artist') Artist
               option(value='admin') Admin
           .form-text
-            | Se generará una contraseña segura y se enviará un correo para que el usuario la establezca.
+            | A secure password will be generated and an email will be sent for the user to set it.
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-        button.btn.btn-primary.admin-users-create-submit#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Crear
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+        button.btn.btn-primary.admin-users-create-submit#adminCreateUserSubmit(type='submit' form='adminCreateUserForm') Create

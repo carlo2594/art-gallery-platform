@@ -15,7 +15,22 @@ if (fs.existsSync(envPath)) {
 const mongoose = require('mongoose');
 const app = require('./app');
 
-const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
+const databaseTemplate = process.env.DATABASE || process.env.MONGODB_URI;
+
+if (!databaseTemplate) {
+  throw new Error('Missing DATABASE env variable. Create a .env file and set DATABASE.');
+}
+
+const DB = databaseTemplate.includes('<db_password>')
+  ? (() => {
+      if (!process.env.DATABASE_PASSWORD) {
+        throw new Error(
+          'DATABASE template expects <db_password> placeholder but DATABASE_PASSWORD is not set.'
+        );
+      }
+      return databaseTemplate.replace('<db_password>', process.env.DATABASE_PASSWORD);
+    })()
+  : databaseTemplate;
 const PORT = process.env.PORT || 3000;
 
 // Opciones de conexión (reduce los tiempos de espera)

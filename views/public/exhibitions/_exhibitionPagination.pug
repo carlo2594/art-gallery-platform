@@ -1,7 +1,7 @@
 // views/public/exhibitions/_exhibitionPagination.pug
 // Requiere: exhibitionPage, exhibitionTotalPages, q, (opcional: search, tab)
 if typeof exhibitionPage !== 'undefined' && typeof exhibitionTotalPages !== 'undefined' && exhibitionTotalPages > 1
-  - var navAttrs = { class: 'mt-4 mb-4 d-flex justify-content-center', id: 'pager-exposiciones', 'aria-label': 'Paginación exposiciones' };
+  - var navAttrs = { class: 'mt-4 mb-4 d-flex justify-content-center', id: 'pager-exhibitions', 'aria-label': 'Exhibit pagination' };
   - if (typeof tab !== 'undefined') navAttrs['data-tab'] = tab;
   nav(&attributes(navAttrs))
     ul.pagination-ox.pagination-lg
@@ -11,7 +11,7 @@ if typeof exhibitionPage !== 'undefined' && typeof exhibitionTotalPages !== 'und
             ? `?q=${search || ''}&tab=${tab}&exhibitionPage=${exhibitionPage-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.type ? `&type=${q.type}` : ''}${q && q.minDate ? `&minDate=${q.minDate}` : ''}${q && q.maxDate ? `&maxDate=${q.maxDate}` : ''}${q && q.minYear && !q.minDate ? `&minDate=${q.minYear}-01-01` : ''}${q && q.maxYear && !q.maxDate ? `&maxDate=${q.maxYear}-12-31` : ''}`
             : `?exhibitionPage=${exhibitionPage-1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.type ? `&type=${q.type}` : ''}${q && q.minDate ? `&minDate=${q.minDate}` : ''}${q && q.maxDate ? `&maxDate=${q.maxDate}` : ''}${q && q.minYear && !q.minDate ? `&minDate=${q.minYear}-01-01` : ''}${q && q.maxYear && !q.maxDate ? `&maxDate=${q.maxYear}-12-31` : ''}`)
           aria-label="Anterior")
-          span(aria-hidden="true") &laquo;
+          span(aria-hidden="true") «
       - var startPage = Math.max(1, exhibitionPage - 2);
       - var endPage = Math.min(exhibitionTotalPages, exhibitionPage + 2);
       - if (endPage - startPage < 4) {
@@ -30,6 +30,6 @@ if typeof exhibitionPage !== 'undefined' && typeof exhibitionTotalPages !== 'und
           href=(typeof tab !== 'undefined' && typeof search !== 'undefined'
             ? `?q=${search || ''}&tab=${tab}&exhibitionPage=${exhibitionPage+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.type ? `&type=${q.type}` : ''}${q && q.minDate ? `&minDate=${q.minDate}` : ''}${q && q.maxDate ? `&maxDate=${q.maxDate}` : ''}${q && q.minYear && !q.minDate ? `&minDate=${q.minYear}-01-01` : ''}${q && q.maxYear && !q.maxDate ? `&maxDate=${q.maxYear}-12-31` : ''}`
             : `?exhibitionPage=${exhibitionPage+1}${q && q.sort ? `&sort=${q.sort}` : ''}${q && q.type ? `&type=${q.type}` : ''}${q && q.minDate ? `&minDate=${q.minDate}` : ''}${q && q.maxDate ? `&maxDate=${q.maxDate}` : ''}${q && q.minYear && !q.minDate ? `&minDate=${q.minYear}-01-01` : ''}${q && q.maxYear && !q.maxDate ? `&maxDate=${q.maxYear}-12-31` : ''}`)
-          aria-label="Siguiente")
-          span(aria-hidden="true") &raquo;
+          aria-label="Following")
+          span(aria-hidden="true") »
 

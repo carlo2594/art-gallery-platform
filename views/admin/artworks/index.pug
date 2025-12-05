@@ -5,65 +5,65 @@ block content
     - const isAdmin = currentUser && currentUser.role === 'admin'
     - const rejectReasonLimit = 100
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
-      span Obras
+      span Artworks
       if isAdmin
         button.btn.btn-success.btn-sm(type='button', data-bs-toggle='modal', data-bs-target='#adminCreateArtwork')
           i.fas.fa-plus.me-1
-          | Agregar obra
+          | Add work
     // Barra de búsqueda y filtros (inspirada en userList.pug)
     form.row.gy-2.gx-2.align-items-center.mb-3(method='GET')
       .col-sm-8.col-md-6
-        input.form-control(type='text', name='q', placeholder='Buscar por título o slug', value=q || '')
+        input.form-control(type='text', name='q', placeholder='Search by title or slug', value=q || '')
       .col-sm-6.col-md-3
         select.form-select(name='avail')
           // Por defecto, mostrar todas las disponibilidades si no hay filtro
-          option(value='' selected=!avail) Disponibilidad: Todas
+          option(value='' selected=!avail) Availability: All
           // Agrupaciones convenientes
-          option(value='available' selected=avail === 'available') Disponibles (en venta o reservadas)
-          option(value='unavailable' selected=avail === 'unavailable') No disponibles (vendidas, no en préstamo)
+          option(value='available' selected=avail === 'available') Available (for sale or reserved)
+          option(value='unavailable' selected=avail === 'unavailable') Not available (sold, not on loan)
           // Estados específicos
-          option(value='for_sale' selected=avail === 'for_sale') En venta
-          option(value='reserved' selected=avail === 'reserved') Reservada
-          option(value='sold' selected=avail === 'sold') Vendida
-          option(value='not_for_sale' selected=avail === 'not_for_sale') No en venta
-          option(value='on_loan' selected=avail === 'on_loan') En préstamo
+          option(value='for_sale' selected=avail === 'for_sale') On sale
+          option(value='reserved' selected=avail === 'reserved') Reserved
+          option(value='sold' selected=avail === 'sold') Sold
+          option(value='not_for_sale' selected=avail === 'not_for_sale') Not for sale
+          option(value='on_loan' selected=avail === 'on_loan') On loan
       .col-sm-6.col-md-3
         select.form-select(name='status')
-          option(value='') Estado: Todos
-          option(value='draft' selected=statusFilter === 'draft') Borrador
-          option(value='submitted' selected=statusFilter === 'submitted') Enviado
+          option(value='') Status: All
+          option(value='draft' selected=statusFilter === 'draft') Eraser
+          option(value='submitted' selected=statusFilter === 'submitted') Sent
           //- estado intermedio removido
-          option(value='approved' selected=statusFilter === 'approved') Aprobado
-          option(value='rejected' selected=statusFilter === 'rejected') Rechazado
-          option(value='trashed' selected=statusFilter === 'trashed') Papelera
+          option(value='approved' selected=statusFilter === 'approved') Approved
+          option(value='rejected' selected=statusFilter === 'rejected') Refused
+          option(value='trashed' selected=statusFilter === 'trashed') Bin
       .col-sm-6.col-md-3
         select.form-select(name='sort')
-          option(value='recent' selected=!sort || sort === 'recent') Recientes primero
-          option(value='popular' selected=sort === 'popular') Más vistas
-          option(value='most_favorited' selected=sort === 'most_favorited') Más favoritas
-          option(value='price_asc' selected=sort === 'price_asc') Precio: menor a mayor
-          option(value='price_desc' selected=sort === 'price_desc') Precio: mayor a menor
+          option(value='recent' selected=!sort || sort === 'recent') Recent first
+          option(value='popular' selected=sort === 'popular') Most views
+          option(value='most_favorited' selected=sort === 'most_favorited') More favorites
+          option(value='price_asc' selected=sort === 'price_asc') Price: low to high
+          option(value='price_desc' selected=sort === 'price_desc') Price: highest to lowest
       .col-auto
-        button.btn.btn-primary(type='submit') Buscar
+        button.btn.btn-primary(type='submit') Search
       if q || avail || sort || statusFilter
         .col-auto
-          a.btn.btn-outline-secondary(href='?') Limpiar
+          a.btn.btn-outline-secondary(href='?') Clean
 
     if artworks && artworks.length
       .table-responsive.admin-artworks-table-wrapper
         table.table.table-striped.table-hover.align-middle.admin-artworks-table
           thead
             tr
-              th Título
-              th Artista
-              th Estado
-              th Disponibilidad
+              th Title
+              th Artist
+              th State
+              th Availability
               th Precio
-              th Favoritos
-              th Creada
-              th Vista previa
-              th Estado
-              th Editar
+              th Favorites
+              th Created
+              th Preview
+              th State
+              th Edit
           tbody
             each a in artworks
               - const status = a.status || a.moderationStatus
@@ -81,19 +81,19 @@ block content
                 td
                   a.btn.btn-sm.btn-outline-secondary(target='_blank' href=`/admin/artworks/${a._id}`)
                     i.fas.fa-eye.me-1
-                    | Vista previa
+                    | Preview
                 // Columna Estado (modal dedicado)
                 td
                   button.btn.btn-sm.btn-outline-secondary(type='button', data-bs-toggle='modal', data-bs-target=`#adminStatusArtwork-${a._id}`)
                     i.fas.fa-sliders.me-1
-                    | Estado
+                    | State
                   // Modal de estado
                   include ../modals/_artworkStatusModal.pug
                 // Columna Editar (modal por fila)
                 td
                   button.btn.btn-sm.btn-outline-primary(type='button', data-bs-toggle='modal', data-bs-target=`#adminEditArtwork-${a._id}`)
                     i.fas.fa-pen-to-square.me-1
-                    | Editar
+                    | Edit
                   // Modal de edición de obra (extraído)
                   include ../modals/_artworkEditModal.pug
                   // Modal de rechazo (motivo)
@@ -101,30 +101,30 @@ block content
                   if isAdmin
                     button.btn.btn-sm.btn-outline-danger.ms-2(type='button', data-bs-toggle='modal', data-bs-target=`#confirmDeleteArtwork-${a._id}`)
                       i.fas.fa-trash-can.me-1
-                      | Eliminar
+                      | Eliminate
                     - const modalId = `confirmDeleteArtwork-${a._id}`
-                    - const modalTitle = `Eliminar obra - ${a.title}`
-                    - const modalMessage = 'Esta acción enviará la obra a la papelera. Escribe "ELIMINAR" para confirmar.'
+                    - const modalTitle = `Delete work - ${a.title}`
+                    - const modalMessage = 'This action will send the work to the trash. Type "DELETE" to confirm.'
                     - const actionUrl = `/api/v1/artworks/${a._id}/trash`
                     - const httpMethod = 'PATCH'
-                    - const confirmText = 'ELIMINAR'
-                    - const confirmBtnLabel = 'Eliminar'
+                    - const confirmText = 'ELIMINATE'
+                    - const confirmBtnLabel = 'Eliminate'
                     - const removeSelector = `#artRow-${a._id}`
                     include ../modals/_confirmDeleteModal.pug
     else
-      .alert.alert-info No hay obras
+      .alert.alert-info There are no works
 
     if typeof totalPages !== 'undefined' && totalPages > 1
-      nav.mt-4(aria-label='Paginación de obras')
+      nav.mt-4(aria-label='Pagination of works')
         ul.pagination.justify-content-center
           - const prevDisabled = page <= 1
           - const nextDisabled = page >= totalPages
           li.page-item(class=prevDisabled ? 'disabled' : '')
             a.page-link(href=`?page=${page-1}${qsPrefix || ''}` aria-label='Anterior') Anterior
           li.page-item.disabled
-            span.page-link= `Página ${page} de ${totalPages}`
+            span.page-link= `Page ${page} of ${totalPages}`
           li.page-item(class=nextDisabled ? 'disabled' : '')
-            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Siguiente') Siguiente
+            a.page-link(href=`?page=${page+1}${qsPrefix || ''}` aria-label='Following') Following
     // Modal: Crear nueva obra
     if isAdmin
       include ../modals/_artworkCreateModal.pug

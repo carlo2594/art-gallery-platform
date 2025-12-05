@@ -3,24 +3,24 @@
   .modal-dialog
     .modal-content
       .modal-header
-        h5.modal-title#artistCoverModalLabel Editar imagen de portada
-        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Cerrar')
+        h5.modal-title#artistCoverModalLabel Edit cover image
+        button.btn-close(type='button' data-bs-dismiss='modal' aria-label='Close')
       .modal-body
         form#artistPanelCoverForm(action='/api/v1/users/me/cover-image' method='POST' enctype='multipart/form-data')
           .mb-3
-            label.form-label Nueva portada
+            label.form-label New cover
             input#artistCoverInput.form-control(type='file', name='coverImage', accept='image/*', required)
             // Mensaje de error mostrado por JS
             small#artistCoverError.text-danger.mt-1.d-none
           .artist-cover-cropper.d-none#artistCoverCropWrapper
-            img#artistCoverPreview.img-fluid.rounded(alt='Vista previa del recorte' decoding='async' loading='lazy')
+            img#artistCoverPreview.img-fluid.rounded(alt='Crop preview' decoding='async' loading='lazy')
           .artist-cover-helper.text-muted.small.mb-3
-            strong Ajusta el recorte:&nbsp;
-            | mueve y haz zoom sobre la imagen para mantener una portada panor?mica horizontal.
-          small.text-muted.d-block.mb-2 Recomendaci?n: utiliza im?genes de al menos 1600px de ancho para una mejor calidad.
+            strong Adjust the crop: 
+            | Move and zoom the image to maintain a horizontal panoramic cover.
+          small.text-muted.d-block.mb-2 Recommendation: use images at least 1600px wide for best quality.
           // Upload progress
           .progress.artist-cover-progress#artistCoverProgressWrap
             .progress-bar.artist-cover-progress-bar#artistCoverProgressBar(role='progressbar' aria-valuemin='0' aria-valuemax='100')
       .modal-footer
-        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancelar
-        button.btn.btn-primary(type='submit' form='artistPanelCoverForm') Actualizar portada
+        button.btn.btn-secondary(type='button' data-bs-dismiss='modal') Cancel
+        button.btn.btn-primary(type='submit' form='artistPanelCoverForm') Update cover

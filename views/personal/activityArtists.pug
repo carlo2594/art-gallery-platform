@@ -3,11 +3,11 @@ extends /layouts/public
 block content
   .container.py-4
     .d-flex.align-items-center.justify-content-between.mb-4
-      h2.mb-0 Artistas que sigues
-      a.btn.btn-outline-secondary(href='/artists') Explorar artistas
+      h2.mb-0 Artists you follow
+      a.btn.btn-outline-secondary(href='/artists') Explore artists
 
     if artists && artists.length
       - var artists = artists
       include /public/artists/_artistGrid.pug
     else
-      p.text-muted Aún no sigues a ningún artista.
+      p.text-muted You don't follow any artists yet.

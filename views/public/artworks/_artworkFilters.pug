@@ -8,10 +8,10 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
   // Chips de orden
   -
     var opts = [
-      {label: 'Relevancia', value: ''},
-      {label: 'Populares', value: 'popular'},
-      {label: 'Recientes', value: 'recent'},
-      {label: 'Más Favoritos', value: 'most_favorited'}
+      {label: 'Relevance', value: ''},
+      {label: 'Popular', value: 'popular'},
+      {label: 'Recent', value: 'recent'},
+      {label: 'Most Favorites', value: 'most_favorited'}
     ];
   each opt in opts
     button.chip.btn(
@@ -102,12 +102,12 @@ form#quickChips(method='GET' action=actionUrl class='d-flex flex-wrap gap-2')
   // Offcanvas con filtros avanzados
   button.btn.btn-outline-secondary.ms-auto(data-bs-toggle='offcanvas' data-bs-target='#filtersDrawer' aria-controls='filtersDrawer')
     i.fa-solid.fa-filter.me-1
-    | Filtros
+    | Filters
 
 div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filtersTitle')
   .offcanvas-header
-    h5#filtersTitle Filtros
-    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Cerrar')
+    h5#filtersTitle Filters
+    button.btn-close(type='button' data-bs-dismiss='offcanvas' aria-label='Close')
   form.offcanvas-body.d-flex.flex-column.gap-4(method='GET' action=actionUrl)
     // Mantener el término de búsqueda si existe
     if typeof search !== 'undefined' && search
@@ -122,7 +122,7 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
         input(type='hidden' name='orientation' value=o)
     // Technique (multi)
     .filter-block
-      label.form-label.mb-2 Técnica
+      label.form-label.mb-2 Technique
       .d-flex.flex-wrap.gap-2
         each t in (typeof techniques !== 'undefined' && techniques ? techniques : [])
           if t
@@ -132,35 +132,35 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
               span= techCap
     // Disponibilidad
     .filter-block
-      label.form-label.mb-2 Disponibilidad para venta
+      label.form-label.mb-2 Availability for sale
       .d-flex.flex-wrap.gap-2
         label.chip
           input(type='radio' name='avail' value='' checked=(!q || !q.avail))
-          span Todas las obras
+          span All works
         label.chip
           input(type='radio' name='avail' value='available' checked=(q && q.avail==='available'))
-          span En venta
+          span On sale
         label.chip
           input(type='radio' name='avail' value='unavailable' checked=(q && q.avail==='unavailable'))
-          span No en venta
+          span Not for sale
     // Tamaño en cm (rango)
     .filter-block
-      label.form-label.mb-2 Tamaño (ancho x alto)
+      label.form-label.mb-2 Size (width x height)
       .row.g-2
         .col-6
-          input.form-control(type='number' name='minw' placeholder='Ancho mín.' value=(q && q.minw ? q.minw : ''))
+          input.form-control(type='number' name='minw' placeholder='Min width' value=(q && q.minw ? q.minw : ''))
         .col-6
-          input.form-control(type='number' name='maxw' placeholder='Ancho máx.' value=(q && q.maxw ? q.maxw : ''))
+          input.form-control(type='number' name='maxw' placeholder='Max width' value=(q && q.maxw ? q.maxw : ''))
         .col-6
-          input.form-control(type='number' name='minh' placeholder='Alto mín.' value=(q && q.minh ? q.minh : ''))
+          input.form-control(type='number' name='minh' placeholder='My alto' value=(q && q.minh ? q.minh : ''))
         .col-6
-          input.form-control(type='number' name='maxh' placeholder='Alto máx.' value=(q && q.maxh ? q.maxh : ''))
+          input.form-control(type='number' name='maxh' placeholder='Max height' value=(q && q.maxh ? q.maxh : ''))
     // === NUEVO: Precio en USD ===
     .filter-block
       label.form-label.mb-2 Precio (USD)
       if typeof priceBounds !== 'undefined' && priceBounds && priceBounds.minUSD != null && priceBounds.maxUSD != null
         .small.text-muted.mb-2
-          | Rango disponible: $
+          | Available range: $
           = priceBounds.minUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
           |  – $
           = priceBounds.maxUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
@@ -171,7 +171,7 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
             step='0.01'
             min='0'
             name='minPrice'
-            placeholder=(priceBounds && priceBounds.minUSD != null ? priceBounds.minUSD.toFixed(2) : 'Mín.')
+            placeholder=(priceBounds && priceBounds.minUSD != null ? priceBounds.minUSD.toFixed(2) : 'Min.')
             value=(appliedPrice && appliedPrice.minUSD != null ? appliedPrice.minUSD.toFixed(2) : (q && q.minPrice ? q.minPrice : ''))
           )
         .col-6
@@ -180,17 +180,17 @@ div.offcanvas.offcanvas-end#filtersDrawer(tabindex='-1' aria-labelledby='filters
             step='0.01'
             min='0'
             name='maxPrice'
-            placeholder=(priceBounds && priceBounds.maxUSD != null ? priceBounds.maxUSD.toFixed(2) : 'Máx.')
+            placeholder=(priceBounds && priceBounds.maxUSD != null ? priceBounds.maxUSD.toFixed(2) : 'Max.')
             value=(appliedPrice && appliedPrice.maxUSD != null ? appliedPrice.maxUSD.toFixed(2) : (q && q.maxPrice ? q.maxPrice : ''))
           )
     // Orden solo por precio
     .filter-block
-      label.form-label.mb-2 Ordenar por precio
+      label.form-label.mb-2 Sort by price
       select.form-select(name='sort')
-        option(value='') Selecciona
-        option(value='price_asc' selected=(q && q.sort==='price_asc')) Menor a mayor
-        option(value='price_desc' selected=(q && q.sort==='price_desc')) Mayor a menor
+        option(value='') Select
+        option(value='price_asc' selected=(q && q.sort==='price_asc')) Lowest to highest
+        option(value='price_desc' selected=(q && q.sort==='price_desc')) Highest to lowest
     .mt-auto.d-flex.gap-2.sticky-apply
-      a.btn.btn-light.flex-fill(href=actionUrl) Limpiar
-      button.btn.btn-apply.flex-fill(type='submit') Ver resultados
+      a.btn.btn-light.flex-fill(href=actionUrl) Clean
+      button.btn.btn-apply.flex-fill(type='submit') See results
 

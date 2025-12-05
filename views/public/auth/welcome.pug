@@ -9,19 +9,19 @@ block content
           .card.shadow-sm.rounded-4.border-0
             .card-body.p-4.p-md-5
               h1.h3.mb-3.text-ox-blue.font-title
-                | Hola
+                | Hello
                 if currentUser && currentUser.name
                   | , #{currentUser.name}
                 | !
 
               p.mb-4
-                | Tu cuenta ya está lista. ¿Qué te gustaría hacer ahora?
+                | Your account is now ready. What would you like to do now?
 
               .d-flex.flex-wrap.gap-3
                 a.btn.btn-primary.text-uppercase.fw-bold(href='/artworks')
-                  | Ver arte
+                  | See art
                 a.btn.btn-outline-secondary.text-uppercase.fw-bold(href='/edit-profile')
                   i.fas.fa-user-circle.me-2
-                  | Editar cuenta
+                  | Edit account
 
   .my-4
