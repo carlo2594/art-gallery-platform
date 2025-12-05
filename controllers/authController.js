@@ -18,6 +18,13 @@ const {
   MODERATE_PASSWORD_MESSAGE
 } = require('@utils/passwordPolicy');
 
+const getSafeInternalPath = (value) => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^\/(?!\/)/.test(trimmed) ? trimmed : null;
+};
+
 // Wrapper simple por si cambias proveedor de correo
 async function sendEmail({ to, subject, text, html }) {
   return sendMail({ to, subject, text, html });
@@ -28,6 +35,9 @@ async function sendEmail({ to, subject, text, html }) {
 /* ------------------------------------------------------------------ */
 exports.signup = catchAsync(async (req, res) => {
   const { email } = req.body;
+  const desiredReturnTo = getSafeInternalPath(
+    req.body?.next || req.body?.returnTo || req.query?.returnTo || req.query?.next
+  );
 
   // nombre por defecto del local-part si no mandan name
   let name;
@@ -42,6 +52,7 @@ exports.signup = catchAsync(async (req, res) => {
       // Redirige a login con mensaje
       const url = new URL(`${req.protocol}://${req.get('host')}/login`);
       url.searchParams.set('error', 'El correo ya está registrado. Inicia sesión.');
+      if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
       return res.redirect(303, url.toString());
     }
     return sendResponse(res, null, 'El correo ya está registrado.', 400);
@@ -89,6 +100,7 @@ exports.signup = catchAsync(async (req, res) => {
   if (wantsHTML(req)) {
     const url = new URL(`${req.protocol}://${req.get('host')}/login`);
     url.searchParams.set('success', 'Registro iniciado. Revisa tu correo para crear la contraseña.');
+    if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
     return res.redirect(303, url.toString());
   }
   return sendResponse(res, null, 'Registro iniciado. Revisa tu correo para crear la contraseña.', 201);
@@ -125,13 +137,13 @@ exports.login = catchAsync(async (req, res, next) => {
   await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() }, { runValidators: false });
 
   // open-redirect safe
-  const getSafePath = (p) => (typeof p === 'string' && /^\/(?!\/)/.test(p) ? p : null);
-  const nextFromQuery = getSafePath(req.query?.next);
-  const nextFromSession = getSafePath(req.session?.returnTo);
+  const nextFromBody = getSafeInternalPath(req.body?.next || req.body?.returnTo);
+  const nextFromQuery = getSafeInternalPath(req.query?.next || req.query?.returnTo);
+  const nextFromSession = getSafeInternalPath(req.session?.returnTo);
   if (req.session && req.session.returnTo) req.session.returnTo = undefined;
 
   const fallbackUrl = isFirstLogin ? '/welcome' : '/?welcome=1';
-  const destination = nextFromSession || nextFromQuery || fallbackUrl;
+  const destination = nextFromBody || nextFromSession || nextFromQuery || fallbackUrl;
 
   if (wantsHTML(req)) return res.redirect(303, destination);
 

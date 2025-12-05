@@ -1260,18 +1260,52 @@ function initSmartBackLink(){
   } catch (e) {}
 }
 
-// Back en páginas de login/signup: prioriza ?returnTo= y luego referrer same-origin
+// Back en páginas de login/signup: prioriza returnTo explícito, luego query y referrer
 function initLoginBackLink(){
   try {
     const link = document.querySelector('.login-signin-back-link');
     if (!link) return;
-    const fallback = link.getAttribute('href') || '/';
+    const fallback = (link.dataset && link.dataset.defaultHref) || link.getAttribute('href') || '/';
+
+    const cleanupReturnToQuery = () => {
+      try {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('returnTo')) {
+          url.searchParams.delete('returnTo');
+          const searchStr = url.searchParams.toString();
+          const nextUrl = url.pathname + (searchStr ? '?' + searchStr : '') + (url.hash || '');
+          if (window.history && typeof window.history.replaceState === 'function') {
+            window.history.replaceState(null, '', nextUrl);
+          }
+        }
+      } catch (_) {}
+    };
+
+    const bindTarget = (target, source) => {
+      try {
+        const targetUrl = new URL(target, window.location.origin);
+        if (targetUrl.origin !== window.location.origin) return false;
+        link.setAttribute('href', targetUrl.href);
+        link.dataset.smartBack = source;
+        link.addEventListener('click', function(e){
+          e.preventDefault();
+          window.location.assign(targetUrl.href);
+        });
+        cleanupReturnToQuery();
+        return true;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    const explicit = link.dataset && link.dataset.returnTo;
+    if (explicit && bindTarget(explicit, 'explicit')) {
+      return;
+    }
 
     const sp = new URLSearchParams(window.location.search);
     const rtRaw = sp.get('returnTo');
 
-    // Si returnTo es exactamente "/", eliminarlo de la URL
-    // y dejar el botón de volver usando siempre el fallback (/).
     if (rtRaw === '/') {
       sp.delete('returnTo');
       try {
@@ -1284,17 +1318,8 @@ function initLoginBackLink(){
       return;
     }
 
-    const rt = rtRaw;
-    if (rt) {
-      try {
-        const rtUrl = new URL(rt, window.location.origin);
-        if (rtUrl.origin === window.location.origin) {
-          link.setAttribute('href', rtUrl.href);
-          link.dataset.smartBack = 'returnTo';
-          link.addEventListener('click', function(e){ e.preventDefault(); window.location.assign(rtUrl.href); });
-          return;
-        }
-      } catch(_){}
+    if (rtRaw && bindTarget(rtRaw, 'returnTo')) {
+      return;
     }
 
     const ref = document.referrer;
@@ -1305,9 +1330,18 @@ function initLoginBackLink(){
       if (sameOrigin && !samePage) {
         link.setAttribute('href', refUrl.href);
         link.dataset.smartBack = 'referrer';
-        link.addEventListener('click', function(e){ if (history.length > 1) { e.preventDefault(); history.back(); } });
+        link.addEventListener('click', function(e){
+          if (history.length > 1) {
+            e.preventDefault();
+            history.back();
+          }
+        });
+        return;
       }
     }
+
+    // Fallback explícito
+    link.setAttribute('href', fallback);
   } catch (e) {}
 }
 

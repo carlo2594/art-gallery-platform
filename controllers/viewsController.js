@@ -20,6 +20,13 @@ const { getAllTechniques, getGlobalPriceBounds, getArtistTechniques, getArtistPr
 const { findArtistByIdOrSlug, getRelatedArtworks, buildArtistStats } = require('@utils/artistHelpers');
 const { findArtworkByIdOrSlug, getPopularArtworks } = require('@utils/artworkHelpers');
 
+const getSafeInternalPath = (value) => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return /^\/(?!\/)/.test(trimmed) ? trimmed : null;
+};
+
 // Vista de todos los artistas
 exports.getArtistsView = catchAsync(async (req, res) => {
   const q = req.query;
@@ -671,26 +678,30 @@ exports.getResetLinkInvalid = (req, res) => {
 // Vista para sign in
 
 exports.getSignUp = (req, res) => {
+  const safeReturnTo = getSafeInternalPath(req.query.returnTo || req.query.next);
   res.render('public/auth/loginSignUp', {
     title: 'Registrarse · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     mode: 'signUp',
     error: req.query.error,
-    success: req.query.success
+    success: req.query.success,
+    returnTo: safeReturnTo
   });
 };
 
 
 // Vista para login
 exports.getLogin = (req, res) => {
+  const safeReturnTo = getSafeInternalPath(req.query.returnTo || req.query.next);
   res.render('public/auth/loginSignUp', {
     title: 'Iniciar sesión · Galería del Ox',
     hideNavbar: true,
     hideFooter: true,
     mode: 'login',
     error: req.query.error,
-    success: req.query.success
+    success: req.query.success,
+    returnTo: safeReturnTo
   });
 };
 

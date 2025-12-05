@@ -18,10 +18,16 @@
       .modal-body
         p.mb-0= _message
       .modal-footer
-        a.btn.btn-outline-secondary(href=`${_signupHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+        a.btn.btn-outline-secondary(
+          href=_signupHref
+          data-return-to=_returnTo
+        )
           i.fas.fa-user-plus.me-2
           | Register
-        a.btn.btn-primary(href=`${_loginHref}?returnTo=${encodeURIComponent(_returnTo)}`)
+        a.btn.btn-primary(
+          href=_loginHref
+          data-return-to=_returnTo
+        )
           i.fas.fa-right-to-bracket.me-2
           | Login
         button.btn.btn-light(type='button' data-bs-dismiss='modal')
