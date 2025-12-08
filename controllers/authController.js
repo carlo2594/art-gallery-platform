@@ -112,6 +112,13 @@ exports.signup = catchAsync(async (req, res) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password, remember } = req.body;
   const normalizedEmail = normalizeEmail(email);
+  const desiredReturnTo = getSafeInternalPath(
+    req.body?.next ||
+    req.body?.returnTo ||
+    req.query?.returnTo ||
+    req.query?.next ||
+    (req.session && req.session.returnTo)
+  );
 
   // El schema oculta password → hay que seleccionarlo para comparar
   const user = await User.findOne({ email: normalizedEmail, active: true })
@@ -121,6 +128,7 @@ exports.login = catchAsync(async (req, res, next) => {
     if (wantsHTML(req)) {
       const url = new URL(`${req.protocol}://${req.get('host')}/login`);
       url.searchParams.set('error', 'Correo o contraseña incorrectos');
+      if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
       return res.redirect(303, url.toString());
     }
     return next(new AppError('Correo o contraseña incorrectos', 401));

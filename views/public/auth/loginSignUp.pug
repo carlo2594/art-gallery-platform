@@ -4,7 +4,6 @@ block headExtra
 
 block content
   - const __returnTo = (typeof returnTo !== 'undefined' && returnTo) ? returnTo : null
-  - const __backHref = __returnTo || '/'
   .login-signin-container
     .row.g-0.align-items-stretch
       .col-12.col-lg
@@ -62,11 +61,7 @@ block content
                     button.btn.btn-primary.w-100.py-2.mt-3.mb-4.login-signin-btn(type="submit") Login
 
                   .d-flex.justify-content-center.mb-3.login-signin-back
-                    a.btn.btn-outline-primary.ox-back-btn.login-signin-back-link(
-                      href=__backHref
-                      data-default-href="/"
-                      data-return-to=(__returnTo || undefined)
-                    )
+                    a.btn.btn-outline-primary.ox-back-btn.login-signin-back-link(href="/")
                       i.fas.fa-arrow-left.me-2
                       | Return
 

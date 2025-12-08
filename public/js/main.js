@@ -664,6 +664,8 @@ __onReady(function () {
     backLinks.forEach(a => {
       // Do NOT override admin sidebar back button; it should always use its href
       if (a.closest('.admin-sidebar')) return;
+      // Login/sign-up back button should always go to its href (root)
+      if (a.classList && a.classList.contains('login-signin-back-link')) return;
       a.addEventListener('click', (ev) => {
         if (!canGoBack()) return; // default navigation to href
         ev.preventDefault();
@@ -1266,82 +1268,8 @@ function initLoginBackLink(){
     const link = document.querySelector('.login-signin-back-link');
     if (!link) return;
     const fallback = (link.dataset && link.dataset.defaultHref) || link.getAttribute('href') || '/';
-
-    const cleanupReturnToQuery = () => {
-      try {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has('returnTo')) {
-          url.searchParams.delete('returnTo');
-          const searchStr = url.searchParams.toString();
-          const nextUrl = url.pathname + (searchStr ? '?' + searchStr : '') + (url.hash || '');
-          if (window.history && typeof window.history.replaceState === 'function') {
-            window.history.replaceState(null, '', nextUrl);
-          }
-        }
-      } catch (_) {}
-    };
-
-    const bindTarget = (target, source) => {
-      try {
-        const targetUrl = new URL(target, window.location.origin);
-        if (targetUrl.origin !== window.location.origin) return false;
-        link.setAttribute('href', targetUrl.href);
-        link.dataset.smartBack = source;
-        link.addEventListener('click', function(e){
-          e.preventDefault();
-          window.location.assign(targetUrl.href);
-        });
-        cleanupReturnToQuery();
-        return true;
-      } catch (_) {
-        return false;
-      }
-    };
-
-    const explicit = link.dataset && link.dataset.returnTo;
-    if (explicit && bindTarget(explicit, 'explicit')) {
-      return;
-    }
-
-    const sp = new URLSearchParams(window.location.search);
-    const rtRaw = sp.get('returnTo');
-
-    if (rtRaw === '/') {
-      sp.delete('returnTo');
-      try {
-        const newSearch = sp.toString();
-        const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + (window.location.hash || '');
-        if (window.history && typeof window.history.replaceState === 'function') {
-          window.history.replaceState(null, '', newUrl);
-        }
-      } catch (_) {}
-      return;
-    }
-
-    if (rtRaw && bindTarget(rtRaw, 'returnTo')) {
-      return;
-    }
-
-    const ref = document.referrer;
-    if (ref) {
-      const refUrl = new URL(ref, window.location.origin);
-      const sameOrigin = refUrl.origin === window.location.origin;
-      const samePage = (refUrl.pathname === window.location.pathname) && (refUrl.search === window.location.search);
-      if (sameOrigin && !samePage) {
-        link.setAttribute('href', refUrl.href);
-        link.dataset.smartBack = 'referrer';
-        link.addEventListener('click', function(e){
-          if (history.length > 1) {
-            e.preventDefault();
-            history.back();
-          }
-        });
-        return;
-      }
-    }
-
-    // Fallback explícito
     link.setAttribute('href', fallback);
+    link.dataset.smartBack = 'fallback';
   } catch (e) {}
 }
 
