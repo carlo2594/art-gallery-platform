@@ -52,8 +52,12 @@
   --font-subtitle: 'Newsreader', Georgia, 'Times New Roman', serif;                 /* Artwork/label font */
   --art-max-h: 68rem;
 }
-html { font-size: 62.5%; height: 100%; min-height: 100%; }
+html { font-size: 62.5%; height: 100%; min-height: 100%; scrollbar-width: thin; scrollbar-color: #ffffff #050b12; }
 body { font-family: var(--font-title); background-color: var(--ox-beige); color: var(--ox-blue); font-size: 1.2rem; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+body::-webkit-scrollbar { width: 10px; }
+body::-webkit-scrollbar-track { background: #050b12; }
+body::-webkit-scrollbar-thumb { background-color: #ffffff; border-radius: 10px; border: 2px solid #050b12; }
+body::-webkit-scrollbar-thumb:hover { background-color: #f0f0f0; }
 .main-content { flex: 1 0 auto; }
 /* Strengthen sticky footer behavior on home (and globally) */
 .main-content {
@@ -87,6 +91,7 @@ footer, .footer { flex-shrink: 0; }
   2. COMPONENTS: NAVBAR & SEARCHBAR
   ========================================== */
 .main-navbar { margin-bottom: 2.2rem; background-color: var(--ox-beige) !important; box-shadow: 0 4px 8px -4px rgba(16, 46, 80, 0.10); border-bottom: none; }
+.main-navbar .navbar-container { margin-left: 1rem; margin-right: 1rem; }
 .navbar-brand { padding-top: .25rem; padding-bottom: .25rem; }
 .navbar-light .navbar-toggler { border: none; }
 .logo-navbar { max-height: 5rem; width: auto; display: block; }
