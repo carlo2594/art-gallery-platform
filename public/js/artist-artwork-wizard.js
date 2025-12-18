@@ -738,7 +738,7 @@
       submitBtn.disabled = true;
       submitBtn.innerHTML =
         '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>' +
-        'Enviando obra...';
+        'Sending artwork...';
     }
     try {
       if (!currentArtworkId){

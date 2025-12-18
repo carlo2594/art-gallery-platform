@@ -141,7 +141,7 @@ async function seed() {
     name: 'Admin', 
     email: 'admin@test.com', 
     password: 'SeedPass1', 
-    role: 'admin', 
+    roles: ['admin'], 
     profileImage: randomFromArray(randomImages),
     coverImage: randomFromArray(randomImages),
     slug: 'admin'
@@ -153,7 +153,7 @@ async function seed() {
       name: `Collector ${i}`,
       email: `collector${i}@test.com`,
       password: 'SeedPass1',
-      role: 'collector',
+      roles: ['collector'],
       bio: `Coleccionista de arte ${i}`,
       profileImage: randomFromArray(randomImages),
       coverImage: randomFromArray(randomImages),
@@ -164,7 +164,7 @@ async function seed() {
     name: 'UsuarioExtra', 
     email: 'usuarioextra@test.com', 
     password: 'SeedPass1', 
-    role: 'admin', 
+    roles: ['admin'], 
     bio: 'Bio de usuario extra', 
     profileImage: randomFromArray(randomImages),
     coverImage: randomFromArray(randomImages),
@@ -176,7 +176,7 @@ async function seed() {
     name: 'Leonardo Martinez',
     email: 'leonardo.martinez@test.com',
     password: 'SeedPass1',
-    role: 'artist',
+    roles: ['artist'],
     bio: 'Artista contemporáneo especializado en pintura abstracta y escultura moderna. Con más de 15 años de experiencia, ha expuesto en galerías de todo el mundo.',
     location: 'Barcelona, España',
     website: 'https://leonardo-martinez-art.com',
@@ -196,7 +196,7 @@ async function seed() {
       name: `Artista ${i}`,
       email: `artista${i}@test.com`,
       password: 'SeedPass1',
-      role: 'artist',
+      roles: ['artist'],
       bio: `Bio de Artista ${i}`,
       profileImage: randomFromArray(randomImages),
       coverImage: randomFromArray(randomImages),
@@ -212,7 +212,10 @@ async function seed() {
   }
 
   // Crear al menos 5 solicitudes de artista con distintos estados
-  const collectors = users.filter(u => u.role === 'collector');
+  const collectors = users.filter(u => {
+    if (Array.isArray(u.roles) && u.roles.includes('collector')) return true;
+    return u.role === 'collector';
+  });
   const owner = collectors.length ? collectors : users; // fallback si no hubiese collectors
   const pickUser = (idx) => owner[idx % owner.length];
   const appSeed = [
@@ -566,7 +569,7 @@ async function seed() {
     name: 'María Fernández',
     email: 'maria.fernandez@example.com',
     password: 'SeedPass1',
-    role: 'artist',
+    roles: ['artist'],
     profileImage: randomFromArray(randomImages),
     coverImage: randomFromArray(randomImages),
     bio: 'Artista contemporanea argentina enfocada en pintura y dibujo expandido. Explora el vínculo entre color, luz y materia en series donde alterna veladuras y empaste. Ha expuesto en Buenos Aires, Madrid y Ciudad de México, participando en residencias y clínicas de obra con enfoque experimental.',

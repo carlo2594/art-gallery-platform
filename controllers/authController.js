@@ -51,11 +51,11 @@ exports.signup = catchAsync(async (req, res) => {
     if (wantsHTML(req)) {
       // Redirige a login con mensaje
       const url = new URL(`${req.protocol}://${req.get('host')}/login`);
-      url.searchParams.set('error', 'El correo ya está registrado. Inicia sesión.');
+      url.searchParams.set('error', 'Email already registered. Please sign in.');
       if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
       return res.redirect(303, url.toString());
     }
-    return sendResponse(res, null, 'El correo ya está registrado.', 400);
+    return sendResponse(res, null, 'Email already registered.', 400);
   }
 
   // Creamos con password temporal (hook del modelo lo hashea)
@@ -77,33 +77,33 @@ exports.signup = catchAsync(async (req, res) => {
   const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
 
   const createPasswordHtml = renderEmailLayout({
-    previewText: 'Crea tu contraseña para completar tu registro en Galería del Ox.',
-    title: 'Crea tu contraseña',
+    previewText: 'Create your password to finish your registration at Ox Gallery.',
+    title: 'Create your password',
     greeting: name || newUser.name || '',
     bodyLines: [
-      'Gracias por registrarte en Galería del Ox.',
-      'Haz clic en el botón para crear tu contraseña y comenzar a explorar la comunidad.',
-      'Este enlace expira en 24 horas para mantener tu cuenta segura.'
+      'Thank you for joining Ox Gallery.',
+      'Click the button to create your password and start exploring the community.',
+      'This link expires in 24 hours to keep your account secure.'
     ],
-    actionLabel: 'Crear contraseña',
+    actionLabel: 'Create password',
     actionUrl: createPasswordLink,
-    footerLines: ['Si no fuiste tú quien inició este registro, ignora este correo.']
+    footerLines: ['If you did not start this registration, you can ignore this email.']
   });
 
   await sendEmail({
     to: newUser.email,
-    subject: 'Crea tu contraseña',
-    text: `Bienvenido, ${name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`,
+    subject: 'Create your password',
+    text: `Welcome, ${name}\nClick the link below to create your password:\n${createPasswordLink}\nThis link expires in 24 hours.`,
     html: createPasswordHtml
   });
 
   if (wantsHTML(req)) {
     const url = new URL(`${req.protocol}://${req.get('host')}/login`);
-    url.searchParams.set('success', 'Registro iniciado. Revisa tu correo para crear la contraseña.');
+    url.searchParams.set('success', 'Registration started. Check your email to create your password.');
     if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
     return res.redirect(303, url.toString());
   }
-  return sendResponse(res, null, 'Registro iniciado. Revisa tu correo para crear la contraseña.', 201);
+  return sendResponse(res, null, 'Registration started. Check your email to create your password.', 201);
 });
 
 /* ------------------------------------------------------------------ */
@@ -127,11 +127,11 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user || !(await user.correctPassword(password))) {
     if (wantsHTML(req)) {
       const url = new URL(`${req.protocol}://${req.get('host')}/login`);
-      url.searchParams.set('error', 'Correo o contraseña incorrectos');
+      url.searchParams.set('error', 'Email or password is incorrect.');
       if (desiredReturnTo) url.searchParams.set('returnTo', desiredReturnTo);
       return res.redirect(303, url.toString());
     }
-    return next(new AppError('Correo o contraseña incorrectos', 401));
+    return next(new AppError('Email or password is incorrect.', 401));
   }
 
   const token = signToken(user._id);
@@ -170,7 +170,7 @@ exports.logout = catchAsync(async (req, res) => {
   });
 
   if (wantsHTML(req)) return res.redirect(303, '/');
-  return sendResponse(res, null, 'Sesión cerrada');
+  return sendResponse(res, null, 'Session closed.');
 });
 
 /* ------------------------------------------------------------------ */
@@ -184,7 +184,7 @@ exports.forgotPassword = catchAsync(async (req, res) => {
 
   // Siempre respondemos igual para no filtrar existencia de cuentas
   if (!user || !user.email || user.email.trim() === '') {
-    return sendResponse(res, null, 'Si el email existe, se enviará un enlace.');
+    return sendResponse(res, null, 'If the email exists, we will send a link.');
   }
 
   const token = crypto.randomBytes(32).toString('hex');
@@ -201,33 +201,33 @@ exports.forgotPassword = catchAsync(async (req, res) => {
   const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${user._id}&token=${token}`;
 
   const forgotPasswordHtml = renderEmailLayout({
-    previewText: 'Usa este enlace temporal para restablecer tu contraseña de Galería del Ox.',
-    title: 'Restablece tu contraseña',
+    previewText: 'Use this temporary link to reset your Ox Gallery password.',
+    title: 'Reset your password',
     greeting: user.name || '',
     bodyLines: [
-      'Recibimos una solicitud para restablecer tu contraseña.',
-      'Haz clic en el botón para continuar. Este enlace es válido por 15 minutos.',
-      'Si no solicitaste este cambio, puedes ignorar este mensaje.'
+      'We received a request to reset your password.',
+      'Click the button to continue. This link is valid for 15 minutes.',
+      'If you did not request this change, you can ignore this message.'
     ],
-    actionLabel: 'Restablecer contraseña',
+    actionLabel: 'Reset password',
     actionUrl: resetLink
   });
 
   await sendEmail({
     to: user.email,
-    subject: 'Restablece tu contraseña',
-    text: `Haz clic en el siguiente enlace para restablecer tu contraseña:\n${resetLink}\nEste enlace expira en 15 minutos.`,
+    subject: 'Reset your password',
+    text: `Click the link below to reset your password:\n${resetLink}\nThis link expires in 15 minutes.`,
     html: forgotPasswordHtml
   });
 
   // Flujos HTML: redirigir con mensaje amigable
   if (wantsHTML(req)) {
     const url = new URL(`${req.protocol}://${req.get('host')}/forgot-password`);
-    url.searchParams.set('success', 'Si el email existe, te enviaremos un enlace para restablecer tu contraseña.');
+    url.searchParams.set('success', 'If the email exists, we will send you a link to reset your password.');
     return res.redirect(303, url.toString());
   }
 
-  return sendResponse(res, null, 'Si el email existe, se enviará un enlace.');
+  return sendResponse(res, null, 'If the email exists, we will send a link.');
 });
 
 /* ------------------------------------------------------------------ */
@@ -236,7 +236,7 @@ exports.forgotPassword = catchAsync(async (req, res) => {
 exports.resetPassword = catchAsync(async (req, res) => {
   const { uid, token, newPassword, remember } = req.body;
   if (!uid || !token || !newPassword) {
-    return sendResponse(res, null, 'Datos incompletos.', 400);
+    return sendResponse(res, null, 'Incomplete data.', 400);
   }
 
   if (!isModeratePassword(newPassword)) {
@@ -264,12 +264,12 @@ exports.resetPassword = catchAsync(async (req, res) => {
     if (wantsHTML(req)) {
       return res.redirect(303, '/reset-link-invalid');
     }
-    return sendResponse(res, null, 'Token inválido o expirado.', 400);
+    return sendResponse(res, null, 'Invalid or expired token.', 400);
   }
 
   const user = await User.findById(uid).select('+email +lastLoginAt');
   if (!user) {
-    return sendResponse(res, null, 'Usuario no encontrado.', 404);
+    return sendResponse(res, null, 'User not found.', 404);
   }
 
 
@@ -299,19 +299,19 @@ exports.resetPassword = catchAsync(async (req, res) => {
   await resetToken.save({ validateBeforeSave: false });
 
   const passwordUpdatedHtml = renderEmailLayout({
-    previewText: 'Confirmación de cambio de contraseña en Galería del Ox.',
-    title: 'Tu contraseña ha sido cambiada',
+    previewText: 'Password change confirmation from Ox Gallery.',
+    title: 'Your password has been changed',
     greeting: user.name || '',
     bodyLines: [
-      'Tu contraseña se actualizó correctamente.',
-      'Si no reconoces este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.'
+      'Your password was updated successfully.',
+      'If you do not recognize this change, contact us immediately at soporte@galeriadelox.com.'
     ]
   });
 
   await sendEmail({
     to: user.email,
-    subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`,
+    subject: 'Your password has been changed',
+    text: `Hi ${user.name || ''}\nYour password has been updated successfully.`,
     html: passwordUpdatedHtml
   });
 
@@ -320,7 +320,7 @@ exports.resetPassword = catchAsync(async (req, res) => {
     return res.redirect(303, '/welcome');
   }
   // Para clientes API, indicar siguiente destino
-  return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
+  return sendResponse(res, { next: '/welcome' }, 'Password updated successfully.');
 });
 
 /* ------------------------------------------------------------------ */
@@ -330,9 +330,9 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body || {};
   const userId = req.user?.id || req.user?._id;
 
-  if (!userId) return next(new AppError('No autorizado', 401));
+  if (!userId) return next(new AppError('Not authorized', 401));
   if (!currentPassword || !newPassword) {
-    return sendResponse(res, null, 'Debes enviar la contraseña actual y la nueva.', 400);
+    return sendResponse(res, null, 'You must send the current and new password.', 400);
   }
 
   if (!isModeratePassword(newPassword)) {
@@ -341,7 +341,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   const user = await User.findById(userId).select('+password +email +lastLoginAt');
   if (!user || !(await user.correctPassword(currentPassword))) {
-    return sendResponse(res, null, 'Tu contraseña actual no es correcta.', 400);
+    return sendResponse(res, null, 'Your current password is incorrect.', 400);
   }
 
   const isFirstLogin = !user.lastLoginAt;
@@ -364,19 +364,19 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   });
 
   const authPasswordUpdatedHtml = renderEmailLayout({
-    previewText: 'Confirmación de cambio de contraseña en Galería del Ox.',
-    title: 'Tu contraseña ha sido cambiada',
+    previewText: 'Password change confirmation from Ox Gallery.',
+    title: 'Your password has been changed',
     greeting: user.name || '',
     bodyLines: [
-      'Tu contraseña se actualizó correctamente.',
-      'Si no reconoces este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.'
+      'Your password was updated successfully.',
+      'If you do not recognize this change, contact us immediately at soporte@galeriadelox.com.'
     ]
   });
 
   await sendEmail({
     to: user.email,
-    subject: 'Tu contraseña ha sido cambiada',
-    text: `Hola ${user.name || ''}\nTu contraseña se ha actualizado correctamente.`,
+    subject: 'Your password has been changed',
+    text: `Hi ${user.name || ''}\nYour password has been updated successfully.`,
     html: authPasswordUpdatedHtml
   });
 
@@ -386,7 +386,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     return res.redirect(303, '/welcome');
   }
   if (isFirstLogin) {
-    return sendResponse(res, { next: '/welcome' }, 'Contraseña actualizada correctamente.');
+    return sendResponse(res, { next: '/welcome' }, 'Password updated successfully.');
   }
-  return sendResponse(res, null, 'Contraseña actualizada correctamente.');
+  return sendResponse(res, null, 'Password updated successfully.');
 });

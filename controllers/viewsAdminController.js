@@ -12,6 +12,10 @@ const http = require('http');
 const { getPaginationParams } = require('@utils/pagination');
 const { buildUserAdminFilter, getUserAdminSort } = require('@utils/userAdminSearch');
 
+const buildRoleMatch = (roleValue) => ({
+  $or: [{ roles: roleValue }, { role: roleValue }]
+});
+
 /* Dashboard */
 exports.getDashboard = catchAsync(async (req, res) => {
   const [totals, recentExhibitions, recentArtworks] = await Promise.all([
@@ -275,13 +279,14 @@ exports.getArtwork = catchAsync(async (req, res, next) => {
 /* Usuarios */
 exports.getUsers = catchAsync(async (req, res) => {
   const role = (req.query.role || 'artist').trim();
-  const filter = buildUserAdminFilter(req.query, role ? { role } : {});
+  const baseFilter = role ? buildRoleMatch(role) : {};
+  const filter = buildUserAdminFilter(req.query, baseFilter);
   const sortParam = (req.query.sort || 'recent').trim();
   const sort = getUserAdminSort(sortParam);
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/index', {
@@ -299,13 +304,13 @@ exports.getUsers = catchAsync(async (req, res) => {
 });
 
 exports.getCollectors = catchAsync(async (req, res) => {
-  const filter = buildUserAdminFilter(req.query, { role: 'collector' });
+  const filter = buildUserAdminFilter(req.query, buildRoleMatch('collector'));
   const sortParam = (req.query.sort || 'recent').trim();
   const sort = getUserAdminSort(sortParam);
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +role +email profileImage').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +role +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/index', {
@@ -393,7 +398,7 @@ exports.getArtistApplications = catchAsync(async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(perPage)
-      .populate({ path: 'user', select: 'name +email +role profileImage' })
+      .populate({ path: 'user', select: 'name +email +roles +role profileImage' })
       .lean()
   ]);
 
@@ -429,7 +434,7 @@ exports.postArtistApplicationStatus = catchAsync(async (req, res, next) => {
   // Si se aprueba, promover al usuario a artista (si no lo es ya)
   if (nextStatus === 'approved' && appDoc.user) {
     try {
-      await User.findByIdAndUpdate(appDoc.user, { role: 'artist' });
+      await User.findByIdAndUpdate(appDoc.user, { $addToSet: { roles: 'artist' } });
     } catch (_) {}
   }
 

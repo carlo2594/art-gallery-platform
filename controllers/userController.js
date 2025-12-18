@@ -21,6 +21,12 @@ const {
   isModeratePassword,
   MODERATE_PASSWORD_MESSAGE
 } = require('@utils/passwordPolicy');
+const {
+  hasRole,
+  normalizeRolesInput,
+  ensureRolesArray,
+  AVAILABLE_ROLES
+} = require('@utils/roleUtils');
 
 // CRUD estándar
 exports.getAllUsers = factory.getAll(User);
@@ -110,20 +116,19 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   // Si el email cambió, notifica al nuevo email
   if (filteredBody.email && filteredBody.email !== oldEmail) {
     const confirmEmailHtml = renderEmailLayout({
-      previewText: 'Confirmamos el cambio de correo de tu cuenta en Galería del Ox.',
-      title: 'Correo actualizado',
+      previewText: 'We have confirmed the email change on your Ox Gallery account.',
+      title: 'Email updated',
       greeting: user.name || '',
       bodyLines: [
-        'Tu correo ha sido actualizado exitosamente en Galería del Ox.',
-        'Si no realizaste este cambio, contáctanos inmediatamente en soporte@galeriadelox.com.'
+        'Your email has been updated successfully on Ox Gallery.',
+        'If you did not make this change, please contact us immediately at soporte@galeriadelox.com.'
       ]
     });
 
     await sendMail({
       to: filteredBody.email,
-      subject: 'Confirmación de cambio de correo',
-      text: `Hola ${user.name}, tu correo ha sido actualizado exitosamente en Galería del Ox. 
-Si no realizaste este cambio, por favor contáctanos de inmediato en soporte@galeriadelox.com.`,
+      subject: 'Email change confirmation',
+      text: `Hi ${user.name}, your email was updated successfully on Ox Gallery.\nIf you did not make this change, please contact us right away at soporte@galeriadelox.com.`,
       html: confirmEmailHtml
     });
   }
@@ -184,35 +189,51 @@ exports.getMyProfileWithArt = catchAsync(async (req, res, next) => {
   );
 });
 
-// ADMIN: Cambiar el rol de un usuario
+// ADMIN: Cambiar los roles de un usuario
 exports.changeUserRole = catchAsync(async (req, res, next) => {
-  const { role } = req.body || {};
-  if (!['admin', 'artist', 'collector'].includes(role)) {
-    return next(new AppError('Rol inválido', 400));
+  const { roles, role } = req.body || {};
+  const normalizedRoles = normalizeRolesInput(
+    typeof roles !== 'undefined' ? roles : role
+  );
+
+  if (!normalizedRoles.length) {
+    return next(
+      new AppError(
+        `Debes proporcionar al menos un rol válido (${AVAILABLE_ROLES.join(', ')})`,
+        400
+      )
+    );
   }
 
-  const target = await User.findById(req.params.id).select('+role');
+  const target = await User.findById(req.params.id).select('+roles +role');
   if (!target) {
     return next(new AppError('Usuario no encontrado', 404));
   }
 
+  const isSelf = String(req.user._id) === String(target._id);
+
   // Evita que un admin se baje a sí mismo
-  if (String(req.user._id) === String(target._id) && role !== 'admin') {
-    return next(new AppError('No puedes cambiar tu propio rol a un rol inferior.', 403));
+  if (isSelf && !normalizedRoles.includes('admin')) {
+    return next(new AppError('No puedes quitar tu rol de administrador.', 403));
   }
 
   // Evita cambiar el rol de otro admin (a menos que sea él mismo)
-  if (target.role === 'admin' && String(req.user._id) !== String(target._id)) {
-    return next(new AppError('No puedes cambiar el rol de otro administrador.', 403));
+  if (!isSelf && hasRole(target, 'admin')) {
+    return next(new AppError('No puedes cambiar los roles de otro administrador.', 403));
   }
 
-  if (target.role === role) {
-    return sendResponse(res, target, 'Rol sin cambios');
+  const currentRoles = ensureRolesArray(target);
+  const sameRoles =
+    currentRoles.length === normalizedRoles.length &&
+    currentRoles.every((r) => normalizedRoles.includes(r));
+
+  if (sameRoles) {
+    return sendResponse(res, target, 'Roles sin cambios');
   }
 
-  target.role = role;
+  target.roles = normalizedRoles;
   await target.save();
-  sendResponse(res, target, 'Rol actualizado');
+  sendResponse(res, target, 'Roles actualizados');
 });
 
 
@@ -318,7 +339,7 @@ exports.deactivateUser = catchAsync(async (req, res, next) => {
 
 // ADMIN: Crear usuario (similar a signup) y enviar correo para definir contraseña
 exports.adminCreateUser = catchAsync(async (req, res, next) => {
-  const { email, name, role } = req.body || {};
+  const { email, name, roles, role } = req.body || {};
   if (!email) {
     return next(new AppError('El email es requerido', 400));
   }
@@ -330,8 +351,19 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
   }
 
   const tempPassword = generatePolicyCompliantPassword();
-  const payload = { name: name || normalizedEmail.split('@')[0], email: normalizedEmail, password: tempPassword };
-  if (role && ['collector','artist','admin'].includes(role)) payload.role = role;
+  const payload = {
+    name: name || normalizedEmail.split('@')[0],
+    email: normalizedEmail,
+    password: tempPassword
+  };
+  const requestedRoles = typeof roles !== 'undefined' ? roles : role;
+  const normalizedRoles = normalizeRolesInput(requestedRoles);
+  if (requestedRoles && !normalizedRoles.length) {
+    return next(
+      new AppError(`Roles inválidos. Usa: ${AVAILABLE_ROLES.join(', ')}`, 400)
+    );
+  }
+  if (normalizedRoles.length) payload.roles = normalizedRoles;
 
   const newUser = await User.create(payload);
 
@@ -344,21 +376,21 @@ exports.adminCreateUser = catchAsync(async (req, res, next) => {
   const createPasswordLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?uid=${newUser._id}&token=${token}&type=new`;
 
   const adminCreateUserHtml = renderEmailLayout({
-    previewText: 'Activa tu cuenta de Galería del Ox creando una contraseña.',
-    title: 'Completa tu acceso',
+    previewText: 'Activate your Ox Gallery account by creating a password.',
+    title: 'Complete your access',
     greeting: newUser.name || '',
     bodyLines: [
-      'Un administrador creó una cuenta para ti en Galería del Ox.',
-      'Haz clic en el botón para configurar tu contraseña. El enlace expira en 24 horas.'
+      'An administrator created an Ox Gallery account for you.',
+      'Click the button to set your password. This link expires in 24 hours.'
     ],
-    actionLabel: 'Crear contraseña',
+    actionLabel: 'Create password',
     actionUrl: createPasswordLink
   });
 
   await sendMail({
     to: newUser.email,
-    subject: 'Crea tu contraseña',
-    text: `Bienvenido, ${newUser.name}\nHaz clic en el siguiente enlace para crear tu contraseña:\n${createPasswordLink}\nEste enlace expira en 24 horas.`,
+    subject: 'Create your password',
+    text: `Welcome, ${newUser.name}\nClick the link below to create your password:\n${createPasswordLink}\nThis link expires in 24 hours.`,
     html: adminCreateUserHtml
   });
 
@@ -519,19 +551,26 @@ exports.lookupByEmail = catchAsync(async (req, res, next) => {
     return res.status(400).json({ status: 'fail', message: 'Email requerido' });
   }
   const email = normalizeEmail(raw);
-  const user = await User.findOne({ email }).select('+email +role name _id');
+  const user = await User.findOne({ email }).select('+email +roles +role name _id');
   if (!user) {
     return sendResponse(res, { exists: false }, 'OK');
   }
-  return sendResponse(res, {
-    exists: true,
-    user: {
-      _id: user._id,
-      name: user.name,
-      role: user.role,
-      email: user.email
-    }
-  }, 'OK');
+  const roles = ensureRolesArray(user);
+  const primaryRole = roles[0] || null;
+  return sendResponse(
+    res,
+    {
+      exists: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        roles,
+        role: primaryRole,
+        email: user.email
+      }
+    },
+    'OK'
+  );
 });
 
 // ADMIN: Buscar usuarios por nombre o email (limitado)
@@ -545,12 +584,15 @@ exports.searchUsers = catchAsync(async (req, res, next) => {
   const s = String(q).trim();
   const escaped = s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const rx = new RegExp(escaped, 'i');
-  const filter = { $or: [ { name: rx }, { email: rx } ] };
-  if (role) filter.role = role;
+  const filter = { $or: [{ name: rx }, { email: rx }] };
+  if (role) {
+    filter.$and = filter.$and || [];
+    filter.$and.push({ $or: [{ roles: role }, { role }] });
+  }
   const users = await User.find(filter)
     .limit(limit)
     .sort({ lastLoginAt: -1, createdAt: -1 })
-    .select('name email profileImage role')
+    .select('name email profileImage roles +role')
     .lean();
   return sendResponse(res, { users }, 'OK');
 });

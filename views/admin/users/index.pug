@@ -44,6 +44,7 @@ block content
             tr
               th Name
               th Mail
+              th Roles
               th State
               th Created
               th Edit
@@ -53,6 +54,14 @@ block content
               tr
                 td= u.name
                 td= u.email
+                td
+                  - const roles = Array.isArray(u.roles) && u.roles.length ? u.roles : (u.role ? [u.role] : [])
+                  if roles.length
+                    each roleValue in roles
+                      - const badgeClass = roleValue === 'admin' ? 'text-bg-danger' : (roleValue === 'artist' ? 'text-bg-success' : 'text-bg-secondary')
+                      span.badge.me-1.text-uppercase(class=badgeClass)= roleValue
+                  else
+                    span.text-muted -- No roles --
                 td
                   span.badge(class=u.active === false ? 'text-bg-secondary' : 'text-bg-success')= (u.active === false ? 'Inactive' : 'Active')
                 td= new Date(u.createdAt).toLocaleDateString('es-ES')

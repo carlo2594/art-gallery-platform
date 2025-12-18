@@ -10,8 +10,8 @@
  */
 function buildArtistsWithArtworksPipeline(search = '') {
   const pipeline = [
-    // Match solo usuarios que son artistas
-    { $match: { role: 'artist' } }
+    // Match solo usuarios que son artistas (considerando legacy `role`)
+    { $match: { $or: [{ roles: 'artist' }, { role: 'artist' }] } }
   ];
 
   // Aplicar filtros de búsqueda si existen

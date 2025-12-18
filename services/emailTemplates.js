@@ -2,47 +2,48 @@
 const { renderEmailLayout } = require('./emailLayout');
 
 function artworkStatusSubject(status) {
-  if (status === 'under_review' || status === 'submitted') return 'Tu obra está en revisión';
-  if (status === 'approved') return '¡Tu obra fue aprobada!';
-  if (status === 'rejected') return 'Tu obra fue rechazada';
-  return 'Actualización de tu obra';
+  if (status === 'under_review' || status === 'submitted') return 'Your artwork is under review';
+  if (status === 'approved') return 'Your artwork was approved!';
+  if (status === 'rejected') return 'Your artwork was rejected';
+  return 'Update about your artwork';
 }
 
 function artworkStatusText({ status, artistName = '', artworkTitle = '', reason = '' }) {
   if (status === 'under_review') {
-    return `Hola ${artistName || ''}, tu obra "${artworkTitle}" ha iniciado el proceso de revisión.\n\nTan pronto sea aprobada o rechazada, te notificaremos.`;
+    return `Hi ${artistName || ''}, your artwork "${artworkTitle}" has entered the review process.\n\nWe will let you know as soon as it is approved or rejected.`;
   }
   if (status === 'approved') {
-    return `¡Felicidades ${artistName || ''}! Tu obra "${artworkTitle}" ha sido aprobada para exhibición.\n\nYa es visible para el público que visita la página.`;
+    return `Congratulations ${artistName || ''}! Your artwork "${artworkTitle}" has been approved for exhibition.\n\nIt is now visible to collectors visiting the site.`;
   }
   if (status === 'rejected') {
-    return `Hola ${artistName || ''}, lamentamos informarte que tu obra "${artworkTitle}" fue rechazada.\nMotivo: ${reason}`;
+    return `Hi ${artistName || ''}, we are sorry to inform you that your artwork "${artworkTitle}" was rejected.\nReason: ${reason}`;
   }
-  return `Hola ${artistName || ''}, hay una actualización sobre tu obra "${artworkTitle}".`;
+  return `Hi ${artistName || ''}, there is an update about your artwork "${artworkTitle}".`;
 }
 
 function artworkStatusHtml({ status, artistName = '', artworkTitle = '', reason = '', artworkUrl = '' } = {}) {
   const normalizedStatus = status === 'submitted' ? 'under_review' : status;
-  let previewText = 'Actualización de tu obra';
-  let title = 'Actualización de tu obra';
+  let previewText = 'Update about your artwork';
+  let title = 'Update about your artwork';
   const bodyLines = [];
 
   if (normalizedStatus === 'under_review') {
-    previewText = 'Tu obra está en revisión.';
-    title = 'Tu obra está en revisión';
-    bodyLines.push(`Tu obra "${artworkTitle}" ha iniciado el proceso de revisión.`);
-    bodyLines.push('Te avisaremos tan pronto sea aprobada o rechazada.');
+    previewText = 'Your artwork is under review.';
+    title = 'Your artwork is under review';
+    bodyLines.push(`Your artwork "${artworkTitle}" has started the review process.`);
+    bodyLines.push('We will notify you as soon as it is approved or rejected.');
   } else if (normalizedStatus === 'approved') {
-    previewText = '¡Tu obra fue aprobada!';
-    title = '¡Tu obra fue aprobada!';
-    bodyLines.push(`¡Felicidades! Tu obra "${artworkTitle}" ha sido aprobada para exhibición.`);
-    bodyLines.push('Ya es visible para los coleccionistas que visitan la galería.');
+    previewText = 'Your artwork was approved!';
+    title = 'Your artwork was approved!';
+    bodyLines.push(`Congratulations! Your artwork "${artworkTitle}" has been approved for exhibition.`);
+    bodyLines.push('It is now visible to collectors visiting the gallery.');
   } else if (normalizedStatus === 'rejected') {
-    title = 'Tu obra fue rechazada';
-    bodyLines.push(`Lamentamos informarte que tu obra "${artworkTitle}" fue rechazada.`);
-    if (reason) bodyLines.push(`Motivo: ${reason}`);
+    previewText = 'Your artwork was rejected.';
+    title = 'Your artwork was rejected';
+    bodyLines.push(`We are sorry to inform you that your artwork "${artworkTitle}" was rejected.`);
+    if (reason) bodyLines.push(`Reason: ${reason}`);
   } else {
-    bodyLines.push(`Hay una actualización sobre tu obra "${artworkTitle}".`);
+    bodyLines.push(`There is an update about your artwork "${artworkTitle}".`);
   }
 
   return renderEmailLayout({
@@ -50,67 +51,67 @@ function artworkStatusHtml({ status, artistName = '', artworkTitle = '', reason 
     title,
     greeting: artistName || '',
     bodyLines,
-    actionLabel: artworkUrl ? 'Ver obra' : undefined,
+    actionLabel: artworkUrl ? 'View artwork' : undefined,
     actionUrl: artworkUrl
   });
 }
 
 function adminSubmissionSubject() {
-  return 'Nueva obra enviada para revisión';
+  return 'New artwork submitted for review';
 }
 
 function adminSubmissionText({ art, artist }) {
   const info = [
-    `Título: ${art.title}`,
-    `Descripción: ${art.description || '(sin descripción)'}`,
-    `Artista: ${artist?.name} (${artist?.email})`,
-    `ID de obra: ${art._id}`
+    `Title: ${art.title}`,
+    `Description: ${art.description || '(no description)'}`,
+    `Artist: ${artist?.name} (${artist?.email})`,
+    `Artwork ID: ${art._id}`
   ].join('\n');
-  const extra = `\n\nEste correo ha sido enviado a otros administradores.\nSi no ves la obra en el queue de aprobación, es posible que ya fue aprobada o rechazada por otro administrador.\nPuedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
+  const extra = `\n\nThis email was also sent to the other administrators.\nIf you do not see the artwork in the review queue, another admin may have already approved or rejected it.\nYou can check the approval history to confirm the final status of the artwork.`;
   return `${info}${extra}`;
 }
 
-// ------- Nuevos templates: Consulta de compra -------
+// ------- Purchase inquiry templates -------
 function purchaseInquirySubject({ artworkTitle = '' } = {}) {
-  return `Consulta de compra: ${artworkTitle || 'obra'}`;
+  return `Purchase inquiry: ${artworkTitle || 'artwork'}`;
 }
 
 function purchaseInquiryTextHtml({ artworkTitle = '', artistName = '', buyerName = '', buyerEmail = '', message = '', artworkUrl = '' } = {}) {
   const bodyLines = [
-    `${buyerName || 'Un coleccionista'} (${buyerEmail || ''}) está interesado(a) en comprar la obra "${artworkTitle || 'de la galería'}".`,
-    'Puedes responder a este correo para coordinar precio final, métodos de pago y envío.'
+    `${buyerName || 'A collector'} (${buyerEmail || ''}) is interested in buying the artwork "${artworkTitle || 'from the gallery'}".`,
+    'You can reply to this email to coordinate final pricing, payment methods, and shipping.'
   ];
   if (message && String(message).trim()) {
-    bodyLines.push('Mensaje del comprador:');
+    bodyLines.push('Message from the collector:');
     bodyLines.push(String(message).trim());
   }
 
   return renderEmailLayout({
-    previewText: `Nueva consulta sobre "${artworkTitle || 'tu obra'}".`,
-    title: 'Consulta de compra',
+    previewText: `New inquiry about "${artworkTitle || 'your artwork'}".`,
+    title: 'Purchase inquiry',
     greeting: artistName || '',
     bodyLines,
-    actionLabel: artworkUrl ? 'Ver obra' : undefined,
+    actionLabel: artworkUrl ? 'View artwork' : undefined,
     actionUrl: artworkUrl,
     footerLines: [
-      `Este correo se envió también a ${buyerName || 'el comprador'} (${buyerEmail || ''}) para que ambos tengan el mismo hilo.`
+      `This email was also sent to ${buyerName || 'the collector'} (${buyerEmail || ''}) so everyone stays on the same thread.`
     ]
   });
 }
 
 function purchaseInquiryTextPlain({ artworkTitle = '', artistName = '', buyerName = '', buyerEmail = '', message = '', artworkUrl = '' } = {}) {
   const parts = [];
-  parts.push(`${buyerName} (${buyerEmail}) está interesado(a) en comprar la obra "${artworkTitle}".`);
-  parts.push('Pueden continuar por email para coordinar detalles (precio final, métodos de pago, envío).');
+  parts.push(`${buyerName} (${buyerEmail}) is interested in buying the artwork "${artworkTitle}".`);
+  parts.push('Feel free to continue over email to coordinate details (final price, payment methods, shipping).');
   if (message && String(message).trim()) {
-    parts.push('\nMensaje del comprador:');
+    parts.push('\nMessage from the collector:');
     parts.push(String(message).trim());
   }
   if (artworkUrl) {
-    parts.push(`\nVer obra: ${artworkUrl}`);
+    parts.push(`\nView artwork: ${artworkUrl}`);
   }
   parts.push('\n---');
-  parts.push(`Este correo fue enviado a ${artistName} con copia a ${buyerName}.`);
+  parts.push(`This email was sent to ${artistName} with a copy to ${buyerName}.`);
   return parts.join('\n');
 }
 

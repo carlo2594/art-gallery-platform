@@ -37,10 +37,28 @@ const userSchema = new mongoose.Schema({
       message: MODERATE_PASSWORD_MESSAGE
     }
   },   // hash no se envía
+  roles: {
+    type: [{
+      type: String,
+      enum: ['artist', 'admin', 'collector']
+    }],
+    default: ['collector'],
+    select: false,
+    validate: {
+      validator: function (value) {
+        return Array.isArray(value) && value.length > 0;
+      },
+      message: 'El usuario debe tener al menos un rol asignado'
+    },
+    set: function (value) {
+      const incoming = Array.isArray(value) ? value : (value ? [value] : []);
+      const deduped = Array.from(new Set(incoming.filter(Boolean)));
+      return deduped.length ? deduped : ['collector'];
+    }
+  },
   role: {
     type: String,
     enum: ['artist', 'admin', 'collector'],
-    default: 'collector',
     select: false
   },
   profileImage: { type: String, trim: true, maxlength: 500 },
@@ -67,20 +85,40 @@ const userSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+userSchema.pre('validate', function (next) {
+  if ((!this.roles || this.roles.length === 0) && this.role) {
+    this.roles = [this.role];
+  }
+  if (this.isModified('role') && this.role) {
+    this.roles = [this.role];
+  }
+  next();
+});
+
+userSchema.pre('save', function (next) {
+  if ((!this.roles || this.roles.length === 0) && this.role) {
+    this.roles = [this.role];
+  }
+  if (Array.isArray(this.roles) && this.roles.length > 0) {
+    this.role = this.roles[0];
+  }
+  next();
+});
+
 /* ---------- Índices optimizados para viewsController ---------- */
 // 1. Índice único para slug solo (para garantizar unicidad global)
 userSchema.index({ slug: 1 }, { unique: true, sparse: true });
 
 // 2. Índice para búsqueda de artistas (getArtistsView, getSearchResults)
 userSchema.index({ 
-  role: 1, 
+  roles: 1, 
   name: 1, 
   createdAt: -1 
 });
 
 // 3. Índice para búsqueda de texto en nombre y bio
 userSchema.index({ 
-  role: 1,
+  roles: 1,
   name: 'text', 
   bio: 'text' 
 });

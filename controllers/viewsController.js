@@ -13,6 +13,7 @@ const User = require('@models/userModel');
 const Exhibition = require('@models/exhibitionModel');
 const Favorite = require('@models/favoriteModel');
 const ArtistApplication = require('@models/artistApplicationModel');
+const { hasRole } = require('@utils/roleUtils');
 
 // Utilities optimizadas
 const { viewsCache } = require('@utils/cache');
@@ -369,7 +370,7 @@ exports.getPersonalHome = catchAsync(async (req, res) => {
     })(),
     (async () => {
       try {
-        return await User.find({ role: 'artist', active: { $ne: false } })
+        return await User.find({ active: { $ne: false }, $or: [{ roles: 'artist' }, { role: 'artist' }] })
           .select('name slug profileImage followersCount')
           .sort({ followersCount: -1, createdAt: -1 })
           .limit(8)
@@ -1148,7 +1149,7 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
     const returnTo = encodeURIComponent(req.originalUrl || '/artists/panel');
     return res.redirect(`/login?returnTo=${returnTo}`);
   }
-  if (currentUser.role !== 'artist') {
+  if (!hasRole(currentUser, 'artist')) {
     return res.status(403).render('public/auth/unauthorized', {
       title: 'Acceso no autorizado · Galería del Ox',
       message: 'Debes ser artista para acceder a tu panel.'
@@ -1159,14 +1160,15 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
 
   // Buscar el artista por ID del usuario autenticado (sin lanzar 404 si no hay slug)
   let artistDoc = await User.findById(currentUser.id)
-    .select('name bio profileImage coverImage createdAt slug email location website social followersCount +role')
+    .select('name bio profileImage coverImage createdAt slug email location website social followersCount +roles +role')
     .lean();
   if (!artistDoc) {
     // Fallback a los datos mínimos del usuario en sesión para no romper el panel
     artistDoc = {
       _id: currentUser.id,
       name: currentUser.name,
-      role: currentUser.role,
+      role: currentUser.role || null,
+      roles: currentUser.roles || [],
       profileImage: currentUser.profileImage,
       coverImage: currentUser.coverImage,
       bio: currentUser.bio,
@@ -1269,7 +1271,7 @@ exports.getArtistCreateArtworkWizard = catchAsync(async (req, res, next) => {
     const returnTo = encodeURIComponent(req.originalUrl || '/artists/panel');
     return res.redirect(`/login?returnTo=${returnTo}`);
   }
-  if (currentUser.role !== 'artist') {
+  if (!hasRole(currentUser, 'artist')) {
     return res.status(403).render('public/auth/unauthorized', {
       title: 'Acceso no autorizado � Galer�a del Ox',
       message: 'Debes ser artista para crear una obra.'
@@ -1331,7 +1333,7 @@ exports.getBecomeArtist = catchAsync(async (req, res) => {
 
   let application = null;
   try {
-    if (currentUser && currentUser.role !== 'artist') {
+    if (currentUser && !hasRole(currentUser, 'artist')) {
       const uid = currentUser.id || currentUser._id;
       // Preferir solicitudes abiertas; si no hay, mostrar la más reciente
       application = await ArtistApplication.findOne({

@@ -6,6 +6,7 @@ const { sendMail } = require('@services/mailer');
 const { renderEmailLayout } = require('@services/emailLayout');
 const ArtistApplication = require('@models/artistApplicationModel');
 const cloudinary = require('@services/cloudinary');
+const { hasRole } = require('@utils/roleUtils');
 
 function wantsHTML(req) {
   try { return req.accepts(['html','json']) === 'html'; } catch (_) { return false; }
@@ -25,7 +26,7 @@ exports.create = catchAsync(async (req, res, next) => {
   } catch (_) {}
 
   // No permitir a artistas ya activos enviar solicitud
-  if (user.role === 'artist') {
+  if (hasRole(user, 'artist')) {
     const msg = 'Tu cuenta ya es de artista.';
     if (wantsHTML(req)) return res.redirect(303, `/become-artist?error=${encodeURIComponent(msg)}`);
     return next(new AppError(msg, 400));
@@ -92,7 +93,7 @@ exports.create = catchAsync(async (req, res, next) => {
 
   // Notificar a soporte
   const to = process.env.CONTACT_EMAIL_TO || process.env.SUPPORT_EMAIL || 'soporte@galeriadelox.com';
-  const subject = `Nueva solicitud de artista – ${user.name || user.email || user._id}`;
+  const subject = `New artist application - ${user.name || user.email || user._id}`;
   // Generar URL de descarga privada (forzar nombre y descarga como PDF)
   let downloadUrl = '';
   try {
@@ -103,25 +104,25 @@ exports.create = catchAsync(async (req, res, next) => {
     });
   } catch(_) {}
 
-  const text = `Usuario: ${user.name || ''} (${user.email || ''})\n` +
-               (valid.length ? `Enlaces:\n- ${valid.join('\n- ')}\n` : '') +
+  const text = `User: ${user.name || ''} (${user.email || ''})\n` +
+               (valid.length ? `Links:\n- ${valid.join('\n- ')}\n` : '') +
                (statement ? `Statement:\n${statement}\n\n` : '') +
-               `CV (descarga privada): ${downloadUrl || '(no disponible)'}\n` +
-               `Aplicación ID: ${appDoc._id}`;
+               `CV (private download): ${downloadUrl || '(not available)'}\n` +
+               `Application ID: ${appDoc._id}`;
 
   const html = renderEmailLayout({
-    previewText: `Nueva solicitud de artista de ${user.name || user.email || ''}.`,
-    title: 'Nueva solicitud de artista',
-    greeting: 'Equipo',
+    previewText: `New artist application from ${user.name || user.email || ''}.`,
+    title: 'New artist application',
+    greeting: 'Team',
     bodyLines: [
-      `Usuario: ${user.name || user.email || ''}`,
-      `Email: ${user.email || 'sin email'}`,
-      valid.length ? `Enlaces: ${valid.join(', ')}` : 'Sin enlaces válidos proporcionados.',
+      `User: ${user.name || user.email || ''}`,
+      `Email: ${user.email || 'no email provided'}`,
+      valid.length ? `Links: ${valid.join(', ')}` : 'No valid links provided.',
       statement ? `Statement: ${statement}` : ''
     ],
-    actionLabel: downloadUrl ? 'Descargar CV' : undefined,
+    actionLabel: downloadUrl ? 'Download CV' : undefined,
     actionUrl: downloadUrl,
-    footerLines: [`Aplicación ID: ${appDoc._id}`]
+    footerLines: [`Application ID: ${appDoc._id}`]
   });
 
   try { await sendMail({ to, subject, text, html }); } catch (_) {}

@@ -1,9 +1,11 @@
 // middlewares/restrictTo.js
+const { hasRole } = require('@utils/roleUtils');
+
 module.exports = (...roles) => {
   return (req, res, next) => {
     try {
-      const role = req.user && req.user.role;
-      if (roles.includes(role)) return next();
+      const allow = roles.some((role) => hasRole(req.user, role));
+      if (allow) return next();
 
       const isApi = (req.originalUrl || '').startsWith('/api/');
       const wantsHtml = typeof req.accepts === 'function' && req.accepts('html') && !isApi;

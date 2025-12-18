@@ -151,35 +151,42 @@ html(lang='es')
             fetch(url, { method: 'PATCH' }).then(function(res){ if(!res.ok) throw new Error('Failed'); success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           }
         }
-        function onPromote(e){
-          var btn = e.target.closest && e.target.closest('.admin-promote');
+        function onSaveRoles(e){
+          var btn = e.target.closest && e.target.closest('.admin-save-roles');
           if(!btn) return;
           e.preventDefault();
           var id = btn.getAttribute('data-user-id');
-          var role = btn.getAttribute('data-role');
-          if(!id || !role) return;
-          if(!confirm('Promote to "' + role + '"?')) return;
+          var modalEl = btn.closest && btn.closest('.modal');
+          if(!id || !modalEl) return;
+          var checkboxes = modalEl.querySelectorAll && modalEl.querySelectorAll('[data-role-checkbox]');
+          var roles = Array.prototype.filter.call(checkboxes || [], function(cb){ return cb.checked; }).map(function(cb){ return cb.value; });
+          if(!roles.length){
+            var msg = 'Selecciona al menos un rol.';
+            if (window.showAdminToast) showAdminToast(msg, 'warning'); else alert(msg);
+            return;
+          }
+          if(!confirm('Save selected roles for this user?')) return;
           var old = btn.textContent;
-          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Updating...';
+          btn.disabled = true; btn.classList.add('disabled'); btn.textContent = 'Saving...';
           var done = function(){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent = old; };
           var url = '/api/v1/users/' + encodeURIComponent(id) + '/role';
           var success = function(){
-            if (window.showAdminToast) showAdminToast('Role updated to ' + role, 'success');
-            var modalEl = btn.closest && btn.closest('.modal');
+            if (window.showAdminToast) showAdminToast('Roles updated', 'success');
             if (modalEl && window.bootstrap && bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
           };
-          var failure = function(){ if (window.showAdminToast) showAdminToast('Could not update role','danger');};
+          var failure = function(){ if (window.showAdminToast) showAdminToast('Could not update roles','danger'); };
+          var payload = { roles: roles };
           if (window.axios) {
-            axios.patch(url, { role: role }).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
+            axios.patch(url, payload).then(function(){ success(); }).catch(function(err){ console.error(err); failure(); }).finally(done);
           } else {
-            fetch(url, { method: 'PATCH', headers: { 'Content-Type':'application/json' }, body: JSON.stringify({ role: role }) })
+            fetch(url, { method: 'PATCH', headers: { 'Content-Type':'application/json' }, body: JSON.stringify(payload) })
               .then(function(res){ if(!res.ok) throw new Error('Failed'); success(); })
               .catch(function(err){ console.error(err); failure(); })
               .finally(done);
           }
         }
         document.addEventListener('click', onClick);
-        document.addEventListener('click', onPromote);
+        document.addEventListener('click', onSaveRoles);
       })();
     // Toggle active/inactive user (admin)
     script.

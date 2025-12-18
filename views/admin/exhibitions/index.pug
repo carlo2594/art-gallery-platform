@@ -2,7 +2,7 @@ extends /layouts/admin
 
 block content
   .container.py-5
-    - const isAdmin = currentUser && currentUser.role === 'admin'
+    - const isAdmin = (typeof currentUserHasRole === 'function' && currentUser) ? currentUserHasRole('admin') : false
     h1.h3.mb-4.d-flex.justify-content-between.align-items-center
       span Exhibitions
       if isAdmin

@@ -4,6 +4,7 @@ const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const sendResponse = require('@utils/sendResponse');
 const isValidObjectId = require('@utils/isValidObjectId');
+const { hasRole } = require('@utils/roleUtils');
 
 // Seguir a un artista
 exports.followArtist = catchAsync(async (req, res, next) => {
@@ -14,9 +15,9 @@ exports.followArtist = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(artistId)) return next(new AppError('ID inválido', 400));
   if (String(artistId) === String(followerId)) return next(new AppError('No puedes seguirte a ti mismo', 400));
 
-  const artist = await User.findById(artistId).select('+role');
+  const artist = await User.findById(artistId).select('+roles +role');
   if (!artist) return next(new AppError('Artista no encontrado', 404));
-  if (artist.role !== 'artist') return next(new AppError('Solo puedes seguir artistas', 400));
+  if (!hasRole(artist, 'artist')) return next(new AppError('Solo puedes seguir artistas', 400));
 
   try {
     await Follow.create({ follower: followerId, artist: artistId });

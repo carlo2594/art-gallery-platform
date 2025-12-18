@@ -12,20 +12,27 @@
             i.fas.fa-key.me-1
             | Reset password
         hr
-        h2.fs-5 Change role
-        .d-flex.gap-2.flex-wrap
-          if u.role !== 'collector'
-            button.btn.btn-secondary.admin-promote(type='button' data-user-id=u._id data-role='collector' aria-label='Switch to collector')
-              i.fas.fa-arrow-down-long.me-1
-              | Switch to Collector
-          if u.role !== 'artist'
-            button.btn.btn-success.admin-promote(type='button' data-user-id=u._id data-role='artist' aria-label='Change artist')
-              i.fas.fa-arrow-up-right-dots.me-1
-              | Switch to Artist
-          if u.role !== 'admin'
-            button.btn.btn-danger.admin-promote(type='button' data-user-id=u._id data-role='admin' aria-label='Switch to administrator')
-              i.fas.fa-user-shield.me-1
-              | Switch to Administrator
+        h2.fs-5 Manage roles
+        - const roleOptions = (typeof availableRoles !== 'undefined' && Array.isArray(availableRoles) && availableRoles.length) ? availableRoles : ['collector','artist','admin']
+        - const userRoles = Array.isArray(u.roles) && u.roles.length ? u.roles : (u.role ? [u.role] : [])
+        form.admin-user-roles-form(data-user-id=u._id)
+          .d-flex.flex-column.gap-2
+            each roleValue in roleOptions
+              - const checkboxId = `userRole-${u._id}-${roleValue}`
+              - const labelText = roleValue.charAt(0).toUpperCase() + roleValue.slice(1)
+              .form-check
+                input.form-check-input(
+                  type='checkbox'
+                  id=checkboxId
+                  name='roles'
+                  data-role-checkbox=true
+                  value=roleValue
+                  checked=userRoles.includes(roleValue))
+                label.form-check-label(for=checkboxId)= labelText
+          .form-text.small.mb-2 Select at least one role. Admins retain their privileges unless removed explicitly.
+          button.btn.btn-primary.w-100.admin-save-roles(type='button' data-user-id=u._id)
+            i.fas.fa-floppy-disk.me-1
+            | Save roles
         hr
         h2.fs-5 Account status
         p

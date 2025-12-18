@@ -4,8 +4,11 @@
  */
 function buildArtistFilter(q, search) {
   const filter = {
-    role: 'artist' // Solo usuarios con role de artista
-  };
+    $or: [
+      { roles: 'artist' },
+      { role: 'artist' }
+    ]
+  }; // Solo usuarios que tengan rol de artista, incluso legacy
   
   if (search) {
     filter.name = { $regex: search, $options: 'i' };

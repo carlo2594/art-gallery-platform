@@ -38,19 +38,19 @@ exports.submit = catchAsync(async (req, res) => {
   }
 
   const to = process.env.CONTACT_EMAIL_TO || 'soporte@galeriadelox.com';
-  const subject = `Contacto web: ${n}`;
-  const text = `Nombre: ${n}\nEmail: ${e}\n\nMensaje:\n${m}\n\nIP: ${req.ip || ''}`;
+  const subject = `Website contact: ${n}`;
+  const text = `Name: ${n}\nEmail: ${e}\n\nMessage:\n${m}\n\nIP: ${req.ip || ''}`;
   const html = renderEmailLayout({
-    previewText: `Nuevo mensaje de ${n}`,
-    title: 'Nuevo mensaje de contacto',
-    greeting: 'Equipo',
+    previewText: `New message from ${n}`,
+    title: 'New contact message',
+    greeting: 'Team',
     bodyLines: [
-      `Nombre: ${n}`,
+      `Name: ${n}`,
       `Email: ${e}`,
-      'Mensaje:',
+      'Message:',
       m
     ],
-    actionLabel: e ? 'Responder' : undefined,
+    actionLabel: e ? 'Reply' : undefined,
     actionUrl: e ? `mailto:${e}` : undefined,
     footerLines: [`IP: ${req.ip || ''}`]
   });

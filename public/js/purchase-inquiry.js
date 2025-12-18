@@ -7,7 +7,7 @@
     var ok = document.getElementById('purchaseInquirySuccess');
     var err = document.getElementById('purchaseInquiryError');
     var btn = document.getElementById('purchaseInquirySubmit');
-    function setLoading(d){ if(btn){ btn.disabled = !!d; btn.textContent = d ? 'Enviando…' : 'Enviar consulta'; } }
+    function setLoading(d){ if(btn){ btn.disabled = !!d; btn.textContent = d ? 'Sending...' : 'Send inquiry'; } }
     form.addEventListener('submit', function(e){
       try { if (!window.api) return; } catch(_) { return; }
       e.preventDefault();

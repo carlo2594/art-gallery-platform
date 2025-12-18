@@ -63,6 +63,9 @@ html.no-js(lang='en')
     link(rel='canonical' href=__metaUrl)
 
   body(class=hideGlobalOverlay ? '' : 'loading')
+    - const userHasRole = typeof currentUserHasRole === 'function' ? currentUserHasRole : (() => false)
+    - const currentUserIsArtist = currentUser ? userHasRole('artist') : false
+    - const currentUserIsAdmin = currentUser ? userHasRole('admin') : false
     //- Overlay de carga global (opcional)
     if !hideGlobalOverlay
       #page-loading-overlay.page-loading-overlay
@@ -101,7 +104,7 @@ html.no-js(lang='en')
               li.nav-item
                 a.nav-link.me-lg-3(href='/exhibitions') Exhibitions
 
-              if currentUser && currentUser.role === 'artist'
+              if currentUserIsArtist
                 li.nav-item
                   a.nav-link.me-lg-3(href='/artists/panel' aria-label='Artist dashboard') Artist dashboard
 
@@ -142,7 +145,7 @@ html.no-js(lang='en')
                     a.dropdown-item.nav-user-menu-link.mb-2(
                       href='/edit-profile'
                       aria-label='Edit account') Edit account
-                  if currentUser && currentUser.role === 'admin'
+                  if currentUserIsAdmin
                     li
                       a.dropdown-item.nav-user-menu-link.mb-2(
                         href='/admin'
@@ -191,7 +194,7 @@ html.no-js(lang='en')
               a.nav-link.nav-user-menu-link(
                 href='/edit-profile'
                 aria-label='Edit account') Edit account
-            if currentUser && currentUser.role === 'admin'
+            if currentUserIsAdmin
               li.nav-item
                 a.nav-link.nav-user-menu-link(
                   href='/admin'
@@ -238,7 +241,7 @@ html.no-js(lang='en')
                 a.nav-overlay__link(href='/artists') Artists
               li
                 a.nav-overlay__link(href='/exhibitions') Exhibitions
-              if currentUser && currentUser.role === 'artist'
+              if currentUserIsArtist
                 li
                   a.nav-overlay__link(
                     href='/artists/panel'
@@ -278,7 +281,7 @@ html.no-js(lang='en')
                   a.nav-overlay__link(
                     href='/edit-profile'
                     aria-label='Edit account') Edit account
-                if currentUser && currentUser.role === 'admin'
+                if currentUserIsAdmin
                   li
                     a.nav-overlay__link(
                       href='/admin'

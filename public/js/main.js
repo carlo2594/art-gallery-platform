@@ -1405,18 +1405,19 @@ document.addEventListener('DOMContentLoaded', function(){
       e.preventDefault();
       var nameEl = document.getElementById('newUserName');
       var emailEl = document.getElementById('newUserEmail');
-      var roleEl = document.getElementById('newUserRole');
       var email = (emailEl && emailEl.value || '').trim();
       var name = (nameEl && nameEl.value || '').trim();
-      var role = roleEl && roleEl.value;
+      var roleEls = form.querySelectorAll('input[name="roles"]');
+      var roles = Array.prototype.filter.call(roleEls || [], function(el){ return el.checked; }).map(function(el){ return el.value; });
       if (!email) { if (window.showAdminToast) showAdminToast('Correo requerido','danger'); return; }
+      if (!roles.length) { if (window.showAdminToast) showAdminToast('Selecciona al menos un rol.','warning'); return; }
       var btn = form && form.querySelector('.admin-users-create-submit');
       var old = btn && btn.textContent;
       if (btn) { btn.disabled=true; btn.classList.add('disabled'); btn.textContent='Creando...'; }
       var done = function(){ if(btn){ btn.disabled=false; btn.classList.remove('disabled'); btn.textContent=old; } };
       var payload = { email: email };
       if (name) payload.name = name;
-      if (role) payload.role = role;
+      if (roles.length) payload.roles = roles;
       var success = function(){
         if (window.showAdminToast) showAdminToast('Usuario creado y correo enviado','success');
         var modalEl = (form && form.closest('.admin-users-create-modal'));
@@ -2419,17 +2420,17 @@ __onReady(function () {
       if(existingAlert){ existingAlert.parentNode.removeChild(existingAlert); }
       var info = document.createElement('div');
       info.className = 'alert alert-info mb-3';
-      info.textContent = 'Enviando…';
+      info.textContent = 'Sending...';
       form.insertBefore(info, form.querySelector('.form-floating'));
       fetch(form.action, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email }) })
         .then(function(res){ return res.json().catch(function(){return {};}).then(function(json){return { ok: res.ok, json: json };}); })
         .then(function(result){
           info.className = 'alert ' + (result.ok ? 'alert-success' : 'alert-warning') + ' mb-3';
-          info.textContent = (result.json && result.json.message) || 'Si el email existe, te enviaremos un enlace para restablecer tu contraseña.';
+          info.textContent = (result.json && result.json.message) || 'If the email exists, we will send you a link to reset your password.';
         })
         .catch(function(){
           info.className = 'alert alert-danger mb-3';
-          info.textContent = 'No se pudo procesar la solicitud. Intenta de nuevo.';
+          info.textContent = 'We could not process your request. Please try again.';
         });
     });
   }

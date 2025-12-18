@@ -34,13 +34,14 @@ block content
                 span Reservations and sales management
 
           // CTAs según estado de sesión
+          - const currentUserIsArtist = typeof currentUserHasRole === 'function' ? currentUserHasRole('artist') : (currentUser && currentUser.role === 'artist')
           if !currentUser
             a.btn.btn-primary.btn-lg.rounded-pill.fw-bold.mb-3(href='/signup?intent=artist' aria-label='Create artist account')
               i.fas.fa-user-plus.me-2
               | Create artist account
             p.small.text-muted
               | Do you already have an account? Log in and complete your application.
-          else if currentUser.role === 'artist'
+          else if currentUserIsArtist
             .alert.alert-success(role='status')
               i.fas.fa-circle-check.me-2
               | You are already an artist in the gallery. Welcome!

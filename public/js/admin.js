@@ -2,6 +2,12 @@
 ;/* ==== admin-users.js ==== */
 
 'use strict';
+function formatUserRolesLabel(user){
+  if (!user) return 'rol desconocido';
+  var roles = Array.isArray(user.roles) && user.roles.length ? user.roles.slice() : [];
+  if (!roles.length && user.role) roles = [user.role];
+  return roles.length ? roles.join(', ') : 'rol desconocido';
+}
 const MAX_REJECT_REASON = 100;
 function enforceRejectReasonLimit(textarea){
   if (!textarea || typeof textarea.value !== 'string') return;
@@ -61,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!val) { a.style.display='none'; toggleSubmit(false); return; }
       var data = await lookup(val);
       if (data && data.exists && data.user){
-        a.innerHTML = 'Este correo ya está registrado: <b>' + (data.user.name || 'Usuario') + '</b> (' + (data.user.role || 'rol desconocido') + ')';
+        a.innerHTML = 'Este correo ya está registrado: <b>' + (data.user.name || 'Usuario') + '</b> (' + formatUserRolesLabel(data.user) + ')';
         a.style.display = '';
         toggleSubmit(true);
       } else {
@@ -81,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function(){
       var email = (emailEl && emailEl.value || '').trim();
       if (!email) return;
       var data = await lookup(email);
-      if (data && data.exists){ e.preventDefault(); ensureAlert(); alertEl.innerHTML = 'Este correo ya está registrado: <b>' + (data.user && data.user.name || 'Usuario') + '</b> (' + (data.user && data.user.role || 'rol desconocido') + ')'; alertEl.style.display=''; toggleSubmit(true); }
+      if (data && data.exists){ e.preventDefault(); ensureAlert(); alertEl.innerHTML = 'Este correo ya está registrado: <b>' + (data.user && data.user.name || 'Usuario') + '</b> (' + formatUserRolesLabel(data.user) + ')'; alertEl.style.display=''; toggleSubmit(true); }
     });
   })();
 
@@ -125,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function(){
       if (!email){ a.style.display='none'; toggleSubmit(modalEl, false); return; }
       var data = await lookup(email);
       if (data && data.exists && data.user && String(data.user._id) !== String(currentId)){
-        a.innerHTML = 'Este correo ya está registrado: <b>' + (data.user.name || 'Usuario') + '</b> (' + (data.user.role || 'rol desconocido') + ')';
+        a.innerHTML = 'Este correo ya está registrado: <b>' + (data.user.name || 'Usuario') + '</b> (' + formatUserRolesLabel(data.user) + ')';
         a.style.display = '';
         toggleSubmit(modalEl, true);
       } else {
@@ -668,7 +674,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     if (!id || !reason) { if (window.showAdminToast) showAdminToast('Debes indicar un motivo', 'warning'); return; }
     var btn = form.querySelector('button[type="submit"]');
-    var oldText = btn && btn.textContent; if (btn){ btn.disabled = true; btn.textContent = 'Enviando...'; }
+    var oldText = btn && btn.textContent; if (btn){ btn.disabled = true; btn.textContent = 'Sending...'; }
     try {
       var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/reject', {
         method: 'PATCH',
@@ -1572,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', function(){
     e.preventDefault();
     var ids = getSelected(); if (!ids.length) return;
     if (!confirm('Enviar ' + ids.length + ' obra(s) a la papelera?')) return;
-    var old = btn.textContent; btn.disabled = true; btn.textContent = 'Enviando...';
+    var old = btn.textContent; btn.disabled = true; btn.textContent = 'Sending...';
     try {
       for (const id of ids){
         var res = await fetch('/api/v1/artworks/' + encodeURIComponent(id) + '/trash', { method: 'PATCH', credentials: 'include' });

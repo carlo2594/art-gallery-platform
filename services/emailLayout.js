@@ -48,7 +48,7 @@ function renderActionButton({ actionUrl, actionLabel }) {
       </tr>
     </table>
     <p style="margin:0 0 16px 0;font-size:13px;color:${MUTED_COLOR};">
-      Si el botón no funciona, copia y pega este enlace: <br>
+      If the button does not work, copy and paste this link: <br>
       <a href="${safeUrl}" style="color:${BRAND_COLOR};word-break:break-all;">${safeUrl}</a>
     </p>
   `;
@@ -56,7 +56,7 @@ function renderActionButton({ actionUrl, actionLabel }) {
 
 function renderEmailLayout({
   previewText = '',
-  title = 'Galería del Ox',
+  title = 'Ox Gallery',
   greeting,
   bodyLines = [],
   listItems = [],
@@ -68,12 +68,12 @@ function renderEmailLayout({
   const bodyHtml = renderParagraphs(bodyLines) + renderList(listItems);
   const footerHtml = renderParagraphs(footerLines);
   const greetingHtml = greeting
-    ? `<p style="margin:0 0 16px 0; font-size:16px; font-weight:600; color:${TEXT_COLOR};">Hola ${escapeHtml(greeting)},</p>`
+    ? `<p style="margin:0 0 16px 0; font-size:16px; font-weight:600; color:${TEXT_COLOR};">Hi ${escapeHtml(greeting)},</p>`
     : '';
 
   return `
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -87,7 +87,7 @@ function renderEmailLayout({
           <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:560px;background:#ffffff;border:1px solid ${BORDER_COLOR};border-radius:12px;padding:32px;">
             <tr>
               <td style="text-align:center;padding-bottom:16px;">
-                <div style="font-size:22px;font-weight:700;color:${TEXT_COLOR};">Galería del Ox</div>
+                <div style="font-size:22px;font-weight:700;color:${TEXT_COLOR};">Ox Gallery</div>
                 <div style="font-size:13px;color:${MUTED_COLOR};">${escapeHtml(title)}</div>
               </td>
             </tr>
@@ -101,7 +101,7 @@ function renderEmailLayout({
             </tr>
           </table>
           <p style="margin:16px 0 0 0;font-size:12px;color:${MUTED_COLOR};">
-            © ${new Date().getFullYear()} Galería del Ox. Todos los derechos reservados.
+            &copy; ${new Date().getFullYear()} Ox Gallery. All rights reserved.
           </p>
         </td>
       </tr>

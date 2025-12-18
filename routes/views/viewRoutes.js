@@ -59,7 +59,12 @@ router.get('/activity/exhibitions', ensureLoggedInView, viewsController.getActiv
 // Guard helper: requiere rol artista
 const ensureArtistRoleView = (req, res, next) => {
   const cu = res.locals && res.locals.currentUser;
-  if (cu && cu.role === 'artist') return next();
+  const hasArtistRole =
+    (res.locals &&
+      typeof res.locals.currentUserHasRole === 'function' &&
+      res.locals.currentUserHasRole('artist')) ||
+    (cu && Array.isArray(cu.roles) && cu.roles.includes('artist'));
+  if (hasArtistRole) return next();
   return res.status(403).render('public/auth/unauthorized', {
     title: 'Acceso no autorizado · Galería del Ox',
     message: 'Debes ser artista para acceder a esta página.'

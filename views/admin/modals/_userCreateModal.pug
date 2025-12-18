@@ -14,11 +14,15 @@
             label.form-label(for='newUserEmail') Mail
             input.form-control#newUserEmail(type='email' name='email' placeholder='correo@dominio.com' required)
           .mb-3
-            label.form-label(for='newUserRole') Role
-            select.form-select#newUserRole(name='role')
-              option(value='collector') Collector
-              option(value='artist' selected=role === 'artist') Artist
-              option(value='admin') Admin
+            - const roleOptions = (typeof availableRoles !== 'undefined' && Array.isArray(availableRoles) && availableRoles.length) ? availableRoles : ['collector','artist','admin']
+            label.form-label Roles
+            .d-flex.flex-column.gap-2
+              each roleValue in roleOptions
+                - const roleId = `newUserRole-${roleValue}`
+                .form-check
+                  input.form-check-input(type='checkbox' id=roleId name='roles' value=roleValue checked=roleValue === 'collector')
+                  label.form-check-label(for=roleId)= roleValue.charAt(0).toUpperCase() + roleValue.slice(1)
+            .form-text Select every role that applies. Collector is recommended by default.
           .form-text
             | A secure password will be generated and an email will be sent for the user to set it.
       .modal-footer

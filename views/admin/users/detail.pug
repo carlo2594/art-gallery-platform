@@ -9,8 +9,15 @@ block content
           dl
             dt Mail
             dd= user.email
-            dt Role
-            dd= user.role
+            dt Roles
+            dd
+              - const roles = Array.isArray(user.roles) && user.roles.length ? user.roles : (user.role ? [user.role] : [])
+              if roles.length
+                each roleValue in roles
+                  - const badgeClass = roleValue === 'admin' ? 'text-bg-danger' : (roleValue === 'artist' ? 'text-bg-success' : 'text-bg-secondary')
+                  span.badge.me-1.text-uppercase(class=badgeClass)= roleValue
+              else
+                span.text-muted -- No roles --
             dt Asset
             dd= (user.active === false ? 'No' : 'Yes')
             dt Created

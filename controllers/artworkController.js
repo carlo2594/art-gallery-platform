@@ -13,6 +13,7 @@ const isValidObjectId = require('@utils/isValidObjectId');
 const catchAsync = require('@utils/catchAsync');
 const { toCentsOrThrow } = require('@utils/priceInput');
 const { getInvalidFields, isEmptyBody } = require('@utils/validation');
+const { hasRole } = require('@utils/roleUtils');
 // Reglas de proporción deshabilitadas: utilidades no-op para compatibilidad
 const verifyAspect = () => ({ ok: true });
 const buildTransformedUrl = (secureUrl) => secureUrl;
@@ -228,22 +229,22 @@ exports.markArtworkSold = catchAsync(async (req, res, next) => {
   if (artwork.artist && artwork.artist.email) {
     const artworkUrl = buildArtworkPublicUrl(req, artwork);
     const soldHtml = renderEmailLayout({
-      previewText: `Tu obra "${artwork.title}" ha sido vendida.`,
-      title: '¡Tu obra ha sido vendida!',
+      previewText: `Your artwork "${artwork.title}" has been sold.`,
+      title: 'Your artwork has been sold!',
       greeting: artwork.artist.name || '',
       bodyLines: [
-        `Te informamos que tu obra "${artwork.title}" ha sido vendida exitosamente.`,
-        'Pronto nos pondremos en contacto para coordinar los siguientes pasos.'
+        `We are excited to let you know that your artwork "${artwork.title}" has been sold.`,
+        'We will reach out soon to coordinate the next steps.'
       ],
-      actionLabel: artworkUrl ? 'Ver obra' : undefined,
+      actionLabel: artworkUrl ? 'View artwork' : undefined,
       actionUrl: artworkUrl
     });
 
     try {
       await sendMail({
         to: artwork.artist.email,
-        subject: `¡Tu obra "${artwork.title}" ha sido vendida!`,
-        text: `Hola ${artwork.artist.name},\n\nTe informamos que tu obra "${artwork.title}" ha sido vendida exitosamente.\n\nFelicidades por esta venta.\n\nSaludos,\nEquipo Galería del Ox`,
+        subject: `Your artwork "${artwork.title}" has been sold!`,
+        text: `Hi ${artwork.artist.name},\n\nWe are happy to let you know that your artwork "${artwork.title}" has been sold successfully.\n\nCongratulations on this sale.\n\nWe will be in touch shortly to coordinate the next steps.\n\nBest,\nOx Gallery Team`,
         html: soldHtml
       });
     } catch (emailError) {
@@ -354,7 +355,7 @@ exports.getAllArtworks = catchAsync(async (req, res, next) => {
 
     if (
       statusParam !== 'approved' &&
-      (!req.user || (req.user.role !== 'admin' && req.query.artist !== 'my'))
+      (!req.user || (!hasRole(req.user, 'admin') && req.query.artist !== 'my'))
     ) {
       return next(new AppError('No tienes autorización para ver este estado.', 403));
     }
@@ -362,7 +363,7 @@ exports.getAllArtworks = catchAsync(async (req, res, next) => {
     filter.status = statusParam;
   } else {
     if (req.query.include !== 'all') filter.status = 'approved';
-    else if (!req.user || req.user.role !== 'admin')
+    else if (!req.user || !hasRole(req.user, 'admin'))
       return next(new AppError('El parámetro include=all es solo para administradores.', 403));
   }
 
@@ -433,7 +434,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     'exhibitions', 'status', 'amount', 'price_cents', 'images', 'completedAt'
   ];
   // Permitir que admin indique el artista destino
-  if (req.user && req.user.role === 'admin') allowed.push('artist');
+  if (req.user && hasRole(req.user, 'admin')) allowed.push('artist');
 
   if (!draftOnly && isEmptyBody(req.body)) {
     return res.status(400).json({
@@ -529,7 +530,7 @@ exports.createArtwork = catchAsync(async (req, res, next) => {
     }
   }
   // Asignar artista: si es admin y envía artist válido, usarlo; si no, usar el propio
-  if (req.user && req.user.role === 'admin' && req.body && req.body.artist) {
+  if (req.user && hasRole(req.user, 'admin') && req.body && req.body.artist) {
     const isValidObjectId = require('@utils/isValidObjectId');
     if (!isValidObjectId(req.body.artist)) {
       return next(new AppError('ID de artista inválido.', 400));
@@ -589,7 +590,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   const artistAllowed = ['title', 'description', 'type', 'width_cm', 'height_cm', 'technique', 'amount', 'price_cents', 'completedAt'];
   // Admin también puede cambiar estado y motivo de rechazo
   const adminAllowed  = [...artistAllowed, 'exhibitions', 'images', 'status', 'reason', 'rejectReason'];
-  const allowedFields = req.user.role === 'admin' ? adminAllowed : artistAllowed;
+  const allowedFields = hasRole(req.user, 'admin') ? adminAllowed : artistAllowed;
 
   // Limpiar flags/meta que puedan venir del formulario
   try { delete req.body._draftOnly; delete req.body.mode; } catch (_) {}
@@ -688,7 +689,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   }
 
   // (3) Si el admin envía un array de images, actualiza la galería
-  if (req.user.role === 'admin' && Array.isArray(dataToUpdate.images)) {
+  if (hasRole(req.user, 'admin') && Array.isArray(dataToUpdate.images)) {
     art.images = arrayUnique([art.imageUrl, ...dataToUpdate.images.filter(Boolean)]);
     delete dataToUpdate.images;
   }
@@ -698,7 +699,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
 
   // Si el admin solicitó cambio de estado, manejar transiciones
   let alreadySaved = false;
-  if (req.user.role === 'admin' && requestedStatus) {
+  if (hasRole(req.user, 'admin') && requestedStatus) {
     // Estados permitidos según el esquema (incluye 'trashed')
     const allowedStatuses = (Artwork.schema && Artwork.schema.path('status') && Artwork.schema.path('status').enumValues) || ['draft','submitted','approved','rejected','trashed'];
     if (!allowedStatuses.includes(requestedStatus)) {
@@ -768,7 +769,7 @@ exports.updateArtwork = catchAsync(async (req, res, next) => {
   }
 
   // Notificaciones por email si el admin cambió a approved/rejected
-  if (req.user.role === 'admin' && requestedStatus && art.artist) {
+  if (hasRole(req.user, 'admin') && requestedStatus && art.artist) {
     try {
       const artworkUrl = buildArtworkPublicUrl(req, art);
       if (requestedStatus === 'approved' && art.artist.email) {
@@ -879,7 +880,10 @@ exports.submitArtwork = catchAsync(async (req, res, next) => {
 
   // Notifica a todos los administradores
   const User = require('@models/userModel');
-  const admins = await User.find({ role: 'admin', active: true }).select('name +email');
+  const admins = await User.find({
+    active: true,
+    $or: [{ roles: 'admin' }, { role: 'admin' }]
+  }).select('name +email');
 
   const artworkInfo = `
 Título: ${art.title}
@@ -892,27 +896,27 @@ ID de obra: ${art._id}
   if (admins.length > 1) {
     extraInfo = `
 
-Este correo ha sido enviado a otros administradores. 
-Si no ves la obra en el queue de aprobación, es posible que ya fue aprobada o rechazada por otro administrador.
-Puedes consultar el historial de aprobaciones para validar el estado final de la obra.`;
+This email was also sent to the other administrators.
+If you do not see the artwork in the review queue, another admin may have already approved or rejected it.
+You can check the approval history to confirm the final status of the artwork.`;
   }
 
   for (const admin of admins) {
     const artworkUrl = buildArtworkPublicUrl(req, art);
     const adminSubmissionHtml = renderEmailLayout({
-      previewText: `Nueva obra enviada por ${art.artist.name || 'un artista'}.`,
-      title: 'Nueva obra enviada para revisión',
-      greeting: admin.name || 'Administrador',
+      previewText: `New artwork submitted by ${art.artist.name || 'an artist'}.`,
+      title: 'New artwork submitted for review',
+      greeting: admin.name || 'Admin',
       bodyLines: [
-        `${art.artist.name} envió la obra "${art.title}" para revisión.`,
-        'Detalles principales:'
+        `${art.artist.name} submitted the artwork "${art.title}" for review.`,
+        'Key details:'
       ],
       listItems: [
-        `Descripción: ${art.description || '(sin descripción)'}`,
-        `Artista: ${art.artist.name} (${art.artist.email})`,
-        `ID de obra: ${art._id}`
+        `Description: ${art.description || '(no description)'}`,
+        `Artist: ${art.artist.name} (${art.artist.email})`,
+        `Artwork ID: ${art._id}`
       ],
-      actionLabel: artworkUrl ? 'Ver obra' : undefined,
+      actionLabel: artworkUrl ? 'View artwork' : undefined,
       actionUrl: artworkUrl,
       footerLines: extraInfo ? [extraInfo.trim()] : []
     });
@@ -944,7 +948,7 @@ exports.getArtworksByStatus = catchAsync(async (req, res, next) => {
   let filter = { status, deletedAt: null };
 
   // Si no es admin, solo puede ver sus propias obras
-  if (req.user.role !== 'admin') {
+  if (!hasRole(req.user, 'admin')) {
     filter.artist = req.user.id;
   }
 
