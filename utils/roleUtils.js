@@ -1,5 +1,5 @@
 // utils/roleUtils.js
-const AVAILABLE_ROLES = ['collector', 'artist', 'admin'];
+const AVAILABLE_ROLES = ['collector', 'artist', 'admin', 'curator', 'manager', 'editor', 'owner'];
 
 const toRoleArray = (input) => {
   if (!input) return [];

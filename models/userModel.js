@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema({
   roles: {
     type: [{
       type: String,
-      enum: ['artist', 'admin', 'collector']
+      enum: ['artist', 'admin', 'collector', 'curator', 'manager', 'editor', 'owner']
     }],
     default: ['collector'],
     select: false,

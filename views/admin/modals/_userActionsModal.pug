@@ -13,7 +13,7 @@
             | Reset password
         hr
         h2.fs-5 Manage roles
-        - const roleOptions = (typeof availableRoles !== 'undefined' && Array.isArray(availableRoles) && availableRoles.length) ? availableRoles : ['collector','artist','admin']
+        - const roleOptions = (typeof availableRoles !== 'undefined' && Array.isArray(availableRoles) && availableRoles.length) ? availableRoles : ['collector','artist','admin','curator','manager','editor','owner']
         - const userRoles = Array.isArray(u.roles) && u.roles.length ? u.roles : []
         form.admin-user-roles-form(data-user-id=u._id)
           .d-flex.flex-column.gap-2
