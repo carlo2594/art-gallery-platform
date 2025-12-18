@@ -11,7 +11,7 @@ block content
             dd= user.email
             dt Roles
             dd
-              - const roles = Array.isArray(user.roles) && user.roles.length ? user.roles : (user.role ? [user.role] : [])
+              - const roles = Array.isArray(user.roles) && user.roles.length ? user.roles : []
               if roles.length
                 each roleValue in roles
                   - const badgeClass = roleValue === 'admin' ? 'text-bg-danger' : (roleValue === 'artist' ? 'text-bg-success' : 'text-bg-secondary')

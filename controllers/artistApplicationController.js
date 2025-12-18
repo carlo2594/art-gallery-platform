@@ -7,23 +7,17 @@ const { renderEmailLayout } = require('@services/emailLayout');
 const ArtistApplication = require('@models/artistApplicationModel');
 const cloudinary = require('@services/cloudinary');
 const { hasRole } = require('@utils/roleUtils');
-
-function wantsHTML(req) {
-  try { return req.accepts(['html','json']) === 'html'; } catch (_) { return false; }
-}
+const { wantsHTML, isHoneypotFilled } = require('@utils/http');
 
 exports.create = catchAsync(async (req, res, next) => {
   const user = req.user;
   if (!user) return next(new AppError('No autorizado', 401));
 
   // Honeypot anti-spam: si viene relleno, responder éxito sin procesar
-  try {
-    const company = String(req.body.company || '').trim();
-    if (company) {
-      if (wantsHTML(req)) return res.redirect(303, '/become-artist?success=1');
-      return res.status(201).json({ ok: true, spam: true });
-    }
-  } catch (_) {}
+  if (isHoneypotFilled(req)) {
+    if (wantsHTML(req)) return res.redirect(303, '/become-artist?success=1');
+    return res.status(201).json({ ok: true, spam: true });
+  }
 
   // No permitir a artistas ya activos enviar solicitud
   if (hasRole(user, 'artist')) {

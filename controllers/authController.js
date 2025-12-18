@@ -7,7 +7,7 @@ const { signToken } = require('@utils/jwt');
 const { parseRememberMe, getJwtCookieOptions } = require('@utils/authUtils');
 const { normalizeEmail } = require('@utils/emailUtils');
 const sendResponse = require('@utils/sendResponse');
-const { wantsHTML } = require('@utils/http');
+const { wantsHTML, getSafeInternalPath } = require('@utils/http');
 const catchAsync = require('@utils/catchAsync');
 const AppError = require('@utils/appError');
 const { sendMail } = require('@services/mailer');
@@ -17,13 +17,6 @@ const {
   isModeratePassword,
   MODERATE_PASSWORD_MESSAGE
 } = require('@utils/passwordPolicy');
-
-const getSafeInternalPath = (value) => {
-  if (typeof value !== 'string') return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  return /^\/(?!\/)/.test(trimmed) ? trimmed : null;
-};
 
 // Wrapper simple por si cambias proveedor de correo
 async function sendEmail({ to, subject, text, html }) {

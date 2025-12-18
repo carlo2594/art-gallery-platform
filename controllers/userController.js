@@ -205,7 +205,7 @@ exports.changeUserRole = catchAsync(async (req, res, next) => {
     );
   }
 
-  const target = await User.findById(req.params.id).select('+roles +role');
+  const target = await User.findById(req.params.id).select('+roles');
   if (!target) {
     return next(new AppError('Usuario no encontrado', 404));
   }
@@ -551,7 +551,7 @@ exports.lookupByEmail = catchAsync(async (req, res, next) => {
     return res.status(400).json({ status: 'fail', message: 'Email requerido' });
   }
   const email = normalizeEmail(raw);
-  const user = await User.findOne({ email }).select('+email +roles +role name _id');
+  const user = await User.findOne({ email }).select('+email +roles name _id');
   if (!user) {
     return sendResponse(res, { exists: false }, 'OK');
   }
@@ -592,7 +592,7 @@ exports.searchUsers = catchAsync(async (req, res, next) => {
   const users = await User.find(filter)
     .limit(limit)
     .sort({ lastLoginAt: -1, createdAt: -1 })
-    .select('name email profileImage roles +role')
+    .select('name email profileImage roles')
     .lean();
   return sendResponse(res, { users }, 'OK');
 });

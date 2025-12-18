@@ -1,4 +1,0 @@
-  // Contador de vistas se actualiza solo vía script diario
-
-  // Buscar obras relacionadas del mismo artista
-  let relatedArtworks = await getRelatedArtworks(Artwork, artwork.artist._id, artwork._

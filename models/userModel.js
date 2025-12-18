@@ -56,11 +56,6 @@ const userSchema = new mongoose.Schema({
       return deduped.length ? deduped : ['collector'];
     }
   },
-  role: {
-    type: String,
-    enum: ['artist', 'admin', 'collector'],
-    select: false
-  },
   profileImage: { type: String, trim: true, maxlength: 500 },
   profileImagePublicId: { type: String, trim: true, maxlength: 200 },
   coverImage: { type: String, trim: true, maxlength: 500 },
@@ -86,21 +81,8 @@ const userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('validate', function (next) {
-  if ((!this.roles || this.roles.length === 0) && this.role) {
-    this.roles = [this.role];
-  }
-  if (this.isModified('role') && this.role) {
-    this.roles = [this.role];
-  }
-  next();
-});
-
-userSchema.pre('save', function (next) {
-  if ((!this.roles || this.roles.length === 0) && this.role) {
-    this.roles = [this.role];
-  }
-  if (Array.isArray(this.roles) && this.roles.length > 0) {
-    this.role = this.roles[0];
+  if (!Array.isArray(this.roles) || this.roles.length === 0) {
+    this.roles = ['collector'];
   }
   next();
 });
@@ -118,7 +100,6 @@ userSchema.index({
 
 // 3. Índice para búsqueda de texto en nombre y bio
 userSchema.index({ 
-  roles: 1,
   name: 'text', 
   bio: 'text' 
 });

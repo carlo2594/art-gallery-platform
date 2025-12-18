@@ -286,7 +286,7 @@ exports.getUsers = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +role +email profileImage').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/index', {
@@ -310,7 +310,7 @@ exports.getCollectors = catchAsync(async (req, res) => {
   const { page, perPage, skip } = getPaginationParams(req.query, 15, 50);
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
-    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +role +email profileImage').lean()
+    User.find(filter).sort(sort).skip(skip).limit(perPage).select('name slug createdAt active lastLoginAt +roles +email profileImage').lean()
   ]);
   const totalPages = Math.max(1, Math.ceil(total / perPage));
   res.status(200).render('admin/users/index', {
@@ -398,7 +398,7 @@ exports.getArtistApplications = catchAsync(async (req, res) => {
       .sort(sort)
       .skip(skip)
       .limit(perPage)
-      .populate({ path: 'user', select: 'name +email +roles +role profileImage' })
+      .populate({ path: 'user', select: 'name +email +roles profileImage' })
       .lean()
   ]);
 

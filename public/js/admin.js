@@ -5,7 +5,6 @@
 function formatUserRolesLabel(user){
   if (!user) return 'rol desconocido';
   var roles = Array.isArray(user.roles) && user.roles.length ? user.roles.slice() : [];
-  if (!roles.length && user.role) roles = [user.role];
   return roles.length ? roles.join(', ') : 'rol desconocido';
 }
 const MAX_REJECT_REASON = 100;

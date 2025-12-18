@@ -1,10 +1,3 @@
-﻿// Vista de contacto (inglés)
-exports.getContact = (req, res) => {
-  res.status(200).render('public/static/contact', {
-    title: 'Contact · Galería del Ox'
-  });
-};
-
 const catchAsync = require('@utils/catchAsync');
 const crypto = require('crypto');
 const PasswordResetToken = require('@models/passwordResetTokenModel');
@@ -14,19 +7,14 @@ const Exhibition = require('@models/exhibitionModel');
 const Favorite = require('@models/favoriteModel');
 const ArtistApplication = require('@models/artistApplicationModel');
 const { hasRole } = require('@utils/roleUtils');
+const { getSafeInternalPath } = require('@utils/http');
+const { consumeContactFormCookie } = require('@utils/contactForm');
 
 // Utilities optimizadas
 const { viewsCache } = require('@utils/cache');
 const { getAllTechniques, getGlobalPriceBounds, getArtistTechniques, getArtistPriceBounds } = require('@utils/aggregationHelpers');
 const { findArtistByIdOrSlug, getRelatedArtworks, buildArtistStats } = require('@utils/artistHelpers');
 const { findArtworkByIdOrSlug, getPopularArtworks } = require('@utils/artworkHelpers');
-
-const getSafeInternalPath = (value) => {
-  if (typeof value !== 'string') return null;
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-  return /^\/(?!\/)/.test(trimmed) ? trimmed : null;
-};
 
 // Vista de todos los artistas
 exports.getArtistsView = catchAsync(async (req, res) => {
@@ -1160,14 +1148,13 @@ exports.getMyArtistPanel = catchAsync(async (req, res, next) => {
 
   // Buscar el artista por ID del usuario autenticado (sin lanzar 404 si no hay slug)
   let artistDoc = await User.findById(currentUser.id)
-    .select('name bio profileImage coverImage createdAt slug email location website social followersCount +roles +role')
+    .select('name bio profileImage coverImage createdAt slug email location website social followersCount +roles')
     .lean();
   if (!artistDoc) {
     // Fallback a los datos mínimos del usuario en sesión para no romper el panel
     artistDoc = {
       _id: currentUser.id,
       name: currentUser.name,
-      role: currentUser.role || null,
       roles: currentUser.roles || [],
       profileImage: currentUser.profileImage,
       coverImage: currentUser.coverImage,
@@ -1304,18 +1291,7 @@ exports.getExhibitionUnpublished = (req, res) => {
 exports.getContact = (req, res) => {
   const success = !!req.query.success;
   const error = req.query.error;
-  let formData = { name: '', email: '', message: '' };
-  try {
-    if (req.cookies && req.cookies.contact_form) {
-      const parsed = JSON.parse(req.cookies.contact_form);
-      if (parsed && typeof parsed === 'object') {
-        formData.name = String(parsed.name || '');
-        formData.email = String(parsed.email || '');
-        formData.message = String(parsed.message || '');
-      }
-      try { res.clearCookie('contact_form', { path: '/' }); } catch (_) {}
-    }
-  } catch (_) {}
+  const formData = consumeContactFormCookie(req, res);
 
   res.status(200).render('public/static/contact', {
     title: 'Contacto · Galería del Ox',

@@ -15,13 +15,12 @@ module.exports = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id)
-      .select('name firstName lastName headline bio website country social profileImage coverImage +roles +role');
+      .select('name firstName lastName headline bio website country social profileImage coverImage +roles');
     if (user) {
       const roles = ensureRolesArray(user);
       const currentUser = {
         id: user.id,
         name: user.name,
-        role: roles[0] || null,
         roles,
         firstName: user.firstName,
         lastName: user.lastName,

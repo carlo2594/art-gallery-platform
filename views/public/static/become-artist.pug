@@ -34,7 +34,7 @@ block content
                 span Reservations and sales management
 
           // CTAs según estado de sesión
-          - const currentUserIsArtist = typeof currentUserHasRole === 'function' ? currentUserHasRole('artist') : (currentUser && currentUser.role === 'artist')
+          - const currentUserIsArtist = typeof currentUserHasRole === 'function' ? currentUserHasRole('artist') : (currentUser && Array.isArray(currentUser.roles) && currentUser.roles.includes('artist'))
           if !currentUser
             a.btn.btn-primary.btn-lg.rounded-pill.fw-bold.mb-3(href='/signup?intent=artist' aria-label='Create artist account')
               i.fas.fa-user-plus.me-2

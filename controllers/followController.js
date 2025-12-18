@@ -15,7 +15,7 @@ exports.followArtist = catchAsync(async (req, res, next) => {
   if (!isValidObjectId(artistId)) return next(new AppError('ID inválido', 400));
   if (String(artistId) === String(followerId)) return next(new AppError('No puedes seguirte a ti mismo', 400));
 
-  const artist = await User.findById(artistId).select('+roles +role');
+  const artist = await User.findById(artistId).select('+roles');
   if (!artist) return next(new AppError('Artista no encontrado', 404));
   if (!hasRole(artist, 'artist')) return next(new AppError('Solo puedes seguir artistas', 400));
 

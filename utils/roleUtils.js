@@ -10,8 +10,7 @@ const toRoleArray = (input) => {
 
 const ensureRolesArray = (user) => {
   if (!user) return [];
-  const raw = user.roles || user.role || [];
-  return toRoleArray(raw);
+  return toRoleArray(user.roles);
 };
 
 const hasRole = (user, role) => {

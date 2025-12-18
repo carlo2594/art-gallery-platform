@@ -8,7 +8,8 @@ const envPath = path.join(rootDir, `.env.${ENV}`);
 if (fs.existsSync(envPath)) {
   require('dotenv').config({ path: envPath });
 } else {
-  require('dotenv').config();
+  const fallbackEnvPath = path.join(rootDir, '.env');
+  require('dotenv').config({ path: fallbackEnvPath });
 }
 // Safety guard: never seed in production
 if (ENV === 'production') {
@@ -21,13 +22,19 @@ const Artwork = require('../models/artworkModel');
 const User = require('../models/userModel');
 const Exhibition = require('../models/exhibitionModel');
 const Favorite = require('../models/favoriteModel');
+const Follow = require('../models/followModel');
 const ArtworkView = require('../models/artworkViewModel'); // <-- AGREGA ESTA LÍNEA
 const Comment = require('../models/commentModel');
 const PasswordResetToken = require('../models/passwordResetTokenModel');
 const Newsletter = require('../models/newsletterModel');
 const ArtistApplication = require('../models/artistApplicationModel');
 
-const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD);
+if (!process.env.DATABASE) {
+  console.error('[SEED] Variable DATABASE no está definida en el archivo .env');
+  process.exit(1);
+}
+
+const DB = process.env.DATABASE.replace('<db_password>', process.env.DATABASE_PASSWORD || '');
 const DB_NAME = process.env.DB_NAME || 'galeria_dev';
 
 const randomImages = [
@@ -109,6 +116,7 @@ async function seed() {
     await Artwork.syncIndexes(); 
     await Exhibition.syncIndexes();
     await Favorite.syncIndexes();
+    await Follow.syncIndexes();
     await ArtworkView.syncIndexes();
     await Comment.syncIndexes();
     await PasswordResetToken.syncIndexes();
@@ -126,6 +134,7 @@ async function seed() {
     Artwork.deleteMany({}),
     Exhibition.deleteMany({}),
     Favorite.deleteMany({}),
+    Follow.deleteMany({}),
     ArtworkView.deleteMany({}), // <-- AGREGA ESTA LÍNEA
     Comment.deleteMany({}),
     PasswordResetToken.deleteMany({}),
@@ -212,10 +221,7 @@ async function seed() {
   }
 
   // Crear al menos 5 solicitudes de artista con distintos estados
-  const collectors = users.filter(u => {
-    if (Array.isArray(u.roles) && u.roles.includes('collector')) return true;
-    return u.role === 'collector';
-  });
+  const collectors = users.filter(u => Array.isArray(u.roles) && u.roles.includes('collector'));
   const owner = collectors.length ? collectors : users; // fallback si no hubiese collectors
   const pickUser = (idx) => owner[idx % owner.length];
   const appSeed = [
@@ -561,6 +567,36 @@ async function seed() {
     const count = favCountByArtwork[String(artwork._id)] || 0;
     artwork.favoritesCount = count;
     await artwork.save();
+  }
+
+  // Crea seguidores de prueba para el nuevo modelo Follow
+  const artistUsers = users.filter((u) => Array.isArray(u.roles) && u.roles.includes('artist'));
+  const followDocs = [];
+  const seenFollowKeys = new Set();
+  for (const artistUser of artistUsers) {
+    const potentialFollowers = users.filter(
+      (user) => String(user._id) !== String(artistUser._id)
+    );
+    if (!potentialFollowers.length) continue;
+    const desiredFollowers = randomInt(
+      1,
+      Math.min(4, potentialFollowers.length)
+    );
+    const shuffled = [...potentialFollowers].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, desiredFollowers);
+    for (const follower of selected) {
+      const key = `${follower._id}:${artistUser._id}`;
+      if (seenFollowKeys.has(key)) continue;
+      seenFollowKeys.add(key);
+      followDocs.push({ follower: follower._id, artist: artistUser._id });
+    }
+  }
+  if (followDocs.length) {
+    await Follow.insertMany(followDocs);
+    await Promise.all(
+      artistUsers.map((artist) => User.recalculateFollowersCount(artist._id))
+    );
+    console.log(`[SEED] Seguimientos creados: ${followDocs.length}`);
   }
 
   // Showcase: crea un artista, una obra y una exposición realistas
